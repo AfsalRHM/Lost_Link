@@ -13,6 +13,7 @@ import {
 } from "../../../redux/slice/registerDetails";
 import insertUser from "../../../api/auth-api/saveUserAPI";
 import { RootState } from "../../../redux/store";
+import { showSuccessToast } from "../../../utils/toastUtils";
 
 type inputPropsType = {
   display: boolean;
@@ -23,8 +24,9 @@ const RegisterStep3 = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const { userFullName, userName, userLocation, userEmail } =
-  useSelector((state: RootState) => state.registerDetails);
+  const { userFullName, userName, userLocation, userEmail } = useSelector(
+    (state: RootState) => state.registerDetails
+  );
 
   const [userPasswordValidationErrorData, setuserPasswordValidationErrorData] =
     useState<inputPropsType>({ display: false, content: "" });
@@ -76,6 +78,7 @@ const RegisterStep3 = () => {
         if (result.status == true) {
           dispatch(resetStep());
           dispatch(makeEmptyUserDetails());
+          showSuccessToast("Registration Successfull!");
           navigate("/signin");
         }
       }

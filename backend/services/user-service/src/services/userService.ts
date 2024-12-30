@@ -15,12 +15,12 @@ export default class userService implements IuserService {
     this._userRepository = new userRepository();
   }
 
-  async checkMail(recieverEmail: string): Promise<boolean> {
+  async checkMail(recieverEmail: string): Promise<any> {
     const userData = await this._userRepository.findUser(recieverEmail);
     if (userData) {
-      return true;
+      return { status: false, data: userData, message: "Registeration Failed", email: recieverEmail };;
     } else {
-      return false;
+      return { status: false, data: null, message: "Registeration Failed", email: recieverEmail };;
     }
   }
 
@@ -44,7 +44,17 @@ export default class userService implements IuserService {
       const { password, ...rest } = plainUserData;
       return rest;
     } else {
-      return { status: false, data: null, message: "Registeration Failed" };
+      return { status: false, data: null, message: "Registeration Failed", email: userEmail };
     }
   }
+
+  async loginUser(userMail: string): Promise<any> {
+    const userData = await this._userRepository.findUser(userMail);
+    if (userData) {
+      return userData;
+    } else {
+      return { status: false, data: null, message: "Login Failed", email: userMail };;
+    }
+  }
+  
 }

@@ -1,5 +1,9 @@
 import configCommunication, { getChannel } from "../config/communicationConfig";
-import authService, { userDetails } from "../services/authService";
+import authService, {
+  loginDetails,
+  mailDuplicationCheck,
+  userDetails,
+} from "../services/authService";
 import { getCorrelationId } from "./correlationId";
 
 export async function manageQueue() {
@@ -17,13 +21,36 @@ export async function manageQueue() {
 
       if (msg) {
         const messageContent = JSON.parse(msg.content.toString());
-
-        const correlationId = getCorrelationId(messageContent.email);
+        let correlationId;
+        if (messageContent) {
+          correlationId = getCorrelationId(messageContent.email);
+        } else {
+          console.log("Message content not available");
+        }
 
         if (correlationId) {
-          if (msg.properties.correlationId == correlationId) {
+          if (
+            msg.properties.correlationId == correlationId &&
+            msg?.properties?.headers?.source == "user register complete info"
+          ) {
             if (messageContent) {
               userDetails(correlationId, messageContent);
+            } else {
+              console.log("Error on messageContent on auth managing Queue 1");
+            }
+          } else if (msg?.properties?.headers?.source == "user login info") {
+            if (messageContent) {
+              loginDetails(correlationId, messageContent);
+            } else {
+              console.log("Error on messageContent on auth managing Queue 2");
+            }
+          } else if (
+            msg?.properties?.headers?.source == "user mail duplication"
+          ) {
+            if (messageContent) {
+              mailDuplicationCheck(correlationId, messageContent);
+            } else {
+              console.log("Error on messageContent on auth managing Queue 3");
             }
           } else {
             console.log(

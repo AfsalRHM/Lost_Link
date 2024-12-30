@@ -9,8 +9,20 @@ import ValidationError from "../shared/ValidationError";
 import { assignAccessToken } from "../../../redux/slice/accessTokenSlice";
 import { useDispatch } from "react-redux";
 import { assignUserDetails } from "../../../redux/slice/userDetailsSlice";
+import { showSuccessToast } from "../../../utils/toastUtils";
+import { validateLoginDetails } from "../../../validations/loginDetails";
+
+type inputPropsType = {
+  display: boolean;
+  content: string;
+};
 
 const LoginPage = () => {
+  const [userMailValidationErrorData, setUserMailValidationErrorData] =
+    useState<inputPropsType>({ display: false, content: "" });
+  const [userPasswordValidationErrorData, setUserPasswordValidationErrorData] =
+    useState<inputPropsType>({ display: false, content: "" });
+
   const [userMailInput, setUserMailInput] = useState<string>("");
   const [userPasswordInput, setUserPasswordInput] = useState<string>("");
 
@@ -22,26 +34,48 @@ const LoginPage = () => {
     message: string;
   }>({ status: true, message: "" });
 
+  const loginPageDetails = {
+    userMail: userMailInput,
+    userPassword: userPasswordInput,
+  };
+
   async function handleSubmit(): Promise<void> {
-    const result = await userLogin({
-      userEmail: userMailInput,
-      userPassword: userPasswordInput,
-    });
-    if (!result.data.status) {
-      setUserLoginValidationError({
-        status: result.data.status,
-        message: result.data.message,
-      });
+    const errors = validateLoginDetails(loginPageDetails);
+
+    if (errors.userMail) {
+      setUserMailValidationErrorData(errors.userMail);
     } else {
-      console.log(result.data.data)
-      const userData = {
-        userId: result.data.data._id,
-        userName: result.data.data.user_name
+      setUserMailValidationErrorData({ display: false, content: "" });
+    }
+
+    if (errors.userPassword) {
+      setUserPasswordValidationErrorData(errors.userPassword);
+    } else {
+      setUserPasswordValidationErrorData({ display: false, content: "" });
+    }
+
+    if (!errors.userMail && !errors.userPassword) {
+      const result = await userLogin({
+        userEmail: userMailInput,
+        userPassword: userPasswordInput,
+      });
+      if (!result.data.status) {
+        setUserLoginValidationError({
+          status: result.data.status,
+          message: result.data.message,
+        });
+      } else {
+        console.log(result.data.data);
+        const userData = {
+          userId: result.data.data._id,
+          userName: result.data.data.user_name,
+        };
+        const accessToken = result.authorizationHeader.split(" ")[1];
+        dispatch(assignUserDetails(userData));
+        dispatch(assignAccessToken(accessToken));
+        showSuccessToast("Login successful!");
+        navigate("/home");
       }
-      const accessToken = result.authorizationHeader.split(" ")[1];
-      dispatch(assignUserDetails(userData))
-      dispatch(assignAccessToken(accessToken));
-      navigate("/home");
     }
   }
 
@@ -65,10 +99,20 @@ const LoginPage = () => {
             name="userLoginValidation"
             content={userLoginValidationError.message}
           />
+          <ValidationError
+            display={userMailValidationErrorData.display}
+            name="userLoginValidation"
+            content={userMailValidationErrorData.content}
+          />
           <LoginInput
             name="Enter your Email"
             stateFunc={setUserMailInput}
             item="emailOrPhone"
+          />
+          <ValidationError
+            display={userPasswordValidationErrorData.display}
+            name="userLoginValidation"
+            content={userPasswordValidationErrorData.content}
           />
           <LoginInput
             name="Enter your Password"

@@ -17,7 +17,10 @@ export async function manageQueue() {
       if (msg) {
         const messageContent = JSON.parse(msg.content.toString());
 
-        if (messageContent.userData) {
+        if (
+          messageContent.userData &&
+          msg?.properties?.headers?.source == "user data insert request"
+        ) {
           const response = await _userService.insertuser(
             messageContent.userData.full_name,
             messageContent.userData.user_name,
@@ -28,6 +31,32 @@ export async function manageQueue() {
 
           channel.sendToQueue("AUTH", Buffer.from(JSON.stringify(response)), {
             correlationId: msg.properties.correlationId,
+            headers: { source: "user register complete info" },
+          });
+        } else if (
+          messageContent.userMail &&
+          msg?.properties?.headers?.source == "user login request"
+        ) {
+          const response = await _userService.loginUser(
+            messageContent.userMail
+          );
+
+          channel.sendToQueue("AUTH", Buffer.from(JSON.stringify(response)), {
+            correlationId: msg.properties.correlationId,
+            headers: { source: "user login info" },
+          });
+        } else if (
+          msg?.properties?.headers?.source == "user mail duplication request"
+        ) {
+          const response = await _userService.checkMail(
+            messageContent.userMail
+          );
+
+          console.log(response, 'this is from managingQueue')
+
+          channel.sendToQueue("AUTH", Buffer.from(JSON.stringify(response)), {
+            correlationId: msg.properties.correlationId,
+            headers: { source: "user mail duplication" },
           });
         } else {
           console.log("No userData found in message.");

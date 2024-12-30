@@ -5,6 +5,7 @@ interface UserDataType {
   user_name: string;
   full_name: string;
   location: string;
+  password?: string;
   _id: string;
   createdAt: string;
   updatedAt: string;
@@ -34,9 +35,41 @@ export default class authService implements IauthService {
     this._userRepository = new userRepository();
   }
 
+  // Function to check the user already exists or not
   async checkMail(recieverEmail: string): Promise<boolean> {
-    const userData = await this._userRepository.findUser(recieverEmail);
-    if (userData) {
+    // const userData = await this._userRepository.findUser(recieverEmail);
+    // Sending the userData to User Service
+    const channel = getChannel();
+    const currentQueue = process.env.AUTH_QUEUE || "Default queue";
+    const replyQueue = process.env.USER_QUEUE || "Deafult Queue";
+    const correlationId = createCorrelationId(recieverEmail);
+
+    channel.sendToQueue(
+      replyQueue,
+      Buffer.from(
+        JSON.stringify({
+          userMail: recieverEmail,
+        })
+      ),
+      {
+        replyTo: currentQueue,
+        correlationId: correlationId,
+        headers: { source: "user mail duplication request" },
+      }
+    );
+
+    const userData: any = await new Promise((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        reject(new Error("Response timeout"));
+      }, 10000);
+
+      eventEmitter.once(correlationId, (data) => {
+        clearTimeout(timeout);
+        resolve(data);
+      });
+    });
+
+    if (userData.data) {
       return true;
     } else {
       return false;
@@ -99,6 +132,7 @@ export default class authService implements IauthService {
       {
         replyTo: currentQueue,
         correlationId: correlationId,
+        headers: { source: "user data insert request" },
       }
     );
 
@@ -115,35 +149,75 @@ export default class authService implements IauthService {
 
     if (userData) {
       clearCorrelationId(userData.email);
-      console.log(userData, "DKjflsjdfklsjdflksdjlfsjl");
       return userData;
     } else {
       return { status: false, data: null, message: "Registeration Failed" };
     }
   }
 
+  // Function to  verify the User Entries for login
   async loginVerify(userEmail: string, userPassword: string): Promise<any> {
-    const userData = await this._userRepository.findUser(userEmail);
+    const channel = getChannel();
+    const currentQueue = process.env.AUTH_QUEUE || "Default queue";
+    const replyQueue = process.env.USER_QUEUE || "Deafult Queue";
+    const correlationId = createCorrelationId(userEmail);
 
-    if (userData) {
+    // Sending the userData to User Service for loginVerify
+    channel.sendToQueue(
+      replyQueue,
+      Buffer.from(
+        JSON.stringify({
+          userMail: userEmail,
+        })
+      ),
+      {
+        replyTo: currentQueue,
+        correlationId: correlationId,
+        headers: { source: "user login request" },
+      }
+    );
+
+    const userData: UserDataType | null = await new Promise(
+      (resolve, reject) => {
+        const timeout = setTimeout(() => {
+          reject(new Error("Response timeout"));
+        }, 10000);
+
+        eventEmitter.once(correlationId, (data) => {
+          clearTimeout(timeout);
+          resolve(data);
+        });
+      }
+    );
+
+    if (userData?.password) {
       const isMatch = await passwordUtils.comparePassword(
         userPassword,
         userData.password
       );
 
-      const plainUserData = userData.toObject();
+      const plainUserData = userData;
       const { password, ...rest } = plainUserData;
 
       if (isMatch) {
         return { status: true, data: rest };
       } else {
-        return { status: false, data: null, message: "Invalid Credentials" };
+        return {
+          status: false,
+          data: null,
+          message: "Invalid Credentials this worked ",
+        };
       }
     } else {
-      return { status: false, data: null, message: "Invalid Credentials" };
+      return {
+        status: false,
+        data: null,
+        message: "Invalid Credentials",
+      };
     }
   }
 
+  // To create a new access token with the existing refresh token
   async refreshToken(
     token: string
   ): Promise<{ status: boolean; message: string } | undefined> {
@@ -166,6 +240,17 @@ export default class authService implements IauthService {
   }
 }
 
+// to access the userDetails from the queue after registration
 export function userDetails(correlationId: string, params: any) {
+  eventEmitter.emit(correlationId, params);
+}
+
+// to access the login User Details from the queus after login
+export function loginDetails(correlationId: string, params: string) {
+  eventEmitter.emit(correlationId, params);
+}
+
+// to access the user mail duplication details from the queus after user enters the mail and request for otp
+export function mailDuplicationCheck(correlationId: string, params: string) {
   eventEmitter.emit(correlationId, params);
 }
