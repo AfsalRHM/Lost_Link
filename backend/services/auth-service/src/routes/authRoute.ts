@@ -15,6 +15,9 @@ auth_route.post("/verifyOTP", verifyotpValidator, AuthController.verifyOTP);
 auth_route.post("/insertUser", signinValidator, AuthController.insertUser);
 auth_route.post("/loginVerify", loginValidator, AuthController.loginVerify);
 
+auth_route.post("/sendResetPasswordOTP", AuthController.sendResetPasswordMail);
+auth_route.post("/resetPassword", AuthController.resetPassword);
+
 auth_route.post("/refreshToken", AuthController.refreshToken);
 
 auth_route.post("/isUserLogin", isUserLogin);

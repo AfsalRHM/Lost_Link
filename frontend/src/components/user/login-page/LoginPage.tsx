@@ -125,9 +125,11 @@ const LoginPage = () => {
               <input type="checkbox" name="ch" id="ch" className="mr-2" />
               <span className="text-md">Remember for 5 days</span>
             </div>
-            <span className="font-bold text-md cursor-pointer hover:text-gray-500">
-              Forgot password
-            </span>
+            <Link to="/resetpassword">
+              <span className="font-bold text-md cursor-pointer hover:text-gray-500">
+                Forgot password
+              </span>
+            </Link>
           </div>
 
           <div onClick={handleSubmit}>

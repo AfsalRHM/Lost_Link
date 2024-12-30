@@ -1,8 +1,10 @@
+import { countReset } from "console";
 import configCommunication, { getChannel } from "../config/communicationConfig";
 import authService, {
   loginDetails,
   mailDuplicationCheck,
   userDetails,
+  userNameForMail,
 } from "../services/authService";
 import { getCorrelationId } from "./correlationId";
 
@@ -51,6 +53,20 @@ export async function manageQueue() {
               mailDuplicationCheck(correlationId, messageContent);
             } else {
               console.log("Error on messageContent on auth managing Queue 3");
+            }
+          } else if (
+            msg?.properties?.headers?.source == "user name in the user data"
+          ) {
+            if (messageContent) {
+              userNameForMail(correlationId, messageContent);
+            } else {
+              console.log("Error on messageContent on auth managing Queue 4");
+            }
+          } else if (msg?.properties?.headers?.source == "password changed") {
+            if (messageContent) {
+              userDetails(correlationId, messageContent);
+            } else {
+              console.log("Error on messageContent on auth managing Queue 5");
             }
           } else {
             console.log(

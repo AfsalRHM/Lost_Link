@@ -18,9 +18,19 @@ export default class userService implements IuserService {
   async checkMail(recieverEmail: string): Promise<any> {
     const userData = await this._userRepository.findUser(recieverEmail);
     if (userData) {
-      return { status: false, data: userData, message: "Registeration Failed", email: recieverEmail };;
+      return {
+        status: true,
+        data: userData,
+        message: "Registration successfull",
+        email: recieverEmail,
+      };
     } else {
-      return { status: false, data: null, message: "Registeration Failed", email: recieverEmail };;
+      return {
+        status: false,
+        data: null,
+        message: "Registeration Failed",
+        email: recieverEmail,
+      };
     }
   }
 
@@ -44,7 +54,12 @@ export default class userService implements IuserService {
       const { password, ...rest } = plainUserData;
       return rest;
     } else {
-      return { status: false, data: null, message: "Registeration Failed", email: userEmail };
+      return {
+        status: false,
+        data: null,
+        message: "Registeration Failed",
+        email: userEmail,
+      };
     }
   }
 
@@ -53,8 +68,34 @@ export default class userService implements IuserService {
     if (userData) {
       return userData;
     } else {
-      return { status: false, data: null, message: "Login Failed", email: userMail };;
+      return {
+        status: false,
+        data: null,
+        message: "Login Failed",
+        email: userMail,
+      };
     }
   }
-  
+
+  async updatePassword(userMail: string, newPassword: string): Promise<any> {
+    const userData = await this._userRepository.updateUserByEmail(
+      { email: userMail },
+      { password: newPassword }
+    );
+    if (userData) {
+      return {
+        status: true,
+        data: userData,
+        message: "Password Changed Successfully",
+        email: userMail,
+      };
+    } else {
+      return {
+        status: false,
+        data: null,
+        message: "Error in the user Service while chaging Password",
+        email: userMail,
+      };
+    }
+  }
 }

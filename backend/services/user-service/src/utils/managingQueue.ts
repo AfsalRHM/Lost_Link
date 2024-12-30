@@ -52,11 +52,32 @@ export async function manageQueue() {
             messageContent.userMail
           );
 
-          console.log(response, 'this is from managingQueue')
-
           channel.sendToQueue("AUTH", Buffer.from(JSON.stringify(response)), {
             correlationId: msg.properties.correlationId,
             headers: { source: "user mail duplication" },
+          });
+        } else if (
+          msg?.properties?.headers?.source == "user name for mail request"
+        ) {
+          const response = await _userService.checkMail(
+            messageContent.userMail
+          );
+
+          channel.sendToQueue("AUTH", Buffer.from(JSON.stringify(response)), {
+            correlationId: msg.properties.correlationId,
+            headers: { source: "user name in the user data" },
+          });
+        } else if (
+          msg?.properties?.headers?.source == "new password to save to user"
+        ) {
+          const response = await _userService.updatePassword(
+            messageContent.userMail,
+            messageContent.newPassword
+          );
+
+          channel.sendToQueue("AUTH", Buffer.from(JSON.stringify(response)), {
+            correlationId: msg.properties.correlationId,
+            headers: { source: "password changed" },
           });
         } else {
           console.log("No userData found in message.");

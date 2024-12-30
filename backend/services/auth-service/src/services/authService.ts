@@ -76,16 +76,102 @@ export default class authService implements IauthService {
     }
   }
 
-  // Method to Send Mail to the User Mail
-  async sendMail(recieverEmail: string, recieverName: string): Promise<void> {
-    const otp: string = await sendMail(recieverEmail, recieverName);
-    const expire = new Date(Date.now() + 10 * 1000 * 1);
-    await this._otpRepository.deleteMany(recieverEmail);
-    const data = await this._otpRepository.insertOTP({
-      email: recieverEmail,
-      otp: otp,
-      expires_at: expire,
+  async resetPassword(userMail: string, newPassword: string): Promise<any> {
+    const hashedPassword = await passwordUtils.hashPassword(newPassword);
+
+    const channel = getChannel();
+    const currentQueue = process.env.AUTH_QUEUE || "Default queue";
+    const replyQueue = process.env.USER_QUEUE || "Deafult Queue";
+    const correlationId = createCorrelationId(userMail);
+
+    const message = JSON.stringify({
+      userMail: userMail,
+      newPassword: hashedPassword,
     });
+
+    // Sending the userData to User Service
+    channel.sendToQueue(replyQueue, Buffer.from(message), {
+      replyTo: currentQueue,
+      correlationId: correlationId,
+      headers: { source: "new password to save to user" },
+    });
+
+    const userData: any = await new Promise((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        reject(new Error("Response timeout"));
+      }, 10000);
+
+      eventEmitter.once(correlationId, (data) => {
+        clearTimeout(timeout);
+        resolve(data);
+      });
+    });
+
+    if (userData.data) {
+      return { status: true, data: userData.data, message: "Password changed" };
+    } else {
+      return { status: false, data: null, message: "Password not changed" };
+    }
+  }
+
+  // Method to Send Mail to the User Mail
+  async sendMail(recieverEmail: string, recieverName: string): Promise<any> {
+    let otp: string;
+    if (recieverName == "Reset Password") {
+      const channel = getChannel();
+      const currentQueue = process.env.AUTH_QUEUE || "Default queue";
+      const replyQueue = process.env.USER_QUEUE || "Deafult Queue";
+      const correlationId = createCorrelationId(recieverEmail);
+
+      // Sending the userData to User Service
+      channel.sendToQueue(
+        replyQueue,
+        Buffer.from(
+          JSON.stringify({
+            userMail: recieverEmail,
+          })
+        ),
+        {
+          replyTo: currentQueue,
+          correlationId: correlationId,
+          headers: { source: "user name for mail request" },
+        }
+      );
+
+      const userData: any = await new Promise((resolve, reject) => {
+        const timeout = setTimeout(() => {
+          reject(new Error("Response timeout"));
+        }, 10000);
+
+        eventEmitter.once(correlationId, (data) => {
+          clearTimeout(timeout);
+          resolve(data);
+        });
+      });
+
+      if (userData.data) {
+        otp = await sendMail(recieverEmail, userData.user_name);
+        const expire = new Date(Date.now() + 10 * 1000 * 1);
+        await this._otpRepository.deleteMany(recieverEmail);
+        const data = await this._otpRepository.insertOTP({
+          email: recieverEmail,
+          otp: otp,
+          expires_at: expire,
+        });
+        return { status: true, data: data, message: "user found" };
+      } else {
+        return { status: false, data: null, message: "No user found" };
+      }
+    } else {
+      otp = await sendMail(recieverEmail, recieverName);
+      const expire = new Date(Date.now() + 10 * 1000 * 1);
+      await this._otpRepository.deleteMany(recieverEmail);
+      const data = await this._otpRepository.insertOTP({
+        email: recieverEmail,
+        otp: otp,
+        expires_at: expire,
+      });
+    }
   }
 
   // Method to verfiy the user Entered OTP
@@ -252,5 +338,10 @@ export function loginDetails(correlationId: string, params: string) {
 
 // to access the user mail duplication details from the queus after user enters the mail and request for otp
 export function mailDuplicationCheck(correlationId: string, params: string) {
+  eventEmitter.emit(correlationId, params);
+}
+
+// to access the user mail duplication details from the queus after user enters the mail and request for otp
+export function userNameForMail(correlationId: string, params: string) {
   eventEmitter.emit(correlationId, params);
 }

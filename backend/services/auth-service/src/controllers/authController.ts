@@ -30,11 +30,60 @@ export default class authController implements IauthController {
           message: "User already exits with this Email",
         });
       } else {
-        await this._authService.sendMail(
+        const response = await this._authService.sendMail(
           req.body.recieverEmail,
           req.body.recieverName
         );
+
         res.status(200).json({ status: true, message: "User is New" });
+      }
+    } catch (error) {
+      console.log("error in authController", error);
+    }
+  };
+
+  public sendResetPasswordMail = async (
+    req: Request,
+    res: Response
+  ): Promise<any> => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+      }
+
+      const response = await this._authService.sendMail(
+        req.body.recieverEmail,
+        req.body.recieverName
+      );
+      if (response.message == "No user found") {
+        res.status(200).json({ status: false, message: "User not Found" });
+      } else {
+        res.status(200).json({ status: true, message: "User is New" });
+      }
+    } catch (error) {
+      console.log("error in authController", error);
+    }
+  };
+
+  public resetPassword = async (
+    req: Request,
+    res: Response
+  ): Promise<any> => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+      }
+
+      const response = await this._authService.resetPassword(
+        req.body.userEmail,
+        req.body.newPassword
+      );
+      if (response.message == "Password changed") {
+        res.status(200).json({ status: true, message: "Password Changed Successfully" });
+      } else {
+        res.status(200).json({ status: false, message: "Password didn't changed" });
       }
     } catch (error) {
       console.log("error in authController", error);
