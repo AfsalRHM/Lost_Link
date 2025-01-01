@@ -14,7 +14,6 @@ interface UserDataType {
 
 import { IauthService } from "../interface/IauthService";
 import otpRepository from "../repositories/otpRepository";
-import userRepository from "../repositories/userRepository";
 import passwordUtils from "../utils/bcryptPassword";
 import jwtFunctions from "../utils/jwt";
 
@@ -28,11 +27,9 @@ import eventEmitter from "../utils/eventEmitter";
 
 export default class authService implements IauthService {
   private _otpRepository: otpRepository;
-  private _userRepository: userRepository;
 
   constructor() {
     this._otpRepository = new otpRepository();
-    this._userRepository = new userRepository();
   }
 
   // Function to check the user already exists or not

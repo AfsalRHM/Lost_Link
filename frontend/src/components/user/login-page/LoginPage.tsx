@@ -48,7 +48,7 @@ const LoginPage = () => {
   };
 
   async function handleSubmit(): Promise<void> {
-    const errors = validateLoginDetails(loginPageDetails);
+    const errors = await validateLoginDetails(loginPageDetails);
 
     if (errors.userMail) {
       setUserMailValidationErrorData(errors.userMail);
@@ -95,7 +95,6 @@ const LoginPage = () => {
         const userData: GoogleJwtPayload = jwtDecode(
           credentialResponse.credential
         );
-        console.log(userData.email, typeof userData.email);
         const result = await googleLogin(userData.email);
         if (result.status) {
           const userData = {

@@ -1,5 +1,3 @@
-import IuserModel from "./IuserModel";
-
 export interface IauthService {
   sendMail(recieverEmail: string, recieverName: string): Promise<void>;
   checkMail(recieverEmail: string): Promise<boolean>;

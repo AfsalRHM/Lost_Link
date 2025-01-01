@@ -1,4 +1,3 @@
-import { countReset } from "console";
 import configCommunication, { getChannel } from "../config/communicationConfig";
 import authService, {
   loginDetails,

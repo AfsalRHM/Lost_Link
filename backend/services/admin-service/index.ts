@@ -28,8 +28,8 @@ app.use(bodyParser.urlencoded({ extended: true }));
 import { manageQueue } from "./src/utils/managingQueue";
 manageQueue();
 
-import authRoute from "./src/routes/authRoute";
-app.use("/", authRoute);
+import adminRoute from "./src/routes/adminRoute";
+app.use("/", adminRoute);
 
 import serverListening from "./src/config/serverConfig";
 serverListening(app);

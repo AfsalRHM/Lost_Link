@@ -1,10 +1,9 @@
 import mongoose, { Document } from "mongoose";
 
-export default interface IuserModel extends Document {
+export default interface IadminModel extends Document {
   _id: mongoose.Types.ObjectId;
-  full_name: string;
-  user_name: string;
-  location: string;
   email: string;
+  name: string;
+  role: string;
   password: string;
 }
