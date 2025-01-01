@@ -9,13 +9,21 @@ import ValidationError from "../shared/ValidationError";
 import { assignAccessToken } from "../../../redux/slice/accessTokenSlice";
 import { useDispatch } from "react-redux";
 import { assignUserDetails } from "../../../redux/slice/userDetailsSlice";
-import { showSuccessToast } from "../../../utils/toastUtils";
+import { showErrorToast, showSuccessToast } from "../../../utils/toastUtils";
 import { validateLoginDetails } from "../../../validations/loginDetails";
+
+import { GoogleLogin, CredentialResponse } from "@react-oauth/google";
+import { jwtDecode } from "jwt-decode";
+import googleLogin from "../../../api/auth-api/googleLoginAPI";
 
 type inputPropsType = {
   display: boolean;
   content: string;
 };
+
+interface GoogleJwtPayload {
+  email: string;
+}
 
 const LoginPage = () => {
   const [userMailValidationErrorData, setUserMailValidationErrorData] =
@@ -79,6 +87,41 @@ const LoginPage = () => {
     }
   }
 
+  async function handleGoogleLoginSuccess(
+    credentialResponse: CredentialResponse
+  ) {
+    try {
+      if (credentialResponse.credential) {
+        const userData: GoogleJwtPayload = jwtDecode(
+          credentialResponse.credential
+        );
+        console.log(userData.email, typeof userData.email);
+        const result = await googleLogin(userData.email);
+        if (result.status) {
+          const userData = {
+            userId: result.data.data._id,
+            userName: result.data.data.user_name,
+          };
+          console.log(result);
+          const accessToken = result.headers.authorization.split(" ")[1];
+          dispatch(assignUserDetails(userData));
+          dispatch(assignAccessToken(accessToken));
+          showSuccessToast("Login successful...!");
+          navigate("/home");
+        } else {
+          handleGoogleLoginFailure();
+        }
+      }
+    } catch (error) {
+      console.log(error);
+      handleGoogleLoginFailure();
+    }
+  }
+
+  function handleGoogleLoginFailure() {
+    showErrorToast("Google Login Failed...!");
+  }
+
   return (
     <div className="flex font-display bg-blue-50 items-center justify-center min-h-screen ">
       <div className="relative flex flex-col m-6 space-y-8 bg-blue-100 shadow-2xl rounded-2xl md:flex-row md:space-y-0">
@@ -88,6 +131,7 @@ const LoginPage = () => {
               Welcome back
             </span>
           </div>
+
           <div className="flex justify-center">
             <span className="font-light text-sm text-gray-400 mb-8">
               Welcome back! Please enter your details
@@ -99,21 +143,25 @@ const LoginPage = () => {
             name="userLoginValidation"
             content={userLoginValidationError.message}
           />
+
           <ValidationError
             display={userMailValidationErrorData.display}
             name="userLoginValidation"
             content={userMailValidationErrorData.content}
           />
+
           <LoginInput
             name="Enter your Email"
             stateFunc={setUserMailInput}
             item="emailOrPhone"
           />
+
           <ValidationError
             display={userPasswordValidationErrorData.display}
             name="userLoginValidation"
             content={userPasswordValidationErrorData.content}
           />
+
           <LoginInput
             name="Enter your Password"
             stateFunc={setUserPasswordInput}
@@ -135,7 +183,15 @@ const LoginPage = () => {
           <div onClick={handleSubmit}>
             <LoginButton item="submitButton" />
           </div>
-          <LoginButton item="googleButton" />
+
+          <GoogleLogin
+            onSuccess={handleGoogleLoginSuccess}
+            onError={handleGoogleLoginFailure}
+            useOneTap
+            theme="filled_blue"
+            size="large"
+          />
+          <br></br>
 
           <div className="text-center text-gray-400">
             Dont'have an account?
@@ -146,6 +202,7 @@ const LoginPage = () => {
             </Link>
           </div>
         </div>
+
         <div className="relative">
           <img
             src={sidePic}

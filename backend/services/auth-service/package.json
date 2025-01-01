@@ -20,11 +20,15 @@
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.1",
+    "express-session": "^1.18.1",
     "express-validator": "^7.2.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.8.4",
     "nodemailer": "^6.9.16",
     "nodemon": "^3.1.7",
+    "passport": "^0.7.0",
+    "passport-google-oauth2": "^0.2.0",
+    "passport-google-oauth20": "^2.0.0",
     "ts-node": "^10.9.2",
     "uuid": "^11.0.3"
   },
@@ -34,7 +38,11 @@
     "@types/bcryptjs": "^2.4.6",
     "@types/cookie-parser": "^1.4.8",
     "@types/cors": "^2.8.17",
+    "@types/express-session": "^1.18.1",
     "@types/jsonwebtoken": "^9.0.7",
-    "@types/nodemailer": "^6.4.17"
+    "@types/nodemailer": "^6.4.17",
+    "@types/passport": "^1.0.17",
+    "@types/passport-google-oauth2": "^0.1.10",
+    "@types/passport-google-oauth20": "^2.0.16"
   }
 }

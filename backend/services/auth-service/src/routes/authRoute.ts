@@ -14,12 +14,16 @@ auth_route.post("/sendMail", sendmailValidator, AuthController.sendMail);
 auth_route.post("/verifyOTP", verifyotpValidator, AuthController.verifyOTP);
 auth_route.post("/insertUser", signinValidator, AuthController.insertUser);
 auth_route.post("/loginVerify", loginValidator, AuthController.loginVerify);
+auth_route.post("/googleLogin", AuthController.googleLoginVerify);
 
+// Password Routes
 auth_route.post("/sendResetPasswordOTP", AuthController.sendResetPasswordMail);
 auth_route.post("/resetPassword", AuthController.resetPassword);
 
+// New Refresh Token Route
 auth_route.post("/refreshToken", AuthController.refreshToken);
 
+// User Login Verify Route
 auth_route.post("/isUserLogin", isUserLogin);
 
 export default auth_route;

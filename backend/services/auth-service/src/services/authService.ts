@@ -324,6 +324,57 @@ export default class authService implements IauthService {
       console.log(error);
     }
   }
+
+  async googleLoginVerify(
+    email: string
+  ): Promise<{ status: boolean; data: UserDataType | null; message: string }> {
+    if (email) {
+      const channel = getChannel();
+      const currentQueue = process.env.AUTH_QUEUE || "Default queue";
+      const replyQueue = process.env.USER_QUEUE || "Deafult Queue";
+      const correlationId = createCorrelationId(email);
+
+      // Sending the userData to User Service for loginVerify
+      channel.sendToQueue(
+        replyQueue,
+        Buffer.from(
+          JSON.stringify({
+            userMail: email,
+          })
+        ),
+        {
+          replyTo: currentQueue,
+          correlationId: correlationId,
+          headers: { source: "user login request" },
+        }
+      );
+
+      const userData: UserDataType | null = await new Promise(
+        (resolve, reject) => {
+          const timeout = setTimeout(() => {
+            reject(new Error("Response timeout"));
+          }, 10000);
+
+          eventEmitter.once(correlationId, (data) => {
+            clearTimeout(timeout);
+            resolve(data);
+          });
+        }
+      );
+
+      return {
+        status: true,
+        data: userData,
+        message: "Email Verification Success",
+      };
+    } else {
+      return {
+        status: false,
+        data: null,
+        message: "Email not reached on the googleLoginVerify/authService",
+      };
+    }
+  }
 }
 
 // to access the userDetails from the queue after registration

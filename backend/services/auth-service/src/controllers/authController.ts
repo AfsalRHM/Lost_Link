@@ -13,7 +13,6 @@ export default class authController implements IauthController {
   }
 
   // Controller to Send the Mail to User
-
   public sendMail = async (req: Request, res: Response): Promise<any> => {
     try {
       const errors = validationResult(req);
@@ -66,10 +65,7 @@ export default class authController implements IauthController {
     }
   };
 
-  public resetPassword = async (
-    req: Request,
-    res: Response
-  ): Promise<any> => {
+  public resetPassword = async (req: Request, res: Response): Promise<any> => {
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
@@ -81,9 +77,13 @@ export default class authController implements IauthController {
         req.body.newPassword
       );
       if (response.message == "Password changed") {
-        res.status(200).json({ status: true, message: "Password Changed Successfully" });
+        res
+          .status(200)
+          .json({ status: true, message: "Password Changed Successfully" });
       } else {
-        res.status(200).json({ status: false, message: "Password didn't changed" });
+        res
+          .status(200)
+          .json({ status: false, message: "Password didn't changed" });
       }
     } catch (error) {
       console.log("error in authController", error);
@@ -91,7 +91,6 @@ export default class authController implements IauthController {
   };
 
   // Controller to Verify the User Entered OTP
-
   public verifyOTP = async (req: Request, res: Response): Promise<any> => {
     try {
       const errors = validationResult(req);
@@ -111,7 +110,6 @@ export default class authController implements IauthController {
   };
 
   // Controller to Insert the User after Registeration.
-
   public insertUser = async (req: Request, res: Response): Promise<any> => {
     try {
       const errors = validationResult(req);
@@ -145,7 +143,6 @@ export default class authController implements IauthController {
   };
 
   // Controller to Verify the User while Login & Setting the JWT Tokens to the Cookies.
-
   public loginVerify = async (req: Request, res: Response): Promise<any> => {
     try {
       const errors = validationResult(req);
@@ -209,6 +206,50 @@ export default class authController implements IauthController {
       res
         .status(401)
         .json({ status: false, message: "New Access Token not Generated" });
+    }
+  };
+
+  public googleLoginVerify = async (
+    req: Request,
+    res: Response
+  ): Promise<void> => {
+    try {
+      if (req.body.email) {
+        const response = await this._authService.googleLoginVerify(
+          req.body.email
+        );
+        if (response.status && response.data) {
+          const accessToken = jwtFunctions.generateAccessToken({
+            userId: response.data._id.toString(),
+          });
+          const refreshToken = jwtFunctions.generateRefreshToken({
+            userId: response.data._id.toString(),
+          });
+
+          res
+            .status(200)
+            .cookie("refreshToken", refreshToken, {
+              httpOnly: true,
+              sameSite: "strict",
+            })
+            .setHeader("Authorization", `Bearer ${accessToken}`)
+            .json({
+              status: true,
+              data: response.data,
+              message: "Login Successfull...!",
+            });
+        } else {
+          res.status(401).json({
+            status: false,
+            message: "Error on GoogleLoginVerify/authController 2",
+          });
+        }
+      }
+    } catch (error) {
+      res.status(401).json({
+        status: false,
+        message: "Error on GoogleLoginVerify/authController 1",
+      });
     }
   };
 }
