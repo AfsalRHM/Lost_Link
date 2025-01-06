@@ -12,7 +12,7 @@ export default async function getProfile(props: Props): Promise<any> {
   try {
     const response = await axiosInstance.get(
       import.meta.env.VITE_GET_PROFILE ||
-        "http://localhost:7000/user/getProfile",
+        `${import.meta.env.VITE_API_ROUTE}/user/getProfile`,
       {
         headers: {
           Authorization: `Bearer ${props.accessToken}`,

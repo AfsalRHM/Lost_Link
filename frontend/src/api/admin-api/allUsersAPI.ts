@@ -1,21 +1,20 @@
 import axios from "axios";
 
-export default async function googleLogin(email: string): Promise<any> {
+export default async function fetchAllUsers(): Promise<any> {
   try {
     const result = await axios
       .post(
-        `${import.meta.env.VITE_API_ROUTE}/auth/googleLogin`,
-        { email },
+        `${import.meta.env.VITE_API_ROUTE}/admin/allUsers`,
+        {},
         {
           withCredentials: true,
         }
       )
       .then((response) => {
-        console.log("this is from here", response.status);
         return response;
       });
     return result;
   } catch (error) {
-    console.log(error);
+    console.log(error, "error on the allUsersAPI");
   }
 }

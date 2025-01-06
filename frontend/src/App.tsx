@@ -3,7 +3,7 @@ import LandingPage from "./pages/user/LandingPage";
 import AuthRoutes from "./routes/AuthRoutes";
 import UserRoutes from "./routes/UserRoutes";
 import AdminRoutes from "./routes/AdminRoutes";
-import { PrivateRoute } from "./utils/PrivateRoutes";
+import { UserPrivateRoute } from "./utils/UserPrivateRoutes";
 import { ToastContainer } from "react-toastify";
 
 function App() {
@@ -11,7 +11,7 @@ function App() {
     <>
       <ToastContainer />
       <Routes>
-        <Route element={<PrivateRoute />}>
+        <Route element={<UserPrivateRoute />}>
           <Route path="/" element={<LandingPage />} />
         </Route>
         {AuthRoutes()}

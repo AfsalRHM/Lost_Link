@@ -1,12 +1,6 @@
 import { defineCustomElements } from "ionicons/dist/loader";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 
-import getProfile from "../../../api/user-api/getProfileAPI";
-import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "../../../redux/store";
-import { assignAccessToken } from "../../../redux/slice/accessTokenSlice";
-import { removeUserDetails } from "../../../redux/slice/userDetailsSlice";
 import TopBar from "./TopBar";
 import TopBarIcons from "./TopBarIcons";
 
@@ -15,11 +9,8 @@ const Header = () => {
     defineCustomElements(window);
   }, []);
 
-  const navigate = useNavigate();
-  const dispatch = useDispatch();
   const [menuOpen, setMenuOpen] = useState(false);
 
-  const { accessToken } = useSelector((state: RootState) => state.accessToken);
 
   const onToggleMenu = (e: React.MouseEvent<HTMLElement>) => {
     const navLinks = document.querySelector(".nav-links");
@@ -29,20 +20,22 @@ const Header = () => {
     navLinks?.classList.toggle("top-[9%]");
   };
 
-  async function handleProfile() {
-    const result = await getProfile({
-      accessToken,
-      navigate,
-      setAccessToken: assignAccessToken,
-      dispatch,
-      removeUserDetails: removeUserDetails,
-    });
-    if (result.status) {
-      navigate("/profile");
-    } else {
-      console.log("Nothing is getting");
-    }
-  }
+  // useEffect(() => {
+  //   async function handleProfile() {
+  //     const result = await getProfile({
+  //       accessToken,
+  //       navigate,
+  //       setAccessToken: assignAccessToken,
+  //       dispatch,
+  //       removeUserDetails: removeUserDetails,
+  //     });
+  //     if (result.status) {
+  //       navigate("/profile");
+  //     } else {
+  //       console.log("Nothing is getting");
+  //     }
+  //   }
+  // });
 
   return (
     <header className="bg-header shadow-2xl border-y md:px-16 p-3 z-10">
@@ -57,7 +50,7 @@ const Header = () => {
           </ul>
         </div>
         <div className="flex items-center gap-6 ">
-          <TopBarIcons handleProfile={handleProfile} />
+          <TopBarIcons />
           <div className="text-xl cursor-pointer mt-1 md:hidden">
             <ion-icon name="menu" onClick={(e) => onToggleMenu(e)}></ion-icon>
           </div>

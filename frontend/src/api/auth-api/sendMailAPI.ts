@@ -8,7 +8,7 @@ type propsType = {
 export default async function sendMail(props: propsType) {
   try {
     const result = await axios
-      .post(import.meta.env.VITE_SEND_MAIL_API, props)
+      .post(`${import.meta.env.VITE_API_ROUTE}/auth/sendMail`, props)
       .then((response) => {
         return response.data;
       });

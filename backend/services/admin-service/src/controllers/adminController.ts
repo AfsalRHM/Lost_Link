@@ -39,4 +39,54 @@ export default class authController implements IadminController {
         .json({ status: false, message: "Login Failed", data: null });
     }
   };
+
+  public getAllUsers = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const response = await this._adminService.getAllUsers();
+      res.status(200).json(response);
+    } catch (error) {
+      res
+        .status(300)
+        .json({ message: "error on the getAllUsers/adminController" });
+    }
+  };
+
+  public getAllAdmins = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const response = await this._adminService.getAllAdmins();
+      console.log(response, "from the getAllAdmins/adminController");
+      res.status(200).json(response);
+    } catch (error) {
+      res
+        .status(300)
+        .json({ message: "error on the getAllAdmins/adminController" });
+    }
+  };
+
+  public changeUserStatus = async (
+    req: Request,
+    res: Response
+  ): Promise<void> => {
+    try {
+      const response = await this._adminService.changeUserStatus(
+        req.body.Props
+      );
+      res.status(200).json(response);
+    } catch (error) {
+      res
+        .status(300)
+        .json({ message: "error on the getAllUsers/changeUserStatus" });
+    }
+  };
+
+  public insertAdmin = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const response = await this._adminService.insertAdmin(req.body.Props);
+      res.status(200).json(response);
+    } catch (error) {
+      res
+        .status(300)
+        .json({ message: "error on the getAllUsers/changeUserStatus" });
+    }
+  };
 }

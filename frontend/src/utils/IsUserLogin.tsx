@@ -4,6 +4,5 @@ import { RootState } from "../redux/store";
 
 export function IsUserLogin() {
   const currentUser = useSelector((state: RootState) => state.userDetails);
-  console.log(currentUser.userId, 'This is user');
-  return currentUser.userId ? <Outlet /> : <Navigate to="/signin" /> ;
+  return currentUser.userId ? <Outlet /> : <Navigate to="/signin" />;
 }

@@ -4,6 +4,7 @@ import emailVerficationReducer from "./slice/emailVerficationSlice";
 import registerDetailsReducer from "./slice/registerDetails";
 import userDetailsReducer from "./slice/userDetailsSlice";
 import currentPageReducer from "./slice/currentPageSlice";
+import adminDetailsReducer from "./slice/adminDetailsSlice";
 import storage from "redux-persist/lib/storage";
 import { persistReducer, persistStore } from "redux-persist";
 import accessTokenReducer from "./slice/accessTokenSlice";
@@ -15,6 +16,7 @@ const rootReducer = combineReducers({
   accessToken: accessTokenReducer,
   userDetails: userDetailsReducer,
   currentPage: currentPageReducer,
+  adminDetails: adminDetailsReducer
 });
 
 const persistConfig = {

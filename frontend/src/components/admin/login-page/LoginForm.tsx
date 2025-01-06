@@ -9,6 +9,7 @@ import { showErrorToast, showSuccessToast } from "../../../utils/toastUtils";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { assignAdminAccessToken } from "../../../redux/slice/accessTokenSlice";
+import { assignAdminDetails } from "../../../redux/slice/adminDetailsSlice";
 
 const LoginForm: React.FC = () => {
   const navigate = useNavigate();
@@ -45,11 +46,11 @@ const LoginForm: React.FC = () => {
 
     if (!errors.password && !errors.email) {
       const result = await adminLogin(formData);
-      if (result.data.status == false) {
+      if (result.data == null) {
         showErrorToast("Admin Login Failed...!");
       } else {
-        console.log(result.authorizationHeader.split(' '))
         dispatch(assignAdminAccessToken(result.authorizationHeader.split(' ')[1]));
+        dispatch(assignAdminDetails(result.data.data.data))
         showSuccessToast("Admin Login Success...!");
         navigate("/admin/dashboard");
       }

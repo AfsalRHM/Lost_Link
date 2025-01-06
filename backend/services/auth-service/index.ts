@@ -10,15 +10,18 @@ const app = express();
 
 dotenv.config();
 
-dbConnection();
+const MAIN_ROUTE = process.env.MAIN_ROUTE;
+const FRONTEND_PORT = process.env.FRONTEND_PORT;
 
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: `${MAIN_ROUTE}${FRONTEND_PORT}`,
     credentials: true,
     exposedHeaders: ["Authorization"],
   })
 );
+
+dbConnection();
 
 app.use(cookieParser());
 

@@ -7,4 +7,5 @@ export default interface IuserModel extends Document {
   location: string;
   email: string;
   password: string;
+  status: string;
 }

@@ -8,7 +8,7 @@ type propsType = {
 export default async function verifyOTP(props: propsType): Promise<any> {
   try {
     const result = await axios
-      .post(import.meta.env.VITE_VERIFY_OTP, props)
+      .post(`${import.meta.env.VITE_API_ROUTE}/auth/verifyOTP`, props)
       .then((response) => {
         return response.data;
       });

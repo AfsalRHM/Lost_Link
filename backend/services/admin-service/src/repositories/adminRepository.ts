@@ -15,4 +15,8 @@ export default class
   async findAdmin(adminMail: string): Promise<IadminModel | null> {
     return this.findOne({ email: adminMail });
   }
+
+  async findAll(): Promise<IadminModel[] | null> {
+    return this.findAllAdmins();
+  }
 }

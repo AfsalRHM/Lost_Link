@@ -19,4 +19,8 @@ export default class BaseRepository<T extends Document>
   async findOne(filter: FilterQuery<T>): Promise<T | null> {
     return this.model.findOne(filter);
   }
+
+  async findAllAdmins(): Promise<T[] | null> {
+    return this.model.find({});
+  }
 }

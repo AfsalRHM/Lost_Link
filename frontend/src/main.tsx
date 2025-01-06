@@ -1,4 +1,3 @@
-import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
@@ -13,16 +12,14 @@ import PageTracker from "./utils/PageTracker.tsx";
 const googleClientId = import.meta.env.VITE_GOOGLE_OAUTH_ID;
 
 createRoot(document.getElementById("root")!).render(
-  <StrictMode>
-    <Provider store={store}>
-      <PersistGate persistor={persistor} loading={null}>
-        <GoogleOAuthProvider clientId={googleClientId}>
-          <BrowserRouter>
-            <PageTracker />
-            <App />
-          </BrowserRouter>
-        </GoogleOAuthProvider>
-      </PersistGate>
-    </Provider>
-  </StrictMode>
+  <Provider store={store}>
+    <PersistGate persistor={persistor} loading={null}>
+      <GoogleOAuthProvider clientId={googleClientId}>
+        <BrowserRouter>
+          <PageTracker />
+          <App />
+        </BrowserRouter>
+      </GoogleOAuthProvider>
+    </PersistGate>
+  </Provider>
 );

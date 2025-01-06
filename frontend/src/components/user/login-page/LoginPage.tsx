@@ -96,7 +96,8 @@ const LoginPage = () => {
           credentialResponse.credential
         );
         const result = await googleLogin(userData.email);
-        if (result.status) {
+        console.log(result);
+        if (result && result.data.status == true) {
           const userData = {
             userId: result.data.data._id,
             userName: result.data.data.user_name,
@@ -108,6 +109,12 @@ const LoginPage = () => {
           showSuccessToast("Login successful...!");
           navigate("/home");
         } else {
+          if (result.message == "Your Account has been Blocked") {
+            setUserLoginValidationError({
+              status: false,
+              message: result.message,
+            });
+          }
           handleGoogleLoginFailure();
         }
       }

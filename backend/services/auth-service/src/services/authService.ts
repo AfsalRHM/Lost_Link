@@ -6,6 +6,7 @@ interface UserDataType {
   full_name: string;
   location: string;
   password?: string;
+  status: string;
   _id: string;
   createdAt: string;
   updatedAt: string;
@@ -283,7 +284,15 @@ export default class authService implements IauthService {
       const { password, ...rest } = plainUserData;
 
       if (isMatch) {
-        return { status: true, data: rest };
+        if (userData.status == "inactive") {
+          return {
+            status: false,
+            data: null,
+            message: "Your Account has been Blocked",
+          };
+        } else {  
+          return { status: true, data: rest };
+        }
       } else {
         return {
           status: false,

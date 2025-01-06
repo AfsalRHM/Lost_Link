@@ -4,7 +4,7 @@ import { LoginFormData } from "../../interface/IloginForm";
 export default async function adminLogin(props: LoginFormData): Promise<any> {
   try {
     const result = await axios
-      .post(import.meta.env.VITE_ADMIN_LOGIN, props, {
+      .post(`${import.meta.env.VITE_API_ROUTE}/admin/adminLogin`, props, {
         withCredentials: true,
       })
       .then((response) => {

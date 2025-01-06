@@ -1,5 +1,5 @@
-import configCommunication, {getChannel} from "../config/communicationConfig";
-import adminService from "../services/adminService";
+import configCommunication, { getChannel } from "../config/communicationConfig";
+import adminService, { userDataStatusChange, userList } from "../services/adminService";
 import { getCorrelationId } from "./correlationId";
 
 export async function manageQueue() {
@@ -17,23 +17,27 @@ export async function manageQueue() {
 
       if (msg) {
         const messageContent = JSON.parse(msg.content.toString());
+        console.log(messageContent, "messageContent");
         let correlationId;
         if (messageContent) {
-          correlationId = getCorrelationId(messageContent.email);
+          correlationId = getCorrelationId(msg?.properties?.headers?.correlationIdString);
         } else {
           console.log("Message content not available");
         }
 
         if (correlationId) {
-          if (
-            msg.properties.correlationId == correlationId &&
-            msg?.properties?.headers?.source == "user register complete info"
-          ) {
-            // if (messageContent) {
-            //   _adminService.userDetails(correlationId, messageContent);
-            // } else {
-            //   console.log("Error on messageContent on auth managing Queue 1");
-            // }
+          if (msg?.properties?.headers?.source == "all user resoponse") {
+            if (messageContent) {
+              userList(correlationId, messageContent);
+            } else {
+              console.log("Error on messageContent on admin managing Queue 1");
+            }
+          } else if (msg?.properties?.headers?.source == "status changed response") {
+            if (messageContent) {
+              userDataStatusChange(correlationId, messageContent);
+            } else {
+              console.log("Error on messageContent on admin managing Queue 2");
+            }
           } else {
             console.log(
               "No consume found because the correlation id dosen't match."

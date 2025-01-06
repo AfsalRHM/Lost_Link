@@ -1,26 +1,27 @@
 import { useEffect, useState } from "react";
-import UserListPart from "./UserListPart";
+import AdminListPart from "./AdminListPart";
 import { Bell, Menu, Search } from "lucide-react";
 import { Sidebar } from "../shared/Sidebar";
-import fetchAllUsers from "../../../api/admin-api/allUsersAPI";
+import fetchAllAdmins from "../../../api/admin-api/allAdminsAPI";
 import { showErrorToast } from "../../../utils/toastUtils";
+import AddAdminForm from "./AddAdminForm";
 
 const UserListPage = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const [userList, setUserList] = useState([]);
+  const [adminList, setAdminList] = useState([]);
 
-  const getAllUsers = async () => {
-    const response = await fetchAllUsers();
+  const getAllAdmins = async () => {
+    const response = await fetchAllAdmins();
     if (response.data.status) {
-      setUserList(response.data.data);
+        setAdminList(response.data.data);
     } else {
-      showErrorToast("Didn't get the User List");
+      showErrorToast("Didn't get the Admin List");
     }
   };
 
   useEffect(() => {
-    getAllUsers();
+    getAllAdmins();
   }, []);
 
   return (
@@ -61,7 +62,7 @@ const UserListPage = () => {
         </header>
 
         <main className="p-6">
-          <UserListPart allUsers={userList} allUsersFunc={getAllUsers} />
+          <AddAdminForm />
         </main>
       </div>
     </div>

@@ -1,34 +1,34 @@
 import { useState } from "react";
-import { Search, ChevronDown, ChevronUp } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Search, UserPlus } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 import changeStatus from "../../../api/admin-api/changeUserStatus";
 import { showErrorToast, showSuccessToast } from "../../../utils/toastUtils";
 
-interface User {
+interface Admin {
   _id: string;
-  full_name: string;
-  user_name: string;
+  name: string;
   email: string;
+  role: string;
   createdAt: Date;
   updatedAt: Date;
   status: "active" | "inactive";
 }
 
-interface UserListPartProps {
-  allUsers: User[];
-  allUsersFunc: () => Promise<void>;
+interface AdminListPartProps {
+  allAdmins: Admin[];
+  allAdminsFunc: () => Promise<void>;
 }
 
-const UserListPart = ({ allUsers, allUsersFunc }: UserListPartProps) => {
+const AdminListPart = ({ allAdmins, allAdminsFunc }: AdminListPartProps) => {
   const navigate = useNavigate();
 
   const [searchTerm, setSearchTerm] = useState("");
-  const [sortField, setSortField] = useState<keyof User>("user_name");
+  const [sortField, setSortField] = useState<keyof Admin>("name");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
 
-  const users: User[] = allUsers;
+  const admins: Admin[] = allAdmins;
 
-  const handleSort = (field: keyof User) => {
+  const handleSort = (field: keyof Admin) => {
     if (sortField === field) {
       setSortDirection(sortDirection === "asc" ? "desc" : "asc");
     } else {
@@ -44,21 +44,21 @@ const UserListPart = ({ allUsers, allUsersFunc }: UserListPartProps) => {
   };
 
   const handleStatusChange = async (id: string) => {
-    const response = await changeStatus({userId: id});
-    await allUsersFunc();
+    const response = await changeStatus({ userId: id });
+    await allAdminsFunc();
     if (response.status) {
-      showSuccessToast('User Status Changed')
+      showSuccessToast("User Status Changed");
     } else {
       showErrorToast("User Status not Changed");
     }
   };
 
-  const filteredUsers = users
+  const filteredAdmins = admins
     .filter(
-      (user) =>
-        user.user_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.email.toLowerCase().includes(searchTerm.toLowerCase())
+      (admin) =>
+        admin.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        admin.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        admin.role.toLowerCase().includes(searchTerm.toLowerCase())
     )
     .sort((a, b) => {
       if (sortDirection === "asc") {
@@ -66,20 +66,6 @@ const UserListPart = ({ allUsers, allUsersFunc }: UserListPartProps) => {
       }
       return a[sortField] < b[sortField] ? 1 : -1;
     });
-
-  const SortIcon = ({ field }: { field: keyof User }) => (
-    <span className="inline-block ml-1">
-      {sortField === field ? (
-        sortDirection === "asc" ? (
-          <ChevronUp size={16} />
-        ) : (
-          <ChevronDown size={16} />
-        )
-      ) : (
-        <ChevronDown size={16} className="text-gray-400" />
-      )}
-    </span>
-  );
 
   return (
     <div className="p-6 bg-blue-900 min-h-screen text-white">
@@ -101,10 +87,12 @@ const UserListPart = ({ allUsers, allUsersFunc }: UserListPartProps) => {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          {/* <button className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-            <UserPlus size={20} className="mr-2" />
-            Add User
-          </button> */}
+          <Link to="/admin/addadmin">
+            <button className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+              <UserPlus size={20} className="mr-2" />
+              Add Admin
+            </button>
+          </Link>
         </div>
       </div>
 
@@ -115,19 +103,22 @@ const UserListPart = ({ allUsers, allUsersFunc }: UserListPartProps) => {
               <tr>
                 <th
                   className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider cursor-pointer"
-                  onClick={() => handleSort("user_name")}
+                  onClick={() => handleSort("name")}
                 >
-                  Name <SortIcon field="user_name" />
+                  Name
                 </th>
                 <th
                   className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider cursor-pointer"
                   onClick={() => handleSort("status")}
                 >
-                  Status <SortIcon field="status" />
+                  Status
                 </th>
-                {/* <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
-                  Last Active
-                </th> */}
+                <th
+                  className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider cursor-pointer"
+                  onClick={() => handleSort("role")}
+                >
+                  Role
+                </th>
                 <th className="px-6 py-3 text-center text-xs font-medium text-white uppercase tracking-wider">
                   Actions
                 </th>
@@ -137,64 +128,54 @@ const UserListPart = ({ allUsers, allUsersFunc }: UserListPartProps) => {
               </tr>
             </thead>
             <tbody className="bg-blue-400 divide-y divide-gray-200">
-              {filteredUsers.map((user) => (
-                <tr key={user._id} className="hover:bg-blue-700">
+              {filteredAdmins.map((admin) => (
+                <tr key={admin._id} className="hover:bg-blue-700">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
-                      <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
-                        <span className="text-black font-medium">
-                          {user.user_name
-                            .split(" ")
-                            .map((n) => n[0])
-                            .join("")}
-                        </span>
-                      </div>
                       <div className="ml-4">
                         <div className="text-sm font-medium text-white">
-                          {user.user_name}
+                          {admin.name}
                         </div>
-                        <div className="text-sm text-black">{user.email}</div>
+                        <div className="text-sm text-black">{admin.email}</div>
                       </div>
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span
                       className={`inline-flex text-sm font-medium px-2 py-1 rounded ${
-                        user.status === "active"
+                        admin.status === "active"
                           ? "bg-green-100 text-green-800"
                           : "bg-gray-100 text-gray-800"
                       }`}
                     >
-                      {user.status.charAt(0).toUpperCase() +
-                        user.status.slice(1)}
+                      {admin.status.charAt(0).toUpperCase() +
+                        admin.status.slice(1)}
                     </span>
                   </td>
-                  {/* <td className="px-6 py-4 whitespace-nowrap text-sm text-black">
-                    {user.lastActive}
-                  </td> */}
-                  <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
-                    <div className="flex justify-center space-x-4">
-                      <button
-                        onClick={() => handleStatusChange(user._id)}
-                        className={`inline-flex items-center px-4 py-2 text-white rounded-lg transition-colors ${
-                          user.status == "active"
-                            ? "bg-red-600 hover:bg-red-700"
-                            : "bg-green-600 hover:bg-green-700"
-                        }`}
-                      >
-                        {user.status == "active" ? "Block" : "Un Block"}
-                      </button>
-                    </div>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className="inline-flex text-sm font-medium">
+                      {admin.role}
+                    </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
-                    <div className="flex justify-center space-x-4">
-                      <button
-                        onClick={() => handleDetailsPage(user._id)}
-                        className="inline-flex items-center px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-                      >
-                        Details
-                      </button>
-                    </div>
+                  <td className="px-6 py-4 whitespace-nowrap text-center">
+                    <button
+                      onClick={() => handleStatusChange(admin._id)}
+                      className={`inline-flex items-center px-4 py-2 text-white rounded-lg transition-colors ${
+                        admin.status === "active"
+                          ? "bg-red-600 hover:bg-red-700"
+                          : "bg-green-600 hover:bg-green-700"
+                      }`}
+                    >
+                      {admin.status === "active" ? "Block" : "Unblock"}
+                    </button>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-center">
+                    <button
+                      onClick={() => handleDetailsPage(admin._id)}
+                      className="inline-flex items-center px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                    >
+                      Details
+                    </button>
                   </td>
                 </tr>
               ))}
@@ -206,4 +187,4 @@ const UserListPart = ({ allUsers, allUsersFunc }: UserListPartProps) => {
   );
 };
 
-export default UserListPart;
+export default AdminListPart;

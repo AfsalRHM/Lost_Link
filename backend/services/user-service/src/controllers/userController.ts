@@ -13,6 +13,7 @@ export default class UserController implements IuserController {
   }
 
   public getProfile = async (req: Request, res: Response): Promise<void> => {
+    console.log('Here it is reacing')
     const accessToken = req.headers["authorization"]?.split(" ")[1];
     if (!accessToken) {
       res.status(400).json({ message: "No authorization token provided" });

@@ -15,6 +15,7 @@ export async function manageQueue() {
       console.log("Consumer Queue triggered");
 
       if (msg) {
+        console.log(msg.content.toString())
         const messageContent = JSON.parse(msg.content.toString());
 
         if (
@@ -79,11 +80,27 @@ export async function manageQueue() {
             correlationId: msg.properties.correlationId,
             headers: { source: "password changed" },
           });
+        } else if ( msg?.properties?.headers?.source == "get All Users") {
+          const response = await _userService.getAllUsers();
+
+          channel.sendToQueue("ADMIN", Buffer.from(JSON.stringify(response)), {
+            correlationId: msg.properties.correlationId,
+            headers: { source: "all user resoponse", correlationIdString: msg?.properties?.headers?.correlationIdString },
+          });
+        } else if ( msg?.properties?.headers?.source == "Change the User Status") {
+          const response = await _userService.changeUserStatus(messageContent);
+
+          channel.sendToQueue("ADMIN", Buffer.from(JSON.stringify(response)), {
+            correlationId: msg.properties.correlationId,
+            headers: { source: "status changed response", correlationIdString: msg?.properties?.headers?.correlationIdString },
+          });
         } else {
           console.log("No userData found in message.");
         }
 
         channel.ack(msg);
+      } else {
+        console.log('No correlation id provided')
       }
     });
   } catch (error) {

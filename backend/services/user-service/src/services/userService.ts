@@ -47,6 +47,7 @@ export default class userService implements IuserService {
       location: userLocation,
       email: userEmail,
       password: hashedPassword,
+      status: "active",
     };
     const userData = await this._userRepository.insertUser(data);
     if (userData) {
@@ -98,4 +99,48 @@ export default class userService implements IuserService {
       };
     }
   }
+
+  async getAllUsers(): Promise<any> {
+    try {
+      const userList = await this._userRepository.findAll();
+      if (userList) {
+        return {
+          status: true,
+          data: userList,
+          message: "get All Users",
+        };
+      } else {
+        return {
+          status: false,
+          data: null,
+          message: "get All Users",
+        };
+      }
+    } catch (error) {
+      console.log(error, "error on the getAllUsers/userService");
+    }
+  }
+
+  async changeUserStatus(props: {userId: string}): Promise<any> {
+    try {
+      const userData = await this._userRepository.changeStatus(props.userId);
+      if (userData) {
+        return {
+          status: true,
+          data: userData,
+          message: "Status Changed",
+        };
+      } else {
+        return {
+          status: false,
+          data: null,
+          message: "Status didin't changed",
+        };
+      }
+    } catch (error) {
+      console.log(error, "error on the getAllUsers/userService");
+    }
+  }
+  
+
 }

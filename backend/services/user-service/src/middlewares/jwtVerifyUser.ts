@@ -17,6 +17,11 @@ const verifyAccessToken = async (
     }
 
     const decoded = jwtFunctions.verifyAccessToken(token);
+    if (!decoded) {
+      return res
+        .status(401)
+        .json({ status: false, message: "Access Denied Access Token expired" });
+    }
     (req as any).userData = decoded;
     next();
   } catch (error) {
