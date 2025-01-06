@@ -218,40 +218,40 @@ export default class authController implements IauthController {
         const response = await this._authService.googleLoginVerify(
           req.body.email
         );
-        console.log(response)
-        if (response.data?.status == "active") {
-          if (response.status && response.data) {
-            const accessToken = jwtFunctions.generateAccessToken({
-              userId: response.data._id.toString(),
-            });
-            const refreshToken = jwtFunctions.generateRefreshToken({
-              userId: response.data._id.toString(),
-            });
-
-            res
-              .status(200)
-              .cookie("refreshToken", refreshToken, {
-                httpOnly: true,
-                sameSite: "strict",
-              })
-              .setHeader("Authorization", `Bearer ${accessToken}`)
-              .json({
-                status: true,
-                data: response.data,
-                message: "Login Successfull...!",
+        if (response.data?.status == "inactive") {
+          res.status(200).json({
+            status: false,
+            message: "Your Account has been Blocked",
+          });
+        } else {
+          if (response.data?.status == "active") {
+            if (response.status && response.data) {
+              const accessToken = jwtFunctions.generateAccessToken({
+                userId: response.data._id.toString(),
               });
+              const refreshToken = jwtFunctions.generateRefreshToken({
+                userId: response.data._id.toString(),
+              });
+
+              res
+                .status(200)
+                .cookie("refreshToken", refreshToken, {
+                  httpOnly: true,
+                  sameSite: "strict",
+                })
+                .setHeader("Authorization", `Bearer ${accessToken}`)
+                .json({
+                  status: true,
+                  data: response.data,
+                  message: "Login Successfull...!",
+                });
+            }
           } else {
-            res.status(200).json({
+            res.status(401).json({
               status: false,
-              message: "Your Account has been Blocked",
+              message: "Error on GoogleLoginVerify/authController 2",
             });
           }
-        } else {
-          console.log('This workied')
-          res.status(401).json({
-            status: false,
-            message: "Error on GoogleLoginVerify/authController 2",
-          });
         }
       }
     } catch (error) {

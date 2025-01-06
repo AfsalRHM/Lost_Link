@@ -5,7 +5,7 @@ import authService, {
   userDetails,
   userNameForMail,
 } from "../services/authService";
-import { getCorrelationId } from "./correlationId";
+import { getCorrelationId } from "../utils/correlationId";
 
 export async function manageQueue() {
   try {

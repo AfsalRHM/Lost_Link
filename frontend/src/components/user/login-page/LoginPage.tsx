@@ -37,10 +37,8 @@ const LoginPage = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const [userLoginValidationError, setUserLoginValidationError] = useState<{
-    status: boolean;
-    message: string;
-  }>({ status: true, message: "" });
+  const [userLoginValidationError, setUserLoginValidationError] =
+    useState<inputPropsType>({ display: false, content: "" });
 
   const loginPageDetails = {
     userMail: userMailInput,
@@ -69,11 +67,10 @@ const LoginPage = () => {
       });
       if (!result.data.status) {
         setUserLoginValidationError({
-          status: result.data.status,
-          message: result.data.message,
+          display: !result.data.status,
+          content: result.data.message,
         });
       } else {
-        console.log(result.data.data);
         const userData = {
           userId: result.data.data._id,
           userName: result.data.data.user_name,
@@ -96,7 +93,6 @@ const LoginPage = () => {
           credentialResponse.credential
         );
         const result = await googleLogin(userData.email);
-        console.log(result);
         if (result && result.data.status == true) {
           const userData = {
             userId: result.data.data._id,
@@ -109,13 +105,15 @@ const LoginPage = () => {
           showSuccessToast("Login successful...!");
           navigate("/home");
         } else {
-          if (result.message == "Your Account has been Blocked") {
+          if (
+            result.data.message ==
+            "Your Account has been Blocked..! Pls contact customer service for further details"
+          ) {
             setUserLoginValidationError({
-              status: false,
-              message: result.message,
+              display: true,
+              content: result.data.message,
             });
           }
-          handleGoogleLoginFailure();
         }
       }
     } catch (error) {
@@ -145,9 +143,9 @@ const LoginPage = () => {
           </div>
 
           <ValidationError
-            display={!userLoginValidationError.status}
+            display={userLoginValidationError.display}
             name="userLoginValidation"
-            content={userLoginValidationError.message}
+            content={userLoginValidationError.content}
           />
 
           <ValidationError

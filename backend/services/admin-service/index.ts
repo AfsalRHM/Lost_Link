@@ -28,7 +28,7 @@ app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-import { manageQueue } from "./src/utils/managingQueue";
+import { manageQueue } from "./src/rabbitmq/consumer";
 manageQueue();
 
 import adminRoute from "./src/routes/adminRoute";

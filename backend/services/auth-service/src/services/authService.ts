@@ -297,7 +297,7 @@ export default class authService implements IauthService {
         return {
           status: false,
           data: null,
-          message: "Invalid Credentials this worked ",
+          message: "Invalid Credentials",
         };
       }
     } else {

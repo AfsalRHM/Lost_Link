@@ -1,6 +1,6 @@
 import configCommunication, { getChannel } from "../config/communicationConfig";
 import adminService, { userDataStatusChange, userList } from "../services/adminService";
-import { getCorrelationId } from "./correlationId";
+import { getCorrelationId } from "../utils/correlationId";
 
 export async function manageQueue() {
   try {

@@ -34,5 +34,5 @@ app.use("/", user_route);
 import serverListening from "./src/config/serverConfig";
 serverListening(app);
 
-import { manageQueue } from "./src/utils/managingQueue";
+import { manageQueue } from "./src/rabbitmq/consumer";
 manageQueue();
