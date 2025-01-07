@@ -23,9 +23,10 @@ export default class authController implements IadminController {
 
       res
         .status(200)
-        .cookie("refreshToken", refreshToken, {
+        .cookie("adminRefreshToken", refreshToken, {
           httpOnly: true,
           sameSite: "strict",
+          path: "/",
         })
         .setHeader("Authorization", `Bearer ${accessToken}`)
         .json({
@@ -54,7 +55,6 @@ export default class authController implements IadminController {
   public getAllAdmins = async (req: Request, res: Response): Promise<void> => {
     try {
       const response = await this._adminService.getAllAdmins();
-      console.log(response, "from the getAllAdmins/adminController");
       res.status(200).json(response);
     } catch (error) {
       res
@@ -75,7 +75,7 @@ export default class authController implements IadminController {
     } catch (error) {
       res
         .status(300)
-        .json({ message: "error on the getAllUsers/changeUserStatus" });
+        .json({ message: "error on the changeUserStatus/adminController" });
     }
   };
 
@@ -86,7 +86,24 @@ export default class authController implements IadminController {
     } catch (error) {
       res
         .status(300)
-        .json({ message: "error on the getAllUsers/changeUserStatus" });
+        .json({ message: "error on the insertAdmin/adminController" });
+    }
+  };
+
+  public adminLogout = async (req: Request, res: Response): Promise<void> => {
+    try {
+      res
+        .status(200)
+        .clearCookie("adminRefreshToken", {
+          httpOnly: true,
+          sameSite: "strict",
+          path: "/",
+        })
+        .json({ status: "true", message: "Logged out successfully" });
+    } catch (error) {
+      res
+        .status(300)
+        .json({ message: "error on the adminLogout/adminController" });
     }
   };
 }

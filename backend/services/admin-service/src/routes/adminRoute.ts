@@ -11,4 +11,6 @@ admin_route.post("/changeUserStatus", AdminController.changeUserStatus);
 admin_route.post("/allAdmins", AdminController.getAllAdmins);
 admin_route.post("/addAdmin", AdminController.insertAdmin);
 
+admin_route.post("/logout", AdminController.adminLogout);
+
 export default admin_route;

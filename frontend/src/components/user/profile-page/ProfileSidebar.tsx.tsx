@@ -18,7 +18,6 @@ const ProfileSidebar = () => {
         accessToken,
         navigate,
       });
-      console.log(result)
       if (result.data.status == "true") {
         dispatch(removeUserDetails());
         dispatch(removeAccessToken());
@@ -29,6 +28,7 @@ const ProfileSidebar = () => {
       }
     } catch (error) {
       console.log("Error on the logoutFunction :", error);
+      showErrorToast("Error while loggin out...!");
     }
   }
 

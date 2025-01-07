@@ -57,8 +57,6 @@ export default class adminService implements IadminService {
       const replyQueue = process.env.USER_QUEUE || "USER";
       const correlationId = createCorrelationId("toGetAllUsers");
 
-      console.log(correlationId, "og correlation id");
-
       // Sending the userData to User Service for loginVerify
       channel.sendToQueue("USER", Buffer.from(JSON.stringify({})), {
         replyTo: currentQueue,
@@ -197,12 +195,10 @@ export default class adminService implements IadminService {
 
 // to access the User List after the API call
 export function userList(correlationId: string, params: any) {
-  console.log("function userList is working", correlationId, params);
   eventEmitter.emit(correlationId, params);
 }
 
 // to access the User Data after the status change
 export function userDataStatusChange(correlationId: string, params: any) {
-  console.log("function userList is working", correlationId, params);
   eventEmitter.emit(correlationId, params);
 }
