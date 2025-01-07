@@ -169,6 +169,7 @@ export default class authController implements IauthController {
           .cookie("refreshToken", refreshToken, {
             httpOnly: true,
             sameSite: "strict",
+            path: "/",
           })
           .setHeader("Authorization", `Bearer ${accessToken}`)
           .json({
@@ -238,6 +239,7 @@ export default class authController implements IauthController {
                 .cookie("refreshToken", refreshToken, {
                   httpOnly: true,
                   sameSite: "strict",
+                  path: "/",
                 })
                 .setHeader("Authorization", `Bearer ${accessToken}`)
                 .json({
@@ -258,6 +260,24 @@ export default class authController implements IauthController {
       res.status(401).json({
         status: false,
         message: "Error on GoogleLoginVerify/authController 1",
+      });
+    }
+  };
+
+  public userLogout = async (req: Request, res: Response): Promise<void> => {
+    try {
+      res
+        .status(200)
+        .clearCookie("refreshToken", {
+          httpOnly: true,
+          sameSite: "strict",
+          path: "/",
+        })
+        .json({ status: "true", message: "Logged out successfully" });
+    } catch (error) {
+      res.status(401).json({
+        status: false,
+        message: "Error on userLogout/authController",
       });
     }
   };

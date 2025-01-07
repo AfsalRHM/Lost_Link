@@ -26,4 +26,7 @@ auth_route.post("/refreshToken", AuthController.refreshToken);
 // User Login Verify Route
 auth_route.post("/isUserLogin", isUserLogin);
 
+// User Logout
+auth_route.post("/logout", AuthController.userLogout);
+
 export default auth_route;
