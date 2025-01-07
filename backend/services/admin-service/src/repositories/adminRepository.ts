@@ -1,10 +1,9 @@
-import { DeleteResult, FilterQuery } from "mongoose";
 import BaseRepository from "./baseRepository";
 import IbaseRepository from "../interface/IbaseRepository";
 import adminModel from "../model/adminModel";
 import IadminModel from "../interface/IadminModel";
 
-export default class
+export default class AdminRepository
   extends BaseRepository<IadminModel>
   implements IbaseRepository<IadminModel>
 {

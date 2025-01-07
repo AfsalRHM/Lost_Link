@@ -1,19 +1,6 @@
 import { Types } from "mongoose";
 
-interface UserDataType {
-  email: string;
-  user_name: string;
-  full_name: string;
-  location: string;
-  password?: string;
-  status: string;
-  _id: string;
-  createdAt: string;
-  updatedAt: string;
-  __v: number;
-}
-
-import { IauthService } from "../interface/IauthService";
+import IauthService, { UserDataType } from "../interface/IauthService";
 import otpRepository from "../repositories/otpRepository";
 import passwordUtils from "../utils/bcryptPassword";
 import jwtFunctions from "../utils/jwt";
@@ -35,8 +22,6 @@ export default class authService implements IauthService {
 
   // Function to check the user already exists or not
   async checkMail(recieverEmail: string): Promise<boolean> {
-    // const userData = await this._userRepository.findUser(recieverEmail);
-    // Sending the userData to User Service
     const channel = getChannel();
     const currentQueue = process.env.AUTH_QUEUE || "Default queue";
     const replyQueue = process.env.USER_QUEUE || "Deafult Queue";
@@ -290,7 +275,7 @@ export default class authService implements IauthService {
             data: null,
             message: "Your Account has been Blocked",
           };
-        } else {  
+        } else {
           return { status: true, data: rest };
         }
       } else {

@@ -4,7 +4,7 @@ import IotpModel from "../interface/IotpModel";
 import otpModel from "../models/otpModel";
 import BaseRepository from "./baseRepository";
 
-export default class
+export default class OtpRepository
   extends BaseRepository<IotpModel>
   implements IbaseRepository<IotpModel>
 {

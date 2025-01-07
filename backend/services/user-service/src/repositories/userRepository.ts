@@ -4,7 +4,7 @@ import BaseRepository from "./baseRepository";
 import IuserModel from "../interface/IuserModel";
 import userModel from "../models/userModel";
 
-export default class
+export default class UserRepository
   extends BaseRepository<IuserModel>
   implements IbaseRepository<IuserModel>
 {

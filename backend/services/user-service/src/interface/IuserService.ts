@@ -1,4 +1,5 @@
 export default interface IuserService {
+  checkMail(recieverEmail: string): Promise<any>;
   insertuser(
     userFullName: string,
     userName: string,
@@ -7,5 +8,8 @@ export default interface IuserService {
     hashedPassword: string
   ): Promise<any>;
   checkMail(recieverEmail: string): Promise<boolean>;
-//   getProfile(req: Request, res: Response): Promise<void>;
+  loginUser(userMail: string): Promise<any>;
+  updatePassword(userMail: string, newPassword: string): Promise<any>;
+  getAllUsers(): Promise<any>;
+  changeUserStatus(props: { userId: string }): Promise<any>;
 }

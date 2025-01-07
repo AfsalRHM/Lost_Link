@@ -1,12 +1,5 @@
-import { Types } from "mongoose";
-
-// import otpRepository from "../repositories/otpRepository";
 import IuserService from "../interface/IuserService";
 import userRepository from "../repositories/userRepository";
-// import passwordUtils from "../utils/bcryptPassword";
-// import jwtFunctions from "../utils/jwt";
-
-// import sendMail from "../utils/sendMail";
 
 export default class userService implements IuserService {
   private _userRepository: userRepository;
@@ -121,7 +114,7 @@ export default class userService implements IuserService {
     }
   }
 
-  async changeUserStatus(props: {userId: string}): Promise<any> {
+  async changeUserStatus(props: { userId: string }): Promise<any> {
     try {
       const userData = await this._userRepository.changeStatus(props.userId);
       if (userData) {
@@ -141,6 +134,4 @@ export default class userService implements IuserService {
       console.log(error, "error on the getAllUsers/userService");
     }
   }
-  
-
 }

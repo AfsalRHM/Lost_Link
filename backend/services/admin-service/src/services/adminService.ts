@@ -8,17 +8,9 @@ import {
 } from "../utils/correlationId";
 
 import adminRepository from "../repositories/adminRepository";
-import IadminService from "../interface/IadminService";
+import IadminService, { adminProps } from "../interface/IadminService";
 
 import eventEmitter from "../utils/eventEmitter";
-
-interface adminProps {
-  email: string;
-  name: string;
-  role: string;
-  password: string;
-  status: string;
-}
 
 export default class adminService implements IadminService {
   private _adminRepository: adminRepository;

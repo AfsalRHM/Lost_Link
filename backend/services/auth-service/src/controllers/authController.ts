@@ -44,21 +44,21 @@ export default class authController implements IauthController {
   public sendResetPasswordMail = async (
     req: Request,
     res: Response
-  ): Promise<any> => {
+  ): Promise<void> => {
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
-      }
-
-      const response = await this._authService.sendMail(
-        req.body.recieverEmail,
-        req.body.recieverName
-      );
-      if (response.message == "No user found") {
-        res.status(200).json({ status: false, message: "User not Found" });
+        res.status(400).json({ errors: errors.array() });
       } else {
-        res.status(200).json({ status: true, message: "User is New" });
+        const response = await this._authService.sendMail(
+          req.body.recieverEmail,
+          req.body.recieverName
+        );
+        if (response.message == "No user found") {
+          res.status(200).json({ status: false, message: "User not Found" });
+        } else {
+          res.status(200).json({ status: true, message: "User is New" });
+        }
       }
     } catch (error) {
       console.log("error in authController", error);
@@ -69,21 +69,21 @@ export default class authController implements IauthController {
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
-      }
-
-      const response = await this._authService.resetPassword(
-        req.body.userEmail,
-        req.body.newPassword
-      );
-      if (response.message == "Password changed") {
-        res
-          .status(200)
-          .json({ status: true, message: "Password Changed Successfully" });
+        res.status(400).json({ errors: errors.array() });
       } else {
-        res
-          .status(200)
-          .json({ status: false, message: "Password didn't changed" });
+        const response = await this._authService.resetPassword(
+          req.body.userEmail,
+          req.body.newPassword
+        );
+        if (response.message == "Password changed") {
+          res
+            .status(200)
+            .json({ status: true, message: "Password Changed Successfully" });
+        } else {
+          res
+            .status(200)
+            .json({ status: false, message: "Password didn't changed" });
+        }
       }
     } catch (error) {
       console.log("error in authController", error);
