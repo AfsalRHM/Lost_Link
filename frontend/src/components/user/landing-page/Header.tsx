@@ -18,7 +18,7 @@ const Header = () => {
   };
 
   return (
-    <header className="bg-header shadow-lg border-y md:px-16 p-3">
+    <header className="bg-header shadow-lg md:px-16 p-3">
       <nav className="flex justify-between items-center w-[92%] mx-auto">
         <div className="flex items-center">
           <img className="w-11 rounded-2xl p-1" src="/Logo.png" alt="" />
@@ -50,7 +50,7 @@ const Header = () => {
         </div>
         <div className="flex items-center gap-6 ">
           <Link to="/signin">
-            <button className="bg-[#a6c1ee] text-black text-lg px-3 py-1 rounded-full hover:bg-[#87acec] border shadow-lg transition-all ease-in-out duration-300 font-medium">
+            <button className="bg-[#a6c1ee] text-black text-lg px-3 py-1 rounded-full hover:bg-[#87acec] border shadow-lg transition-all ease-in-out duration-300 font-medium md:mr-10">
               Sign In
             </button>
           </Link>
