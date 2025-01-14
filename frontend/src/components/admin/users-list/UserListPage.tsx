@@ -4,18 +4,35 @@ import { Bell, Menu, Search } from "lucide-react";
 import { Sidebar } from "../shared/Sidebar";
 import fetchAllUsers from "../../../api/admin-api/allUsersAPI";
 import { showErrorToast } from "../../../utils/toastUtils";
+import adminLogout from "../../../api/admin-api/adminLogoutAPI";
+import { useSelector } from "react-redux";
+import { RootState } from "../../../redux/store";
+import { useAdminJwtErrors } from "../../../utils/JwtErrors";
 
 const UserListPage = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-
+  const { adminAccessToken } = useSelector(
+    (state: RootState) => state.accessToken
+  );
   const [userList, setUserList] = useState([]);
+  const JwtErrors = useAdminJwtErrors();
 
   const getAllUsers = async () => {
-    const response = await fetchAllUsers();
-    if (response.data.status) {
-      setUserList(response.data.data);
-    } else {
-      showErrorToast("Didn't get the User List");
+    try {
+      const response = await fetchAllUsers();
+      if (response && response.data && response.data.status) {
+        setUserList(response.data.data);
+      } else if (response === false) {
+        JwtErrors({ reason: "session expiration" });
+        await adminLogout({
+          accessToken: adminAccessToken,
+        });
+      } else {
+        console.log("Unexpected response:", response);
+      }
+    } catch (error) {
+      console.error("Error in getAllUsers:", error);
+      showErrorToast("An unexpected error occurred while fetching users");
     }
   };
 

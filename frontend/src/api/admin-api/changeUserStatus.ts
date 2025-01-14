@@ -1,4 +1,4 @@
-import axios from "axios";
+import adminAxiosInstance from "../axios-api/adminAxiosInterceptorAPI";
 
 interface propsType {
   userId: string;
@@ -6,7 +6,7 @@ interface propsType {
 
 export default async function changeStatus(Props: propsType): Promise<any> {
   try {
-    const result = await axios
+    const result = await adminAxiosInstance
       .post(
         `${import.meta.env.VITE_API_ROUTE}/admin/changeUserStatus`,
         { Props },
@@ -20,5 +20,6 @@ export default async function changeStatus(Props: propsType): Promise<any> {
     return result;
   } catch (error) {
     console.log(error, "error on the changeUserStatusAPI");
+    return false;
   }
 }

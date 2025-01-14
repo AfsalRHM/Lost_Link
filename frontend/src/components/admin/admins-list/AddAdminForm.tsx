@@ -2,14 +2,22 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { showSuccessToast, showErrorToast } from "../../../utils/toastUtils";
 import insertAdmin from "../../../api/admin-api/insertAdminAPI";
+import { useAdminJwtErrors } from "../../../utils/JwtErrors";
+import adminLogout from "../../../api/admin-api/adminLogoutAPI";
+import { useSelector } from "react-redux";
+import { RootState } from "../../../redux/store";
 
 const AddAdminForm = () => {
   const navigate = useNavigate();
 
+  const { adminAccessToken } = useSelector(
+    (state: RootState) => state.accessToken
+  );
+
   const [formData, setFormData] = useState({
     email: "",
     name: "",
-    role: "Admin", // Default value
+    role: "subAdmin", // Default value
     password: "",
     status: "active", // Default value
   });
@@ -37,6 +45,8 @@ const AddAdminForm = () => {
     return Object.keys(newErrors).length === 0;
   };
 
+  const JwtErrors = useAdminJwtErrors();
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateForm()) return;
@@ -46,8 +56,13 @@ const AddAdminForm = () => {
       if (response.status) {
         showSuccessToast("Admin created successfully.");
         navigate("/admin/admins");
+      } else if (response === false) {
+        JwtErrors({ reason: "session expiration" });
+        await adminLogout({
+          accessToken: adminAccessToken,
+        });
       } else {
-        showErrorToast("Failed to create admin.");
+        console.log("Unexpected response:", response);
       }
     } catch (error) {
       console.error(error);

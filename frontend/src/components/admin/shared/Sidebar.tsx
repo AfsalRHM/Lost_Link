@@ -28,7 +28,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggle }) => {
     try {
       const result = await adminLogout({
         accessToken: adminAccessToken,
-        navigate,
       });
       if (result.data.status == "true") {
         dispatch(removeAdminDetails());

@@ -2,7 +2,11 @@ import { useState } from "react";
 import { Search, UserPlus } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import changeStatus from "../../../api/admin-api/changeUserStatus";
-import { showErrorToast, showSuccessToast } from "../../../utils/toastUtils";
+import { showSuccessToast } from "../../../utils/toastUtils";
+import { useAdminJwtErrors } from "../../../utils/JwtErrors";
+import adminLogout from "../../../api/admin-api/adminLogoutAPI";
+import { useSelector } from "react-redux";
+import { RootState } from "../../../redux/store";
 
 interface Admin {
   _id: string;
@@ -20,6 +24,9 @@ interface AdminListPartProps {
 }
 
 const AdminListPart = ({ allAdmins, allAdminsFunc }: AdminListPartProps) => {
+  const { adminAccessToken } = useSelector(
+    (state: RootState) => state.accessToken
+  );
   const navigate = useNavigate();
 
   const [searchTerm, setSearchTerm] = useState("");
@@ -43,13 +50,20 @@ const AdminListPart = ({ allAdmins, allAdminsFunc }: AdminListPartProps) => {
     }
   };
 
+  const JwtErrors = useAdminJwtErrors();
+
   const handleStatusChange = async (id: string) => {
     const response = await changeStatus({ userId: id });
     await allAdminsFunc();
     if (response.status) {
       showSuccessToast("User Status Changed");
+    } else if (response === false) {
+      JwtErrors({ reason: "session expiration" });
+      await adminLogout({
+        accessToken: adminAccessToken,
+      });
     } else {
-      showErrorToast("User Status not Changed");
+      console.log("Unexpected response:", response);
     }
   };
 

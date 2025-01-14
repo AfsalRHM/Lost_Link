@@ -1,4 +1,11 @@
 export interface logoutProps {
   accessToken: string;
-  navigate: any;
+}
+
+export interface adminProps {
+  email: string;
+  name: string;
+  role: string;
+  password: string;
+  status: string;
 }

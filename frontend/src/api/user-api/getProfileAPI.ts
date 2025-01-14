@@ -11,8 +11,7 @@ interface Props {
 export default async function getProfile(props: Props): Promise<any> {
   try {
     const response = await axiosInstance.get(
-      import.meta.env.VITE_GET_PROFILE ||
-        `${import.meta.env.VITE_API_ROUTE}/user/getProfile`,
+      `${import.meta.env.VITE_API_ROUTE}/user/getProfile`,
       {
         headers: {
           Authorization: `Bearer ${props.accessToken}`,

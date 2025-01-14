@@ -1,13 +1,13 @@
 import sendToService from "../rabbitmq/producer";
 
-import {
-  createCorrelationId,
-} from "../utils/correlationId";
+import { createCorrelationId } from "../utils/correlationId";
 
 import adminRepository from "../repositories/adminRepository";
 import IadminService, { adminProps } from "../interface/IadminService";
 
 import eventEmitter from "../utils/eventEmitter";
+import jwtFunctions from "../utils/jwt";
+import { Types } from "mongoose";
 
 export default class adminService implements IadminService {
   private _adminRepository: adminRepository;
@@ -107,7 +107,6 @@ export default class adminService implements IadminService {
 
   async changeUserStatus(props: { userId: string }): Promise<any> {
     try {
-
       const correlationIdString = "toChangeTheUserStatus";
       const correlationId = createCorrelationId(correlationIdString);
       const sendingTo = process.env.USER_QUEUE;
@@ -117,7 +116,13 @@ export default class adminService implements IadminService {
         throw new Error("sendingTo is emplty...");
       }
 
-      sendToService({ sendingTo, correlationId, source, correlationIdString, props });
+      sendToService({
+        sendingTo,
+        correlationId,
+        source,
+        correlationIdString,
+        props,
+      });
 
       const responseData: any = await new Promise((resolve, reject) => {
         const timeout = setTimeout(() => {
@@ -165,6 +170,28 @@ export default class adminService implements IadminService {
         message: "Error in insertAdmin/adminService",
         error: error,
       };
+    }
+  }
+
+  // To create a new access token with the existing refresh token
+  async refreshToken(
+    token: string
+  ): Promise<{ status: boolean; message: string } | undefined> {
+    try {
+      if (!token) {
+        return { status: false, message: "No Token Provided" };
+      }
+      const decoded = jwtFunctions.verifyRefreshToken(token);
+      if (!decoded) {
+        return { status: false, message: "Token expired" };
+      }
+      const newUserId = new Types.ObjectId(decoded.userId).toString();
+      const newAccessToken = jwtFunctions.generateAccessToken({
+        userId: newUserId,
+      });
+      return { status: true, message: newAccessToken };
+    } catch (error) {
+      console.log(error);
     }
   }
 }

@@ -1,16 +1,9 @@
-import axios from "axios";
-
-interface adminProps {
-  email: string;
-  name: string;
-  role: string;
-  password: string;
-  status: string;
-}
+import { adminProps } from "../../interface/IapiProps";
+import adminAxiosInstance from "../axios-api/adminAxiosInterceptorAPI";
 
 export default async function insertAdmin(Props: adminProps): Promise<any> {
   try {
-    const result = await axios
+    const result = await adminAxiosInstance
       .post(
         `${import.meta.env.VITE_API_ROUTE}/admin/addAdmin`,
         { Props },
@@ -25,5 +18,6 @@ export default async function insertAdmin(Props: adminProps): Promise<any> {
     return result;
   } catch (error) {
     console.log(error, "error on the insertAdminAPI");
+    return false;
   }
 }

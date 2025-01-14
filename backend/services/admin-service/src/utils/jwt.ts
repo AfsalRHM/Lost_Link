@@ -8,7 +8,7 @@ const refreshTokenSecret =
   process.env.JWT_REFRESH_SECRETKEY || "ACCESS_SECRET_KEY";
 
 const accessExpiration = "5s";
-const refreshExpiration = "1m";
+const refreshExpiration = "10s";
 
 export default class jwtFunctions {
   static generateAccessToken(admin: jwtPayload): string {

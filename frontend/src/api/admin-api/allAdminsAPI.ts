@@ -1,8 +1,8 @@
-import axios from "axios";
+import adminAxiosInstance from "../axios-api/adminAxiosInterceptorAPI";
 
 export default async function fetchAllAdmins(): Promise<any> {
   try {
-    const result = await axios
+    const result = await adminAxiosInstance
       .post(
         `${import.meta.env.VITE_API_ROUTE}/admin/allAdmins`,
         {},
@@ -16,5 +16,6 @@ export default async function fetchAllAdmins(): Promise<any> {
     return result;
   } catch (error) {
     console.log(error, "error on the allUsersAPI");
+    return false;
   }
 }

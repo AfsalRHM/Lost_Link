@@ -15,7 +15,6 @@ export default async function userLogout(props: logoutProps): Promise<any> {
     return response;
   } catch (error) {
     console.error("Error while user logs out:", error);
-    props.navigate("/home");
     return { status: false };
   }
 }

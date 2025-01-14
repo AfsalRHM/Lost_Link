@@ -106,4 +106,29 @@ export default class authController implements IadminController {
         .json({ message: "error on the adminLogout/adminController" });
     }
   };
+
+  public refreshToken = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const refreshToken = req.cookies.adminRefreshToken;
+      const result = await this._adminService.refreshToken(refreshToken);
+      if (result?.status == true) {
+        res
+          .setHeader("Authorization", `Bearer ${result.message}`)
+          .status(200)
+          .json({ status: true, message: "New Access Token Created" });
+      } else if (result?.message === "Token expired") {
+        res
+          .status(401)
+          .json({ status: false, message: "Refresh token expired" });
+      } else {
+        res
+          .status(401)
+          .json({ status: false, message: "Failed to refresh token" });
+      }
+    } catch (error) {
+      res
+        .status(401)
+        .json({ status: false, message: "New Access Token not Generated" });
+    }
+  };
 }

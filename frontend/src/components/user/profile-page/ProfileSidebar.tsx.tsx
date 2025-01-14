@@ -16,7 +16,6 @@ const ProfileSidebar = () => {
     try {
       const result = await userLogout({
         accessToken,
-        navigate,
       });
       if (result.data.status == "true") {
         dispatch(removeUserDetails());

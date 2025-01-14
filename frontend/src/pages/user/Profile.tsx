@@ -8,9 +8,13 @@ import getProfile from "../../api/user-api/getProfileAPI";
 import { useNavigate } from "react-router-dom";
 import { assignAccessToken } from "../../redux/slice/accessTokenSlice";
 import { removeUserDetails } from "../../redux/slice/userDetailsSlice";
+import userLogout from "../../api/auth-api/userLogoutAPI";
+import { useUserJwtErrors } from "../../utils/JwtErrors";
 
 const Profile = () => {
   const { accessToken } = useSelector((state: RootState) => state.accessToken);
+
+  const jwtErrors = useUserJwtErrors();
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -27,7 +31,10 @@ const Profile = () => {
       if (result.status) {
         navigate("/profile");
       } else {
-        console.log("Nothing is getting");
+        jwtErrors({ reason: "session expiration" });
+        await userLogout({
+          accessToken,
+        });
       }
     }
     handleProfile();
