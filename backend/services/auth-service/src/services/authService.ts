@@ -6,12 +6,13 @@ import passwordUtils from "../utils/bcryptPassword";
 import jwtFunctions from "../utils/jwt";
 
 import sendMail from "../utils/sendMail";
-import { getChannel, getConnection } from "../config/communicationConfig";
+import { getChannel } from "../config/communicationConfig";
 import {
   clearCorrelationId,
   createCorrelationId,
 } from "../utils/correlationId";
 import eventEmitter from "../utils/eventEmitter";
+import sendToService from "../rabbitmq/producer";
 
 export default class authService implements IauthService {
   private _otpRepository: otpRepository;
@@ -22,39 +23,39 @@ export default class authService implements IauthService {
 
   // Function to check the user already exists or not
   async checkMail(recieverEmail: string): Promise<boolean> {
-    const channel = getChannel();
-    const currentQueue = process.env.AUTH_QUEUE || "Default queue";
-    const replyQueue = process.env.USER_QUEUE || "Deafult Queue";
-    const correlationId = createCorrelationId(recieverEmail);
+    try {
+      const replyQueue = process.env.USER_QUEUE;
+      const correlationId = createCorrelationId(recieverEmail);
 
-    channel.sendToQueue(
-      replyQueue,
-      Buffer.from(
-        JSON.stringify({
-          userMail: recieverEmail,
-        })
-      ),
-      {
-        replyTo: currentQueue,
-        correlationId: correlationId,
-        headers: { source: "user mail duplication request" },
+      if (!replyQueue) {
+        throw new Error("replyQueue is empty...!");
       }
-    );
 
-    const userData: any = await new Promise((resolve, reject) => {
-      const timeout = setTimeout(() => {
-        reject(new Error("Response timeout"));
-      }, 10000);
-
-      eventEmitter.once(correlationId, (data) => {
-        clearTimeout(timeout);
-        resolve(data);
+      sendToService({
+        sendingTo: replyQueue,
+        correlationId: correlationId,
+        source: "user mail duplication request",
+        userMail: recieverEmail,
       });
-    });
 
-    if (userData.data) {
-      return true;
-    } else {
+      const userData: any = await new Promise((resolve, reject) => {
+        const timeout = setTimeout(() => {
+          reject(new Error("Response timeout"));
+        }, 10000);
+
+        eventEmitter.once(correlationId, (data) => {
+          clearTimeout(timeout);
+          resolve(data);
+        });
+      });
+
+      if (userData.data) {
+        return true;
+      } else {
+        return false;
+      }
+    } catch (error) {
+      console.log(error, "error on the checkMail/authService");
       return false;
     }
   }
@@ -62,21 +63,19 @@ export default class authService implements IauthService {
   async resetPassword(userMail: string, newPassword: string): Promise<any> {
     const hashedPassword = await passwordUtils.hashPassword(newPassword);
 
-    const channel = getChannel();
-    const currentQueue = process.env.AUTH_QUEUE || "Default queue";
-    const replyQueue = process.env.USER_QUEUE || "Deafult Queue";
+    const replyQueue = process.env.USER_QUEUE;
     const correlationId = createCorrelationId(userMail);
 
-    const message = JSON.stringify({
-      userMail: userMail,
-      newPassword: hashedPassword,
-    });
+    if (!replyQueue) {
+      throw new Error("replyQueue is empty...!");
+    }
 
-    // Sending the userData to User Service
-    channel.sendToQueue(replyQueue, Buffer.from(message), {
-      replyTo: currentQueue,
+    sendToService({
+      sendingTo: replyQueue,
       correlationId: correlationId,
-      headers: { source: "new password to save to user" },
+      source: "new password to save to user",
+      userMail,
+      newPassword: hashedPassword,
     });
 
     const userData: any = await new Promise((resolve, reject) => {
@@ -101,25 +100,19 @@ export default class authService implements IauthService {
   async sendMail(recieverEmail: string, recieverName: string): Promise<any> {
     let otp: string;
     if (recieverName == "Reset Password") {
-      const channel = getChannel();
-      const currentQueue = process.env.AUTH_QUEUE || "Default queue";
-      const replyQueue = process.env.USER_QUEUE || "Deafult Queue";
+      const replyQueue = process.env.USER_QUEUE;
       const correlationId = createCorrelationId(recieverEmail);
 
-      // Sending the userData to User Service
-      channel.sendToQueue(
-        replyQueue,
-        Buffer.from(
-          JSON.stringify({
-            userMail: recieverEmail,
-          })
-        ),
-        {
-          replyTo: currentQueue,
-          correlationId: correlationId,
-          headers: { source: "user name for mail request" },
-        }
-      );
+      if (!replyQueue) {
+        throw new Error("replyQueue is empty...!");
+      }
+
+      sendToService({
+        sendingTo: replyQueue,
+        correlationId: correlationId,
+        source: "user name for mail request",
+        userMail: recieverEmail,
+      });
 
       const userData: any = await new Promise((resolve, reject) => {
         const timeout = setTimeout(() => {
@@ -185,25 +178,19 @@ export default class authService implements IauthService {
       password: hashedPassword,
     };
 
-    const channel = getChannel();
-    const currentQueue = process.env.AUTH_QUEUE || "Default queue";
-    const replyQueue = process.env.USER_QUEUE || "Deafult Queue";
+    const replyQueue = process.env.USER_QUEUE;
     const correlationId = createCorrelationId(data.email);
 
-    // Sending the userData to User Service
-    channel.sendToQueue(
-      replyQueue,
-      Buffer.from(
-        JSON.stringify({
-          userData: data,
-        })
-      ),
-      {
-        replyTo: currentQueue,
-        correlationId: correlationId,
-        headers: { source: "user data insert request" },
-      }
-    );
+    if (!replyQueue) {
+      throw new Error("replyQueue is empty...!");
+    }
+
+    sendToService({
+      sendingTo: replyQueue,
+      correlationId: correlationId,
+      source: "user data insert request",
+      userData: data,
+    });
 
     const userData: UserDataType = await new Promise((resolve, reject) => {
       const timeout = setTimeout(() => {
@@ -226,25 +213,19 @@ export default class authService implements IauthService {
 
   // Function to  verify the User Entries for login
   async loginVerify(userEmail: string, userPassword: string): Promise<any> {
-    const channel = getChannel();
-    const currentQueue = process.env.AUTH_QUEUE || "Default queue";
-    const replyQueue = process.env.USER_QUEUE || "Deafult Queue";
+    const replyQueue = process.env.USER_QUEUE;
     const correlationId = createCorrelationId(userEmail);
 
-    // Sending the userData to User Service for loginVerify
-    channel.sendToQueue(
-      replyQueue,
-      Buffer.from(
-        JSON.stringify({
-          userMail: userEmail,
-        })
-      ),
-      {
-        replyTo: currentQueue,
-        correlationId: correlationId,
-        headers: { source: "user login request" },
-      }
-    );
+    if (!replyQueue) {
+      throw new Error("replyQueue is empty...!");
+    }
+
+    sendToService({
+      sendingTo: replyQueue,
+      correlationId: correlationId,
+      source: "user login request",
+      userMail: userEmail,
+    });
 
     const userData: UserDataType | null = await new Promise(
       (resolve, reject) => {
@@ -320,25 +301,19 @@ export default class authService implements IauthService {
     email: string
   ): Promise<{ status: boolean; data: UserDataType | null; message: string }> {
     if (email) {
-      const channel = getChannel();
-      const currentQueue = process.env.AUTH_QUEUE || "Default queue";
-      const replyQueue = process.env.USER_QUEUE || "Deafult Queue";
+      const replyQueue = process.env.USER_QUEUE;
       const correlationId = createCorrelationId(email);
 
-      // Sending the userData to User Service for loginVerify
-      channel.sendToQueue(
-        replyQueue,
-        Buffer.from(
-          JSON.stringify({
-            userMail: email,
-          })
-        ),
-        {
-          replyTo: currentQueue,
-          correlationId: correlationId,
-          headers: { source: "user login request" },
-        }
-      );
+      if (!replyQueue) {
+        throw new Error("replyQueue is empty...!");
+      }
+
+      sendToService({
+        sendingTo: replyQueue,
+        correlationId: correlationId,
+        source: "user login request",
+        userMail: email,
+      });
 
       const userData: UserDataType | null = await new Promise(
         (resolve, reject) => {

@@ -31,3 +31,11 @@ export interface UserDataType {
   updatedAt: string;
   __v: number;
 }
+
+export interface UserFormDataType {
+  email: string;
+  user_name: string;
+  full_name: string;
+  location: string;
+  password: string;
+}

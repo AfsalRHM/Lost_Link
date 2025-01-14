@@ -15,29 +15,22 @@ export async function manageQueue() {
       console.log("Consumer Queue triggered");
 
       if (msg) {
-        console.log(msg.content.toString())
         const messageContent = JSON.parse(msg.content.toString());
 
-        if (
-          messageContent.userData &&
-          msg?.properties?.headers?.source == "user data insert request"
-        ) {
+        if (msg?.properties?.headers?.source == "user data insert request") {
           const response = await _userService.insertuser(
-            messageContent.userData.full_name,
-            messageContent.userData.user_name,
-            messageContent.userData.location,
-            messageContent.userData.email,
-            messageContent.userData.password
+            messageContent.full_name,
+            messageContent.user_name,
+            messageContent.location,
+            messageContent.email,
+            messageContent.password
           );
 
           channel.sendToQueue("AUTH", Buffer.from(JSON.stringify(response)), {
             correlationId: msg.properties.correlationId,
             headers: { source: "user register complete info" },
           });
-        } else if (
-          messageContent.userMail &&
-          msg?.properties?.headers?.source == "user login request"
-        ) {
+        } else if (msg?.properties?.headers?.source == "user login request") {
           const response = await _userService.loginUser(
             messageContent.userMail
           );
@@ -80,19 +73,31 @@ export async function manageQueue() {
             correlationId: msg.properties.correlationId,
             headers: { source: "password changed" },
           });
-        } else if ( msg?.properties?.headers?.source == "get All Users") {
+        } else if (msg?.properties?.headers?.source == "get All Users") {
           const response = await _userService.getAllUsers();
 
           channel.sendToQueue("ADMIN", Buffer.from(JSON.stringify(response)), {
             correlationId: msg.properties.correlationId,
-            headers: { source: "all user resoponse", correlationIdString: msg?.properties?.headers?.correlationIdString },
+            headers: {
+              source: "all user resoponse",
+              correlationIdString:
+                msg?.properties?.headers?.correlationIdString,
+            },
           });
-        } else if ( msg?.properties?.headers?.source == "Change the User Status") {
-          const response = await _userService.changeUserStatus(messageContent);
+        } else if (
+          msg?.properties?.headers?.source == "Change the User Status"
+        ) {
+          const response = await _userService.changeUserStatus(
+            messageContent.props
+          );
 
           channel.sendToQueue("ADMIN", Buffer.from(JSON.stringify(response)), {
             correlationId: msg.properties.correlationId,
-            headers: { source: "status changed response", correlationIdString: msg?.properties?.headers?.correlationIdString },
+            headers: {
+              source: "status changed response",
+              correlationIdString:
+                msg?.properties?.headers?.correlationIdString,
+            },
           });
         } else {
           console.log("No userData found in message.");
@@ -100,7 +105,7 @@ export async function manageQueue() {
 
         channel.ack(msg);
       } else {
-        console.log('No correlation id provided')
+        console.log("No correlation id provided");
       }
     });
   } catch (error) {

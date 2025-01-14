@@ -1,5 +1,8 @@
 import configCommunication, { getChannel } from "../config/communicationConfig";
-import adminService, { userDataStatusChange, userList } from "../services/adminService";
+import adminService, {
+  userDataStatusChange,
+  userList,
+} from "../services/adminService";
 import { getCorrelationId } from "../utils/correlationId";
 
 export async function manageQueue() {
@@ -18,8 +21,11 @@ export async function manageQueue() {
       if (msg) {
         const messageContent = JSON.parse(msg.content.toString());
         let correlationId;
+
         if (messageContent) {
-          correlationId = getCorrelationId(msg?.properties?.headers?.correlationIdString);
+          correlationId = getCorrelationId(
+            msg?.properties?.headers?.correlationIdString
+          );
         } else {
           console.log("Message content not available");
         }
@@ -31,7 +37,9 @@ export async function manageQueue() {
             } else {
               console.log("Error on messageContent on admin managing Queue 1");
             }
-          } else if (msg?.properties?.headers?.source == "status changed response") {
+          } else if (
+            msg?.properties?.headers?.source == "status changed response"
+          ) {
             if (messageContent) {
               userDataStatusChange(correlationId, messageContent);
             } else {

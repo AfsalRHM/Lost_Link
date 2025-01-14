@@ -1,9 +1,6 @@
-import { Types } from "mongoose";
-
-import { getChannel, getConnection } from "../config/communicationConfig";
+import sendToService from "../rabbitmq/producer";
 
 import {
-  clearCorrelationId,
   createCorrelationId,
 } from "../utils/correlationId";
 
@@ -44,20 +41,16 @@ export default class adminService implements IadminService {
 
   async getAllUsers(): Promise<any> {
     try {
-      const channel = getChannel();
-      const currentQueue = process.env.AUTH_QUEUE || "ADMIN";
-      const replyQueue = process.env.USER_QUEUE || "USER";
-      const correlationId = createCorrelationId("toGetAllUsers");
+      const correlationIdString = "toGetAllUsers";
+      const correlationId = createCorrelationId(correlationIdString);
+      const sendingTo = process.env.USER_QUEUE;
+      const source = "get All Users";
 
-      // Sending the userData to User Service for loginVerify
-      channel.sendToQueue("USER", Buffer.from(JSON.stringify({})), {
-        replyTo: currentQueue,
-        correlationId: correlationId,
-        headers: {
-          source: "get All Users",
-          correlationIdString: "toGetAllUsers",
-        },
-      });
+      if (!sendingTo) {
+        throw new Error("sendingTo is emplty...");
+      }
+
+      sendToService({ sendingTo, correlationId, source, correlationIdString });
 
       const responseData: any = await new Promise((resolve, reject) => {
         const timeout = setTimeout(() => {
@@ -114,26 +107,17 @@ export default class adminService implements IadminService {
 
   async changeUserStatus(props: { userId: string }): Promise<any> {
     try {
-      const channel = getChannel();
-      const currentQueue = process.env.AUTH_QUEUE || "ADMIN";
-      const replyQueue = process.env.USER_QUEUE || "USER";
-      const correlationId = createCorrelationId("toChangeTheUserStatus");
 
-      const userId = props.userId;
+      const correlationIdString = "toChangeTheUserStatus";
+      const correlationId = createCorrelationId(correlationIdString);
+      const sendingTo = process.env.USER_QUEUE;
+      const source = "Change the User Status";
 
-      // Sending the userData to User Service for loginVerify
-      channel.sendToQueue(
-        "USER",
-        Buffer.from(JSON.stringify({ userId: userId })),
-        {
-          replyTo: currentQueue,
-          correlationId: correlationId,
-          headers: {
-            source: "Change the User Status",
-            correlationIdString: "toChangeTheUserStatus",
-          },
-        }
-      );
+      if (!sendingTo) {
+        throw new Error("sendingTo is emplty...");
+      }
+
+      sendToService({ sendingTo, correlationId, source, correlationIdString, props });
 
       const responseData: any = await new Promise((resolve, reject) => {
         const timeout = setTimeout(() => {
