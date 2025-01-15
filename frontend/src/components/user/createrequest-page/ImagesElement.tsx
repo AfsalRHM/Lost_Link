@@ -1,12 +1,15 @@
 import { useState } from "react";
+import { ImagesElementProps } from "../../../interface/IrequestProps";
+import ValidationError from "../shared/ValidationError";
 
-const ImagesElement = () => {
+const ImagesElement = ({ onChange, errorData }: ImagesElementProps) => {
   const [images, setImages] = useState<File[]>([]);
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
       const uploadedImages = Array.from(event.target.files);
       setImages((prev) => [...prev, ...uploadedImages]);
+      onChange(uploadedImages);
     }
   };
 
@@ -16,6 +19,11 @@ const ImagesElement = () => {
 
   return (
     <div className="w-8/12">
+      <ValidationError
+        display={errorData.display}
+        name="userLoginValidation"
+        content={errorData.content}
+      />
       <p className="text-violet-700 font-semibold mb-2">Upload Images</p>
       <div className="border border-dashed border-gray-400 rounded-md p-4 bg-gray-100">
         <label className="flex flex-col items-center cursor-pointer">

@@ -6,9 +6,16 @@ type propsType = {
 
 const ValidationError = (props: propsType) => {
   return (
-    <p id={props.name} className={`${props.display == true ? "text-red-700 text-xs font-medium" : "hidden"}`}>
-      {props.content}*
-    </p>
+    <div className="w-8/12">
+      <p
+        id={props.name}
+        className={`${
+          props.display == true ? "text-red-700 text-xs font-medium " : "hidden"
+        }`}
+      >
+        {props.content}*
+      </p>
+    </div>
   );
 };
 

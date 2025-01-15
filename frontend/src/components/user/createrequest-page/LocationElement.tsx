@@ -1,16 +1,26 @@
 import { useState } from "react";
 import InputElement from "./InputElement";
+import { LocationElementProps } from "../../../interface/IrequestProps";
 
-const LocationElement = () => {
+const LocationElement = ({
+  setData,
+  missingPlaceErrorData,
+  modeOfTravelErrorData,
+  missingRouteErrorData
+}: LocationElementProps) => {
   const [locationFormat, setLocationFormat] = useState<
     "route" | "specific" | null
   >(null);
+
+  const handleChange = (key: string, value: any) => {
+    setData((prev) => ({ ...prev, [key]: value }));
+  };
 
   return (
     <>
       <div className="w-8/12">
         <p className="text-violet-700 font-semibold mb-2">
-          Where did your item go missing?
+          How did your item gone missing?
         </p>
         <div className="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-4 items-center">
           <label className="flex items-center space-x-2">
@@ -37,11 +47,26 @@ const LocationElement = () => {
       </div>
       {locationFormat == "route" ? (
         <>
-          <InputElement item="modeOfTravel" placeHolder="Mode of Travel" />
-          <InputElement item="Routes" placeHolder="Routes" />
+          <InputElement
+            onChange={(e) => handleChange("travelMode", e.target.value)}
+            item="modeOfTravel"
+            placeHolder="Mode of Travel"
+            errorData={modeOfTravelErrorData}
+          />
+          <InputElement
+            onChange={(e) => handleChange("travelRoutes", e.target.value)}
+            item="Routes"
+            placeHolder="Routes"
+            errorData={missingRouteErrorData}
+          />
         </>
       ) : locationFormat == "specific" ? (
-        <InputElement item="place" placeHolder="Place" />
+        <InputElement
+          onChange={(e) => handleChange("missingPlace", e.target.value)}
+          item="place"
+          placeHolder="Place"
+          errorData={missingPlaceErrorData}
+        />
       ) : null}
     </>
   );
