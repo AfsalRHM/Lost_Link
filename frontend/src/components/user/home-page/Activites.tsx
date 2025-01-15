@@ -1,14 +1,11 @@
 const Activities = () => {
   return (
     <div className="w-full bg-activity p-8">
-      {/* Heading */}
       <div className="flex items-center justify-center font-bold text-3xl md:text-5xl underline text-activityHeading mb-8">
         What You Can Do
       </div>
 
-      {/* Activities Container */}
       <div className="flex flex-col md:flex-row md:justify-between gap-8 md:gap-0 px-5 md:px-10">
-        {/* Activity 1 */}
         <div className="w-full md:w-1/4 text-center group cursor-pointer transition-transform transform hover:scale-105">
           <div className="flex flex-col items-center gap-2 mb-4 relative">
             <img
@@ -29,7 +26,6 @@ const Activities = () => {
           </div>
         </div>
 
-        {/* Activity 2 */}
         <div className="w-full md:w-1/4 text-center group cursor-pointer transition-transform transform hover:scale-105">
           <div className="flex flex-col items-center gap-2 mb-4 relative">
             <img
@@ -49,7 +45,6 @@ const Activities = () => {
           </div>
         </div>
 
-        {/* Activity 3 */}
         <div className="w-full md:w-1/4 text-center group cursor-pointer transition-transform transform hover:scale-105">
           <div className="flex flex-col items-center gap-2 mb-4 relative">
             <img

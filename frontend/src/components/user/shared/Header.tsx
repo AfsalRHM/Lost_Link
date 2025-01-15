@@ -38,7 +38,7 @@ const Header = () => {
   // });
 
   return (
-    <header className="bg-header shadow-2xl border-y md:px-16 p-3 z-10">
+    <header className="bg-header shadow-2xl md:px-16 p-3 z-10">
       <nav className="flex justify-between items-center w-[92%] mx-auto">
         <div className="flex items-center">
           <img className="w-11 rounded-2xl p-1" src="/Logo.png" alt="" />

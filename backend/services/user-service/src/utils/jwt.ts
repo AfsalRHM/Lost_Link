@@ -16,8 +16,8 @@ if (process.env.JWT_REFRESH_SECRETKEY) {
   console.log("No process.env.JWT_REFRESH_SECRETKEY Available");
 }
 
-const accessExpiration = "5s";
-const refreshExpiration = "1d";
+const accessExpiration = "1d";
+const refreshExpiration = "1w";
 
 export default class jwtFunctions {
   static generateAccessToken(user: jwtPayload): string {
