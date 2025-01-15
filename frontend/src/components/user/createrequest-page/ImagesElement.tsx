@@ -5,11 +5,45 @@ import ValidationError from "../shared/ValidationError";
 const ImagesElement = ({ onChange, errorData }: ImagesElementProps) => {
   const [images, setImages] = useState<File[]>([]);
 
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const CLOUDINARY_UPLOAD_PRESET = "product_preset";
+  const CLOUDINARY_URL =
+    "https://api.cloudinary.com/v1_1/dnxt7foko/image/upload";
+
+  const handleImageUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     if (event.target.files) {
       const uploadedImages = Array.from(event.target.files);
-      setImages((prev) => [...prev, ...uploadedImages]);
-      onChange(uploadedImages);
+
+      // Prepare the uploaded images for Cloudinary upload
+      const uploadedImageUrls: any[] = [];
+
+      for (const image of uploadedImages) {
+        const formData = new FormData();
+        formData.append("file", image);
+        formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+
+        try {
+          const response = await fetch(CLOUDINARY_URL, {
+            method: "POST",
+            body: formData,
+          });
+
+          const data = await response.json();
+
+          if (data.secure_url) {
+            uploadedImageUrls.push(data.secure_url);
+          }
+        } catch (error) {
+          console.error("Error uploading image to Cloudinary:", error);
+        }
+      }
+
+      console.log(uploadedImageUrls);
+
+      setImages((prev) => [...prev, ...uploadedImageUrls]);
+
+      onChange(uploadedImageUrls);
     }
   };
 
@@ -44,7 +78,9 @@ const ImagesElement = ({ onChange, errorData }: ImagesElementProps) => {
           {images.map((image, index) => (
             <div key={index} className="relative">
               <img
-                src={URL.createObjectURL(image)}
+                src={
+                  typeof image === "string" ? image : URL.createObjectURL(image)
+                }
                 alt={`Uploaded preview ${index + 1}`}
                 className="w-full h-24 object-cover rounded-md"
               />

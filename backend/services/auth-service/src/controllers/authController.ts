@@ -188,6 +188,7 @@ export default class authController implements IauthController {
   public refreshToken = async (req: Request, res: Response): Promise<void> => {
     try {
       const refreshToken = req.cookies.refreshToken;
+      console.log(refreshToken, "console from the refreshToken/authController")
       const result = await this._authService.refreshToken(refreshToken);
       if (result?.status == true) {
         res

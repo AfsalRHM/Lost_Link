@@ -1,4 +1,4 @@
 export default interface IrequestService {
-    checkMail(recieverEmail: string): Promise<any>;
+    insertRequest({ accessToken, formData }: { accessToken: string; formData: FormData }): Promise<any>;
   }
   

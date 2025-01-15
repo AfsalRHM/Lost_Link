@@ -7,6 +7,7 @@ import TopBarIcons from "./TopBarIcons";
 const Header = () => {
   useEffect(() => {
     defineCustomElements(window);
+    // handleProfile();
   }, []);
 
   const [menuOpen, setMenuOpen] = useState(false);
@@ -20,22 +21,20 @@ const Header = () => {
     navLinks?.classList.toggle("top-[9%]");
   };
 
-  // useEffect(() => {
-  //   async function handleProfile() {
-  //     const result = await getProfile({
-  //       accessToken,
-  //       navigate,
-  //       setAccessToken: assignAccessToken,
-  //       dispatch,
-  //       removeUserDetails: removeUserDetails,
-  //     });
-  //     if (result.status) {
-  //       navigate("/profile");
-  //     } else {
-  //       console.log("Nothing is getting");
-  //     }
-  //   }
-  // });
+    // async function handleProfile() {
+    //   const result = await getProfile({
+    //     accessToken,
+    //     navigate,
+    //     setAccessToken: assignAccessToken,
+    //     dispatch,
+    //     removeUserDetails: removeUserDetails,
+    //   });
+    //   if (result.status) {
+    //     navigate("/profile");
+    //   } else {
+    //     console.log("Nothing is getting");
+    //   }
+    // }
 
   return (
     <header className="bg-header shadow-2xl md:px-16 p-3 z-10">

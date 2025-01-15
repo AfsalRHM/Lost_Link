@@ -6,8 +6,20 @@ import InputElement from "./InputElement";
 import LocationElement from "./LocationElement";
 import validateCreateRequestEntries from "../../../validations/createRequestValidation";
 import { Errors } from "../../../interface/IrequestProps";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../../../redux/store";
+import createRequest from "../../../api/user-api/createRequestAPI";
+import { showErrorToast, showSuccessToast } from "../../../utils/toastUtils";
+import { useNavigate } from "react-router-dom";
+import { removeUserDetails } from "../../../redux/slice/userDetailsSlice";
+import { removeAccessToken } from "../../../redux/slice/accessTokenSlice";
 
 const CreateRequestForm = () => {
+  const { accessToken } = useSelector((state: RootState) => state.accessToken);
+
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+
   const [formData, setFormData] = useState({
     productName: "",
     requestReward: 0,
@@ -38,7 +50,7 @@ const CreateRequestForm = () => {
     setFormData((prev) => ({ ...prev, [key]: value }));
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     setErrorData({
       productNameValidationErrorData: { display: false, content: "" },
       requestRewardValidationErrorData: { display: false, content: "" },
@@ -85,7 +97,20 @@ const CreateRequestForm = () => {
       }
     }
     // If there has no errors what to do
-    
+    const response = await createRequest({ formData, accessToken });
+    if (response == false) {
+      dispatch(removeUserDetails());
+      dispatch(removeAccessToken());
+      navigate("/login");
+      showErrorToast("Session Expired! Please Login...");
+    } else {
+      if (response.data.status) {
+        showSuccessToast("Request Created SuccessFully.");
+        navigate("/home");
+      } else {
+        showErrorToast("Request Failed to Create...!");
+      }
+    }
   };
 
   return (

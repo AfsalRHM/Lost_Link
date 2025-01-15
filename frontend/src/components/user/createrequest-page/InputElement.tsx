@@ -2,7 +2,6 @@ import { InputElementProps } from "../../../interface/IrequestProps";
 import ValidationError from "../shared/ValidationError";
 
 const InputElement = (props: InputElementProps) => {
-  console.log(props.errorData);
   return (
     <div className="w-8/12">
       <ValidationError

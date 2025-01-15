@@ -5,9 +5,8 @@ import IrequestModel from "../interface/IrequestModel";
 const requestSchema = new Schema(
   {
     user_id: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: String,
       required: true,
-      ref: "User",
     },
     product_name: {
       type: String,
@@ -35,8 +34,11 @@ const requestSchema = new Schema(
       required: true,
     },
     expiration_date: {
-      type: Date,
+      type: String,
       required: true,
+    },
+    product_images: {
+      type: Array
     },
     additional_information: {
       type: String,

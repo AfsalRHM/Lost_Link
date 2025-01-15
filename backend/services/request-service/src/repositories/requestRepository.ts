@@ -12,10 +12,10 @@ export default class RequestRepository
     super(requestModel);
   }
 
-  async insertUser(
-    userData: Partial<IrequestModel>
+  async insertRequest(
+    requestData: Partial<IrequestModel>
   ): Promise<IrequestModel | null> {
-    return this.insert(userData);
+    return this.insert(requestData);
   }
 
   async findUser(userMail: string): Promise<IrequestModel | null> {

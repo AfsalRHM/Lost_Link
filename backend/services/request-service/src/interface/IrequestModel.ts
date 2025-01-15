@@ -2,7 +2,7 @@ import mongoose, { Document } from "mongoose";
 
 export default interface IrequestModel extends Document {
   _id: mongoose.Types.ObjectId;
-  user_id: mongoose.Types.ObjectId;
+  user_id: string;
   product_name: string;
   reward_amount: number;
   product_category: string;
@@ -10,7 +10,7 @@ export default interface IrequestModel extends Document {
   mode_of_travel: string;
   missing_route: string[];
   missing_date: Date;
-  expiration_date: Date;
+  expiration_date: string;
   additional_information: Date;
   
 }

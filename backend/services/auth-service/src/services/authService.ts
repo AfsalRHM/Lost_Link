@@ -6,7 +6,6 @@ import passwordUtils from "../utils/bcryptPassword";
 import jwtFunctions from "../utils/jwt";
 
 import sendMail from "../utils/sendMail";
-import { getChannel } from "../config/communicationConfig";
 import {
   clearCorrelationId,
   createCorrelationId,
@@ -280,6 +279,8 @@ export default class authService implements IauthService {
     token: string
   ): Promise<{ status: boolean; message: string } | undefined> {
     try {
+      console.log('Reaching here on refreshTOken/authService')
+      console.log(token, "this is the data")
       if (!token) {
         return { status: false, message: "No Token Provided" };
       }
