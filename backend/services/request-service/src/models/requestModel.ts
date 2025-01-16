@@ -43,6 +43,10 @@ const requestSchema = new Schema(
     additional_information: {
       type: String,
     },
+    status: {
+      type: String,
+      default: "active"
+    }
   },
   {
     timestamps: true,

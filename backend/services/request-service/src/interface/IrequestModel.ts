@@ -12,5 +12,5 @@ export default interface IrequestModel extends Document {
   missing_date: Date;
   expiration_date: string;
   additional_information: Date;
-  
+  status: string;
 }

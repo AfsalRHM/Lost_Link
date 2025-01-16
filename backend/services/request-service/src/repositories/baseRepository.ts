@@ -20,8 +20,12 @@ export default class BaseRepository<T extends Document>
     return this.model.findOne(filter);
   }
 
-  async findAll(filter?: Partial<T> | undefined): Promise<T[]> {
-    return this.model.find({});
+  async findAll(filter?: FilterQuery<T> | undefined): Promise<T[]> {
+    if (filter) {
+      return this.model.find(filter);
+    } else {
+      return this.model.find();
+    }
   }
 
   async findByIdAndUpdate(Id: string, update: Partial<T>): Promise<T | null> {

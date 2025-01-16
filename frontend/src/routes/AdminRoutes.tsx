@@ -7,6 +7,7 @@ import UserDetailsPage from "../components/admin/user-details/UserDetailsPage";
 import { IsAdminLogin } from "../utils/IsAdminLogin";
 import { AdminPrivateRoute } from "../utils/AdminPrivateRoutes";
 import AddAdmin from "../pages/admin/AddAdmin";
+import RequestList from "../pages/admin/RequestList";
 
 const AdminRoutes = () => {
   return (
@@ -20,6 +21,7 @@ const AdminRoutes = () => {
         <Route path="/admin/userdetails" element={<UserDetailsPage />} />
         <Route path="/admin/admins" element={<AdminList />} />
         <Route path="/admin/addadmin" element={<AddAdmin />} />
+        <Route path="/admin/requests" element={<RequestList />} />
       </Route>
     </>
   );

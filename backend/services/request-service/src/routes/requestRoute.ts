@@ -2,7 +2,9 @@ import express from "express";
 const request_route = express.Router();
 
 import requestController from "../controllers/requestController";
-import verifyAccessToken from "../middlewares/jwtVerifyUser";
+import verifyAccessToken, {
+  verifyAdminAccessToken,
+} from "../middlewares/jwtVerifyUser";
 
 const RequestController = new requestController();
 
@@ -21,6 +23,18 @@ request_route.get(
   "/getAllRequests",
   verifyAccessToken,
   RequestController.getAllRequests
+);
+
+request_route.get(
+  "/getAllRequestsAdmin",
+  verifyAdminAccessToken,
+  RequestController.getAllRequests
+);
+
+request_route.post(
+  "/changeRequestStatus",
+  verifyAdminAccessToken,
+  RequestController.changeRequestStatus
 );
 
 export default request_route;

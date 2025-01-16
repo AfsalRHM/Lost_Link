@@ -33,25 +33,33 @@ export default class RequestRepository
     return this.model.findOneAndUpdate(filter, update, { new: true });
   }
 
-  //   async changeStatus(userId: string): Promise<IrequestModel | null> {
-  //     try {
-  //       const user = await this.model.findById(userId);
-  //       if (!user) {
-  //         throw new Error("User not found");
-  //       }
+  async changeStatus(requestId: string): Promise<IrequestModel | null> {
+    try {
+      const request = await this.model.findById(requestId);
+      if (!request) {
+        throw new Error("User not found");
+      }
+      
+      let currentStatus = request.status;
+      
+      if (request.toObject) {
+        currentStatus = request.toObject().status;
+      }
 
-  //       const newStatus = user.status === "active" ? "inactive" : "active";
+      const newStatus = currentStatus == "active" ? "inactive" : "active";
 
-  //       const updatedUser = await this.model.findByIdAndUpdate(
-  //         userId,
-  //         { status: newStatus },
-  //         { new: true }
-  //       );
+      const updatedRequest = await this.model.findByIdAndUpdate(
+        requestId,
+        {
+          status: newStatus,
+        },
+        { new: true }
+      );
 
-  //       return updatedUser;
-  //     } catch (error) {
-  //       console.error("Error updating status:", error);
-  //       return null;
-  //     }
-  //   }
+      return updatedRequest;
+    } catch (error) {
+      console.error("Error updating status:", error);
+      return null;
+    }
+  }
 }

@@ -76,4 +76,28 @@ export default class RequestController implements IrequestController {
       console.log("error in requestController", error);
     }
   };
+
+  public changeRequestStatus = async (
+    req: Request,
+    res: Response
+  ): Promise<void> => {
+    try {
+      const accessToken = req.headers["authorization"]?.split(" ")[1];
+      if (!accessToken) {
+        res.status(400).json({ message: "No authorization token provided" });
+      } else {
+        const response = await this._requestService.changeRequestStatus(
+          req.body.Props
+        );
+        res
+          .setHeader("Authorization", `Bearer ${accessToken}`)
+          .status(200)
+          .json(response);
+      }
+    } catch (error) {
+      res
+        .status(300)
+        .json({ message: "error on the changeUserStatus/adminController" });
+    }
+  };
 }

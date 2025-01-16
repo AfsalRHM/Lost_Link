@@ -123,13 +123,40 @@ export default class requestService implements IrequestService {
         message: "Payment session created successfully.",
       };
     } catch (error) {
-      console.error("Stripe Payment Error: ", error); // Log the complete error
+      console.error("Stripe Payment Error: ", error);
 
       return {
         status: false,
         data: null,
         message:
           "Error occured while making payment - from makePayment/requestService",
+      };
+    }
+  }
+
+  async changeRequestStatus(props: { requestId: string }): Promise<any> {
+    try {
+      const response = await this._requestRepository.changeStatus(
+        props.requestId
+      );
+      if (response) {
+        return {
+          status: true,
+          data: response,
+          message: "Request Status Changed Successfully.",
+        };
+      } else {
+        return {
+          status: false,
+          data: response,
+          message: "Request Status Changed Successfully.",
+        };
+      }
+    } catch (error) {
+      return {
+        status: false,
+        message: "Error in getAllUsers/adminService",
+        error: error,
       };
     }
   }
