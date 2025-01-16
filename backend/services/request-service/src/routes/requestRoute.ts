@@ -11,6 +11,12 @@ request_route.post(
   verifyAccessToken,
   RequestController.createRequest
 );
+request_route.post(
+  "/create_checkout_session",
+  verifyAccessToken,
+  RequestController.managePayment
+);
+
 request_route.get(
   "/getAllRequests",
   verifyAccessToken,

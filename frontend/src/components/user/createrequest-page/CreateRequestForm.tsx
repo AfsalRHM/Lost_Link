@@ -17,6 +17,11 @@ import {
   removeAccessToken,
 } from "../../../redux/slice/accessTokenSlice";
 
+import { loadStripe, Stripe } from "@stripe/stripe-js";
+import makePayment from "../../../api/user-api/makePaymentAPI";
+
+const STRIPE_KEY = import.meta.env.VITE_STRIPE_KEY;
+
 const CreateRequestForm = () => {
   const { accessToken } = useSelector((state: RootState) => state.accessToken);
 
@@ -99,22 +104,64 @@ const CreateRequestForm = () => {
         return;
       }
     }
-    // If there has no errors what to do
-    const response = await createRequest({ formData, accessToken });
-    if (response == false) {
-      dispatch(removeUserDetails());
-      dispatch(removeAccessToken());
-      navigate("/login");
-      showErrorToast("Session Expired! Please Login...");
-    } else {
-      if (response.data.status) {
-        const newAccessToken = response.headers["authorization"].split(" ")[1];
-        dispatch(assignAccessToken(newAccessToken));
-        showSuccessToast("Request Created SuccessFully.");
-        navigate("/home");
-      } else {
-        showErrorToast("Request Failed to Create...!");
+
+    // Setting up the payment
+    if (!STRIPE_KEY) {
+      console.log("Stripe Key Not Provided");
+      showErrorToast("Request Failed to Create...!");
+      return;
+    }
+
+    const stripe: Stripe | null = await loadStripe(STRIPE_KEY);
+    if (!stripe) {
+      showErrorToast("Failed to load Stripe. Please try again.");
+      return;
+    }
+
+    try {
+      const paymentResponse = await makePayment({
+        formData,
+        accessToken,
+      });
+
+      console.log(paymentResponse.data);
+
+      const { sessionId } = paymentResponse.data.data;
+
+      const response = await createRequest({
+        formData,
+        accessToken,
+      });
+
+      const result = await stripe.redirectToCheckout({ sessionId });
+
+      if (result.error) {
+        console.error("Stripe Checkout error: ", result.error);
+        showErrorToast("Stripe Checkout error...!");
+        return;
       }
+
+      console.log(response);
+
+      if (response === false) {
+        dispatch(removeUserDetails());
+        dispatch(removeAccessToken());
+        navigate("/login");
+        showErrorToast("Session Expired! Please Login...");
+      } else {
+        if (response.data.status) {
+          const newAccessToken =
+            response.headers["authorization"].split(" ")[1];
+          dispatch(assignAccessToken(newAccessToken));
+          showSuccessToast("Request Created Successfully.");
+          navigate("/home");
+        } else {
+          showErrorToast("Request Failed to Create...!");
+        }
+      }
+    } catch (error) {
+      console.error(error);
+      showErrorToast("An unexpected error occurred. Please try again.");
     }
   };
 

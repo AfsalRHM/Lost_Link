@@ -3,6 +3,8 @@ import IrequestService from "../interface/IrequestService";
 import requestRepository from "../repositories/requestRepository";
 import jwtFunctions from "../utils/jwt";
 
+import stripe, { Stripe } from "stripe";
+
 export default class requestService implements IrequestService {
   private _requestRepository: requestRepository;
 
@@ -54,19 +56,80 @@ export default class requestService implements IrequestService {
 
   async getRequests(): Promise<any> {
     try {
-    } catch (error) {}
-    const requests = await this._requestRepository.findAllRequests();
-    if (requests) {
-      return {
-        status: true,
-        data: requests,
-        message: "All Request recieved",
-      };
-    } else {
+      const requests = await this._requestRepository.findAllRequests();
+      if (requests) {
+        return {
+          status: true,
+          data: requests,
+          message: "All Request recieved",
+        };
+      } else {
+        return {
+          status: false,
+          data: null,
+          message: "All Request Failed to fetch",
+        };
+      }
+    } catch (error) {
       return {
         status: false,
         data: null,
-        message: "All Request Failed to fetch",
+        message:
+          "Error occured while getting all requests - from getRequests/requestService",
+      };
+    }
+  }
+
+  async makePayment(formData: any): Promise<any> {
+    try {
+      const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
+
+      if (!STRIPE_SECRET_KEY) {
+        console.log("Stripe key not provided");
+        return {
+          status: false,
+          data: null,
+          message: "Stripe key not provided",
+        };
+      }
+
+      const stripeClient = new stripe(STRIPE_SECRET_KEY);
+
+      const { requestReward, productName } = formData;
+      const amount = parseInt(requestReward);
+
+      const session = await stripeClient.checkout.sessions.create({
+        payment_method_types: ["card"],
+        line_items: [
+          {
+            price_data: {
+              currency: "inr",
+              product_data: {
+                name: productName || "Product",
+              },
+              unit_amount: amount * 100,
+            },
+            quantity: 1,
+          },
+        ],
+        mode: "payment",
+        success_url: `${process.env.MAIN_ROUTE}${process.env.FRONTEND_PORT}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${process.env.MAIN_ROUTE}${process.env.FRONTEND_PORT}/payment-cancel`,
+      });
+
+      return {
+        status: true,
+        data: { sessionId: session.id },
+        message: "Payment session created successfully.",
+      };
+    } catch (error) {
+      console.error("Stripe Payment Error: ", error); // Log the complete error
+
+      return {
+        status: false,
+        data: null,
+        message:
+          "Error occured while making payment - from makePayment/requestService",
       };
     }
   }
