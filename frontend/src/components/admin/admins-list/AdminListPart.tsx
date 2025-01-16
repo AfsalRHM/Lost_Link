@@ -1,12 +1,12 @@
-import { useState } from "react";
 import { Search, UserPlus } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import changeStatus from "../../../api/admin-api/changeUserStatus";
-import { showSuccessToast } from "../../../utils/toastUtils";
-import { useAdminJwtErrors } from "../../../utils/JwtErrors";
 import adminLogout from "../../../api/admin-api/adminLogoutAPI";
+import { showSuccessToast } from "../../../utils/toastUtils";
+import changeStatus from "../../../api/admin-api/changeUserStatus";
+import { useAdminJwtErrors } from "../../../utils/JwtErrors";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../redux/store";
+import { useState } from "react";
 
 interface Admin {
   _id: string;
@@ -23,7 +23,10 @@ interface AdminListPartProps {
   allAdminsFunc: () => Promise<void>;
 }
 
-const AdminListPart = ({ allAdmins, allAdminsFunc }: AdminListPartProps) => {
+const AdminListPart = ({
+  allAdmins = [],
+  allAdminsFunc,
+}: AdminListPartProps) => {
   const { adminAccessToken } = useSelector(
     (state: RootState) => state.accessToken
   );
@@ -32,8 +35,10 @@ const AdminListPart = ({ allAdmins, allAdminsFunc }: AdminListPartProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortField, setSortField] = useState<keyof Admin>("name");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10; // Items per page
 
-  const admins: Admin[] = allAdmins;
+  const admins: Admin[] = allAdmins || [];
 
   const handleSort = (field: keyof Admin) => {
     if (sortField === field) {
@@ -81,11 +86,24 @@ const AdminListPart = ({ allAdmins, allAdminsFunc }: AdminListPartProps) => {
       return a[sortField] < b[sortField] ? 1 : -1;
     });
 
+  // Pagination logic
+  const totalPages = Math.ceil(filteredAdmins.length / itemsPerPage);
+  const currentAdmins = filteredAdmins.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const handlePageChange = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
+
   return (
     <div className="p-6 bg-blue-900 min-h-screen text-white">
       <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-2xl font-semibold text-white mb-4 sm:mb-0">
-          Users
+          Admins
         </h1>
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="relative">
@@ -142,7 +160,7 @@ const AdminListPart = ({ allAdmins, allAdminsFunc }: AdminListPartProps) => {
               </tr>
             </thead>
             <tbody className="bg-blue-400 divide-y divide-gray-200">
-              {filteredAdmins.map((admin) => (
+              {currentAdmins.map((admin) => (
                 <tr key={admin._id} className="hover:bg-blue-700">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
@@ -196,6 +214,26 @@ const AdminListPart = ({ allAdmins, allAdminsFunc }: AdminListPartProps) => {
             </tbody>
           </table>
         </div>
+      </div>
+
+      <div className="mt-4 flex justify-center gap-5 items-center">
+        <button
+          onClick={() => handlePageChange(currentPage - 1)}
+          disabled={currentPage === 1}
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg disabled:opacity-50"
+        >
+          Previous
+        </button>
+        <span className="text-white">
+          Page {currentPage} of {totalPages}
+        </span>
+        <button
+          onClick={() => handlePageChange(currentPage + 1)}
+          disabled={currentPage === totalPages}
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg disabled:opacity-50"
+        >
+          Next
+        </button>
       </div>
     </div>
   );

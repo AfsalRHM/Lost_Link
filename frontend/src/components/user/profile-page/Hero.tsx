@@ -2,7 +2,7 @@ import LocationInfo from "./LocationInfo";
 import ProfileSidebar from "./ProfileSidebar.tsx";
 import TierSection from "./TierSection";
 import UserDetails from "./UserDetails";
-import VerifyButton from "./VerifyButton";
+// import VerifyButton from "./VerifyButton";
 
 const Hero = () => (
   <div className="bg-gray-100 min-h-screen py-10 px-4">
@@ -11,7 +11,7 @@ const Hero = () => (
         <div className="bg-white shadow-lg rounded-xl p-6">
           <UserDetails />
           <TierSection />
-          <VerifyButton />
+          {/* <VerifyButton /> */}
         </div>
       </div>
       <div className="flex flex-col md:flex-row md:w-4/6 gap-5 mb-24 w-full">

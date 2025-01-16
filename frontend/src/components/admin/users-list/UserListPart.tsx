@@ -25,8 +25,8 @@ const UserListPart = ({ allUsers, allUsersFunc }: UserListPartProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortField, setSortField] = useState<keyof User>("user_name");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
-
-  const users: User[] = allUsers;
+  const [currentPage, setCurrentPage] = useState(1);
+  const usersPerPage = 10;
 
   const handleSort = (field: keyof User) => {
     if (sortField === field) {
@@ -51,7 +51,7 @@ const UserListPart = ({ allUsers, allUsersFunc }: UserListPartProps) => {
     }
   };
 
-  const filteredUsers = users
+  const filteredUsers = allUsers
     .filter(
       (user) =>
         user.user_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -64,6 +64,13 @@ const UserListPart = ({ allUsers, allUsersFunc }: UserListPartProps) => {
       }
       return a[sortField] < b[sortField] ? 1 : -1;
     });
+
+  const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
+  const startIndex = (currentPage - 1) * usersPerPage;
+  const paginatedUsers = filteredUsers.slice(
+    startIndex,
+    startIndex + usersPerPage
+  );
 
   const SortIcon = ({ field }: { field: keyof User }) => (
     <span className="inline-block ml-1">
@@ -99,10 +106,6 @@ const UserListPart = ({ allUsers, allUsersFunc }: UserListPartProps) => {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          {/* <button className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-            <UserPlus size={20} className="mr-2" />
-            Add User
-          </button> */}
         </div>
       </div>
 
@@ -123,9 +126,6 @@ const UserListPart = ({ allUsers, allUsersFunc }: UserListPartProps) => {
                 >
                   Status <SortIcon field="status" />
                 </th>
-                {/* <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
-                  Last Active
-                </th> */}
                 <th className="px-6 py-3 text-center text-xs font-medium text-white uppercase tracking-wider">
                   Actions
                 </th>
@@ -135,7 +135,7 @@ const UserListPart = ({ allUsers, allUsersFunc }: UserListPartProps) => {
               </tr>
             </thead>
             <tbody className="bg-blue-400 divide-y divide-gray-200">
-              {filteredUsers.map((user) => (
+              {paginatedUsers.map((user) => (
                 <tr key={user._id} className="hover:bg-blue-700">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
@@ -167,9 +167,6 @@ const UserListPart = ({ allUsers, allUsersFunc }: UserListPartProps) => {
                         user.status.slice(1)}
                     </span>
                   </td>
-                  {/* <td className="px-6 py-4 whitespace-nowrap text-sm text-black">
-                    {user.lastActive}
-                  </td> */}
                   <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
                     <div className="flex justify-center space-x-4">
                       <button
@@ -199,6 +196,28 @@ const UserListPart = ({ allUsers, allUsersFunc }: UserListPartProps) => {
             </tbody>
           </table>
         </div>
+      </div>
+
+      <div className="flex justify-center gap-5 items-center mt-4">
+        <button
+          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+          disabled={currentPage === 1}
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+        >
+          Previous
+        </button>
+        <span className="text-white">
+          Page {currentPage} of {totalPages}
+        </span>
+        <button
+          onClick={() =>
+            setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+          }
+          disabled={currentPage === totalPages}
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+        >
+          Next
+        </button>
       </div>
     </div>
   );

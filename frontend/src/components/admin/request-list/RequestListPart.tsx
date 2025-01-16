@@ -43,6 +43,9 @@ const RequestListPart = ({
   const [sortField, setSortField] = useState<keyof Request>("product_name");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10); // Number of requests per page
+
   const request: Request[] = allRequests;
 
   const handleSort = (field: keyof Request) => {
@@ -90,6 +93,21 @@ const RequestListPart = ({
       }
       return a[sortField] < b[sortField] ? 1 : -1;
     });
+
+  // Get the requests to display based on the current page and items per page
+  const indexOfLastRequest = currentPage * itemsPerPage;
+  const indexOfFirstRequest = indexOfLastRequest - itemsPerPage;
+  const currentRequests = filteredRequests.slice(
+    indexOfFirstRequest,
+    indexOfLastRequest
+  );
+
+  // Handle page change
+  const handlePageChange = (page: number) => {
+    if (page < 1 || page > Math.ceil(filteredRequests.length / itemsPerPage))
+      return;
+    setCurrentPage(page);
+  };
 
   return (
     <div className="p-6 bg-blue-900 min-h-screen text-white">
@@ -146,7 +164,7 @@ const RequestListPart = ({
               </tr>
             </thead>
             <tbody className="bg-blue-400 divide-y divide-gray-200">
-              {filteredRequests.map((request) => (
+              {currentRequests.map((request) => (
                 <tr key={request._id} className="hover:bg-blue-700">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
@@ -202,6 +220,30 @@ const RequestListPart = ({
             </tbody>
           </table>
         </div>
+      </div>
+
+      {/* Pagination Controls */}
+      <div className="mt-4 flex justify-center">
+        <button
+          onClick={() => handlePageChange(currentPage - 1)}
+          disabled={currentPage === 1}
+          className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50"
+        >
+          Previous
+        </button>
+        <span className="px-4 py-2 text-white">
+          Page {currentPage} of{" "}
+          {Math.ceil(filteredRequests.length / itemsPerPage)}
+        </span>
+        <button
+          onClick={() => handlePageChange(currentPage + 1)}
+          disabled={
+            currentPage === Math.ceil(filteredRequests.length / itemsPerPage)
+          }
+          className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50"
+        >
+          Next
+        </button>
       </div>
     </div>
   );
