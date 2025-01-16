@@ -18,6 +18,10 @@ export default class RequestRepository
     return this.insert(requestData);
   }
 
+  async findAllRequests(): Promise<IrequestModel[] | null> {
+    return this.findAll();
+  }
+
   async findUser(userMail: string): Promise<IrequestModel | null> {
     return this.findOne({ email: userMail });
   }

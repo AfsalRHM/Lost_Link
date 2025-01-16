@@ -11,5 +11,10 @@ request_route.post(
   verifyAccessToken,
   RequestController.createRequest
 );
+request_route.get(
+  "/getAllRequests",
+  verifyAccessToken,
+  RequestController.getAllRequests
+);
 
 export default request_route;

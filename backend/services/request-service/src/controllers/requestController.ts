@@ -37,4 +37,22 @@ export default class RequestController implements IrequestController {
       console.log("error in requestController", error);
     }
   };
+
+  public getAllRequests = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const accessToken = req.headers["authorization"]?.split(" ")[1];
+      if (!accessToken) {
+        res.status(400).json({ message: "No authorization token provided" });
+      } else {
+        const requestData = await this._requestService.getRequests();
+
+        res
+          .setHeader("Authorization", `Bearer ${accessToken}`)
+          .status(200)
+          .json({ status: requestData.status, data: requestData.data });
+      }
+    } catch (error) {
+      console.log("error in requestController", error);
+    }
+  };
 }

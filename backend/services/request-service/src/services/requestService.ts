@@ -51,4 +51,23 @@ export default class requestService implements IrequestService {
       }
     }
   }
+
+  async getRequests(): Promise<any> {
+    try {
+    } catch (error) {}
+    const requests = await this._requestRepository.findAllRequests();
+    if (requests) {
+      return {
+        status: true,
+        data: requests,
+        message: "All Request recieved",
+      };
+    } else {
+      return {
+        status: false,
+        data: null,
+        message: "All Request Failed to fetch",
+      };
+    }
+  }
 }

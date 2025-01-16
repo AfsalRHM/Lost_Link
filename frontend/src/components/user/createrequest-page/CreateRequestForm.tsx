@@ -12,7 +12,10 @@ import createRequest from "../../../api/user-api/createRequestAPI";
 import { showErrorToast, showSuccessToast } from "../../../utils/toastUtils";
 import { useNavigate } from "react-router-dom";
 import { removeUserDetails } from "../../../redux/slice/userDetailsSlice";
-import { removeAccessToken } from "../../../redux/slice/accessTokenSlice";
+import {
+  assignAccessToken,
+  removeAccessToken,
+} from "../../../redux/slice/accessTokenSlice";
 
 const CreateRequestForm = () => {
   const { accessToken } = useSelector((state: RootState) => state.accessToken);
@@ -105,6 +108,8 @@ const CreateRequestForm = () => {
       showErrorToast("Session Expired! Please Login...");
     } else {
       if (response.data.status) {
+        const newAccessToken = response.headers["authorization"].split(" ")[1];
+        dispatch(assignAccessToken(newAccessToken));
         showSuccessToast("Request Created SuccessFully.");
         navigate("/home");
       } else {
