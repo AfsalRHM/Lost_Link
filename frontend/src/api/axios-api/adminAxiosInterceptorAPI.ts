@@ -1,10 +1,28 @@
 import axios from "axios";
+import { store } from "../../redux/store";
 
 const adminAxiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_ROUTE,
   withCredentials: true,
 });
 
+// Request Interceptor (Add Authorization Header)
+adminAxiosInstance.interceptors.request.use(
+  (config) => {
+    const state = store.getState();
+    const accessToken = state.accessToken.adminAccessToken;
+
+    if (accessToken) {
+      config.headers["Authorization"] = `Bearer ${accessToken}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Response Interceptor (Handle the 401 Error)
 adminAxiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {
@@ -15,7 +33,7 @@ adminAxiosInstance.interceptors.response.use(
 
       try {
         const response = await axios.post(
-          `${import.meta.env.VITE_API_ROUTE}/admin/refreshToken`,
+          `${import.meta.env.VITE_API_ROUTE}/auth/adminRefreshToken`,
           {},
           {
             withCredentials: true,

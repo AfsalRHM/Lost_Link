@@ -7,7 +7,7 @@ import {
   ShoppingCart,
   TrendingUp,
   Search,
-} from "lucide-react"; // Add Search icon import
+} from "lucide-react"; 
 import { Sidebar } from "../shared/Sidebar";
 import { StatCard } from "./StatCard";
 import { RevenueChart } from "./RevenueChart";
@@ -20,7 +20,6 @@ const DashboardPage = () => {
 
   return (
     <div className="flex min-h-screen bg-blue-900 text-white">
-      {/* Sidebar */}
       <div
         className={`lg:block fixed top-0 left-0 w-64 h-full bg-blue-800 shadow-md z-10 ${
           sidebarOpen ? "block" : "hidden"
@@ -31,14 +30,12 @@ const DashboardPage = () => {
 
       <div className="flex-1 ml-0 lg:ml-64">
         {" "}
-        {/* Adjust main content to account for sidebar */}
         <header className="sticky top-0 z-20 bg-blue-800 shadow-sm">
           <div className="flex items-center justify-between p-4">
             <button onClick={() => setSidebarOpen(true)} className="lg:hidden">
               <Menu size={24} className="text-white" />
             </button>
 
-            {/* Search Bar */}
             <div className="flex-1 mx-4 relative flex items-center">
               <input
                 type="text"
@@ -51,12 +48,10 @@ const DashboardPage = () => {
             </div>
 
             <div className="flex items-center space-x-4">
-              {/* Notification Icon */}
               <button className="p-2 hover:bg-blue-700 rounded-lg transition-all ease-in-out duration-300">
                 <Bell size={20} className="text-white" />
               </button>
 
-              {/* Profile Icon */}
               <div className="w-8 h-8 bg-blue-500 rounded-full transition-all ease-in-out duration-300"></div>
             </div>
           </div>

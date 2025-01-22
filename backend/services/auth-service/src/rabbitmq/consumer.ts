@@ -5,7 +5,6 @@ import authService, {
   userDetails,
   userNameForMail,
 } from "../services/authService";
-import { getCorrelationId } from "../utils/correlationId";
 
 export async function manageQueue() {
   try {
@@ -23,8 +22,9 @@ export async function manageQueue() {
       if (msg) {
         const messageContent = JSON.parse(msg.content.toString());
         let correlationId;
+        console.log(messageContent);
         if (messageContent) {
-          correlationId = getCorrelationId(messageContent.email);
+          correlationId = messageContent.correlationId;
         } else {
           console.log("Message content not available");
         }
@@ -38,6 +38,112 @@ export async function manageQueue() {
               userDetails(correlationId, messageContent);
             } else {
               console.log("Error on messageContent on auth managing Queue 1");
+            }
+          } else if (
+            msg?.properties?.headers?.source ==
+            "Create tokens while Admin Login"
+          ) {
+            if (messageContent) {
+              const response = await _authService.createJwtTokens(
+                messageContent
+              );
+              channel.sendToQueue(
+                "ADMIN",
+                Buffer.from(JSON.stringify(response)),
+                {
+                  correlationId: msg.properties.correlationId,
+                  headers: {
+                    source: "Access Token and Refresh Token OnBoard",
+                    correlationIdIdentifier: messageContent.props.email,
+                  },
+                }
+              );
+            } else {
+              console.log("Error on messageContent on auth managing Queue 7");
+            }
+          } else if (
+            msg?.properties?.headers?.source == "Admin Access Token Validator"
+          ) {
+            if (messageContent) {
+              const response = await _authService.verifyAdminAccessToken(
+                messageContent
+              );
+              channel.sendToQueue(
+                "ADMIN",
+                Buffer.from(JSON.stringify(response)),
+                {
+                  correlationId: msg.properties.correlationId,
+                  headers: {
+                    source: "Admin Access Token Verification",
+                    correlationIdIdentifier: messageContent.props.token,
+                  },
+                }
+              );
+            } else {
+              console.log("Error on messageContent on auth managing Queue 8");
+            }
+          } else if (
+            msg?.properties?.headers?.source == "Admin Refresh Token Validator"
+          ) {
+            if (messageContent) {
+              const response = await _authService.verifyAdminRefreshToken(
+                messageContent
+              );
+              channel.sendToQueue(
+                "ADMIN",
+                Buffer.from(JSON.stringify(response)),
+                {
+                  correlationId: msg.properties.correlationId,
+                  headers: {
+                    source: "Admin Refresh Token Verification",
+                    correlationIdIdentifier: messageContent.props.token,
+                  },
+                }
+              );
+            } else {
+              console.log("Error on messageContent on auth managing Queue 8");
+            }
+          } else if (
+            msg?.properties?.headers?.source == "Create New Admin Access Token"
+          ) {
+            if (messageContent) {
+              const response = await _authService.createAdminRefreshToken(
+                messageContent
+              );
+              channel.sendToQueue(
+                "ADMIN",
+                Buffer.from(JSON.stringify(response)),
+                {
+                  correlationId: msg.properties.correlationId,
+                  headers: {
+                    source: "New Admin Access Token",
+                    correlationIdIdentifier: messageContent.props.email,
+                  },
+                }
+              );
+            } else {
+              console.log("Error on messageContent on auth managing Queue 8");
+            }
+          } else if (
+            msg?.properties?.headers?.source == "User Access Token Validator"
+          ) {
+            if (messageContent) {
+              const response = await _authService.verifyUserAccessToken(
+                messageContent
+              );
+              channel.sendToQueue(
+                "ADMIN",
+                Buffer.from(JSON.stringify(response)),
+                {
+                  correlationId: msg.properties.correlationId,
+                  headers: {
+                    source: "User Access Token Verification",
+                    correlationIdIdentifier: messageContent.props.token,
+                  },
+                }
+              );
+            } else {
+              console.log("Error on messageContent on auth managing Queue 8");
             }
           } else if (msg?.properties?.headers?.source == "user login info") {
             if (messageContent) {

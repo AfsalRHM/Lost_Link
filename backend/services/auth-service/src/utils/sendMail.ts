@@ -29,7 +29,7 @@ export default async function sendMail(
           <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; text-align: center; background-color: #f0f8ff; padding: 20px;">
             <div style="max-width: 600px; margin: auto; border: 1px solid #ddd; border-radius: 8px; padding: 20px; background-color: #ffffff; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
               <div style="text-align: center; border-radius: 100px">
-                <img src="https://i.ibb.co/kqc0vFk/Logo.png" alt="LostLink Logo" style="max-width: 150px; margin-bottom: 20px;">
+                <img src="https://i.ibb.co/PzBDdhb/Logo-rounded.png" alt="LostLink Logo" style="max-width: 150px; margin-bottom: 20px;">
               </div>
               <h2 style="color: #007BFF;">Welcome to LostLink!</h2>
               <p style="font-size: 16px; color: #333;">Hi <strong>${recieverName}</strong>,</p>

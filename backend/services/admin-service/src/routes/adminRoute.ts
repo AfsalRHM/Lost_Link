@@ -9,6 +9,7 @@ const AdminController = new adminController();
 admin_route.post("/adminLogin", AdminController.adminLogin);
 admin_route.post("/allUsers", verifyAccessToken, AdminController.getAllUsers);
 admin_route.post("/changeUserStatus", verifyAccessToken, AdminController.changeUserStatus);
+admin_route.post("/changeAdminStatus", verifyAccessToken, AdminController.changeAdminStatus);
 admin_route.post("/allAdmins", verifyAccessToken, AdminController.getAllAdmins);
 admin_route.post("/addAdmin", verifyAccessToken, AdminController.insertAdmin);
 

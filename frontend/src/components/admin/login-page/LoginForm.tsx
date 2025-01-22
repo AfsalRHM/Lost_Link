@@ -46,13 +46,14 @@ const LoginForm: React.FC = () => {
 
     if (!errors.password && !errors.email) {
       const result = await adminLogin(formData);
+      console.log(result);
       if (result.data == null) {
         showErrorToast("Admin Login Failed...!");
       } else {
         dispatch(assignAdminAccessToken(result.authorizationHeader.split(' ')[1]));
         dispatch(assignAdminDetails(result.data.data.data))
         showSuccessToast("Admin Login Success...!");
-        navigate("/admin/dashboard");
+        navigate("/admin");
       }
     }
   };

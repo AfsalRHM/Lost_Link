@@ -23,4 +23,8 @@ export default class BaseRepository<T extends Document>
   async findAllAdmins(): Promise<T[] | null> {
     return this.model.find({});
   }
+
+  async findByIdAndUpdate(Id: string, update: Partial<T>): Promise<T | null> {
+    return this.model.findByIdAndUpdate(Id, update, { new: true });
+  }
 }

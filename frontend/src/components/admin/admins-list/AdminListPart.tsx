@@ -2,11 +2,11 @@ import { Search, UserPlus } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import adminLogout from "../../../api/admin-api/adminLogoutAPI";
 import { showSuccessToast } from "../../../utils/toastUtils";
-import changeStatus from "../../../api/admin-api/changeUserStatus";
 import { useAdminJwtErrors } from "../../../utils/JwtErrors";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../redux/store";
 import { useState } from "react";
+import changeAdminStatus from "../../../api/admin-api/changeAdminStatus";
 
 interface Admin {
   _id: string;
@@ -15,7 +15,7 @@ interface Admin {
   role: string;
   createdAt: Date;
   updatedAt: Date;
-  status: "active" | "inactive";
+  status: string;
 }
 
 interface AdminListPartProps {
@@ -51,17 +51,17 @@ const AdminListPart = ({
 
   const handleDetailsPage = (id: string) => {
     if (id) {
-      navigate(`/admin/userdetails`, { state: { userId: id } });
+      navigate(`/admin/userdetails`, { state: { adminId: id } });
     }
   };
 
   const JwtErrors = useAdminJwtErrors();
 
   const handleStatusChange = async (id: string) => {
-    const response = await changeStatus({ userId: id });
+    const response = await changeAdminStatus({ adminId: id });
     await allAdminsFunc();
     if (response.status) {
-      showSuccessToast("User Status Changed");
+      showSuccessToast("Admin Status Changed");
     } else if (response === false) {
       JwtErrors({ reason: "session expiration" });
       await adminLogout({

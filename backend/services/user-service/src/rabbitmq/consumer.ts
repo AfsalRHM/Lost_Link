@@ -80,7 +80,7 @@ export async function manageQueue() {
             correlationId: msg.properties.correlationId,
             headers: {
               source: "all user resoponse",
-              correlationIdString:
+              correlationIdIdentifier:
                 msg?.properties?.headers?.correlationIdString,
             },
           });
@@ -95,7 +95,7 @@ export async function manageQueue() {
             correlationId: msg.properties.correlationId,
             headers: {
               source: "status changed response",
-              correlationIdString:
+              correlationIdIdentifier:
                 msg?.properties?.headers?.correlationIdString,
             },
           });

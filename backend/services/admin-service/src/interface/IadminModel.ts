@@ -5,5 +5,6 @@ export default interface IadminModel extends Document {
   email: string;
   name: string;
   role: string;
+  status: string;
   password: string;
 }

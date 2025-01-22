@@ -274,13 +274,145 @@ export default class authService implements IauthService {
     }
   }
 
+  async createJwtTokens(messageContent: any): Promise<any> {
+    try {
+      const accessToken = jwtFunctions.generateAdminAccessToken({
+        id: messageContent.props.adminId,
+        email: messageContent.props.email,
+        role: messageContent.props.role,
+      });
+      const refreshToken = jwtFunctions.generateAdminRefreshToken({
+        id: messageContent.props.adminId,
+        email: messageContent.props.email,
+        role: messageContent.props.role,
+      });
+
+      if (accessToken && refreshToken) {
+        return { status: true, data: { accessToken, refreshToken } };
+      } else {
+        throw new Error(
+          "Admin And Refresh Token not generated on createJwtTokens/authService"
+        );
+      }
+    } catch (error) {
+      console.log(
+        "An Error has appeared here on createJwtTokens/authService",
+        error
+      );
+      return {
+        status: false,
+        data: null,
+      };
+    }
+  }
+
+  async verifyAdminAccessToken(messageContent: any): Promise<any> {
+    try {
+      const decoded = jwtFunctions.verifyAdminAccessToken(
+        messageContent.props.token
+      );
+      if (decoded) {
+        return {
+          status: true,
+          message: "Access token verified",
+          data: decoded,
+        };
+      } else {
+        return {
+          status: false,
+          message: "Access token expired verified",
+          data: null,
+        };
+      }
+    } catch (error) {
+      console.log("An Error has appeared here", error);
+    }
+  }
+
+  async verifyAdminRefreshToken(messageContent: any): Promise<any> {
+    try {
+      const decoded = jwtFunctions.verifyAdminRefreshToken(
+        messageContent.props.token
+      );
+      if (decoded) {
+        return {
+          status: true,
+          message: "Admin Refresh token verified",
+          data: decoded,
+        };
+      } else {
+        return {
+          status: false,
+          message: "Admin Refresh token expired verified",
+          data: null,
+        };
+      }
+    } catch (error) {
+      console.log("An Error has appeared here", error);
+    }
+  }
+
+  async createAdminRefreshToken(messageContent: any): Promise<any> {
+    try {
+      console.log(
+        "This is the messageContent on the createAdminRefreshToken",
+        messageContent
+      );
+      const accessToken = jwtFunctions.generateAdminAccessToken({
+        id: messageContent.props.adminId,
+        email: messageContent.props.email,
+        role: messageContent.props.role,
+      });
+
+      if (accessToken) {
+        return { status: true, data: { accessToken } };
+      } else {
+        throw new Error(
+          "Admin Token not generated on createAdminRefreshToken/authService"
+        );
+      }
+    } catch (error) {
+      console.log(
+        "An Error has appeared here on createJwtTokens/authService",
+        error
+      );
+      return {
+        status: false,
+        data: null,
+      };
+    }
+  }
+
+  async verifyUserAccessToken(messageContent: any): Promise<any> {
+    try {
+      const decoded = jwtFunctions.verifyAccessToken(
+        messageContent.props.token
+      );
+      if (decoded) {
+        return {
+          status: true,
+          message: "Access token verified",
+          data: decoded,
+        };
+      } else {
+        return {
+          status: false,
+          message: "Access token expired verified",
+          data: null,
+        };
+      }
+    } catch (error) {
+      console.log("An Error has appeared here", error);
+    }
+  }
+
   // To create a new access token with the existing refresh token
   async refreshToken(
     token: string
   ): Promise<{ status: boolean; message: string } | undefined> {
     try {
-      console.log('Reaching here on refreshTOken/authService')
-      console.log(token, "this is the data")
+      console.log("Reaching here on refreshTOken/authService");
+      console.log(token, "this is the data");
       if (!token) {
         return { status: false, message: "No Token Provided" };
       }
@@ -288,9 +420,37 @@ export default class authService implements IauthService {
       if (!decoded) {
         return { status: false, message: "Token expired" };
       }
-      const newUserId = new Types.ObjectId(decoded.userId).toString();
+      const newUserId = new Types.ObjectId(decoded.id).toString();
       const newAccessToken = jwtFunctions.generateAccessToken({
-        userId: newUserId,
+        id: newUserId,
+        email: decoded.email,
+        role: decoded.role,
+      });
+      return { status: true, message: newAccessToken };
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  // To create a new admin access token with the existing admin refresh token
+  async adminRefreshToken(
+    token: string
+  ): Promise<{ status: boolean; message: string } | undefined> {
+    try {
+      console.log("Reaching here on refreshTOken/authService");
+      console.log(token, "this is the data");
+      if (!token) {
+        return { status: false, message: "No Token Provided" };
+      }
+      const decoded = jwtFunctions.verifyAdminRefreshToken(token);
+      if (!decoded) {
+        return { status: false, message: "Token expired" };
+      }
+      const newUserId = new Types.ObjectId(decoded.id).toString();
+      const newAccessToken = jwtFunctions.generateAdminAccessToken({
+        id: newUserId,
+        email: decoded.email,
+        role: decoded.role,
       });
       return { status: true, message: newAccessToken };
     } catch (error) {

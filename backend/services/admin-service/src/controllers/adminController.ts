@@ -2,8 +2,6 @@ import { Request, Response } from "express";
 import IadminController from "../interface/IadminController";
 import adminService from "../services/adminService";
 
-import jwtFunctions from "../utils/jwt";
-
 export default class authController implements IadminController {
   private _adminService: adminService;
 
@@ -14,12 +12,8 @@ export default class authController implements IadminController {
   public adminLogin = async (req: Request, res: Response): Promise<void> => {
     const response = await this._adminService.adminLogin(req.body);
     if (response.status) {
-      const accessToken = jwtFunctions.generateAccessToken({
-        userId: response.data._id.toString(),
-      });
-      const refreshToken = jwtFunctions.generateRefreshToken({
-        userId: response.data._id.toString(),
-      });
+      const accessToken = response.tokenData.accessToken;
+      const refreshToken = response.tokenData.refreshToken;
 
       res
         .status(200)
@@ -43,6 +37,7 @@ export default class authController implements IadminController {
 
   public getAllUsers = async (req: Request, res: Response): Promise<void> => {
     try {
+      console.log('Here reaching on the getAllUsers/adminController')
       const response = await this._adminService.getAllUsers();
       res.status(200).json(response);
     } catch (error) {
@@ -76,6 +71,22 @@ export default class authController implements IadminController {
       res
         .status(300)
         .json({ message: "error on the changeUserStatus/adminController" });
+    }
+  };
+
+  public changeAdminStatus = async (
+    req: Request,
+    res: Response
+  ): Promise<void> => {
+    try {
+      const response = await this._adminService.changeAdminStatus(
+        req.body.Props
+      );
+      res.status(200).json(response);
+    } catch (error) {
+      res
+        .status(300)
+        .json({ message: "error on the changeAdminStatus/adminController" });
     }
   };
 

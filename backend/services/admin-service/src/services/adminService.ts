@@ -6,8 +6,8 @@ import adminRepository from "../repositories/adminRepository";
 import IadminService, { adminProps } from "../interface/IadminService";
 
 import eventEmitter from "../utils/eventEmitter";
-import jwtFunctions from "../utils/jwt";
 import { Types } from "mongoose";
+import { decodedType } from "../interface/IjwtTypes";
 
 export default class adminService implements IadminService {
   private _adminRepository: adminRepository;
@@ -21,19 +21,56 @@ export default class adminService implements IadminService {
     password: string;
   }): Promise<any> {
     try {
+      const AUTH_QUEUE = process.env.AUTH_QUEUE;
+      if (!AUTH_QUEUE) {
+        throw new Error("AUTH_QUEUE not found on env");
+      }
+
       const adminData = await this._adminRepository.findAdmin(
         loginDetails.email
       );
-
       if (!adminData || adminData.password !== loginDetails.password) {
         return { status: false, message: "Invalid Credentials" };
       }
 
-      return {
-        status: true,
-        message: "Admin Verificaiton Successfull",
-        data: adminData,
-      };
+      const correlationId = createCorrelationId(loginDetails.email);
+
+      sendToService({
+        sendingTo: AUTH_QUEUE,
+        correlationId,
+        source: "Create tokens while Admin Login",
+        props: {
+          adminId: adminData._id.toString(),
+          email: adminData.email,
+          role: adminData.role,
+        },
+      });
+
+      const responseData: any = await new Promise((resolve, reject) => {
+        const timeout = setTimeout(() => {
+          reject(new Error("Response timeout"));
+        }, 10000);
+
+        eventEmitter.once(correlationId, (data) => {
+          clearTimeout(timeout);
+          resolve(data);
+        });
+      });
+
+      if (responseData.status) {
+        return {
+          status: true,
+          message: "Admin Verificaiton Successfull",
+          data: adminData,
+          tokenData: responseData.data,
+        };
+      } else {
+        return {
+          status: false,
+          message: "Admin Verificaiton Failed",
+          data: null,
+        };
+      }
     } catch (error) {
       return { status: false, message: "Error in adminLogin/adminService" };
     }
@@ -50,7 +87,12 @@ export default class adminService implements IadminService {
         throw new Error("sendingTo is emplty...");
       }
 
-      sendToService({ sendingTo, correlationId, source, correlationIdString });
+      sendToService({
+        sendingTo,
+        correlationId,
+        source,
+        correlationIdIdentifier: correlationIdString,
+      });
 
       const responseData: any = await new Promise((resolve, reject) => {
         const timeout = setTimeout(() => {
@@ -120,7 +162,7 @@ export default class adminService implements IadminService {
         sendingTo,
         correlationId,
         source,
-        correlationIdString,
+        correlationIdIdentifier: correlationIdString,
         props,
       });
 
@@ -152,10 +194,36 @@ export default class adminService implements IadminService {
     }
   }
 
+  async changeAdminStatus(props: { adminId: string }): Promise<any> {
+    try {
+      if (!props.adminId) {
+        throw new Error("Admin Id is empty...");
+      }
+
+      const responseData = await this._adminRepository.changeStatus(
+        props.adminId
+      );
+
+      if (responseData) {
+        return responseData;
+      } else {
+        return {
+          status: false,
+          message: "responseData not reached on here from the mangingQueue 2",
+        };
+      }
+    } catch (error) {
+      return {
+        status: false,
+        message: "Error in getAllUsers/adminService",
+        error: error,
+      };
+    }
+  }
+
   async insertAdmin(props: adminProps): Promise<any> {
     try {
       const response = await this._adminRepository.insert(props);
-      console.log(response);
       if (response) {
         return response;
       } else {
@@ -178,18 +246,74 @@ export default class adminService implements IadminService {
     token: string
   ): Promise<{ status: boolean; message: string } | undefined> {
     try {
+      const CURRENT_QUEUE = process.env.ADMIN_QUEUE;
+      const AUTH_QUEUE = process.env.AUTH_QUEUE;
+
+      if (!AUTH_QUEUE || !CURRENT_QUEUE) {
+        throw new Error("AUTH QUEUE is not available on the middleware");
+      }
+
       if (!token) {
         return { status: false, message: "No Token Provided" };
       }
-      const decoded = jwtFunctions.verifyRefreshToken(token);
+
+      const correlationId = createCorrelationId(token);
+
+      sendToService({
+        sendingTo: AUTH_QUEUE,
+        correlationId,
+        source: "Admin Refresh Token Validator",
+        props: { token },
+      });
+
+      const decoded: decodedType = await new Promise((resolve, reject) => {
+        const timeout = setTimeout(() => {
+          reject(new Error("Response timeout"));
+        }, 10000);
+
+        eventEmitter.once(correlationId, (data) => {
+          clearTimeout(timeout);
+          resolve(data);
+        });
+      });
+
+      console.log("Decode Refresh token is here", decoded);
+
       if (!decoded) {
         return { status: false, message: "Token expired" };
       }
-      const newUserId = new Types.ObjectId(decoded.userId).toString();
-      const newAccessToken = jwtFunctions.generateAccessToken({
-        userId: newUserId,
+      const newAdminId = new Types.ObjectId(decoded.data.id).toString();
+
+      const correlationId2 = createCorrelationId(decoded.data.email);
+
+      sendToService({
+        sendingTo: AUTH_QUEUE,
+        correlationId,
+        source: "Create New Admin Access Token",
+        props: {
+          adminId: newAdminId,
+          email: decoded.data.email,
+          role: decoded.data.role,
+        },
       });
-      return { status: true, message: newAccessToken };
+
+      const newAccessData: any = await new Promise((resolve, reject) => {
+        const timeout = setTimeout(() => {
+          reject(new Error("Response timeout"));
+        }, 10000);
+
+        eventEmitter.once(correlationId2, (data) => {
+          clearTimeout(timeout);
+          resolve(data);
+        });
+      });
+
+      // const newAccessToken = jwtFunctions.generateAccessToken({
+      //   id: newAdminId,
+      //   email: decoded.data.email,
+      //   role: decoded.data.role,
+      // });
+      return { status: true, message: newAccessData.data };
     } catch (error) {
       console.log(error);
     }
@@ -203,5 +327,15 @@ export function userList(correlationId: string, params: any) {
 
 // to access the User Data after the status change
 export function userDataStatusChange(correlationId: string, params: any) {
+  eventEmitter.emit(correlationId, params);
+}
+
+// to access the Admin Tokens after the tokens created
+export function gettingAdminTokens(correlationId: string, params: any) {
+  eventEmitter.emit(correlationId, params);
+}
+
+// to access the Admin Tokens after the tokens created
+export function gettingAdminAccessToken(correlationId: string, params: any) {
   eventEmitter.emit(correlationId, params);
 }

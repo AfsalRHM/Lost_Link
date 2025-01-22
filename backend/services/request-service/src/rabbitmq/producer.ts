@@ -17,7 +17,7 @@ interface sendToServiceType {
 export default async function sendToService(props: sendToServiceType) {
   try {
     const channel = getChannel();
-    const currentQueue = process.env.ADMIN_QUEUE;
+    const currentQueue = process.env.REQUEST_QUEUE;
     const sendingTo = props.sendingTo;
     const correlationId = props.correlationId;
 

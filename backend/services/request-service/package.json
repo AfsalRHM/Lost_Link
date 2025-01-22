@@ -23,7 +23,8 @@
     "mongoose": "^8.9.5",
     "nodemon": "^3.1.9",
     "stripe": "^17.5.0",
-    "ts-node": "^10.9.2"
+    "ts-node": "^10.9.2",
+    "uuid": "^11.0.5"
   },
   "devDependencies": {
     "@types/amqplib": "^0.10.6",

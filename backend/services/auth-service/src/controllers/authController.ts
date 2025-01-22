@@ -158,10 +158,14 @@ export default class authController implements IauthController {
 
       if (result.status == true) {
         const accessToken = jwtFunctions.generateAccessToken({
-          userId: result.data._id.toString(),
+          id: result.data._id.toString(),
+          email: result.data.email,
+          role: result.data.role,
         });
         const refreshToken = jwtFunctions.generateRefreshToken({
-          userId: result.data._id.toString(),
+          id: result.data._id.toString(),
+          email: result.data.email,
+          role: result.data.role,
         });
 
         res
@@ -188,8 +192,37 @@ export default class authController implements IauthController {
   public refreshToken = async (req: Request, res: Response): Promise<void> => {
     try {
       const refreshToken = req.cookies.refreshToken;
-      console.log(refreshToken, "console from the refreshToken/authController")
+      console.log(refreshToken, "console from the refreshToken/authController");
       const result = await this._authService.refreshToken(refreshToken);
+      if (result?.status == true) {
+        res
+          .setHeader("Authorization", `Bearer ${result.message}`)
+          .status(200)
+          .json({ status: true, message: "New Access Token Created" });
+      } else if (result?.message === "Token expired") {
+        res
+          .status(401)
+          .json({ status: false, message: "Refresh token expired" });
+      } else {
+        res
+          .status(401)
+          .json({ status: false, message: "Failed to refresh token" });
+      }
+    } catch (error) {
+      res
+        .status(401)
+        .json({ status: false, message: "New Access Token not Generated" });
+    }
+  };
+
+  public adminRefreshToken = async (
+    req: Request,
+    res: Response
+  ): Promise<void> => {
+    try {
+      const refreshToken = req.cookies.refreshToken;
+      console.log(refreshToken, "console from the refreshToken/authController");
+      const result = await this._authService.adminRefreshToken(refreshToken);
       if (result?.status == true) {
         res
           .setHeader("Authorization", `Bearer ${result.message}`)
@@ -229,10 +262,14 @@ export default class authController implements IauthController {
           if (response.data?.status == "active") {
             if (response.status && response.data) {
               const accessToken = jwtFunctions.generateAccessToken({
-                userId: response.data._id.toString(),
+                id: response.data._id.toString(),
+                email: response.data.email,
+                role: response.data.role,
               });
               const refreshToken = jwtFunctions.generateRefreshToken({
-                userId: response.data._id.toString(),
+                id: response.data._id.toString(),
+                email: response.data.email,
+                role: response.data.role,
               });
 
               res

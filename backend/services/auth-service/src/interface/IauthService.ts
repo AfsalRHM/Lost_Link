@@ -23,6 +23,7 @@ export interface UserDataType {
   email: string;
   user_name: string;
   full_name: string;
+  role: string;
   location: string;
   password?: string;
   status: string;

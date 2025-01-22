@@ -1,5 +1,7 @@
 import configCommunication, { getChannel } from "../config/communicationConfig";
+import { gettingAdminAccessTokenVerifyResult } from "../middlewares/jwtVerifyUser";
 import adminService, {
+  gettingAdminTokens,
   userDataStatusChange,
   userList,
 } from "../services/adminService";
@@ -21,10 +23,11 @@ export async function manageQueue() {
       if (msg) {
         const messageContent = JSON.parse(msg.content.toString());
         let correlationId;
+        console.log(messageContent);
 
         if (messageContent) {
           correlationId = getCorrelationId(
-            msg?.properties?.headers?.correlationIdString
+            msg?.properties?.headers?.correlationIdIdentifier
           );
         } else {
           console.log("Message content not available");
@@ -36,6 +39,35 @@ export async function manageQueue() {
               userList(correlationId, messageContent);
             } else {
               console.log("Error on messageContent on admin managing Queue 1");
+            }
+          } else if (
+            msg?.properties?.headers?.source ==
+            "Access Token and Refresh Token OnBoard"
+          ) {
+            if (messageContent) {
+              gettingAdminTokens(correlationId, messageContent);
+            } else {
+              console.log("Error on messageContent on admin managing Queue 2");
+            }
+          } else if (
+            msg?.properties?.headers?.source ==
+            "Admin Access Token Verification"
+          ) {
+            if (messageContent) {
+              gettingAdminAccessTokenVerifyResult(
+                correlationId,
+                messageContent
+              );
+            } else {
+              console.log("Error on messageContent on admin managing Queue 2");
+            }
+          } else if (
+            msg?.properties?.headers?.source == "New Admin Access Token"
+          ) {
+            if (messageContent) {
+              gettingAdminTokens(correlationId, messageContent);
+            } else {
+              console.log("Error on messageContent on admin managing Queue 2");
             }
           } else if (
             msg?.properties?.headers?.source == "status changed response"
