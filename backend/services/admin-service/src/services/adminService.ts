@@ -8,6 +8,7 @@ import IadminService, { adminProps } from "../interface/IadminService";
 import eventEmitter from "../utils/eventEmitter";
 import { Types } from "mongoose";
 import { decodedType } from "../interface/IjwtTypes";
+import jwtFunctions from "../utils/jwt";
 
 export default class adminService implements IadminService {
   private _adminRepository: adminRepository;
@@ -21,11 +22,6 @@ export default class adminService implements IadminService {
     password: string;
   }): Promise<any> {
     try {
-      const AUTH_QUEUE = process.env.AUTH_QUEUE;
-      if (!AUTH_QUEUE) {
-        throw new Error("AUTH_QUEUE not found on env");
-      }
-
       const adminData = await this._adminRepository.findAdmin(
         loginDetails.email
       );
@@ -33,29 +29,36 @@ export default class adminService implements IadminService {
         return { status: false, message: "Invalid Credentials" };
       }
 
-      const correlationId = createCorrelationId(loginDetails.email);
-
-      sendToService({
-        sendingTo: AUTH_QUEUE,
-        correlationId,
-        source: "Create tokens while Admin Login",
-        props: {
-          adminId: adminData._id.toString(),
-          email: adminData.email,
-          role: adminData.role,
-        },
+      const newAccessToken = jwtFunctions.generateAdminAccessToken({
+        id: adminData._id.toString(),
+        email: adminData.email,
+        role: adminData.role,
+      });
+      const newRefreshToken = jwtFunctions.generateAdminRefreshToken({
+        id: adminData._id.toString(),
+        email: adminData.email,
+        role: adminData.role,
       });
 
-      const responseData: any = await new Promise((resolve, reject) => {
-        const timeout = setTimeout(() => {
-          reject(new Error("Response timeout"));
-        }, 10000);
+      let responseData: {
+        status: boolean;
+        data: null | { accessToken: string; refreshToken: string };
+      };
 
-        eventEmitter.once(correlationId, (data) => {
-          clearTimeout(timeout);
-          resolve(data);
-        });
-      });
+      if (!newAccessToken || !newRefreshToken) {
+        responseData = {
+          status: false,
+          data: null,
+        };
+      } else {
+        responseData = {
+          status: true,
+          data: {
+            accessToken: newAccessToken,
+            refreshToken: newRefreshToken,
+          },
+        };
+      }
 
       if (responseData.status) {
         return {
@@ -332,10 +335,5 @@ export function userDataStatusChange(correlationId: string, params: any) {
 
 // to access the Admin Tokens after the tokens created
 export function gettingAdminTokens(correlationId: string, params: any) {
-  eventEmitter.emit(correlationId, params);
-}
-
-// to access the Admin Tokens after the tokens created
-export function gettingAdminAccessToken(correlationId: string, params: any) {
   eventEmitter.emit(correlationId, params);
 }

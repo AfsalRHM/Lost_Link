@@ -42,15 +42,6 @@ export async function manageQueue() {
             }
           } else if (
             msg?.properties?.headers?.source ==
-            "Access Token and Refresh Token OnBoard"
-          ) {
-            if (messageContent) {
-              gettingAdminTokens(correlationId, messageContent);
-            } else {
-              console.log("Error on messageContent on admin managing Queue 2");
-            }
-          } else if (
-            msg?.properties?.headers?.source ==
             "Admin Access Token Verification"
           ) {
             if (messageContent) {
