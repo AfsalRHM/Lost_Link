@@ -18,7 +18,7 @@ function generateOTP(): string {
 export default async function sendMail(
   recieverEmail: string,
   recieverName: string
-): Promise<string> {
+): Promise<string | null> {
   const otpValue = generateOTP();
 
   const info = await transporter.sendMail({
@@ -59,5 +59,12 @@ export default async function sendMail(
           </div>
         `,
   });
-  return otpValue;
+  if (info) {
+    return otpValue;
+  } else {
+    console.log(
+      "Mail didn't send Correctly, An error occured in the sendMail.ts"
+    );
+    return null;
+  }
 }

@@ -97,7 +97,7 @@ export default class authService implements IauthService {
 
   // Method to Send Mail to the User Mail
   async sendMail(recieverEmail: string, recieverName: string): Promise<any> {
-    let otp: string;
+    let otp: string | null;
     if (recieverName == "Reset Password") {
       const replyQueue = process.env.USER_QUEUE;
       const correlationId = createCorrelationId(recieverEmail);
@@ -126,6 +126,9 @@ export default class authService implements IauthService {
 
       if (userData.data) {
         otp = await sendMail(recieverEmail, userData.user_name);
+        if (!otp) {
+          return { status: false, data: null, message: "Otp Not Send" }
+        }
         const expire = new Date(Date.now() + 10 * 1000 * 1);
         await this._otpRepository.deleteMany(recieverEmail);
         const data = await this._otpRepository.insertOTP({
@@ -143,7 +146,7 @@ export default class authService implements IauthService {
       await this._otpRepository.deleteMany(recieverEmail);
       const data = await this._otpRepository.insertOTP({
         email: recieverEmail,
-        otp: otp,
+        otp: otp!,
         expires_at: expire,
       });
     }

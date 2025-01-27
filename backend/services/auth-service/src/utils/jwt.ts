@@ -32,7 +32,7 @@ if (process.env.JWT_REFRESH_SECRETKEY) {
 }
 
 const accessExpiration = "1d";
-const refreshExpiration = "2w";
+const refreshExpiration = "2d";
 
 /******* Functions For User JWT Verifications ********************************************************************************/
 export default class jwtFunctions {
@@ -46,6 +46,9 @@ export default class jwtFunctions {
 
   static verifyAccessToken(token: string): jwtPayload | null {
     try {
+      if (!token) {
+        throw new Error("Token is undefined or null.");
+      }
       const decoded = jwt.verify(token, accessTokenSecret);
       return decoded as any;
     } catch (error) {
@@ -55,6 +58,9 @@ export default class jwtFunctions {
 
   static verifyRefreshToken(token: string): jwtPayload | null {
     try {
+      if (!token) {
+        throw new Error("Token is undefined or null.");
+      }
       const decoded = jwt.verify(token, refreshTokenSecret);
       return decoded as any;
     } catch (error) {
@@ -77,15 +83,22 @@ export default class jwtFunctions {
 
   static verifyAdminAccessToken(token: string): jwtPayload | null {
     try {
+      if (!token) {
+        throw new Error("Token is undefined or null.");
+      }
       const decoded = jwt.verify(token, adminAccessTokenSecret);
       return decoded as any;
     } catch (error) {
-      throw new Error();
+      console.error("Error verifying token:", error);
+      return null;
     }
   }
 
   static verifyAdminRefreshToken(token: string): jwtPayload | null {
     try {
+      if (!token) {
+        throw new Error("Token is undefined or null.");
+      }
       const decoded = jwt.verify(token, adminRefreshTokenSecret);
       return decoded as any;
     } catch (error) {

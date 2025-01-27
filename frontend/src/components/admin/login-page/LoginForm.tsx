@@ -49,6 +49,8 @@ const LoginForm: React.FC = () => {
       console.log(result);
       if (result.data == null) {
         showErrorToast("Admin Login Failed...!");
+      } else if (result.data.data.status == false) {
+        setAdminLoginValidationError({display: true, content: "Invalid Credentials"})
       } else {
         dispatch(assignAdminAccessToken(result.authorizationHeader.split(' ')[1]));
         dispatch(assignAdminDetails(result.data.data.data))

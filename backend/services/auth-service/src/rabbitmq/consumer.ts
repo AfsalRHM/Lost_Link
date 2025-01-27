@@ -40,28 +40,6 @@ export async function manageQueue() {
               console.log("Error on messageContent on auth managing Queue 1");
             }
           } else if (
-            msg?.properties?.headers?.source ==
-            "Create tokens while Admin Login"
-          ) {
-            if (messageContent) {
-              const response = await _authService.createJwtTokens(
-                messageContent
-              );
-              channel.sendToQueue(
-                "ADMIN",
-                Buffer.from(JSON.stringify(response)),
-                {
-                  correlationId: msg.properties.correlationId,
-                  headers: {
-                    source: "Access Token and Refresh Token OnBoard",
-                    correlationIdIdentifier: messageContent.props.email,
-                  },
-                }
-              );
-            } else {
-              console.log("Error on messageContent on auth managing Queue 7");
-            }
-          } else if (
             msg?.properties?.headers?.source == "Admin Access Token Validator"
           ) {
             if (messageContent) {
