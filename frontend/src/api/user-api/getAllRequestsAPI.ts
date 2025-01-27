@@ -15,14 +15,9 @@ export default async function getAllRequests(props: Props): Promise<any> {
       }
     );
 
-    // const newAccessToken = response.headers["authorization"].split(" ")[1];
-    // // props.dispatch(props.setAccessToken(newAccessToken));
-    console.log(response.data.data, "this is all the reques from the getAllRequestAPI")
     return response;
   } catch (error) {
     console.error("Error fetching All Requests:", error);
-    // props.dispatch(props.removeUserDetails());
-    // props.navigate("/signin");
     return false;
   }
 }

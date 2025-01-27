@@ -73,17 +73,6 @@ export async function manageQueue() {
             correlationId: msg.properties.correlationId,
             headers: { source: "password changed" },
           });
-        } else if (msg?.properties?.headers?.source == "get All Users") {
-          const response = await _userService.getAllUsers();
-
-          channel.sendToQueue("ADMIN", Buffer.from(JSON.stringify(response)), {
-            correlationId: msg.properties.correlationId,
-            headers: {
-              source: "all user resoponse",
-              correlationIdIdentifier:
-                msg?.properties?.headers?.correlationIdString,
-            },
-          });
         } else if (
           msg?.properties?.headers?.source == "Change the User Status"
         ) {

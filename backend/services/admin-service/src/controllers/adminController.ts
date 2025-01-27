@@ -120,6 +120,7 @@ export default class authController implements IadminController {
 
   public refreshToken = async (req: Request, res: Response): Promise<void> => {
     try {
+      console.log('Reaching here on the admin refreshTOken/adminController');
       const refreshToken = req.cookies.adminRefreshToken;
       const result = await this._adminService.refreshToken(refreshToken);
       if (result?.status == true) {

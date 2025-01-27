@@ -3,7 +3,7 @@ import IrequestService from "../interface/IrequestService";
 import requestRepository from "../repositories/requestRepository";
 import jwtFunctions from "../utils/jwt";
 
-import stripe, { Stripe } from "stripe";
+import stripe from "stripe";
 
 export default class requestService implements IrequestService {
   private _requestRepository: requestRepository;
@@ -21,7 +21,7 @@ export default class requestService implements IrequestService {
   }): Promise<any> {
     const decoded = jwtFunctions.verifyAccessToken(accessToken);
     if (decoded) {
-      const userId = decoded.userId;
+      const userId = decoded.id;
       const requestData = {
         user_id: userId,
         product_name: formData.productName,
@@ -35,7 +35,7 @@ export default class requestService implements IrequestService {
         product_images: formData.images,
         additional_information: formData.additionalInfo,
       };
-      const insertedData = await this._requestRepository.insertRequest(
+      const insertedData: IrequestModel | null = await this._requestRepository.insertRequest(
         requestData
       );
       if (insertedData) {

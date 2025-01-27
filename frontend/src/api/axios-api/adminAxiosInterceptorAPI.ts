@@ -9,11 +9,13 @@ const adminAxiosInstance = axios.create({
 // Request Interceptor (Add Authorization Header)
 adminAxiosInstance.interceptors.request.use(
   (config) => {
-    const state = store.getState();
-    const accessToken = state.accessToken.adminAccessToken;
+    if (!config.headers["Authorization"]) {
+      const state = store.getState();
+      const accessToken = state.accessToken.adminAccessToken;
 
-    if (accessToken) {
-      config.headers["Authorization"] = `Bearer ${accessToken}`;
+      if (accessToken) {
+        config.headers["Authorization"] = `Bearer ${accessToken}`;
+      }
     }
     return config;
   },
@@ -33,12 +35,13 @@ adminAxiosInstance.interceptors.response.use(
 
       try {
         const response = await axios.post(
-          `${import.meta.env.VITE_API_ROUTE}/auth/adminRefreshToken`,
+          `${import.meta.env.VITE_API_ROUTE}/admin/refreshToken`,
           {},
           {
             withCredentials: true,
           }
         );
+
         const newAccessToken = response.headers["authorization"].split(" ")[1];
 
         originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;

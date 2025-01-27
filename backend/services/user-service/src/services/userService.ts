@@ -97,17 +97,9 @@ export default class userService implements IuserService {
     try {
       const userList = await this._userRepository.findAll();
       if (userList) {
-        return {
-          status: true,
-          data: userList,
-          message: "get All Users",
-        };
+        return userList;
       } else {
-        return {
-          status: false,
-          data: null,
-          message: "get All Users",
-        };
+        return null;
       }
     } catch (error) {
       console.log(error, "error on the getAllUsers/userService");

@@ -12,6 +12,7 @@ import {
 } from "../utils/correlationId";
 import eventEmitter from "../utils/eventEmitter";
 import sendToService from "../rabbitmq/producer";
+import jwtPayload from "../interface/IjwtPayload";
 
 export default class authService implements IauthService {
   private _otpRepository: otpRepository;
@@ -127,7 +128,7 @@ export default class authService implements IauthService {
       if (userData.data) {
         otp = await sendMail(recieverEmail, userData.user_name);
         if (!otp) {
-          return { status: false, data: null, message: "Otp Not Send" }
+          return { status: false, data: null, message: "Otp Not Send" };
         }
         const expire = new Date(Date.now() + 10 * 1000 * 1);
         await this._otpRepository.deleteMany(recieverEmail);
@@ -419,12 +420,12 @@ export default class authService implements IauthService {
       if (!token) {
         return { status: false, message: "No Token Provided" };
       }
-      const decoded = jwtFunctions.verifyRefreshToken(token);
+      const decoded: jwtPayload | null = jwtFunctions.verifyRefreshToken(token);
       if (!decoded) {
         return { status: false, message: "Token expired" };
       }
-      const newUserId = new Types.ObjectId(decoded.id).toString();
-      const newAccessToken = jwtFunctions.generateAccessToken({
+      const newUserId: string = new Types.ObjectId(decoded.id).toString();
+      const newAccessToken: string = jwtFunctions.generateAccessToken({
         id: newUserId,
         email: decoded.email,
         role: decoded.role,

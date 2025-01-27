@@ -11,6 +11,7 @@ import {
 import { removeUserDetails } from "../../../redux/slice/userDetailsSlice";
 import { useNavigate } from "react-router-dom";
 import { showErrorToast } from "../../../utils/toastUtils";
+import RequestLoading from "./requestLoading";
 
 const AllRequests = () => {
   const { accessToken } = useSelector((state: RootState) => state.accessToken);
@@ -22,7 +23,7 @@ const AllRequests = () => {
   const [loading, setLoading] = useState(true);
 
   const [filters, setFilters] = useState({
-    category: "", // This initializes the category filter as an empty string
+    category: "", 
     minReward: 0,
     maxReward: 1000,
   });
@@ -67,7 +68,7 @@ const AllRequests = () => {
           filters={filters}
           setFilteredRequests={setFilteredRequests}
         />
-        <p>Loading...</p>
+        <RequestLoading />
       </div>
     );
 

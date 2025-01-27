@@ -2,8 +2,6 @@ import jwt from "jsonwebtoken";
 
 import { jwtPayload } from "../interface/IjwtTypes";
 
-let accessTokenSecret = "";
-let refreshTokenSecret = "";
 let adminAccessTokenSecret = "";
 let adminRefreshTokenSecret = "";
 
@@ -19,49 +17,10 @@ if (process.env.ADMIN_JWT_REFRESH_SECRETKEY) {
   console.log("No process.env.ADMIN_JWT_REFRESH_SECRETKEY Available");
 }
 
-if (process.env.JWT_ACCESS_SECRETKEY) {
-  accessTokenSecret = process.env.JWT_ACCESS_SECRETKEY;
-} else {
-  console.log("No process.env.JWT_ACCESS_SECRETKEY Available");
-}
+const accessExpiration = "5s";
+const refreshExpiration = "1d";
 
-if (process.env.JWT_REFRESH_SECRETKEY) {
-  refreshTokenSecret = process.env.JWT_REFRESH_SECRETKEY;
-} else {
-  console.log("No process.env.JWT_REFRESH_SECRETKEY Available");
-}
-
-const accessExpiration = "1d";
-const refreshExpiration = "2d";
-
-/******* Functions For User JWT Verifications ********************************************************************************/
 export default class jwtFunctions {
-  static generateAccessToken(user: jwtPayload): string {
-    return jwt.sign(user, accessTokenSecret, { expiresIn: accessExpiration });
-  }
-
-  static generateRefreshToken(user: jwtPayload): string {
-    return jwt.sign(user, refreshTokenSecret, { expiresIn: refreshExpiration });
-  }
-
-  static verifyAccessToken(token: string): jwtPayload | null {
-    try {
-      const decoded = jwt.verify(token, accessTokenSecret);
-      return decoded as any;
-    } catch (error) {
-      throw new Error();
-    }
-  }
-
-  static verifyRefreshToken(token: string): jwtPayload | null {
-    try {
-      const decoded = jwt.verify(token, refreshTokenSecret);
-      return decoded as any;
-    } catch (error) {
-      return null;
-    }
-  }
-
   /******* Functions For Admin JWT Verifications ********************************************************************************/
   static generateAdminAccessToken(admin: jwtPayload): string {
     return jwt.sign(admin, adminAccessTokenSecret, {
@@ -80,12 +39,9 @@ export default class jwtFunctions {
       if (!token) {
         throw new Error("Token is undefined or null.");
       }
-      console.log("this is from the verifyAdminAccessToken/jwt 1", token);
       const decoded = jwt.verify(token, adminAccessTokenSecret);
-      console.log("this is from the verifyAdminAccessToken/jwt 2", decoded);
       return decoded as any;
     } catch (error) {
-      console.error("Error verifying token:", error);
       return null;
     }
   }
@@ -93,7 +49,6 @@ export default class jwtFunctions {
   static verifyAdminRefreshToken(token: string): jwtPayload | null {
     try {
       const decoded = jwt.verify(token, adminRefreshTokenSecret);
-      console.log(decoded, "This is from the verifyAdminRefreshToken/jwt.ts");
       return decoded as any;
     } catch (error) {
       return null;

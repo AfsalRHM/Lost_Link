@@ -31,10 +31,11 @@ if (process.env.JWT_REFRESH_SECRETKEY) {
   console.log("No process.env.JWT_REFRESH_SECRETKEY Available");
 }
 
-const accessExpiration = "1d";
+const accessExpiration = "5s";
 const refreshExpiration = "2w";
 
 export default class jwtFunctions {
+  /******* Functions For User JWT Verifications ********************************************************************************/
   static generateAccessToken(user: jwtPayload): string {
     return jwt.sign(user, accessTokenSecret, { expiresIn: accessExpiration });
   }
@@ -48,7 +49,7 @@ export default class jwtFunctions {
       const decoded = jwt.verify(token, accessTokenSecret);
       return decoded as any;
     } catch (error) {
-      throw new Error();
+      return null;
     }
   }
 
@@ -61,12 +62,25 @@ export default class jwtFunctions {
     }
   }
 
+  /******* Functions For Admin JWT Verifications ********************************************************************************/
+  static generateAdminAccessToken(admin: jwtPayload): string {
+    return jwt.sign(admin, adminAccessTokenSecret, {
+      expiresIn: accessExpiration,
+    });
+  }
+
+  static generateAdminRefreshToken(admin: jwtPayload): string {
+    return jwt.sign(admin, adminRefreshTokenSecret, {
+      expiresIn: refreshExpiration,
+    });
+  }
+
   static verifyAdminAccessToken(token: string): jwtPayload | null {
     try {
       const decoded = jwt.verify(token, adminAccessTokenSecret);
       return decoded as any;
     } catch (error) {
-      throw new Error();
+      return null;
     }
   }
 

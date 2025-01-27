@@ -1,5 +1,4 @@
 const ReqeustPart = ({ filteredRequests }: { filteredRequests: any }) => {
-  console.log(filteredRequests);
   return (
     <div className="flex-1 p-8">
       <h1 className="text-3xl font-bold underline text-center mb-6 text-violet-600">
@@ -9,14 +8,14 @@ const ReqeustPart = ({ filteredRequests }: { filteredRequests: any }) => {
         {filteredRequests.map((request: any) => (
           <div
             key={request._id}
-            className="bg-white shadow-md rounded-lg border border-gray-200 overflow-hidden"
+            className="bg-white shadow-md rounded-lg border border-gray-200 overflow-hidden flex flex-col"
           >
             <img
               src={request.product_images[0]}
               alt={request.product_name}
               className="w-full h-48 object-cover"
             />
-            <div className="p-4">
+            <div className="p-4 flex-1 flex flex-col">
               <h2 className="text-lg font-semibold mb-2 text-violet-700">
                 {request.product_name}
               </h2>
@@ -28,12 +27,14 @@ const ReqeustPart = ({ filteredRequests }: { filteredRequests: any }) => {
                 <span className="font-medium">Reward:</span>
                 {` ₹${request.reward_amount}`}
               </p>
-              <p className="text-sm text-gray-700 mb-4">
-                {request.additional_information.length > 60
-                  ? `${request.additional_information.slice(0, 60)}...`
-                  : request.additional_information}
+              <p className="text-sm text-gray-700 mb-4 flex-1">
+                {request.additional_information.length !== 0
+                  ? request.additional_information.length > 60
+                    ? `${request.additional_information.slice(0, 60)}...`
+                    : request.additional_information
+                  : "No Description Available..."}
               </p>
-              <button className="w-full bg-violet-600 text-white py-2 rounded-md hover:bg-violet-700">
+              <button className="w-full bg-violet-600 text-white py-2 rounded-md hover:bg-violet-700 mt-auto">
                 View Details
               </button>
             </div>

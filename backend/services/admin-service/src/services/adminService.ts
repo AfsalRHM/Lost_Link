@@ -249,91 +249,43 @@ export default class adminService implements IadminService {
     token: string
   ): Promise<{ status: boolean; message: string } | undefined> {
     try {
-      const CURRENT_QUEUE = process.env.ADMIN_QUEUE;
-      const AUTH_QUEUE = process.env.AUTH_QUEUE;
-
-      if (!AUTH_QUEUE || !CURRENT_QUEUE) {
-        throw new Error("AUTH QUEUE is not available on the middleware");
-      }
-
       if (!token) {
         return { status: false, message: "No Token Provided" };
       }
 
-      const correlationId = createCorrelationId(token);
-
-      sendToService({
-        sendingTo: AUTH_QUEUE,
-        correlationId,
-        source: "Admin Refresh Token Validator",
-        props: { token },
-      });
-
-      const decoded: decodedType = await new Promise((resolve, reject) => {
-        const timeout = setTimeout(() => {
-          reject(new Error("Response timeout"));
-        }, 10000);
-
-        eventEmitter.once(correlationId, (data) => {
-          clearTimeout(timeout);
-          resolve(data);
-        });
-      });
+      const decoded = jwtFunctions.verifyAdminRefreshToken(token);
 
       console.log("Decode Refresh token is here", decoded);
 
       if (!decoded) {
         return { status: false, message: "Token expired" };
       }
-      const newAdminId = new Types.ObjectId(decoded.data.id).toString();
 
-      const correlationId2 = createCorrelationId(decoded.data.email);
+      const adminData = await this._adminRepository.findAdmin(decoded.email);
 
-      sendToService({
-        sendingTo: AUTH_QUEUE,
-        correlationId,
-        source: "Create New Admin Access Token",
-        props: {
-          adminId: newAdminId,
-          email: decoded.data.email,
-          role: decoded.data.role,
-        },
+      if (!adminData) {
+        return { status: false, message: "Admin Not Found" };
+      }
+
+      console.log(adminData._id, "this is the admin Data");
+
+      const newAccessToken = jwtFunctions.generateAdminAccessToken({
+        id: adminData._id.toString(),
+        email: adminData.email,
+        role: adminData.role,
       });
+      if (!newAccessToken) {
+        return { status: false, message: "New Access Token not Generated" };
+      }
 
-      const newAccessData: any = await new Promise((resolve, reject) => {
-        const timeout = setTimeout(() => {
-          reject(new Error("Response timeout"));
-        }, 10000);
-
-        eventEmitter.once(correlationId2, (data) => {
-          clearTimeout(timeout);
-          resolve(data);
-        });
-      });
-
-      // const newAccessToken = jwtFunctions.generateAccessToken({
-      //   id: newAdminId,
-      //   email: decoded.data.email,
-      //   role: decoded.data.role,
-      // });
-      return { status: true, message: newAccessData.data };
+      return { status: true, message: newAccessToken };
     } catch (error) {
       console.log(error);
     }
   }
 }
 
-// to access the User List after the API call
-export function userList(correlationId: string, params: any) {
-  eventEmitter.emit(correlationId, params);
-}
-
 // to access the User Data after the status change
 export function userDataStatusChange(correlationId: string, params: any) {
-  eventEmitter.emit(correlationId, params);
-}
-
-// to access the Admin Tokens after the tokens created
-export function gettingAdminTokens(correlationId: string, params: any) {
   eventEmitter.emit(correlationId, params);
 }

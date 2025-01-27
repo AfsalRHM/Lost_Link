@@ -1,10 +1,5 @@
 import configCommunication, { getChannel } from "../config/communicationConfig";
-import { gettingAdminAccessTokenVerifyResult } from "../middlewares/jwtVerifyUser";
-import adminService, {
-  gettingAdminTokens,
-  userDataStatusChange,
-  userList,
-} from "../services/adminService";
+import adminService, { userDataStatusChange } from "../services/adminService";
 import { getCorrelationId } from "../utils/correlationId";
 
 export async function manageQueue() {
@@ -23,6 +18,7 @@ export async function manageQueue() {
       if (msg) {
         const messageContent = JSON.parse(msg.content.toString());
         let correlationId;
+        console.log(msg.properties);
         console.log(messageContent);
 
         if (messageContent) {
@@ -34,35 +30,7 @@ export async function manageQueue() {
         }
 
         if (correlationId) {
-          if (msg?.properties?.headers?.source == "all user resoponse") {
-            if (messageContent) {
-              userList(correlationId, messageContent);
-            } else {
-              console.log("Error on messageContent on admin managing Queue 1");
-            }
-          } else if (
-            msg?.properties?.headers?.source ==
-            "Admin Access Token Verification"
-          ) {
-            if (messageContent) {
-              gettingAdminAccessTokenVerifyResult(
-                correlationId,
-                messageContent
-              );
-            } else {
-              console.log("Error on messageContent on admin managing Queue 2");
-            }
-          } else if (
-            msg?.properties?.headers?.source == "New Admin Access Token"
-          ) {
-            if (messageContent) {
-              gettingAdminTokens(correlationId, messageContent);
-            } else {
-              console.log("Error on messageContent on admin managing Queue 2");
-            }
-          } else if (
-            msg?.properties?.headers?.source == "status changed response"
-          ) {
+          if (msg?.properties?.headers?.source == "status changed response") {
             if (messageContent) {
               userDataStatusChange(correlationId, messageContent);
             } else {

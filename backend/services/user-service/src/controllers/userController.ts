@@ -25,4 +25,25 @@ export default class UserController implements IuserController {
         .json({ status: true, data: userData });
     }
   };
+
+  public getAllUsers = async (req: Request, res: Response): Promise<void> => {
+    const accessToken = req.headers["authorization"]?.split(" ")[1];
+    if (!accessToken) {
+      res.status(400).json({ message: "No authorization token provided" });
+    } else {
+      const userData = await this._userService.getAllUsers();
+      if (userData) {
+        res
+        .setHeader("Authorization", `Bearer ${accessToken}`)
+        .status(200)
+        .json({ status: true, data: userData });
+      } else {
+        res
+        .setHeader("Authorization", `Bearer ${accessToken}`)
+        .status(200)
+        .json({ status: false, data: userData });
+      }
+      
+    }
+  };
 }
