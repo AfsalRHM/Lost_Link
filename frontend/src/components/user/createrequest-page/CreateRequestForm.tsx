@@ -13,7 +13,6 @@ import { showErrorToast, showSuccessToast } from "../../../utils/toastUtils";
 import { useNavigate } from "react-router-dom";
 import { removeUserDetails } from "../../../redux/slice/userDetailsSlice";
 import {
-  assignAccessToken,
   removeAccessToken,
 } from "../../../redux/slice/accessTokenSlice";
 
@@ -124,8 +123,6 @@ const CreateRequestForm = () => {
         accessToken,
       });
 
-      console.log(paymentResponse.data);
-
       const { sessionId } = paymentResponse.data.data;
 
       const response = await createRequest({
@@ -141,8 +138,6 @@ const CreateRequestForm = () => {
         return;
       }
 
-      console.log(response);
-
       if (response === false) {
         dispatch(removeUserDetails());
         dispatch(removeAccessToken());
@@ -150,9 +145,6 @@ const CreateRequestForm = () => {
         showErrorToast("Session Expired! Please Login...");
       } else {
         if (response.data.status) {
-          const newAccessToken =
-            response.headers["authorization"].split(" ")[1];
-          dispatch(assignAccessToken(newAccessToken));
           showSuccessToast("Request Created Successfully.");
           navigate("/home");
         } else {

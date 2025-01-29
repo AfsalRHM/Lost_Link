@@ -1,10 +1,31 @@
 import axios from "axios";
+import { store } from "../../redux/store";
+import { assignAccessToken } from "../../redux/slice/accessTokenSlice";
 
 const axiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_ROUTE,
   withCredentials: true,
 });
 
+// Request Interceptor (Add Authorization Header)
+axiosInstance.interceptors.request.use(
+  (config) => {
+    if (!config.headers["Authorization"]) {
+      const state = store.getState();
+      const accessToken = state.accessToken.accessToken;
+
+      if (accessToken) {
+        config.headers["Authorization"] = `Bearer ${accessToken}`;
+      }
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Response Interceptor (Handle the 401 Error)
 axiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {
@@ -22,6 +43,8 @@ axiosInstance.interceptors.response.use(
           }
         );
         const newAccessToken = response.headers["authorization"].split(" ")[1];
+
+        assignAccessToken(newAccessToken);
 
         originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
 

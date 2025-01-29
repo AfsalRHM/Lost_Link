@@ -31,8 +31,8 @@ if (process.env.JWT_REFRESH_SECRETKEY) {
   console.log("No process.env.JWT_REFRESH_SECRETKEY Available");
 }
 
-const accessExpiration = "5s";
-const refreshExpiration = "2d";
+const accessExpiration = "1d";
+const refreshExpiration = "2w";
 
 /******* Functions For User JWT Verifications ********************************************************************************/
 export default class jwtFunctions {

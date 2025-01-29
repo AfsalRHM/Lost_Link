@@ -1,4 +1,5 @@
-import IuserService from "../interface/IuserService";
+import IuserModel from "../interface/IuserModel";
+import IuserService, { updateFormDataType } from "../interface/IuserService";
 import userRepository from "../repositories/userRepository";
 
 export default class userService implements IuserService {
@@ -93,6 +94,78 @@ export default class userService implements IuserService {
     }
   }
 
+  async getProfile({ userId }: { userId: string | undefined }): Promise<any> {
+    try {
+      if (!userId) {
+        return {
+          status: false,
+          message: "User Id not reached on the getProfile/userService",
+          data: null,
+        };
+      }
+      const userData: IuserModel | null = await this._userRepository.findOne({
+        _id: userId,
+      });
+      if (userData) {
+        return {
+          status: true,
+          message: "User Data Is Available",
+          data: userData,
+        };
+      } else {
+        return {
+          status: false,
+          message: "User not exist with the provided user id",
+          data: null,
+        };
+      }
+    } catch (error) {
+      console.log(error, "error on the getAllUsers/userService");
+    }
+  }
+
+  async updateUser({
+    updateFormData,
+    userId,
+  }: {
+    updateFormData: updateFormDataType;
+    userId: string;
+  }): Promise<any> {
+    try {
+      if (!updateFormData) {
+        return {
+          status: false,
+          message: "User Id not reached on the getProfile/userService",
+          data: null,
+        };
+      }
+      const userUpdateData = {
+        profile_pic: updateFormData.profilePic,
+        full_name: updateFormData.fullName,
+        user_name: updateFormData.userName,
+        phone: updateFormData.phone,
+      };
+      const userData: IuserModel | null =
+        await this._userRepository.findByIdAndUpdate(userId, userUpdateData);
+      if (userData) {
+        return {
+          status: true,
+          message: "User Data Is Updated",
+          data: userData,
+        };
+      } else {
+        return {
+          status: false,
+          message: "User not exist with the provided user id",
+          data: null,
+        };
+      }
+    } catch (error) {
+      console.log(error, "error on the getAllUsers/userService");
+    }
+  }
+
+  /****************************           Admin Side             **************************************/
   async getAllUsers(): Promise<any> {
     try {
       const userList = await this._userRepository.findAll();

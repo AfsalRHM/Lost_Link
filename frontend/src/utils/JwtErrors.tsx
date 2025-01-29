@@ -33,6 +33,11 @@ export const useUserJwtErrors = () => {
       dispatch(removeAccessToken());
       navigate("/signin");
       showErrorToast("Session Expired! Please Login...");
+    } else {
+      dispatch(removeUserDetails());
+      dispatch(removeAccessToken());
+      navigate("/signin");
+      showErrorToast("Unexpected Error Occured...");
     }
   };
 };

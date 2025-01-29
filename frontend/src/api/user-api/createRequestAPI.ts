@@ -19,13 +19,9 @@ export default async function createRequest(props: Props): Promise<any> {
       }
     );
 
-    // const newAccessToken = response.headers["authorization"].split(" ")[1];
-    // props.dispatch(props.setAccessToken(newAccessToken));
     return response;
   } catch (error) {
     console.error("Error Creating Request:", error);
-    // props.dispatch(props.removeUserDetails());
-    // props.navigate("/signin");
     return false;
   }
 }

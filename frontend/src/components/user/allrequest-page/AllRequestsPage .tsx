@@ -2,8 +2,7 @@ import { useEffect, useState } from "react";
 import FilterSideBar from "./FilterSideBar";
 import ReqeustPart from "./ReqeustPart";
 import getAllRequests from "../../../api/user-api/getAllRequestsAPI";
-import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "../../../redux/store";
+import { useDispatch } from "react-redux";
 import {
   assignAccessToken,
   removeAccessToken,
@@ -11,10 +10,9 @@ import {
 import { removeUserDetails } from "../../../redux/slice/userDetailsSlice";
 import { useNavigate } from "react-router-dom";
 import { showErrorToast } from "../../../utils/toastUtils";
-import RequestLoading from "./requestLoading";
+import RequestLoading from "./loading/AllRequestLoading";
 
 const AllRequests = () => {
-  const { accessToken } = useSelector((state: RootState) => state.accessToken);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -23,7 +21,7 @@ const AllRequests = () => {
   const [loading, setLoading] = useState(true);
 
   const [filters, setFilters] = useState({
-    category: "", 
+    category: "",
     minReward: 0,
     maxReward: 1000,
   });
@@ -31,7 +29,7 @@ const AllRequests = () => {
   useEffect(() => {
     const fetchRequests = async () => {
       try {
-        const response = await getAllRequests({ accessToken });
+        const response = await getAllRequests();
         if (response === false) {
           dispatch(removeUserDetails());
           dispatch(removeAccessToken());

@@ -1,5 +1,6 @@
 import axios from "axios";
 import { store } from "../../redux/store";
+import { assignAdminAccessToken } from "../../redux/slice/accessTokenSlice";
 
 const adminAxiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_ROUTE,
@@ -43,6 +44,8 @@ adminAxiosInstance.interceptors.response.use(
         );
 
         const newAccessToken = response.headers["authorization"].split(" ")[1];
+
+        assignAdminAccessToken(newAccessToken);
 
         originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
 

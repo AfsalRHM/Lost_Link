@@ -1,18 +1,9 @@
 import axiosInstance from "../axios-api/axiosInterceptorAPI";
 
-interface Props {
-  accessToken: string;
-}
-
-export default async function getAllRequests(props: Props): Promise<any> {
+export default async function getAllRequests(): Promise<any> {
   try {
     const response = await axiosInstance.get(
-      `${import.meta.env.VITE_API_ROUTE}/request/getAllRequests`,
-      {
-        headers: {
-          Authorization: `Bearer ${props.accessToken}`,
-        },
-      }
+      `${import.meta.env.VITE_API_ROUTE}/request/getAllRequests`
     );
 
     return response;
