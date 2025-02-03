@@ -4,6 +4,7 @@ import jwtFunctions from "../utils/jwt";
 
 import userService from "../services/userService";
 import jwtPayload from "../interface/IjwtPayload";
+import { validationResult } from "express-validator";
 
 export default class UserController implements IuserController {
   private _userService: userService;
@@ -74,38 +75,43 @@ export default class UserController implements IuserController {
 
   public updateUser = async (req: Request, res: Response): Promise<void> => {
     try {
-      const accessToken = req.headers["authorization"]?.split(" ")[1];
-      if (!accessToken) {
-        res.status(400).json({ message: "No authorization token provided" });
-      } else if (!req.body.formData) {
-        res.status(404).json({
-          status: false,
-          data: null,
-          message: "The from data not found on the updateUser/userController",
-        });
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        res.status(400).json({ errors: errors.array()[0] });
       } else {
-        const decoded = jwtFunctions.verifyAccessToken(accessToken);
-        if (!decoded) {
-          throw new Error(
-            "Decoded value is not getting on the the updateUser/userController"
-          );
-        } else {
-          const response = await this._userService.updateUser({
-            updateFormData: req.body.formData,
-            userId: decoded.id,
+        const accessToken = req.headers["authorization"]?.split(" ")[1];
+        if (!accessToken) {
+          res.status(400).json({ message: "No authorization token provided" });
+        } else if (!req.body.formData) {
+          res.status(404).json({
+            status: false,
+            data: null,
+            message: "The form data not found on the updateUser/userController",
           });
-          if (response.status) {
-            res.status(200).json({
-              status: response.status,
-              data: response.data,
-              message: response.message,
-            });
+        } else {
+          const decoded = jwtFunctions.verifyAccessToken(accessToken);
+          if (!decoded) {
+            throw new Error(
+              "Decoded value is not getting on the the updateUser/userController"
+            );
           } else {
-            res.status(500).json({
-              status: false,
-              data: null,
-              message: response.message,
+            const response = await this._userService.updateUser({
+              updateFormData: req.body.formData,
+              userId: decoded.id,
             });
+            if (response.status) {
+              res.status(200).json({
+                status: response.status,
+                data: response.data,
+                message: response.message,
+              });
+            } else {
+              res.status(500).json({
+                status: false,
+                data: null,
+                message: response.message,
+              });
+            }
           }
         }
       }

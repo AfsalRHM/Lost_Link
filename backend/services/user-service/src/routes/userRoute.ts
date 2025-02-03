@@ -3,6 +3,7 @@ const user_route = express.Router();
 
 import userController from "../controllers/userController";
 import verifyAccessToken, { verifyAdminAccessToken } from "../middlewares/jwtVerifyUser";
+import updateUserDataValidator from "../validator/editUserDetailsValidator";
 
 const UserController = new userController();
 
@@ -11,7 +12,7 @@ const UserController = new userController();
 user_route.get("/getProfile", verifyAccessToken , UserController.getProfile); // To get the user data
 
 // Patch Requests
-user_route.patch("/update_user", verifyAccessToken, UserController.updateUser); // To update the user data
+user_route.patch("/update_user", verifyAccessToken, updateUserDataValidator, UserController.updateUser); // To update the user data
 
 
 /*************************      Admin Side       *******************************/

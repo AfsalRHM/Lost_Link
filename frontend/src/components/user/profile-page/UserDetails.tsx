@@ -1,6 +1,11 @@
 import { useRef, useState } from "react";
 import { formDataType, userDataType } from "../../../interface/IuserModel";
 import saveUpdatedData from "../../../api/user-api/saveUpdatedDataAPI";
+import { validateUserEditDetails } from "../../../validations/editUserDetails";
+import {
+  showErrorToast2,
+  showSuccessToast2,
+} from "../../../utils/iziToastUtils";
 
 const UserDetails = ({ userData }: { userData: userDataType | undefined }) => {
   const [editDetails, setEditDetails] = useState<boolean>(false);
@@ -59,11 +64,49 @@ const UserDetails = ({ userData }: { userData: userDataType | undefined }) => {
 
   async function saveEditedData(formData: formDataType) {
     try {
-      const response = await saveUpdatedData({ formData });
-      console.log(response);
+      const errors = validateUserEditDetails(formData);
+      if (errors.phone) {
+        showErrorToast2(errors.phone.content);
+        formData.profilePic = userData?.profile_pic;
+        formData.fullName = userData?.full_name;
+        formData.userName = userData?.user_name;
+        formData.email = userData?.email;
+        formData.phone = userData?.phone;
+      } else if (errors.fullName) {
+        showErrorToast2(errors.fullName.content);
+        formData.profilePic = userData?.profile_pic;
+        formData.fullName = userData?.full_name;
+        formData.userName = userData?.user_name;
+        formData.email = userData?.email;
+        formData.phone = userData?.phone;
+      } else if (errors.userName) {
+        showErrorToast2(errors.userName.content);
+        formData.profilePic = userData?.profile_pic;
+        formData.fullName = userData?.full_name;
+        formData.userName = userData?.user_name;
+        formData.email = userData?.email;
+        formData.phone = userData?.phone;
+      } else {
+        const response = await saveUpdatedData({ formData });
+        if (response.errors) {
+          showErrorToast2(response.errors.msg);
+        } else if (response.data.status) {
+          showSuccessToast2("user details updated successfully");
+        } else {
+          showErrorToast2("error while user details edit");
+        }
+      }
     } catch (error) {
       console.log("error while saving the user updated data", error);
     }
+  }
+
+  function removeProfileImage() {
+    setImage(
+      "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png"
+    );
+    formData.profilePic =
+      "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png";
   }
 
   return (
@@ -82,6 +125,18 @@ const UserDetails = ({ userData }: { userData: userDataType | undefined }) => {
           alt="profile_pic"
           onClick={editDetails ? () => fileRef?.current?.click() : undefined}
         />
+        {editDetails &&
+          image !==
+            "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png" && (
+            <div className="flex justify-center">
+              <button
+                className="bg-red-500 px-1 mt-1 rounded-md"
+                onClick={removeProfileImage}
+              >
+                Remove
+              </button>
+            </div>
+          )}
       </div>
 
       <div className="md:grid grid-cols-2 gap-4 flex-grow">
@@ -153,6 +208,26 @@ const UserDetails = ({ userData }: { userData: userDataType | undefined }) => {
           }}
         >
           Edit Details
+        </button>
+      )}
+      {editDetails ? (
+        <button
+          className="md:hidden bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg shadow-md transition-all"
+          onClick={() => {
+            setEditDetails(!editDetails);
+            saveEditedData(formData);
+          }}
+        >
+          Save
+        </button>
+      ) : (
+        <button
+          className="md:hidden bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg shadow-md transition-all"
+          onClick={() => {
+            setEditDetails(!editDetails);
+          }}
+        >
+          Edit
         </button>
       )}
     </div>
