@@ -6,7 +6,13 @@ import { showErrorToast, showSuccessToast } from "../../../utils/toastUtils";
 import userLogout from "../../../api/auth-api/userLogoutAPI";
 import { RootState } from "../../../redux/store";
 
-const ProfileSidebar = () => {
+const ProfileSidebar = ({
+  selectFunction,
+  selectedItem,
+}: {
+  selectFunction: React.Dispatch<React.SetStateAction<string>>;
+  selectedItem: string;
+}) => {
   const { accessToken } = useSelector((state: RootState) => state.accessToken);
 
   const dispatch = useDispatch();
@@ -14,10 +20,8 @@ const ProfileSidebar = () => {
 
   async function logoutFunction() {
     try {
-      const result = await userLogout({
-        accessToken,
-      });
-      if (result.data.status == "true") {
+      const result = await userLogout({ accessToken });
+      if (result.data.status === "true") {
         dispatch(removeUserDetails());
         dispatch(removeAccessToken());
         showSuccessToast("Logout successful!");
@@ -26,34 +30,47 @@ const ProfileSidebar = () => {
         showErrorToast("Logout Failed..!");
       }
     } catch (error) {
-      console.log("Error on the logoutFunction :", error);
-      showErrorToast("Error while loggin out...!");
+      console.log("Error on the logoutFunction:", error);
+      showErrorToast("Error while logging out...!");
     }
   }
 
   function goToPage(currentValue: string) {
+    selectFunction(currentValue);
     console.log(currentValue);
   }
+
+  const menuItems = [
+    "Location Info",
+    "Tier Information",
+    "My Requests",
+    "Completed Requests",
+    "Payment History",
+    "Logout",
+  ];
 
   return (
     <div className="bg-white shadow-lg rounded-xl p-6">
       <h3 className="font-bold text-gray-700 text-lg mb-4">Profile Info</h3>
       <ul className="space-y-3">
-        {[
-          "Location Info",
-          "Tier Information",
-          "My Requests",
-          "Completed Requests",
-          "Payment History",
-          "Logout",
-        ].map((item, index) => (
+        {menuItems.map((item, index) => (
           <li
             key={index}
-            className={`p-3 hover:bg-blue-50 hover:shadow-md rounded-md text-gray-700 cursor-pointer transition-all${
-              index == 5 ? "bg-red-400 hover:text-red-500" : "bg-gray-100"
-            }`}
+            className={`
+              p-3 rounded-md cursor-pointer transition-all 
+              ${
+                item === selectedItem
+                  ? "bg-blue-500 text-white shadow-md"
+                  : "bg-gray-100 text-gray-700 hover:bg-blue-50 hover:shadow-md"
+              } 
+              ${item === "Logout" && "bg-red-400 text-white hover:bg-red-500"} 
+            `}
             onClick={() => {
-              index == 5 ? logoutFunction() : goToPage(item);
+              if (item === "Logout") {
+                logoutFunction();
+              } else {
+                goToPage(item);
+              }
             }}
           >
             {item}

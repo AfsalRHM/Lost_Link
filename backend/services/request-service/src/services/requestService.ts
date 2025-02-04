@@ -1,5 +1,6 @@
 import IrequestModel from "../interface/IrequestModel";
 import IrequestService from "../interface/IrequestService";
+import sendToService from "../rabbitmq/producer";
 import requestRepository from "../repositories/requestRepository";
 import jwtFunctions from "../utils/jwt";
 
@@ -35,10 +36,28 @@ export default class requestService implements IrequestService {
         product_images: formData.images,
         additional_information: formData.additionalInfo,
       };
-      const insertedData: IrequestModel | null = await this._requestRepository.insertRequest(
-        requestData
-      );
+
+      const insertedData: IrequestModel | null =
+        await this._requestRepository.insertRequest(requestData);
+
       if (insertedData) {
+        const sendingTo = process.env.USER_QUEUE;
+        const source = "Add the request Id to the user";
+        const props = {
+          userId,
+          requestId: insertedData._id.toString(),
+        };
+
+        if (!sendingTo) {
+          throw new Error("sendingTo is emplty...");
+        }
+
+        sendToService({
+          sendingTo,
+          source,
+          props,
+        });
+
         return {
           status: true,
           data: insertedData,
@@ -51,6 +70,62 @@ export default class requestService implements IrequestService {
           message: "Request Creation Failed",
         };
       }
+    }
+  }
+
+  async getUserRequests(requestIds: [string]): Promise<any> {
+    try {
+      const userRequests = await this._requestRepository.findUserRequests(
+        requestIds
+      );
+      if (userRequests) {
+        return {
+          status: true,
+          data: userRequests,
+          message: "All My Request Fetched",
+        };
+      } else {
+        return {
+          status: false,
+          data: null,
+          message: "All My Request Failed to fetch",
+        };
+      }
+    } catch (error) {
+      return {
+        status: false,
+        data: null,
+        message:
+          "Error occured while getting all requests - from getUserRequests/requestService",
+      };
+    }
+  }
+
+  async getRequestDetails(requestIds: [string]): Promise<any> {
+    try {
+      const requestData = await this._requestRepository.findOne({
+        _id: requestIds,
+      });
+      if (requestData) {
+        return {
+          status: true,
+          data: requestData,
+          message: "Request Data Found",
+        };
+      } else {
+        return {
+          status: false,
+          data: null,
+          message: "Request Data not Found",
+        };
+      }
+    } catch (error) {
+      return {
+        status: false,
+        data: null,
+        message:
+          "Error occured while Fetching Request Data - from getRequestDetails/requestService",
+      };
     }
   }
 

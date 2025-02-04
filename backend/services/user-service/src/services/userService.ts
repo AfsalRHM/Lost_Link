@@ -165,14 +165,38 @@ export default class userService implements IuserService {
     }
   }
 
+  async addRequestId({
+    requestId,
+    userId,
+  }: {
+    requestId: string;
+    userId: string;
+  }): Promise<void> {
+    try {
+      
+      const userData: IuserModel | null =
+        await this._userRepository.findByIdAndAddRequestId(userId, requestId);
+    } catch (error) {
+      console.log(error, "error on the getAllUsers/userService");
+    }
+  }
+
   /****************************           Admin Side             **************************************/
   async getAllUsers(): Promise<any> {
     try {
       const userList = await this._userRepository.findAll();
       if (userList) {
-        return userList;
+        return {
+          status: true,
+          data: userList,
+          message: "All Users Fetched Successfully",
+        };
       } else {
-        return null;
+        return {
+          status: true,
+          data: null,
+          message: "Failed to Fetch All Users ",
+        };
       }
     } catch (error) {
       console.log(error, "error on the getAllUsers/userService");

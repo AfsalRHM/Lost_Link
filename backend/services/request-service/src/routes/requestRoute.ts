@@ -8,6 +8,12 @@ import verifyAccessToken, {
 
 const RequestController = new requestController();
 
+request_route.get(
+  "/getAllRequests",
+  verifyAccessToken,
+  RequestController.getAllRequests
+);
+
 request_route.post(
   "/create_request",
   verifyAccessToken,
@@ -18,11 +24,15 @@ request_route.post(
   verifyAccessToken,
   RequestController.managePayment
 );
-
-request_route.get(
-  "/getAllRequests",
+request_route.post(
+  "/getMyRequests",
   verifyAccessToken,
-  RequestController.getAllRequests
+  RequestController.getUserRequests
+);
+request_route.post(
+  "/getRequestDetails",
+  verifyAccessToken,
+  RequestController.getRequestDetails
 );
 
 request_route.get(

@@ -9,10 +9,12 @@ import { assignAccessToken } from "../../../redux/slice/accessTokenSlice.ts";
 import getProfile from "../../../api/user-api/getProfileAPI.ts";
 import UserDetailsLoading from "./loading/UserDetailsLoading.tsx";
 import VerifyButton from "./VerifyButton";
+import MyRequests from "./MyRequests.tsx";
 
 const Hero = () => {
   const [loading, setLoading] = useState<boolean>(true);
-  const [userData, setUserData] = useState(); // Add the type here
+  const [userData, setUserData] = useState();
+  const [selectedItem, setSelectedItem] = useState<string>("Location Info");
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -55,7 +57,10 @@ const Hero = () => {
           </div>
           <div className="flex flex-col md:flex-row md:w-4/6 gap-5 mb-24 w-full">
             <div className="md:w-80">
-              <ProfileSidebar />
+              <ProfileSidebar
+                selectFunction={setSelectedItem}
+                selectedItem={selectedItem}
+              />
             </div>
 
             <div className="w-full">
@@ -78,11 +83,20 @@ const Hero = () => {
         </div>
         <div className="flex flex-col md:flex-row md:w-4/6 gap-5 mb-24 w-full">
           <div className="md:w-80">
-            <ProfileSidebar />
+            <ProfileSidebar
+              selectFunction={setSelectedItem}
+              selectedItem={selectedItem}
+            />
           </div>
 
           <div className="w-full">
-            <LocationInfo />
+            {selectedItem === "Location Info" ? (
+              <LocationInfo />
+            ) : selectedItem === "My Requests" ? (
+              <MyRequests userData={userData} />
+            ) : (
+              <LocationInfo />
+            )}
           </div>
         </div>
       </div>

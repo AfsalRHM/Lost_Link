@@ -77,6 +77,56 @@ export default class RequestController implements IrequestController {
     }
   };
 
+  public getUserRequests = async (
+    req: Request,
+    res: Response
+  ): Promise<void> => {
+    try {
+      if (!req.body.userRequests) {
+        res.status(400).json({
+          status: false,
+          message: "No User Requests found on the getUserRequests Post Request",
+        });
+        return;
+      }
+      const response = await this._requestService.getUserRequests(
+        req.body.userRequests
+      );
+      if (response.status) {
+        res.status(200).json(response);
+      } else {
+        res.status(400).json(response);
+      }
+    } catch (error) {
+      console.log("error in requestController", error);
+    }
+  };
+
+  public getRequestDetails = async (
+    req: Request,
+    res: Response
+  ): Promise<void> => {
+    try {
+      if (!req.body.requestId) {
+        res.status(400).json({
+          status: false,
+          message: "Request Id not found on the getRequestDetails Post Request",
+        });
+        return;
+      }
+      const response = await this._requestService.getRequestDetails(
+        req.body.requestId
+      );
+      if (response.status) {
+        res.status(200).json(response);
+      } else {
+        res.status(400).json(response);
+      }
+    } catch (error) {
+      console.log("error in getRequestDetails/requestController", error);
+    }
+  };
+
   public changeRequestStatus = async (
     req: Request,
     res: Response

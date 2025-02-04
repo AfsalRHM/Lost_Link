@@ -1,4 +1,4 @@
-import { Document, Model, FilterQuery, DeleteResult } from "mongoose";
+import { Document, Model, FilterQuery } from "mongoose";
 
 import IbaseRepository from "../interface/IbaseRepository";
 
@@ -21,7 +21,7 @@ export default class BaseRepository<T extends Document>
   }
 
   async findAllAdmins(): Promise<T[] | null> {
-    return this.model.find({});
+    return this.model.find({role: "Moderator"});
   }
 
   async findByIdAndUpdate(Id: string, update: Partial<T>): Promise<T | null> {

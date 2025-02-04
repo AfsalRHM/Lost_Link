@@ -6,5 +6,9 @@ export default interface IrequestService {
     accessToken: string;
     formData: FormData;
   }): Promise<any>;
+  getUserRequests(requestIds: [string]): Promise<any>;
+  getRequestDetails(requestIds: [string]): Promise<any>;
+  getRequests(): Promise<any>;
+  makePayment(formData: any): Promise<any>;
   changeRequestStatus(props: { requestId: string }): Promise<any>;
 }

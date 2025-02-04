@@ -88,6 +88,11 @@ export async function manageQueue() {
                 msg?.properties?.headers?.correlationIdString,
             },
           });
+        } else if (
+          msg?.properties?.headers?.source == "Add the request Id to the user"
+        ) {
+          console.log(messageContent);
+          await _userService.addRequestId(messageContent.props);
         } else {
           console.log("No userData found in message.");
         }

@@ -39,9 +39,9 @@ export default class RequestRepository
       if (!request) {
         throw new Error("User not found");
       }
-      
+
       let currentStatus = request.status;
-      
+
       if (request.toObject) {
         currentStatus = request.toObject().status;
       }
@@ -59,6 +59,18 @@ export default class RequestRepository
       return updatedRequest;
     } catch (error) {
       console.error("Error updating status:", error);
+      return null;
+    }
+  }
+
+  async findUserRequests(
+    requestIds: string[]
+  ): Promise<IrequestModel[] | null> {
+    try {
+      const userRequests = await this.model.find({ _id: { $in: requestIds } });
+      return userRequests.length > 0 ? userRequests : null;
+    } catch (error) {
+      console.error("Error getting User Requests:", error);
       return null;
     }
   }

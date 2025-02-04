@@ -10,7 +10,6 @@ const SearchLocation = () => (
         Search
       </button>
     </div>
-    {/* Placeholder for search results */}
     <div className="overflow-x-auto">
       <table className="w-full text-left text-sm border-collapse">
         <thead className="bg-gray-200">

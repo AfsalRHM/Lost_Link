@@ -44,7 +44,7 @@ const RequestListPart = ({
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
 
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(10); // Number of requests per page
+  const [itemsPerPage] = useState(10); 
 
   const request: Request[] = allRequests;
 
@@ -94,7 +94,6 @@ const RequestListPart = ({
       return a[sortField] < b[sortField] ? 1 : -1;
     });
 
-  // Get the requests to display based on the current page and items per page
   const indexOfLastRequest = currentPage * itemsPerPage;
   const indexOfFirstRequest = indexOfLastRequest - itemsPerPage;
   const currentRequests = filteredRequests.slice(
@@ -102,7 +101,6 @@ const RequestListPart = ({
     indexOfLastRequest
   );
 
-  // Handle page change
   const handlePageChange = (page: number) => {
     if (page < 1 || page > Math.ceil(filteredRequests.length / itemsPerPage))
       return;
@@ -222,7 +220,6 @@ const RequestListPart = ({
         </div>
       </div>
 
-      {/* Pagination Controls */}
       <div className="mt-4 flex justify-center">
         <button
           onClick={() => handlePageChange(currentPage - 1)}

@@ -2,7 +2,7 @@ import { getChannel } from "../config/communicationConfig";
 
 interface sendToServiceType {
   sendingTo: string;
-  correlationId: string;
+  correlationId?: string;
   source: string;
   correlationIdIdentifier?: string;
   props?: {
@@ -11,6 +11,7 @@ interface sendToServiceType {
     adminId?: string;
     email?: string;
     role?: string;
+    requestId?: string;
   };
 }
 
@@ -31,7 +32,7 @@ export default async function sendToService(props: sendToServiceType) {
       correlationId: correlationId,
       headers: {
         source: props.source,
-        correlationIdString: props.correlationIdIdentifier,
+        correlationIdString: props?.correlationIdIdentifier,
       },
     });
   } catch (error) {

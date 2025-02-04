@@ -48,4 +48,23 @@ export default class UserRepository
       return null;
     }
   }
+
+  async findByIdAndAddRequestId(
+    userId: string,
+    requestId: string
+  ): Promise<IuserModel | null> {
+    try {
+      const updatedUser = await this.model.findByIdAndUpdate(
+        userId,
+        { $push: { requests: requestId } },
+        { new: true }
+      );
+
+       console.log(updatedUser)
+      return updatedUser;
+    } catch (error) {
+      console.error("Error adding request ID:", error);
+      return null;
+    }
+  }
 }
