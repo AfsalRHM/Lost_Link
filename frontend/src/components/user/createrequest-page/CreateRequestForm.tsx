@@ -12,9 +12,7 @@ import createRequest from "../../../api/user-api/createRequestAPI";
 import { showErrorToast, showSuccessToast } from "../../../utils/toastUtils";
 import { useNavigate } from "react-router-dom";
 import { removeUserDetails } from "../../../redux/slice/userDetailsSlice";
-import {
-  removeAccessToken,
-} from "../../../redux/slice/accessTokenSlice";
+import { removeAccessToken } from "../../../redux/slice/accessTokenSlice";
 
 import { loadStripe, Stripe } from "@stripe/stripe-js";
 import makePayment from "../../../api/user-api/makePaymentAPI";
@@ -38,6 +36,8 @@ const CreateRequestForm = () => {
     expirationLimit: "",
     images: [] as File[],
     additionalInfo: "",
+    lastSeen: "",
+    missingWhile: "",
   });
 
   const [errorData, setErrorData] = useState({
@@ -51,6 +51,8 @@ const CreateRequestForm = () => {
     expirationLimitValidationErrorData: { display: false, content: "" },
     imagesValidationErrorData: { display: false, content: "" },
     additionalInfoValidationErrorData: { display: false, content: "" },
+    lastSeenValidationErrorData: { display: false, content: "" },
+    missingWhileValidationErrorData: { display: false, content: "" },
   });
 
   const handleChange = (key: string, value: any) => {
@@ -69,8 +71,19 @@ const CreateRequestForm = () => {
       expirationLimitValidationErrorData: { display: false, content: "" },
       imagesValidationErrorData: { display: false, content: "" },
       additionalInfoValidationErrorData: { display: false, content: "" },
+      lastSeenValidationErrorData: { display: false, content: "" },
+      missingWhileValidationErrorData: { display: false, content: "" },
     });
+
+    console.log(
+      "this is the from data going for frontend validation",
+      formData
+    );
+
     const errors = validateCreateRequestEntries(formData);
+
+    console.log(errors);
+
     if (errors) {
       let hasErrors = false;
       Object.keys(errors).forEach((key) => {
@@ -190,8 +203,15 @@ const CreateRequestForm = () => {
               onChange={(value) => handleChange("productCategory", value)}
               errorData={errorData.productCategoryValidationErrorData}
             />
+            <InputElement
+              item="last_seen"
+              placeHolder="Last Seen At"
+              onChange={(e) => handleChange("lastSeen", e.target.value)}
+              errorData={errorData.lastSeenValidationErrorData}
+            />
             <LocationElement
               setData={setFormData}
+              missingWhileErrorData={errorData.missingWhileValidationErrorData}
               missingPlaceErrorData={errorData.missingPlaceValidationErrorData}
               modeOfTravelErrorData={errorData.travelModeValidationErrorData}
               missingRouteErrorData={errorData.travelRoutesValidationErrorData}

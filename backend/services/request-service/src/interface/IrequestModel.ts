@@ -7,10 +7,13 @@ export default interface IrequestModel extends Document {
   reward_amount: number;
   product_category: string;
   missing_place: string;
+  last_seen: string;
+  expiration_validity: string;
   mode_of_travel: string;
   missing_route: string[];
+  product_images: string[];
   missing_date: Date;
-  expiration_date: string;
-  additional_information: Date;
+  expiration_date: Date;
+  additional_information: string;
   status: string;
 }

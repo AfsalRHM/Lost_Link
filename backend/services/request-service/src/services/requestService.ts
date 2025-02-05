@@ -23,16 +23,30 @@ export default class requestService implements IrequestService {
     const decoded = jwtFunctions.verifyAccessToken(accessToken);
     if (decoded) {
       const userId = decoded.id;
+
+      const expirationMonths = parseInt(
+        formData.expirationLimit.split(" ")[0],
+        10
+      );
+
+      const currentDate = new Date();
+      const expiryDate = new Date(
+        currentDate.setMonth(currentDate.getMonth() + expirationMonths)
+      );
+
       const requestData = {
         user_id: userId,
         product_name: formData.productName,
         reward_amount: formData.requestReward,
         product_category: formData.productCategory,
+        last_seen: formData.lastSeen,
+        missing_while: formData.missingWhile,
         missing_place: formData.missingPlace,
         mode_of_travel: formData.travelMode,
         missing_route: formData.travelRoutes,
         missing_date: formData.missingDate,
-        expiration_date: formData.expirationLimit,
+        expiration_validity: formData.expirationLimit,
+        expiration_date: expiryDate,
         product_images: formData.images,
         additional_information: formData.additionalInfo,
       };

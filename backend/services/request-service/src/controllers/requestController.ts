@@ -13,6 +13,7 @@ export default class RequestController implements IrequestController {
 
   public createRequest = async (req: Request, res: Response): Promise<void> => {
     try {
+      console.log("here reaching after the validation");
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
         res.status(400).json({ errors: errors.array() });

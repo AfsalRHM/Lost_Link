@@ -13,6 +13,8 @@ const validateCreateRequestEntries = (requestDetails: RequestProps) => {
     expirationLimit?: ValidationErrorData;
     images?: ValidationErrorData;
     additionalInfo?: ValidationErrorData;
+    lastSeen?: ValidationErrorData;
+    missingWhile?: ValidationErrorData;
   } = {};
 
   const inputDate = new Date(requestDetails.missingDate);
@@ -24,40 +26,56 @@ const validateCreateRequestEntries = (requestDetails: RequestProps) => {
       content: "Product Name is required",
     };
   }
-  if (requestDetails.requestReward !== undefined && requestDetails.requestReward < 0) {
+  if (!requestDetails.lastSeen.trim()) {
+    errors.lastSeen = {
+      display: true,
+      content: "Last Seen Info is required",
+    };
+  }
+  if (
+    requestDetails.requestReward !== undefined &&
+    requestDetails.requestReward < 0
+  ) {
     errors.requestReward = {
       display: true,
       content: "Invalid Reward Amount",
     };
   }
-  if (
-    requestDetails.travelMode &&
-    (!requestDetails.travelMode.trim() ||
-      requestDetails.travelMode.trim().length <= 2)
-  ) {
-    errors.travelMode = {
+  if (requestDetails.missingWhile == "") {
+    errors.missingWhile = {
       display: true,
-      content: "Invalid Mode of Travel",
+      content: "Select an Option",
     };
   }
-  if (
-    Array.isArray(requestDetails.travelRoutes) &&
-    requestDetails.travelRoutes.length === 0
-  ) {
-    errors.travelRoutes = {
-      display: true,
-      content: "Invalid Travel Routes",
-    };
-  }
-  if (
-    requestDetails.missingPlace &&
-    (!requestDetails.missingPlace.trim() ||
-      requestDetails.missingPlace.trim().length <= 2)
-  ) {
-    errors.missingPlace = {
-      display: true,
-      content: "Invalid Place",
-    };
+  if (requestDetails.missingWhile == "route") {
+    if (
+      !requestDetails.travelMode.trim() ||
+      requestDetails.travelMode.trim().length <= 2
+    ) {
+      errors.travelMode = {
+        display: true,
+        content: "Invalid Mode of Travel",
+      };
+    }
+    if (
+      Array.isArray(requestDetails.travelRoutes) &&
+      requestDetails.travelRoutes.length === 0
+    ) {
+      errors.travelRoutes = {
+        display: true,
+        content: "Invalid Travel Routes",
+      };
+    }
+  } else if (requestDetails.missingWhile == "specific") {
+    if (
+      !requestDetails.missingPlace.trim() ||
+      requestDetails.missingPlace.trim().length <= 2
+    ) {
+      errors.missingPlace = {
+        display: true,
+        content: "Invalid Place",
+      };
+    }
   }
   if (requestDetails.missingDate && !Date.parse(requestDetails.missingDate)) {
     errors.missingDate = {

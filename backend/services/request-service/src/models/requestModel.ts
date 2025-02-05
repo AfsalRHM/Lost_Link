@@ -20,6 +20,18 @@ const requestSchema = new Schema(
       type: String,
       required: true,
     },
+    last_seen: {
+      type: String,
+      required: true,
+    },
+    expiration_validity: {
+      type: String,
+      required: true,
+    },
+    missing_while: {
+      type: String,
+      required: true
+    },
     missing_place: {
       type: String,
     },
@@ -34,19 +46,19 @@ const requestSchema = new Schema(
       required: true,
     },
     expiration_date: {
-      type: String,
+      type: Date,
       required: true,
     },
     product_images: {
-      type: Array
+      type: Array,
     },
     additional_information: {
       type: String,
     },
     status: {
       type: String,
-      default: "active"
-    }
+      default: "active",
+    },
   },
   {
     timestamps: true,

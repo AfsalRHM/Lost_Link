@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { showErrorToast2 } from "../../../utils/iziToastUtils";
 import IrequestModel from "../../../interface/IrequestModel";
 import getRequestDetails from "../../../api/user-api/getRequestDetails";
+import MyRequestDetailsLoading from "./loading/MyRequestDetailsLoadin";
 
 const MyRequestDetails = () => {
   const navigate = useNavigate();
@@ -46,24 +47,9 @@ const MyRequestDetails = () => {
     getRequestData();
   }, []);
 
-  //   const requestData = {
-  //     product_name: "Just Testing 2",
-  //     reward_amount: 1425,
-  //     product_category: "Clothing",
-  //     missing_place: "Malappuram",
-  //     mode_of_travel: "Bus",
-  //     missing_date: "2025-02-02T00:00:00.000Z",
-  //     expiration_date: "2 Month",
-  //     product_images: [
-  //       "https://res.cloudinary.com/dnxt7foko/image/upload/v1738576885/o0h8nkoydob68utiucvf.png",
-  //       "https://res.cloudinary.com/dnxt7foko/image/upload/v1738576886/z8fne5qxi3eutf8nocxh.png",
-  //       "https://res.cloudinary.com/dnxt7foko/image/upload/v1738576888/zjrsmzhiapekxfzt6efi.png",
-  //     ],
-  //     additional_information: "",
-  //     status: "active",
-  //     description: "Lost item details and identification marks would go here...",
-  //     last_seen: "Near Central Bus Station",
-  //   };
+  if (loading) {
+    return <MyRequestDetailsLoading />;
+  }
 
   return (
     <div className="w-full bg-banner min-h-screen">
@@ -97,8 +83,11 @@ const MyRequestDetails = () => {
             </div>
             <div className="flex flex-wrap items-center gap-4">
               <span className="text-gray-500 font-medium">
+                {" "}
                 Posted On :{" "}
-                {/* {new Date(requestData?.missing_date).toLocaleDateString()} */}
+                {requestData?.createdAt
+                  ? new Date(requestData.createdAt).toLocaleDateString()
+                  : "N/A"}
               </span>
             </div>
           </div>
@@ -117,26 +106,49 @@ const MyRequestDetails = () => {
                         {requestData?.product_category}
                       </p>
                     </div>
-                    <div className="bg-gray-50 p-4 rounded-xl">
-                      <p className="text-gray-600 text-sm mb-1">
-                        Missing Place
-                      </p>
-                      <p className="font-semibold">
-                        {requestData?.missing_place}
-                      </p>
-                    </div>
+                    {requestData?.missing_while == "specific" ? (
+                      <div className="bg-gray-50 p-4 rounded-xl">
+                        <p className="text-gray-600 text-sm mb-1">
+                          Missing Place
+                        </p>
+                        <p className="font-semibold">
+                          {requestData?.missing_place}
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="bg-gray-50 p-4 rounded-xl">
+                        <p className="text-gray-600 text-sm mb-1">
+                          Travelling On
+                        </p>
+                        <p className="font-semibold">
+                          {requestData?.mode_of_travel}
+                        </p>
+                      </div>
+                    )}
                     <div className="bg-gray-50 p-4 rounded-xl">
                       <p className="text-gray-600 text-sm mb-1">Last Seen</p>
                       <p className="font-semibold">{requestData?.last_seen}</p>
                     </div>
-                    <div className="bg-gray-50 p-4 rounded-xl">
-                      <p className="text-gray-600 text-sm mb-1">
-                        Mode of Travel
-                      </p>
-                      <p className="font-semibold">
-                        {requestData?.mode_of_travel}
-                      </p>
-                    </div>
+                    {requestData?.missing_while === "route" ? (
+                      <div className="bg-gray-50 p-4 rounded-xl">
+                        <p className="text-gray-600 text-sm mb-1">
+                          Route of {requestData?.mode_of_travel}
+                        </p>
+                        <div className="font-semibold flex items-center flex-wrap gap-2">
+                          {requestData?.missing_route.map(
+                            (place: string, index: number) => (
+                              <React.Fragment key={index}>
+                                <span>{place}</span>
+                                {index <
+                                  requestData.missing_route.length - 1 && (
+                                  <span className="text-gray-400">→</span>
+                                )}
+                              </React.Fragment>
+                            )
+                          )}
+                        </div>
+                      </div>
+                    ) : null}
                   </div>
                 </div>
               </div>
@@ -166,7 +178,12 @@ const MyRequestDetails = () => {
                   <div className="flex items-center gap-3">
                     <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
                     <p className="text-gray-600">
-                      Request Expires in : {requestData?.expiration_date}
+                      Request Expires in :{" "}
+                      {requestData?.expiration_date
+                        ? new Date(
+                            requestData.expiration_date
+                          ).toLocaleDateString()
+                        : "N/A"}
                     </p>
                   </div>
                 </div>
@@ -208,7 +225,7 @@ const MyRequestDetails = () => {
               <div className="bg-gray-50 rounded-xl p-6"></div>
             </div>
           </div>
-          <div className="md:flex justify-center md:gap-5">
+          <div className="md:flex justify-center md:gap-5 md:my-8">
             <button className="w-full md:w-1/3 px-6 py-3 bg-blue-400 text-white rounded-full font-semibold hover:bg-blue-500 transition-all duration-300 shadow-md hover:shadow-lg md:mb-0 mb-3">
               Chat with Admin
             </button>

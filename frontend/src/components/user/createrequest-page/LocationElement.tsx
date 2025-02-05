@@ -1,16 +1,25 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import InputElement from "./InputElement";
 import { LocationElementProps } from "../../../interface/IrequestProps";
+import ValidationError from "../shared/ValidationError";
 
 const LocationElement = ({
   setData,
+  missingWhileErrorData,
   missingPlaceErrorData,
   modeOfTravelErrorData,
-  missingRouteErrorData
+  missingRouteErrorData,
 }: LocationElementProps) => {
   const [locationFormat, setLocationFormat] = useState<
     "route" | "specific" | null
   >(null);
+
+  useEffect(() => {
+    setData((prevData) => ({
+      ...prevData,
+      missingWhile: locationFormat ?? "",
+    }));
+  }, [locationFormat]);
 
   const handleChange = (key: string, value: any) => {
     setData((prev) => ({ ...prev, [key]: value }));
@@ -19,6 +28,11 @@ const LocationElement = ({
   return (
     <>
       <div className="w-8/12">
+        <ValidationError
+          display={missingWhileErrorData.display}
+          name="userLoginValidation"
+          content={missingWhileErrorData.content}
+        />
         <p className="text-violet-700 font-semibold mb-2">
           How did your item gone missing?
         </p>

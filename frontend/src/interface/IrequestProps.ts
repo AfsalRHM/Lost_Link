@@ -26,6 +26,7 @@ export interface DescriptionElementProps {
 
 export interface LocationElementProps {
   setData: React.Dispatch<React.SetStateAction<RequestProps>>;
+  missingWhileErrorData: { content: string; display: boolean };
   missingPlaceErrorData: { content: string; display: boolean };
   modeOfTravelErrorData: { content: string; display: boolean };
   missingRouteErrorData: { content: string; display: boolean };
@@ -42,6 +43,8 @@ export interface RequestProps {
   expirationLimit: string;
   images: File[];
   additionalInfo: string;
+  lastSeen: string;
+  missingWhile: string;
 }
 
 export interface Errors {
@@ -55,4 +58,6 @@ export interface Errors {
   expirationLimit?: ValidationErrorData;
   images?: ValidationErrorData;
   additionalInfo?: ValidationErrorData;
+  lastSeen?: ValidationErrorData;
+  missingWhile: ValidationErrorData;
 }
