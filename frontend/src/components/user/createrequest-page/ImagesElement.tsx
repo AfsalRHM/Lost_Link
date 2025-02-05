@@ -83,7 +83,7 @@ const ImagesElement = ({ onChange, errorData }: ImagesElementProps) => {
                   typeof image === "string" ? image : URL.createObjectURL(image)
                 }
                 alt={`Uploaded preview ${index + 1}`}
-                className="w-full h-24 object-cover rounded-md"
+                className="w-full h-full object-cover rounded-md"
               />
               <button
                 onClick={() => removeImage(index)}

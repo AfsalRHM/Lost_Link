@@ -199,6 +199,7 @@ const CreateRequestForm = () => {
                 "Furniture",
                 "Books",
                 "Cosmetics",
+                "Accessories"
               ]}
               onChange={(value) => handleChange("productCategory", value)}
               errorData={errorData.productCategoryValidationErrorData}

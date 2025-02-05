@@ -1,9 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { showErrorToast2 } from "../../../utils/iziToastUtils";
+import {
+  showConfirmToast,
+  showErrorToast2,
+  showSuccessToast2,
+} from "../../../utils/iziToastUtils";
 import IrequestModel from "../../../interface/IrequestModel";
 import getRequestDetails from "../../../api/user-api/getRequestDetails";
 import MyRequestDetailsLoading from "./loading/MyRequestDetailsLoadin";
+import cancelRequest from "../../../api/user-api/cancelRequestAPI";
 
 const MyRequestDetails = () => {
   const navigate = useNavigate();
@@ -15,8 +20,6 @@ const MyRequestDetails = () => {
     navigate(-1);
   }
 
-  console.log(requestId);
-
   const [loading, setLoading] = useState<boolean>(true);
   const [requestData, setRequestData] = useState<IrequestModel | undefined>(
     undefined
@@ -27,7 +30,6 @@ const MyRequestDetails = () => {
       try {
         if (requestId == undefined) {
           showErrorToast2("Invalid Access Detected");
-          // Redirect to Page not found page
           return;
         } else {
           const response = await getRequestDetails(requestId);
@@ -47,6 +49,33 @@ const MyRequestDetails = () => {
     getRequestData();
   }, []);
 
+  async function handleCancelRequest() {
+    showConfirmToast(
+      "Are you sure you want to cancel this request?",
+      async () => {
+        const requestId = requestData?._id;
+        if (requestId) {
+          const response = await cancelRequest({ requestId });
+          console.log(response);
+          if (response.status) {
+            setRequestData((prev) => {
+              if (prev) {
+                return {
+                  ...prev,
+                  status: "cancelled",
+                };
+              }
+              return prev;
+            });
+            showSuccessToast2(response.data.message);
+          } else {
+            showErrorToast2(response.data.message);
+          }
+        }
+      }
+    );
+  }
+
   if (loading) {
     return <MyRequestDetailsLoading />;
   }
@@ -65,7 +94,9 @@ const MyRequestDetails = () => {
             className={`px-4 py-2 rounded-full text-sm font-semibold border border-black ${
               requestData?.status === "active"
                 ? "bg-green-300 text-gray-700"
-                : "bg-red-300 text-gray-700"
+                : requestData?.status === "cancelled"
+                ? "bg-red-300 text-gray-700"
+                : "bg-orange-300 text-gray-700"
             }`}
           >
             {requestData?.status.toUpperCase()}
@@ -230,7 +261,10 @@ const MyRequestDetails = () => {
               Chat with Admin
             </button>
             {requestData?.status == "active" ? (
-              <button className="w-full md:w-1/3 px-6 py-3 bg-red-400 text-white rounded-full font-semibold hover:bg-red-500 transition-all duration-300 shadow-md hover:shadow-lg">
+              <button
+                onClick={handleCancelRequest}
+                className="w-full md:w-1/3 px-6 py-3 bg-red-400 text-white rounded-full font-semibold hover:bg-red-500 transition-all duration-300 shadow-md hover:shadow-lg"
+              >
                 Cancel Request
               </button>
             ) : null}

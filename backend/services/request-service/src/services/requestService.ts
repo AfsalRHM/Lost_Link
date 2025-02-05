@@ -100,9 +100,9 @@ export default class requestService implements IrequestService {
         };
       } else {
         return {
-          status: false,
+          status: true,
           data: null,
-          message: "All My Request Failed to fetch",
+          message: "No request on the database",
         };
       }
     } catch (error) {
@@ -139,6 +139,59 @@ export default class requestService implements IrequestService {
         data: null,
         message:
           "Error occured while Fetching Request Data - from getRequestDetails/requestService",
+      };
+    }
+  }
+
+  async cancelRequest({
+    requestId,
+    userId,
+  }: {
+    requestId: string;
+    userId: string | undefined;
+  }): Promise<any> {
+    try {
+      console.log('Request Id 2', requestId)
+      const requestData: IrequestModel | null =
+        await this._requestRepository.findOne({ _id: requestId });
+      if (!requestData) {
+        return {
+          status: false,
+          data: null,
+          message: "Request not found",
+        };
+      }
+      if (requestData.user_id == userId) {
+        const request = await this._requestRepository.findByIdAndUpdate(
+          requestId,
+          { status: "cancelled" }
+        );
+        if (request) {
+          return {
+            status: true,
+            data: request,
+            message: "Request Cancelled",
+          };
+        } else {
+          return {
+            status: false,
+            data: null,
+            message: "Request Cancellation failed",
+          };
+        }
+      } else {
+        return {
+          status: false,
+          data: null,
+          message: "Invalid Action Detected",
+        };
+      }
+    } catch (error) {
+      return {
+        status: false,
+        data: null,
+        message:
+          "Error occured while cancelling the request - from cancelRequest/requestService",
       };
     }
   }

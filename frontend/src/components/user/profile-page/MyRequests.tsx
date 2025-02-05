@@ -33,7 +33,7 @@ const MyRequests = ({ userData }: { userData: userDataType | undefined }) => {
 
     getUserRequests();
   }, []);
-  
+
   // To handle the request details page click
   const handleDetailsPageClick = (id: string) => {
     if (id) {
@@ -63,103 +63,134 @@ const MyRequests = ({ userData }: { userData: userDataType | undefined }) => {
         My Requests
       </h2>
 
-      <div className="md:hidden space-y-4">
-        {currentRequests.map((request: any, index: number) => (
-          <div
-            key={request._id}
-            className="border rounded-lg p-4 space-y-3 hover:bg-gray-50"
+      {requests.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-16 text-center text-gray-500">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-16 w-16 text-gray-400 mb-4"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={1.5}
           >
-            <div className="flex justify-between items-center">
-              <span className="text-sm font-semibold text-gray-600">
-                #{indexOfFirstRequest + index + 1}
-              </span>
-              <button className="inline-flex items-center px-3 py-1.5 border border-gray-300 text-sm rounded-md hover:bg-gray-100 transition-colors">
-                <span className="mr-2">👁️</span>Details
-              </button>
-            </div>
-            <div className="text-gray-800">{request.name}</div>
-          </div>
-        ))}
-      </div>
-
-      <div className="hidden md:block">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-200">
-              <tr>
-                <th className="px-3 py-3 text-left text-sm font-semibold text-gray-700">
-                  Sl No.
-                </th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">
-                  Request Name
-                </th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">
-                  Status
-                </th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {currentRequests.map((request: any, index: number) => (
-                <tr
-                  key={request._id}
-                  className="hover:bg-gray-50 transition-colors"
-                >
-                  <td className="px-6 py-3 text-sm text-gray-700">
-                    {indexOfFirstRequest + index + 1}
-                  </td>
-                  <td className="px-6 py-3 text-sm text-gray-700">
-                    {request.product_name}
-                  </td>
-                  <td className="px-6 py-3 text-sm text-green-700">
-                    {request.status}
-                  </td>
-                  <td className="px-6 py-3 text-sm">
-                    <button
-                      className="inline-flex items-center px-3 py-1.5 border border-gray-300 rounded-md hover:bg-gray-100 transition-colors"
-                      onClick={() => handleDetailsPageClick(request._id)}
-                    >
-                      <span className="mr-2">👁️</span>Details
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M9 17v-6m6 6v-4M3 3l18 18M4 4l16 16"
+            />
+          </svg>
+          <p className="text-lg font-semibold">No Requests Available</p>
+          <p className="text-sm text-gray-400">
+            You haven’t made any requests yet.
+          </p>
         </div>
-      </div>
+      ) : (
+        <>
+          {/* Mobile View */}
+          <div className="md:hidden space-y-4">
+            {currentRequests.map((request: any, index: number) => (
+              <div
+                key={request._id}
+                className="border rounded-lg p-4 space-y-3 hover:bg-gray-50"
+              >
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-semibold text-gray-600">
+                    #{indexOfFirstRequest + index + 1}
+                  </span>
+                  <button
+                    className="inline-flex items-center px-3 py-1.5 border border-gray-300 text-sm rounded-md hover:bg-gray-100 transition-colors"
+                    onClick={() => handleDetailsPageClick(request._id)}
+                  >
+                    <span className="mr-2">👁️</span>Details
+                  </button>
+                </div>
+                <div className="text-gray-800">{request.product_name}</div>
+              </div>
+            ))}
+          </div>
 
-      <div className="flex justify-center items-center space-x-2 mt-6">
-        <button
-          className="px-3 py-1.5 bg-gray-300 text-sm rounded-md hover:bg-gray-400 disabled:opacity-50"
-          onClick={() => paginate(currentPage - 1)}
-          disabled={currentPage === 1}
-        >
-          Prev
-        </button>
-        {[...Array(totalPages)].map((_, index) => (
-          <button
-            key={index}
-            className={`px-3 py-1.5 ${
-              currentPage === index + 1
-                ? "bg-blue-500 text-white"
-                : "bg-gray-300 text-sm"
-            } rounded-md hover:bg-gray-400`}
-            onClick={() => paginate(index + 1)}
-          >
-            {index + 1}
-          </button>
-        ))}
-        <button
-          className="px-3 py-1.5 bg-gray-300 text-sm rounded-md hover:bg-gray-400 disabled:opacity-50"
-          onClick={() => paginate(currentPage + 1)}
-          disabled={currentPage === totalPages}
-        >
-          Next
-        </button>
-      </div>
+          {/* Desktop View */}
+          <div className="hidden md:block">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-200">
+                  <tr>
+                    <th className="px-3 py-3 text-left text-sm font-semibold text-gray-700">
+                      Sl No.
+                    </th>
+                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">
+                      Request Name
+                    </th>
+                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">
+                      Status
+                    </th>
+                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {currentRequests.map((request: any, index: number) => (
+                    <tr
+                      key={request._id}
+                      className="hover:bg-gray-50 transition-colors"
+                    >
+                      <td className="px-6 py-3 text-sm text-gray-700">
+                        {indexOfFirstRequest + index + 1}
+                      </td>
+                      <td className="px-6 py-3 text-sm text-gray-700">
+                        {request.product_name}
+                      </td>
+                      <td className="px-6 py-3 text-sm text-green-700">
+                        {request.status}
+                      </td>
+                      <td className="px-6 py-3 text-sm">
+                        <button
+                          className="inline-flex items-center px-3 py-1.5 border border-gray-300 rounded-md hover:bg-gray-100 transition-colors"
+                          onClick={() => handleDetailsPageClick(request._id)}
+                        >
+                          <span className="mr-2">👁️</span>Details
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Pagination */}
+          <div className="flex justify-center items-center space-x-2 mt-6">
+            <button
+              className="px-3 py-1.5 bg-gray-300 text-sm rounded-md hover:bg-gray-400 disabled:opacity-50"
+              onClick={() => paginate(currentPage - 1)}
+              disabled={currentPage === 1}
+            >
+              Prev
+            </button>
+            {[...Array(totalPages)].map((_, index) => (
+              <button
+                key={index}
+                className={`px-3 py-1.5 ${
+                  currentPage === index + 1
+                    ? "bg-blue-500 text-white"
+                    : "bg-gray-300 text-sm"
+                } rounded-md hover:bg-gray-400`}
+                onClick={() => paginate(index + 1)}
+              >
+                {index + 1}
+              </button>
+            ))}
+            <button
+              className="px-3 py-1.5 bg-gray-300 text-sm rounded-md hover:bg-gray-400 disabled:opacity-50"
+              onClick={() => paginate(currentPage + 1)}
+              disabled={currentPage === totalPages}
+            >
+              Next
+            </button>
+          </div>
+        </>
+      )}
     </div>
   );
 };

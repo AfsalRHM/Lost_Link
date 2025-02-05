@@ -34,6 +34,11 @@ request_route.post(
   verifyAccessToken,
   RequestController.getRequestDetails
 );
+request_route.patch(
+  "/cancelRequest",
+  verifyAccessToken,
+  RequestController.cancelRequest
+);
 
 request_route.get(
   "/getAllRequestsAdmin",

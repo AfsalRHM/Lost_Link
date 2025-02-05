@@ -6,6 +6,7 @@ export default interface IrequestController {
   managePayment(req: Request, res: Response): Promise<void>;
   getUserRequests(req: Request, res: Response): Promise<void>;
   getRequestDetails(req: Request, res: Response): Promise<void>;
+  cancelRequest(req: Request, res: Response): Promise<void>;
 
   changeRequestStatus(req: Request, res: Response): Promise<void>;
 }

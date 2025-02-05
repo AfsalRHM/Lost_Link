@@ -3,6 +3,7 @@ import IrequestController from "../interface/IrequestController";
 
 import requestService from "../services/requestService";
 import { validationResult } from "express-validator";
+import jwtFunctions from "../utils/jwt";
 
 export default class RequestController implements IrequestController {
   private _requestService: requestService;
@@ -125,6 +126,31 @@ export default class RequestController implements IrequestController {
       }
     } catch (error) {
       console.log("error in getRequestDetails/requestController", error);
+    }
+  };
+
+  public cancelRequest = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const accessToken = req.headers["authorization"]?.split(" ")[1];
+      if (!accessToken) {
+        res.status(400).json({ message: "No authorization token provided" });
+      } else {
+        const decoded = await jwtFunctions.verifyAccessToken(accessToken);
+
+        console.log('Request Id 2', req.body, decoded)
+
+        const response = await this._requestService.cancelRequest({
+          requestId: req.body.requestId,
+          userId: decoded?.id,
+        });
+        res
+          .status(200)
+          .json(response);
+      }
+    } catch (error) {
+      res
+        .status(300)
+        .json({ message: "error on the cancelRequest/adminController" });
     }
   };
 
