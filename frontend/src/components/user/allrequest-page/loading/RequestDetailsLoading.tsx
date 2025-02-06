@@ -59,7 +59,6 @@ const RequestDetailsLoading = () => {
             {/* Buttons */}
             <div className="md:flex justify-center md:gap-5 md:my-8">
               <div className="w-full md:w-1/3 h-12 bg-gray-300 rounded-full animate-pulse"></div>
-              <div className="w-full md:w-1/3 h-12 bg-gray-300 rounded-full animate-pulse mt-3 md:mt-0"></div>
             </div>
           </div>
         </div>

@@ -137,20 +137,39 @@ export default class RequestController implements IrequestController {
       } else {
         const decoded = await jwtFunctions.verifyAccessToken(accessToken);
 
-        console.log('Request Id 2', req.body, decoded)
+        console.log("Request Id 2", req.body, decoded);
 
         const response = await this._requestService.cancelRequest({
           requestId: req.body.requestId,
           userId: decoded?.id,
         });
-        res
-          .status(200)
-          .json(response);
+        res.status(200).json(response);
       }
     } catch (error) {
       res
         .status(300)
         .json({ message: "error on the cancelRequest/adminController" });
+    }
+  };
+
+  public createRedeemRequest = async (
+    req: Request,
+    res: Response
+  ): Promise<void> => {
+    try {
+      const response = await this._requestService.createRedeemRequest({
+        requestId: req.body.requestId,
+        formData: req.body.formData,
+      });
+      if (response.status) {
+        res.status(200).json(response);
+      } else {
+        res.status(400).json(response);
+      }
+    } catch (error) {
+      res
+        .status(300)
+        .json({ message: "error on the createRedeemRequest/adminController" });
     }
   };
 

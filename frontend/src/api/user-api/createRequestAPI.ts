@@ -10,13 +10,7 @@ export default async function createRequest(props: Props): Promise<any> {
   try {
     const response = await axiosInstance.post(
       `${import.meta.env.VITE_API_ROUTE}/request/create_request`,
-      props.formData,
-      {
-        headers: {
-          Authorization: `Bearer ${props.accessToken}`,
-        },
-        withCredentials: true,
-      }
+      props.formData
     );
 
     return response;

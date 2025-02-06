@@ -8,8 +8,6 @@ const ImagesElement = ({ onChange, errorData }: ImagesElementProps) => {
   const CLOUDINARY_UPLOAD_PRESET = "product_preset";
   const CLOUDINARY_URL = import.meta.env.VITE_CLOUDINARY_URL;
 
-  console.log(CLOUDINARY_URL, "this is the cloudinary url");
-
   const handleImageUpload = async (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {

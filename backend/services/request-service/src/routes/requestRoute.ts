@@ -17,6 +17,7 @@ request_route.post("/create_request", verifyAccessToken, RequestController.creat
 request_route.post("/create_checkout_session", verifyAccessToken, RequestController.managePayment); // To manage the Payment
 request_route.post("/getMyRequests", verifyAccessToken, RequestController.getUserRequests); // To get the user requests
 request_route.post("/getRequestDetails", verifyAccessToken, RequestController.getRequestDetails); // To get the details of the request
+request_route.post("/create-redeem-request", verifyAccessToken, RequestController.createRedeemRequest); // To save the request redeem details
 
 // Patch Requests
 request_route.patch("/cancelRequest", verifyAccessToken, RequestController.cancelRequest); // To cancel a request

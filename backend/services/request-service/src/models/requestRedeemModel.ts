@@ -1,0 +1,58 @@
+import mongoose, { Schema } from "mongoose";
+
+import IrequestRedeemModel from "../interface/IrequestRedeemModel";
+
+const requestRedeemSchema = new Schema(
+  {
+    request_id: {
+      type: String,
+      required: true,
+    },
+    found_location: {
+      type: String,
+      required: true,
+    },
+    found_date: {
+      type: Date,
+      required: true,
+    },
+    damage_issues: {
+      type: String,
+      required: true,
+    },
+    mobile_number: {
+      type: String,
+      required: true,
+    },
+    bank_name: {
+      type: String,
+      required: true,
+    },
+    account_number: {
+      type: String,
+      required: true,
+    },
+    ifsc_code: {
+      type: String,
+      required: true,
+    },
+    account_holder_name: {
+      type: String,
+    },
+    images: {
+      type: Array,
+    },
+    status: {
+      type: String,
+      default: "pending"
+    }
+  },
+  {
+    timestamps: true,
+  }
+);
+
+export default mongoose.model<IrequestRedeemModel>(
+  "Request_Redeem",
+  requestRedeemSchema
+);

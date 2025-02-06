@@ -6,6 +6,7 @@ import AllRequestsPage from "../pages/user/AllRequestsPage";
 import PaymentSuccessPage from "../pages/user/PaymentSuccessPage";
 import MyReqeustDetailsPage from "../pages/user/MyReqeustDetailsPage";
 import ReqeustDetailsPage from "../pages/user/RequestDetailsPage";
+import RequestRedeemPage from "../pages/user/RequestRedeemPage";
 
 import { IsUserLogin } from "../utils/IsUserLogin";
 
@@ -19,6 +20,7 @@ const UserRoutes = () => {
         <Route path="/create_request" element={<CreateRequestPage />} />
         <Route path="/requests" element={<AllRequestsPage />} />
         <Route path="/requests/request-details" element={<ReqeustDetailsPage />} />
+        <Route path="/requests/redeem-request" element={<RequestRedeemPage />} />
         <Route path="/payment-success" element={<PaymentSuccessPage />} />
       </Route>
     </>

@@ -2,15 +2,18 @@ import IrequestModel from "../interface/IrequestModel";
 import IrequestService from "../interface/IrequestService";
 import sendToService from "../rabbitmq/producer";
 import requestRepository from "../repositories/requestRepository";
+import requestRedeemRepository from "../repositories/requestRedeemRepository";
 import jwtFunctions from "../utils/jwt";
 
 import stripe from "stripe";
 
 export default class requestService implements IrequestService {
   private _requestRepository: requestRepository;
+  private _requestRedeemRepository: requestRedeemRepository;
 
   constructor() {
     this._requestRepository = new requestRepository();
+    this._requestRedeemRepository = new requestRedeemRepository();
   }
 
   async insertRequest({
@@ -151,7 +154,7 @@ export default class requestService implements IrequestService {
     userId: string | undefined;
   }): Promise<any> {
     try {
-      console.log('Request Id 2', requestId)
+      console.log("Request Id 2", requestId);
       const requestData: IrequestModel | null =
         await this._requestRepository.findOne({ _id: requestId });
       if (!requestData) {
@@ -192,6 +195,51 @@ export default class requestService implements IrequestService {
         data: null,
         message:
           "Error occured while cancelling the request - from cancelRequest/requestService",
+      };
+    }
+  }
+
+  async createRedeemRequest({
+    requestId,
+    formData,
+  }: {
+    requestId: string;
+    formData: any;
+  }): Promise<any> {
+    try {
+      const updatedFormData = {
+        request_id: requestId,
+        found_location: formData.foundLocation,
+        found_date: formData.foundDate,
+        damage_issues: formData.damageIssues,
+        mobile_number: formData.mobileNumber,
+        bank_name: formData.bankName,
+        account_number: formData.accountNumber,
+        ifsc_code: formData.ifscCode,
+        account_holder_name: formData.accountHolderName,
+        images: formData.images,
+      };
+      console.log(updatedFormData);
+      const requestRedeemData = await this._requestRedeemRepository.insertRequestRedeemForm(updatedFormData);
+      if (requestRedeemData) {
+        return {
+          status: true,
+          data: requestRedeemData,
+          message: "Request Redeem Form Submitted",
+        };
+      } else {
+        return {
+          status: false,
+          data: null,
+          message: "Failed to submit Request Redeem Form",
+        };
+      }
+    } catch (error) {
+      return {
+        status: false,
+        data: null,
+        message:
+          "Error occured while getting all requests - from createRedeemRequest/requestService",
       };
     }
   }

@@ -61,3 +61,27 @@ export interface Errors {
   lastSeen?: ValidationErrorData;
   missingWhile: ValidationErrorData;
 }
+
+export interface RequestRedeemProps {
+  foundLocation: string;
+  foundDate: string;
+  damageIssues: string;
+  mobileNumber: string;
+  bankName: string;
+  accountNumber: string;
+  ifscCode: string;
+  accountHolderName: string;
+  images: File[];
+}
+
+export interface RequestRedeemErrorData {
+  foundLocation: string;
+  foundDate: string;
+  damageIssues: string;
+  mobileNumber: string;
+  bankName: string;
+  accountNumber: string;
+  ifscCode: string;
+  accountHolderName: string;
+  images: string;
+}

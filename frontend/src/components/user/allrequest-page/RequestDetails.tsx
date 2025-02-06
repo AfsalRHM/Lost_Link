@@ -46,6 +46,10 @@ const RequestDetails = ({}) => {
     navigate(-1);
   }
 
+  function handleRedeemRequest(id: string) {
+    navigate("/requests/redeem-request", { state: { requestId: id } });
+  }
+
   if (loading) {
     return <RequestDetailsLoading />;
   }
@@ -216,7 +220,14 @@ const RequestDetails = ({}) => {
           </div>
 
           <div className="md:flex justify-center md:gap-5 md:my-8">
-            <button className="w-full md:w-1/3 px-6 py-3 bg-violet-600 text-white rounded-full font-semibold hover:bg-violet-700 transition-all duration-300 shadow-md hover:shadow-lg md:mb-0 mb-3">
+            <button
+              className="w-full md:w-1/3 px-6 py-3 bg-violet-600 text-white rounded-full font-semibold hover:bg-violet-700 transition-all duration-300 shadow-md hover:shadow-lg md:mb-0 mb-3"
+              onClick={() =>
+                handleRedeemRequest(
+                  requestData && requestData._id ? requestData._id : ""
+                )
+              }
+            >
               Redeem Request
             </button>
           </div>

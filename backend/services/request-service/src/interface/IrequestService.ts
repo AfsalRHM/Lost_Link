@@ -11,4 +11,11 @@ export default interface IrequestService {
   getRequests(): Promise<any>;
   makePayment(formData: any): Promise<any>;
   changeRequestStatus(props: { requestId: string }): Promise<any>;
+  createRedeemRequest({
+    requestId,
+    formData,
+  }: {
+    requestId: string;
+    formData: any;
+  }): Promise<any>;
 }
