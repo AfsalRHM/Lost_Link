@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import AdminListPart from "./AdminListPart";
 import { Bell, Menu, Search } from "lucide-react";
 import { Sidebar } from "../shared/Sidebar";
 import fetchAllAdmins from "../../../api/admin-api/allAdminsAPI";
@@ -14,7 +13,7 @@ const UserListPage = () => {
   const getAllAdmins = async () => {
     const response = await fetchAllAdmins();
     if (response.data.status) {
-        setAdminList(response.data.data);
+      setAdminList(response.data.data);
     } else {
       showErrorToast("Didn't get the Admin List");
     }

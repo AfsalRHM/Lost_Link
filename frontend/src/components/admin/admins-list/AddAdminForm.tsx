@@ -17,7 +17,7 @@ const AddAdminForm = () => {
   const [formData, setFormData] = useState({
     email: "",
     name: "",
-    role: "subAdmin", // Default value
+    role: "Admin", // Default value
     password: "",
     status: "active", // Default value
   });
@@ -126,7 +126,6 @@ const AddAdminForm = () => {
             >
               <option value="Admin">Admin</option>
               <option value="Moderator">Moderator</option>
-              <option value="Editor">Editor</option>
             </select>
           </div>
 
