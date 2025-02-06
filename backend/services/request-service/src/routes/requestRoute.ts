@@ -8,48 +8,25 @@ import verifyAccessToken, {
 
 const RequestController = new requestController();
 
-request_route.get(
-  "/getAllRequests",
-  verifyAccessToken,
-  RequestController.getAllRequests
-);
+/*************************      User Side       *******************************/
+// Get Requests
+request_route.get("/getAllRequests", verifyAccessToken, RequestController.getAllRequests); // To get all the requests to show in the request part
 
-request_route.post(
-  "/create_request",
-  verifyAccessToken,
-  RequestController.createRequest
-);
-request_route.post(
-  "/create_checkout_session",
-  verifyAccessToken,
-  RequestController.managePayment
-);
-request_route.post(
-  "/getMyRequests",
-  verifyAccessToken,
-  RequestController.getUserRequests
-);
-request_route.post(
-  "/getRequestDetails",
-  verifyAccessToken,
-  RequestController.getRequestDetails
-);
-request_route.patch(
-  "/cancelRequest",
-  verifyAccessToken,
-  RequestController.cancelRequest
-);
+// Post Requests
+request_route.post("/create_request", verifyAccessToken, RequestController.createRequest); // To create new Requests
+request_route.post("/create_checkout_session", verifyAccessToken, RequestController.managePayment); // To manage the Payment
+request_route.post("/getMyRequests", verifyAccessToken, RequestController.getUserRequests); // To get the user requests
+request_route.post("/getRequestDetails", verifyAccessToken, RequestController.getRequestDetails); // To get the details of the request
 
-request_route.get(
-  "/getAllRequestsAdmin",
-  verifyAdminAccessToken,
-  RequestController.getAllRequests
-);
+// Patch Requests
+request_route.patch("/cancelRequest", verifyAccessToken, RequestController.cancelRequest); // To cancel a request
 
-request_route.post(
-  "/changeRequestStatus",
-  verifyAdminAccessToken,
-  RequestController.changeRequestStatus
-);
+
+/*************************      Admin Side       *******************************/
+// Get Requests
+request_route.get("/getAllRequestsAdmin", verifyAdminAccessToken, RequestController.getAllRequests); // To get all the requests in the admin side
+
+// Post Requests
+request_route.post("/changeRequestStatus", verifyAdminAccessToken, RequestController.changeRequestStatus); // To change the request status
 
 export default request_route;

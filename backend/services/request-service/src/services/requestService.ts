@@ -115,10 +115,10 @@ export default class requestService implements IrequestService {
     }
   }
 
-  async getRequestDetails(requestIds: [string]): Promise<any> {
+  async getRequestDetails(requestId: [string]): Promise<any> {
     try {
       const requestData = await this._requestRepository.findOne({
-        _id: requestIds,
+        _id: requestId,
       });
       if (requestData) {
         return {

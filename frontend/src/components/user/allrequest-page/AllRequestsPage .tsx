@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import FilterSideBar from "./FilterSideBar";
-import ReqeustPart from "./ReqeustPart";
 import getAllRequests from "../../../api/user-api/getAllRequestsAPI";
 import { useDispatch } from "react-redux";
 import {
@@ -11,6 +10,7 @@ import { removeUserDetails } from "../../../redux/slice/userDetailsSlice";
 import { useNavigate } from "react-router-dom";
 import { showErrorToast } from "../../../utils/toastUtils";
 import RequestLoading from "./loading/AllRequestLoading";
+import RequestPart from "./RequestPart";
 
 const AllRequests = () => {
   const dispatch = useDispatch();
@@ -78,7 +78,7 @@ const AllRequests = () => {
         filters={filters}
         setFilteredRequests={setFilteredRequests}
       />
-      <ReqeustPart filteredRequests={filteredRequests} />
+      <RequestPart filteredRequests={filteredRequests} />
     </div>
   );
 };

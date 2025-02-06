@@ -141,7 +141,15 @@ const MyRequests = ({ userData }: { userData: userDataType | undefined }) => {
                       <td className="px-6 py-3 text-sm text-gray-700">
                         {request.product_name}
                       </td>
-                      <td className="px-6 py-3 text-sm text-green-700">
+                      <td
+                        className={`px-6 py-3 text-sm ${
+                          request?.status === "active"
+                            ? "bg-green-300 text-green-700"
+                            : request?.status === "cancelled"
+                            ? "text-red-700"
+                            : "text-orange-700"
+                        }`}
+                      >
                         {request.status}
                       </td>
                       <td className="px-6 py-3 text-sm">

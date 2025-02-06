@@ -16,6 +16,7 @@ user_route.patch("/update_user", verifyAccessToken, updateUserDataValidator, Use
 
 
 /*************************      Admin Side       *******************************/
+// Get Requests
 user_route.get("/allUsers", verifyAdminAccessToken , UserController.getAllUsers); // To get all users
 
 export default user_route;

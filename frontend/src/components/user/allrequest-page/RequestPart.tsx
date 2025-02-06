@@ -1,4 +1,15 @@
-const ReqeustPart = ({ filteredRequests }: { filteredRequests: any }) => {
+import { useNavigate } from "react-router-dom";
+
+const RequestPart = ({ filteredRequests }: { filteredRequests: any }) => {
+
+  const navigate = useNavigate();
+
+  async function handleRequestDetails(id: string) {
+    if (id) {
+      navigate(`/requests/request-details?id=${id}`);
+    }
+  }
+
   return (
     <div className="flex-1 p-8">
       <h1 className="text-3xl font-bold underline text-center mb-6 text-violet-600">
@@ -34,7 +45,7 @@ const ReqeustPart = ({ filteredRequests }: { filteredRequests: any }) => {
                     : request.additional_information
                   : "No Description Available..."}
               </p>
-              <button className="w-full bg-violet-600 text-white py-2 rounded-md hover:bg-violet-700 mt-auto">
+              <button className="w-full bg-violet-600 text-white py-2 rounded-md hover:bg-violet-700 mt-auto" onClick={() => handleRequestDetails(request._id)}>
                 View Details
               </button>
             </div>
@@ -45,4 +56,4 @@ const ReqeustPart = ({ filteredRequests }: { filteredRequests: any }) => {
   );
 };
 
-export default ReqeustPart;
+export default RequestPart;
