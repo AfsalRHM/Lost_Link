@@ -9,6 +9,7 @@ import IrequestModel from "../../../interface/IrequestModel";
 import getRequestDetails from "../../../api/user-api/getRequestDetails";
 import MyRequestDetailsLoading from "./loading/MyRequestDetailsLoadin";
 import cancelRequest from "../../../api/user-api/cancelRequestAPI";
+import ChatPart from "./ChatPart";
 
 const MyRequestDetails = () => {
   const navigate = useNavigate();
@@ -24,6 +25,8 @@ const MyRequestDetails = () => {
   const [requestData, setRequestData] = useState<IrequestModel | undefined>(
     undefined
   );
+
+  const [showChat, setShowChat] = useState(false);
 
   useEffect(() => {
     const getRequestData = async () => {
@@ -257,7 +260,7 @@ const MyRequestDetails = () => {
             </div>
           </div>
           <div className="md:flex justify-center md:gap-5 md:my-8">
-            <button className="w-full md:w-1/3 px-6 py-3 bg-blue-400 text-white rounded-full font-semibold hover:bg-blue-500 transition-all duration-300 shadow-md hover:shadow-lg md:mb-0 mb-3">
+            <button className="w-full md:w-1/3 px-6 py-3 bg-blue-400 text-white rounded-full font-semibold hover:bg-blue-500 transition-all duration-300 shadow-md hover:shadow-lg md:mb-0 mb-3" onClick={() => setShowChat(true)}>
               Chat with Admin
             </button>
             {requestData?.status == "active" ? (
@@ -268,6 +271,7 @@ const MyRequestDetails = () => {
                 Cancel Request
               </button>
             ) : null}
+            {showChat && <ChatPart onClose={() => setShowChat(false)} />}
           </div>
         </div>
       </div>

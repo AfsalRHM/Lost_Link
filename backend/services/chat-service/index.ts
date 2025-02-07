@@ -28,8 +28,8 @@ app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// import user_route from "./src/routes/userRoute";
-// app.use("/", user_route);
+import chat_route from "./src/routes/requestRoute";
+app.use("/", chat_route);
 
 import serverListening from "./src/config/serverConfig";
 serverListening(app);
