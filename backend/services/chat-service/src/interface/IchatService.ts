@@ -1,3 +1,3 @@
 export default interface IchatService {
-  getUserChat(recieverEmail: string): Promise<any>
+  getUserChat({ userId }: { userId: string }): Promise<any>
 }

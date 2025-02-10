@@ -12,6 +12,7 @@ export default interface IuserService {
   updatePassword(userMail: string, newPassword: string): Promise<any>;
   getAllUsers(): Promise<any>;
   changeUserStatus(props: { userId: string }): Promise<any>;
+  getUserDataById({ userId }: { userId: string }): Promise<any>;
   getProfile({ userId }: { userId: string | undefined }): Promise<any>;
   updateUser({
     updateFormData,

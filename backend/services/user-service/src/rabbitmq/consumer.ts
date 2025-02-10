@@ -89,6 +89,24 @@ export async function manageQueue() {
             },
           });
         } else if (
+          msg?.properties?.headers?.source == "get user data by userId"
+        ) {
+          console.log("This the message content",messageContent)
+          const response = await _userService.getUserDataById(
+            messageContent
+          );
+
+          console.log("This is the response from there here", response)
+
+          channel.sendToQueue("CHAT", Buffer.from(JSON.stringify(response)), {
+            correlationId: msg.properties.correlationId,
+            headers: {
+              source: "get user data by userId response",
+              correlationIdIdentifier:
+                msg?.properties?.headers?.correlationIdString,
+            },
+          });
+        } else if (
           msg?.properties?.headers?.source == "Add the request Id to the user"
         ) {
           console.log(messageContent);

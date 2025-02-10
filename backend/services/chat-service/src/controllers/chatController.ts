@@ -25,7 +25,11 @@ export default class chatController implements IchatController {
 
       const userId = decoded.id;
 
-      // Here to start
+      const response = await this._chatService.getUserChat({userId});
+
+      console.log(response, "THisi is the response");
+
+      res.status(200).json(response)
       
     } catch (error) {
       console.log("error in getUserChat/chatController", error);

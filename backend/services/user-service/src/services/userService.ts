@@ -165,6 +165,28 @@ export default class userService implements IuserService {
     }
   }
 
+  async getUserDataById({ userId }: { userId: string }): Promise<any> {
+    try {
+      const userData = await this._userRepository.findOne({ _id: userId });
+      if (userData) {
+        const { password, ...newUserData } = userData;
+        return {
+          status: true,
+          data: newUserData,
+          message: "User Data Available",
+        };
+      } else {
+        return {
+          status: false,
+          data: null,
+          message: "User Un Available",
+        };
+      }
+    } catch (error) {
+      console.log(error, "error on the getUserDataById/userService");
+    }
+  }
+
   async addRequestId({
     requestId,
     userId,
@@ -173,7 +195,6 @@ export default class userService implements IuserService {
     userId: string;
   }): Promise<void> {
     try {
-      
       const userData: IuserModel | null =
         await this._userRepository.findByIdAndAddRequestId(userId, requestId);
     } catch (error) {

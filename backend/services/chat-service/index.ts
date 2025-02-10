@@ -28,11 +28,11 @@ app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-import chat_route from "./src/routes/requestRoute";
+import chat_route from "./src/routes/chatRoute";
 app.use("/", chat_route);
 
 import serverListening from "./src/config/serverConfig";
 serverListening(app);
 
-// import { manageQueue } from "./src/rabbitmq/consumer";
-// manageQueue();
+import { manageQueue } from "./src/rabbitmq/consumer";
+manageQueue();

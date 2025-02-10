@@ -14,6 +14,7 @@ const verifyAccessToken = async (
   res: Response,
   next: NextFunction
 ): Promise<any> => {
+  console.log('Here raching the request')
   try {
     const token = req.header("Authorization")?.split(" ")[1];
 
