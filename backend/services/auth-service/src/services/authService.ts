@@ -31,11 +31,15 @@ export default class authService implements IauthService {
         throw new Error("replyQueue is empty...!");
       }
 
+      const props = {
+        userMail: recieverEmail,
+      };
+
       sendToService({
         sendingTo: replyQueue,
         correlationId: correlationId,
         source: "user mail duplication request",
-        userMail: recieverEmail,
+        props,
       });
 
       const userData: any = await new Promise((resolve, reject) => {
@@ -70,12 +74,16 @@ export default class authService implements IauthService {
       throw new Error("replyQueue is empty...!");
     }
 
+    const props = {
+      userMail,
+      newPassword: hashedPassword,
+    };
+
     sendToService({
       sendingTo: replyQueue,
       correlationId: correlationId,
       source: "new password to save to user",
-      userMail,
-      newPassword: hashedPassword,
+      props,
     });
 
     const userData: any = await new Promise((resolve, reject) => {
@@ -107,11 +115,15 @@ export default class authService implements IauthService {
         throw new Error("replyQueue is empty...!");
       }
 
+      const props = {
+        userMail: recieverEmail,
+      };
+
       sendToService({
         sendingTo: replyQueue,
         correlationId: correlationId,
         source: "user name for mail request",
-        userMail: recieverEmail,
+        props,
       });
 
       const userData: any = await new Promise((resolve, reject) => {
@@ -188,11 +200,15 @@ export default class authService implements IauthService {
       throw new Error("replyQueue is empty...!");
     }
 
+    const props = {
+      userData: data,
+    };
+
     sendToService({
       sendingTo: replyQueue,
       correlationId: correlationId,
       source: "user data insert request",
-      userData: data,
+      props,
     });
 
     const userData: UserDataType = await new Promise((resolve, reject) => {
@@ -223,11 +239,15 @@ export default class authService implements IauthService {
       throw new Error("replyQueue is empty...!");
     }
 
+    const props = {
+      userMail: userEmail,
+    };
+
     sendToService({
       sendingTo: replyQueue,
       correlationId: correlationId,
       source: "user login request",
-      userMail: userEmail,
+      props,
     });
 
     const userData: UserDataType | null = await new Promise(
@@ -413,24 +433,77 @@ export default class authService implements IauthService {
   // To create a new access token with the existing refresh token
   async refreshToken(
     token: string
-  ): Promise<{ status: boolean; message: string } | undefined> {
+  ): Promise<
+    { status: boolean; data: string | null; message: string } | undefined
+  > {
     try {
-      console.log("Reaching here on refreshTOken/authService");
-      console.log(token, "this is the data");
       if (!token) {
-        return { status: false, message: "No Token Provided" };
+        console.log("No Token Provided");
+        return {
+          status: false,
+          data: null,
+          message: "UnAuthorized Access Detected",
+        };
       }
       const decoded: jwtPayload | null = jwtFunctions.verifyRefreshToken(token);
       if (!decoded) {
-        return { status: false, message: "Token expired" };
+        console.log("Token expired");
+        return {
+          status: false,
+          data: null,
+          message: "Session Expired! Please Login...",
+        };
       }
       const newUserId: string = new Types.ObjectId(decoded.id).toString();
-      const newAccessToken: string = jwtFunctions.generateAccessToken({
-        id: newUserId,
-        email: decoded.email,
-        role: decoded.role,
+
+      const replyQueue = process.env.USER_QUEUE || "USER";
+      const correlationId = createCorrelationId(newUserId);
+
+      const props = {
+        userId: newUserId,
+      };
+
+      sendToService({
+        sendingTo: replyQueue,
+        correlationId,
+        source: "get user data by userId",
+        correlationIdString: newUserId,
+        props,
       });
-      return { status: true, message: newAccessToken };
+
+      const userDataResponse: any = await new Promise((resolve, reject) => {
+        const timeout = setTimeout(() => {
+          reject(new Error("Response timeout"));
+        }, 10000);
+
+        eventEmitter.once(correlationId, (data) => {
+          clearTimeout(timeout);
+          resolve(data);
+        });
+      });
+
+      const newUserData = userDataResponse.data._doc;
+
+      console.log("userDataResponse is here", userDataResponse);
+
+      if (newUserData.status !== "active") {
+        return {
+          status: false,
+          data: null,
+          message: "You are Blocked from this Site.",
+        };
+      }
+
+      const newAccessToken: string = jwtFunctions.generateAccessToken({
+        id: newUserData._id,
+        email: newUserData.email,
+        role: newUserData.role,
+      });
+      return {
+        status: true,
+        data: newAccessToken,
+        message: "New Access Token Created",
+      };
     } catch (error) {
       console.log(error);
     }
@@ -473,11 +546,15 @@ export default class authService implements IauthService {
         throw new Error("replyQueue is empty...!");
       }
 
+      const props = {
+        userMail: email,
+      };
+
       sendToService({
         sendingTo: replyQueue,
         correlationId: correlationId,
         source: "user login request",
-        userMail: email,
+        props,
       });
 
       const userData: UserDataType | null = await new Promise(
@@ -525,5 +602,10 @@ export function mailDuplicationCheck(correlationId: string, params: string) {
 
 // to access the user mail duplication details from the queus after user enters the mail and request for otp
 export function userNameForMail(correlationId: string, params: string) {
+  eventEmitter.emit(correlationId, params);
+}
+
+// to access the userDetails from the queue after registration
+export function getUserDataByUserId(correlationId: string, params: any) {
   eventEmitter.emit(correlationId, params);
 }

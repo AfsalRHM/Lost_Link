@@ -1,5 +1,6 @@
 import configCommunication, { getChannel } from "../config/communicationConfig";
 import authService, {
+  getUserDataByUserId,
   loginDetails,
   mailDuplicationCheck,
   userDetails,
@@ -66,6 +67,15 @@ export async function manageQueue() {
           } else if (msg?.properties?.headers?.source == "password changed") {
             if (messageContent) {
               userDetails(correlationId, messageContent);
+            } else {
+              console.log("Error on messageContent on auth managing Queue 5");
+            }
+          } else if (
+            msg?.properties?.headers?.source ==
+            "get user data by userId response"
+          ) {
+            if (messageContent) {
+              getUserDataByUserId(correlationId, messageContent);
             } else {
               console.log("Error on messageContent on auth managing Queue 5");
             }

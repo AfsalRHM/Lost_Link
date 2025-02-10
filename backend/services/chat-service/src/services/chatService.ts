@@ -1,11 +1,9 @@
 import IchatService from "../interface/IchatService";
 import chatRepository from "../repositories/chatRepository";
-import jwtFunctions from "../utils/jwt";
 
 import { createCorrelationId } from "../utils/correlationId";
 import eventEmitter from "../utils/eventEmitter";
 import sendToService from "../rabbitmq/producer";
-import jwtPayload from "../interface/IjwtPayload";
 
 export default class chatService implements IchatService {
   private _chatRepository: chatRepository;
@@ -14,7 +12,7 @@ export default class chatService implements IchatService {
     this._chatRepository = new chatRepository();
   }
 
-  // Function to check the user already exists or not
+  // Function to Get the Chat if created OR Create the Chat
   async getUserChat({ userId }: { userId: string }): Promise<any> {
     try {
       let chatData = await this._chatRepository.findOne({
@@ -58,7 +56,10 @@ export default class chatService implements IchatService {
         if (chatData) {
           return {
             status: true,
-            data: chatData,
+            data: {
+              chatData: chatData,
+              userData: userDataResponse.data._doc,
+            },
             message: "Chat Data Available",
           };
         } else {
@@ -91,6 +92,15 @@ export default class chatService implements IchatService {
       }
     } catch (error) {
       console.log(error, "error on the getUserChat/chatService");
+      return false;
+    }
+  }
+
+  async fetchChats(): Promise<any> {
+    try {
+      
+    } catch (error) {
+      console.log(error, "error on the fetchChats/chatService");
       return false;
     }
   }

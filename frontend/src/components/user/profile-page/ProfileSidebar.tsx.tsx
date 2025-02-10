@@ -2,7 +2,11 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { removeUserDetails } from "../../../redux/slice/userDetailsSlice";
 import { removeAccessToken } from "../../../redux/slice/accessTokenSlice";
-import { showErrorToast, showSuccessToast } from "../../../utils/toastUtils";
+import {
+  showErrorToast,
+  showLogoutConfirmation,
+  showSuccessToast,
+} from "../../../utils/toastUtils";
 import userLogout from "../../../api/auth-api/userLogoutAPI";
 import { RootState } from "../../../redux/store";
 
@@ -34,6 +38,10 @@ const ProfileSidebar = ({
       showErrorToast("Error while logging out...!");
     }
   }
+
+  const onLogoutClick = () => {
+    showLogoutConfirmation("Are you sure you want to log out?", logoutFunction);
+  };
 
   function goToPage(currentValue: string) {
     selectFunction(currentValue);
@@ -67,7 +75,7 @@ const ProfileSidebar = ({
             `}
             onClick={() => {
               if (item === "Logout") {
-                logoutFunction();
+                onLogoutClick();
               } else {
                 goToPage(item);
               }

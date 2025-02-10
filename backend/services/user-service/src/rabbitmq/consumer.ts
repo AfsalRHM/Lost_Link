@@ -17,6 +17,8 @@ export async function manageQueue() {
       if (msg) {
         const messageContent = JSON.parse(msg.content.toString());
 
+        console.log(msg, "this is the msg");
+
         if (msg?.properties?.headers?.source == "user data insert request") {
           const response = await _userService.insertuser(
             messageContent.full_name,
@@ -91,21 +93,21 @@ export async function manageQueue() {
         } else if (
           msg?.properties?.headers?.source == "get user data by userId"
         ) {
-          console.log("This the message content",messageContent)
-          const response = await _userService.getUserDataById(
-            messageContent
+          console.log("This the message content", messageContent);
+          const response = await _userService.getUserDataById(messageContent);
+
+          channel.sendToQueue(
+            msg.properties.replyTo,
+            Buffer.from(JSON.stringify(response)),
+            {
+              correlationId: msg.properties.correlationId,
+              headers: {
+                source: "get user data by userId response",
+                correlationIdIdentifier:
+                  msg?.properties?.headers?.correlationIdString,
+              },
+            }
           );
-
-          console.log("This is the response from there here", response)
-
-          channel.sendToQueue("CHAT", Buffer.from(JSON.stringify(response)), {
-            correlationId: msg.properties.correlationId,
-            headers: {
-              source: "get user data by userId response",
-              correlationIdIdentifier:
-                msg?.properties?.headers?.correlationIdString,
-            },
-          });
         } else if (
           msg?.properties?.headers?.source == "Add the request Id to the user"
         ) {

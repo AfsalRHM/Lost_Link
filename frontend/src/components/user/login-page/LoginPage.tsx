@@ -98,20 +98,17 @@ const LoginPage = () => {
             userId: result.data.data._id,
             userName: result.data.data.user_name,
           };
-          console.log(result);
           const accessToken = result.headers.authorization.split(" ")[1];
           dispatch(assignUserDetails(userData));
           dispatch(assignAccessToken(accessToken));
           showSuccessToast("Login successful...!");
           navigate("/home");
         } else {
-          if (
-            result.data.message ==
-            "Your Account has been Blocked..! Pls contact customer service for further details"
-          ) {
+          if (result.data.message == "Your Account has been Blocked") {
             setUserLoginValidationError({
               display: true,
-              content: result.data.message,
+              content:
+                "Your Account has been Blocked..! Pls contact customer service for further details",
             });
           }
         }

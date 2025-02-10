@@ -30,11 +30,12 @@ const AllRequests = () => {
     const fetchRequests = async () => {
       try {
         const response = await getAllRequests();
-        if (response === false) {
+        console.log(response);
+        if (response.status === 401) {
           dispatch(removeUserDetails());
           dispatch(removeAccessToken());
           navigate("/login");
-          showErrorToast("Session Expired! Please Login...");
+          showErrorToast(response.data.message);
         } else if (response.data.status) {
           const newAccessToken =
             response.headers["authorization"].split(" ")[1];

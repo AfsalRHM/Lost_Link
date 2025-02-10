@@ -6,10 +6,12 @@ interface sendToServiceType {
   correlationId: string;
   source: string;
   correlationIdString?: string;
-  userId?: string;
-  userMail?: string;
-  newPassword?: string;
-  userData?: UserFormDataType;
+  props?: {
+    userId?: string;
+    userMail?: string;
+    newPassword?: string;
+    userData?: UserFormDataType;
+  };
 }
 
 export default async function sendToService(props: sendToServiceType) {
@@ -23,34 +25,14 @@ export default async function sendToService(props: sendToServiceType) {
       throw new Error("currentQueue is empty");
     }
 
-    let content: Record<string, string | undefined> = {};
-
-    if (props.userId) {
-      content.userId = props.userId;
-    }
-    if (props.userMail) {
-      content.userMail = props.userMail;
-    }
-    if (props.newPassword) {
-      content.newPassword = props.newPassword;
-    }
-    if (props.userData) {
-      content = { ...props.userData };
-    }
-
-    const headers: Record<string, string | undefined> = {
-      source: props.source,
-    };
-
-    if (props.correlationIdString) {
-      headers.correlationIdString = props.correlationIdString;
-    }
-
     // Invoking the queue to take actions
-    channel.sendToQueue(sendingTo, Buffer.from(JSON.stringify(content)), {
+    channel.sendToQueue(sendingTo, Buffer.from(JSON.stringify(props.props)), {
       replyTo: currentQueue,
       correlationId: correlationId,
-      headers,
+      headers: {
+        source: props.source,
+        correlationIdString: props.correlationIdString,
+      },
     });
   } catch (error) {
     console.log(error, "error on the producer");

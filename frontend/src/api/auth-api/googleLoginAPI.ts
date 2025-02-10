@@ -15,7 +15,11 @@ export default async function googleLogin(email: string): Promise<any> {
         return response;
       });
     return result;
-  } catch (error) {
+  } catch (error: any) {
     console.log(error);
+    if (error.response) {
+      return error.response;
+    }
+    return { status: 500, message: "Something went wrong" };
   }
 }

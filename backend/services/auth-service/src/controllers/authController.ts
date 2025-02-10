@@ -189,25 +189,18 @@ export default class authController implements IauthController {
     }
   };
 
+  // To Verify the Refresh Token and Create new Access Token
   public refreshToken = async (req: Request, res: Response): Promise<void> => {
     try {
-      console.log('Reaching here on the refreshToken/authController');
       const refreshToken = req.cookies.refreshToken;
-      console.log(refreshToken, "console from the refreshToken/authController");
       const result = await this._authService.refreshToken(refreshToken);
       if (result?.status == true) {
         res
-          .setHeader("Authorization", `Bearer ${result.message}`)
+          .setHeader("Authorization", `Bearer ${result.data}`)
           .status(200)
-          .json({ status: true, message: "New Access Token Created" });
-      } else if (result?.message === "Token expired") {
-        res
-          .status(401)
-          .json({ status: false, message: "Refresh token expired" });
+          .json(result);
       } else {
-        res
-          .status(401)
-          .json({ status: false, message: "Failed to refresh token" });
+        res.status(401).json(result);
       }
     } catch (error) {
       res
@@ -255,7 +248,7 @@ export default class authController implements IauthController {
           req.body.email
         );
         if (response.data?.status == "inactive") {
-          res.status(200).json({
+          res.status(401).json({
             status: false,
             message: "Your Account has been Blocked",
           });

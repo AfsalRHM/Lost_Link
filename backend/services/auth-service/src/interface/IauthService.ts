@@ -13,7 +13,7 @@ export default interface IauthService {
   loginVerify(userEmail: string, userPassword: string): Promise<any>;
   refreshToken(
     token: string
-  ): Promise<{ status: boolean; message: string } | undefined>;
+  ): Promise<{ status: boolean; data: string | null; message: string } | undefined>;
   googleLoginVerify(
     email: string
   ): Promise<{ status: boolean; data: UserDataType | null; message: string }>;
