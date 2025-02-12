@@ -22,7 +22,7 @@ export default async function sendMail(
   const otpValue = generateOTP();
 
   const info = await transporter.sendMail({
-    from: '"LostLink.com " <afsalrahmanm25@gmail.com>',
+    from: "LostLink.com",
     to: recieverEmail,
     subject: "Your LostLink 6-digit OTP",
     html: `

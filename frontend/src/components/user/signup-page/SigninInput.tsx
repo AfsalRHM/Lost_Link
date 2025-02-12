@@ -12,11 +12,9 @@ const SigninInput = (props: inputProps) => {
   return (
     <div className="py-1">
       <span className="mb-2 text-md">{props.name}</span>
-      {props.item == "userFullName" || props.item == "userLocation" ? (
+      {props.item == "userFullName" ? (
         <span className="mb-2 font-light text-gray-500">
-          (
-          {props.item == "userFullName" ? "as per in your id" : "your location"}
-          )
+          ({props.item == "userFullName" ? "as per in your id" : undefined})
         </span>
       ) : (
         <span></span>
@@ -33,13 +31,6 @@ const SigninInput = (props: inputProps) => {
         id={props.item}
         onChange={(e) => handleInputChange(e)}
       />
-      {props.item == "userLocation" ? (
-        <span className="text-blue-600 font-normal text-sm hover:text-blue-800 cursor-pointer">
-          get current location
-        </span>
-      ) : (
-        <span></span>
-      )}
     </div>
   );
 };

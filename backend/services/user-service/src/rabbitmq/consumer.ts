@@ -17,15 +17,15 @@ export async function manageQueue() {
       if (msg) {
         const messageContent = JSON.parse(msg.content.toString());
 
-        console.log(msg, "this is the msg");
+        console.log(messageContent, "this is the msg");
 
         if (msg?.properties?.headers?.source == "user data insert request") {
           const response = await _userService.insertuser(
-            messageContent.full_name,
-            messageContent.user_name,
-            messageContent.location,
-            messageContent.email,
-            messageContent.password
+            messageContent.userData.full_name,
+            messageContent.userData.user_name,
+            messageContent.userData.location,
+            messageContent.userData.email,
+            messageContent.userData.password
           );
 
           channel.sendToQueue("AUTH", Buffer.from(JSON.stringify(response)), {

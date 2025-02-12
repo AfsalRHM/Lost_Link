@@ -14,6 +14,7 @@ import {
   assignUserLocation,
   assignUserName,
 } from "../../../redux/slice/registerDetails";
+import Geoapify from "../shared/Geoapify";
 
 type inputPropsType = {
   display: boolean;
@@ -100,12 +101,12 @@ const RegisterStep1 = () => {
         name="userLocationValidation"
         content={userLocationValidationErrorData.content}
       />
-      <SigninInput
+      {/* <SigninInput
         name="Location"
         item="userLocation"
         stateFunc={setUserLocationInput}
-      />
-
+      /> */}
+      <Geoapify forThe="onUserRegister" stateFunc={setUserLocationInput} />
       <div onClick={handleSubmit}>
         <ContinueButton
           text="Continue to Next"
