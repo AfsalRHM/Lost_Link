@@ -1,6 +1,7 @@
 import mongoose, { Schema } from "mongoose";
 
 import IchatModel from "../interface/IchatModel";
+import ImessageModel from "../interface/ImessageModel";
 
 const chatSchema = new Schema(
   {
@@ -19,11 +20,17 @@ const chatSchema = new Schema(
       },
     ],
     latest_message: {
-      type: String,
+      type: {
+        sender: String,
+        content: String,
+        chat: String,
+        createdAt: Date,
+        updatedAt: Date,
+      },
     },
     group_admin: {
       type: String,
-    }
+    },
   },
   {
     timestamps: true,

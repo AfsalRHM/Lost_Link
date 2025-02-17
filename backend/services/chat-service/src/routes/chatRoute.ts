@@ -8,14 +8,9 @@ const ChatController = new chatController();
 
 /*************************      User Side       *******************************/
 // Get Requests
-chat_route.get("/getUserChat", verifyAccessToken, ChatController.getUserChat); // To get all the requests to show in the request part
-
-chat_route.get("/ha", (req, res) => {
-    res.send("Hahahah");
-    res.end();
-})
 
 // Post Requests
+chat_route.post("/getUserChat", verifyAccessToken, ChatController.getUserChat); // To get all the requests to show in the request part
 
 // Patch Requests
 

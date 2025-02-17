@@ -1,7 +1,12 @@
 import { useState, useRef, useEffect } from "react";
 import { IoSend, IoClose } from "react-icons/io5";
+import getMyChat from "../../../api/user-api/getChat";
+import { showErrorToast2 } from "../../../utils/iziToastUtils";
+import ChatPartLoading from "./loading/ChatPartLoading";
 
 const ChatPart = ({ onClose }: { onClose: any }) => {
+  const [chat, setChat] = useState();
+  const [loading, setLoading] = useState(true);
   const [messages, setMessages] = useState([
     {
       sender: "admin",
@@ -18,6 +23,26 @@ const ChatPart = ({ onClose }: { onClose: any }) => {
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
+
+  useEffect(() => {
+    const getRequestData = async () => {
+      try {
+        const response = await getMyChat();
+        if (response.status === 200) {
+          console.log(response, "This is the Chat data of the user");
+          setChat(response.data.data);
+        } else {
+          showErrorToast2(response.data.message);
+        }
+      } catch (error) {
+        console.error("Failed to fetch requests:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    getRequestData();
+  }, []);
 
   useEffect(() => {
     scrollToBottom();
@@ -46,6 +71,10 @@ const ChatPart = ({ onClose }: { onClose: any }) => {
       sendMessage();
     }
   };
+
+  if (loading) {
+    return <ChatPartLoading />;
+  }
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
