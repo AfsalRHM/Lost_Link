@@ -24,6 +24,10 @@ const chatSchema = new Schema(
       type: String,
       required: true
     },
+    request_status: {
+      type: String,
+      required: true
+    },
     latest_message: {
       type: {
         sender: String,

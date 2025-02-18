@@ -2,18 +2,13 @@ import React, { useEffect, useState } from "react";
 import { BarChart, Activity, Users, X, Notebook, LogOut } from "lucide-react";
 import { SidebarProps } from "../../../interface/IadminDashboard";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { removeAdminDetails } from "../../../redux/slice/adminDetailsSlice";
 import adminLogout from "../../../api/admin-api/adminLogoutAPI";
-import { RootState } from "../../../redux/store";
 import { showErrorToast, showSuccessToast } from "../../../utils/toastUtils";
 import { removeAdminAccessToken } from "../../../redux/slice/accessTokenSlice";
 
 export const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggle }) => {
-  const { adminAccessToken } = useSelector(
-    (state: RootState) => state.accessToken
-  );
-
   const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -26,9 +21,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggle }) => {
 
   const handleLogout = async () => {
     try {
-      const result = await adminLogout({
-        accessToken: adminAccessToken,
-      });
+      const result = await adminLogout();
       if (result.data.status == "true") {
         dispatch(removeAdminDetails());
         dispatch(removeAdminAccessToken());
@@ -89,7 +82,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggle }) => {
                 <Link to={item.path}>
                   <div
                     className={`flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 ${
-                      currentLocation === item.path
+                      item.path !== "/admin" &&
+                      currentLocation.startsWith(item.path)
+                        ? "bg-blue-700"
+                        : currentLocation === item.path
                         ? "bg-blue-700"
                         : "hover:bg-blue-700"
                     }`}

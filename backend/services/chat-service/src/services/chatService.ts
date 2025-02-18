@@ -105,6 +105,7 @@ export default class chatService implements IchatService {
             user_id: userDataResponse.data._doc._id,
             request_name: requestDataResponse.data.product_name,
             request_id: requestDataResponse.data._id,
+            request_status: requestDataResponse.data.status,
           };
           const newChatData: IchatModel | null =
             await this._chatRepository.insertChat(chatDataToInsert);
@@ -137,7 +138,9 @@ export default class chatService implements IchatService {
   // Fetch All the Chats
   async getAllChats(): Promise<any> {
     try {
-      const chatData = await this._chatRepository.findAll();
+      const chatData = await this._chatRepository.findSome({
+        latest_message: { $exists: true, $ne: null },
+      });
 
       if (chatData) {
         return {
@@ -158,6 +161,34 @@ export default class chatService implements IchatService {
         status: false,
         data: null,
         message: "Failed to get all the Chats",
+      };
+    }
+  }
+
+  // To fetch the chat details on the admin side
+  async getChatDetails({ chatId }: { chatId: string }): Promise<any> {
+    try {
+      const chatData = await this._chatRepository.findOne({ _id: chatId });
+
+      if (chatData) {
+        return {
+          status: true,
+          data: chatData,
+          message: "Fetched the User's Chat",
+        };
+      } else {
+        return {
+          status: true,
+          data: null,
+          message: "User's Chat Data is Empty",
+        };
+      }
+    } catch (error) {
+      console.log(error, "error on the getChatDetails/chatService");
+      return {
+        status: false,
+        data: null,
+        message: "Failed to get User's Chat Data",
       };
     }
   }

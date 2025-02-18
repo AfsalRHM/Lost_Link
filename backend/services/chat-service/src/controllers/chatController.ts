@@ -58,4 +58,25 @@ export default class chatController implements IchatController {
       return;
     }
   };
+
+  // To fetch the user chat details to the admin
+  public getChatDetails = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const chatId = req.body.chatId;
+      if (!chatId) {
+        throw new Error("Request Id not passed correctly");
+      }
+
+      const response = await this._chatService.getChatDetails({chatId: chatId});
+
+      if (response.status) {
+        res.status(200).json(response);
+      } else {
+        res.status(400).json(response);
+      }
+    } catch (error) {
+      console.log("error in getChatDetails/chatController", error);
+      return;
+    }
+  };
 }

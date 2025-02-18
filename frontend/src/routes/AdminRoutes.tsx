@@ -9,6 +9,7 @@ import { AdminPrivateRoute } from "../utils/AdminPrivateRoutes";
 import AddAdmin from "../pages/admin/AddAdmin";
 import RequestList from "../pages/admin/RequestList";
 import ChatList from "../pages/admin/ChatList";
+import ChatDetails from "../pages/admin/ChatDetails";
 
 const AdminRoutes = () => {
   return (
@@ -24,6 +25,7 @@ const AdminRoutes = () => {
         <Route path="/admin/addadmin" element={<AddAdmin />} />
         <Route path="/admin/requests" element={<RequestList />} />
         <Route path="/admin/chats" element={<ChatList />} />
+        <Route path="/admin/chats/chat-details/:id" element={<ChatDetails />} />
       </Route>
     </>
   );

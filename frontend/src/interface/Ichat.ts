@@ -1,8 +1,11 @@
 export default interface IchatModel {
   _id: string;
-  chat_name: string;
+  user_name: string;
+  request_name: string;
+  user_id: string;
+  request_id: string;
+  request_status: string;
   is_group_chat: boolean;
-  users: string[];
   latest_message: ImessageModel;
   group_admin: string;
   createdAt: Date;
