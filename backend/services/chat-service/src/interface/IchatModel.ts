@@ -2,9 +2,11 @@ import { Document } from "mongoose";
 import ImessageModel from "./ImessageModel";
 
 export default interface IchatModel extends Document {
-  chat_name: string;
+  user_name: string;
+  request_name: string;
+  user_id: string;
+  request_id: string;
   is_group_chat: boolean;
-  users: string[];
   latest_message: ImessageModel;
   group_admin: string;
   createdAt?: Date;

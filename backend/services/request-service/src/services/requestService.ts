@@ -199,6 +199,27 @@ export default class requestService implements IrequestService {
     }
   }
 
+  async getRequestDataById({ requestId }: { requestId: string }): Promise<any> {
+    try {
+      const requestData = await this._requestRepository.findOne({ _id: requestId });
+      if (requestData) {
+        return {
+          status: true,
+          data: requestData,
+          message: "Request Data Available",
+        };
+      } else {
+        return {
+          status: false,
+          data: null,
+          message: "Request Un Available",
+        };
+      }
+    } catch (error) {
+      console.log(error, "error on the getRequestDataById/requestService");
+    }
+  }
+
   async createRedeemRequest({
     requestId,
     formData,

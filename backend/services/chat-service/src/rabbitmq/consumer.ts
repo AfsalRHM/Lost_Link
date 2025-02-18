@@ -1,5 +1,8 @@
 import configCommunication, { getChannel } from "../config/communicationConfig";
-import chatService, { getUserDataByUserId } from "../services/chatService";
+import chatService, {
+  getRequestDataByRequestId,
+  getUserDataByUserId,
+} from "../services/chatService";
 import dotenv from "dotenv";
 import { getCorrelationId } from "../utils/correlationId";
 
@@ -27,8 +30,6 @@ export async function manageQueue() {
         const messageContent = JSON.parse(msg.content.toString());
 
         let correlationId;
-        console.log(msg.properties);
-        console.log(messageContent);
 
         if (messageContent) {
           correlationId = getCorrelationId(
@@ -41,22 +42,19 @@ export async function manageQueue() {
         if (
           msg?.properties?.headers?.source == "get user data by userId response"
         ) {
-          //   const response = await _chatService.insertuser(
-          //     messageContent.full_name,
-          //     messageContent.user_name,
-          //     messageContent.location,
-          //     messageContent.email,
-          //     messageContent.password
-          //   );
-
-          //   channel.sendToQueue("AUTH", Buffer.from(JSON.stringify(response)), {
-          //     correlationId: msg.properties.correlationId,
-          //     headers: { source: "user register complete info" },
-          //   });
           if (messageContent && correlationId) {
             getUserDataByUserId(correlationId, messageContent);
           } else {
             console.log("Error on messageContent on admin managing Queue 2");
+          }
+        } else if (
+          msg?.properties?.headers?.source ==
+          "get request data by requestId response"
+        ) {
+          if (messageContent && correlationId) {
+            getRequestDataByRequestId(correlationId, messageContent);
+          } else {
+            console.log("Error on messageContent on admin managing Queue 3");
           }
         } else {
           console.log("No requestData found in message.");

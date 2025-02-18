@@ -104,7 +104,7 @@ export async function manageQueue() {
               headers: {
                 source: "get user data by userId response",
                 correlationIdIdentifier:
-                  msg?.properties?.headers?.correlationIdString,
+                  msg?.properties?.headers?.correlationIdIdentifier,
               },
             }
           );

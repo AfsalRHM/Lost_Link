@@ -1,24 +1,29 @@
 import mongoose, { Schema } from "mongoose";
 
 import IchatModel from "../interface/IchatModel";
-import ImessageModel from "../interface/ImessageModel";
 
 const chatSchema = new Schema(
   {
-    chat_name: {
+    user_name: {
       type: String,
       required: true,
-      trim: true,
+    },
+    user_id: {
+      type: String,
+      required: true,
     },
     is_group_chat: {
       type: Boolean,
       default: false,
     },
-    users: [
-      {
-        type: String,
-      },
-    ],
+    request_name: {
+      type: String,
+      required: true,
+    },
+    request_id: {
+      type: String,
+      required: true
+    },
     latest_message: {
       type: {
         sender: String,

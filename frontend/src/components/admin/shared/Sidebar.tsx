@@ -53,6 +53,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggle }) => {
     { text: "Users", icon: <Users size={20} />, path: "/admin/users" },
     { text: "Admins", icon: <Users size={20} />, path: "/admin/admins" },
     { text: "Requests", icon: <Notebook size={20} />, path: "/admin/requests" },
+    { text: "Chats", icon: <Notebook size={20} />, path: "/admin/chats" },
     { text: "Logout", icon: <LogOut size={20} />, path: "/" },
   ];
 

@@ -12,8 +12,13 @@ export default class chatController implements IchatController {
     this._chatService = new chatService();
   }
 
+  // To Create or Fetch the Chat
   public getUserChat = async (req: Request, res: Response): Promise<void> => {
     try {
+      const requestId = req.body.requestId;
+      if (!requestId) {
+        throw new Error("Request Id not passed correctly");
+      }
       const accessToken = req.headers["authorization"]?.split(" ")[1];
       if (!accessToken) {
         throw new Error("Access Token no exist");
@@ -25,12 +30,29 @@ export default class chatController implements IchatController {
 
       const userId = decoded.id;
 
-      const response = await this._chatService.getUserChat({userId});
+      const response = await this._chatService.getUserChat({ userId, requestId });
 
-      console.log(response, "THisi is the response");
+      if (response.status) {
+        res.status(200).json(response);
+      } else {
+        res.status(400).json(response);
+      }
+    } catch (error) {
+      console.log("error in getUserChat/chatController", error);
+      return;
+    }
+  };
 
-      res.status(200).json(response)
-      
+  // To fetch all the chats
+  public getAllChats = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const response = await this._chatService.getAllChats();
+
+      if (response.status) {
+        res.status(200).json(response);
+      } else {
+        res.status(400).json(response);
+      }
     } catch (error) {
       console.log("error in getUserChat/chatController", error);
       return;

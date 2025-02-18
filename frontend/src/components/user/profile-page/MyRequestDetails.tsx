@@ -271,7 +271,7 @@ const MyRequestDetails = () => {
                 Cancel Request
               </button>
             ) : null}
-            {showChat && <ChatPart onClose={() => setShowChat(false)} />}
+            {showChat && <ChatPart requestId={requestData?._id} onClose={() => setShowChat(false)} />}
           </div>
         </div>
       </div>

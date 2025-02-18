@@ -1,12 +1,18 @@
 import axiosInstance from "../axios-api/axiosInterceptorAPI";
 
-export default async function getMyChat(): Promise<any> {
+type getMyChatPropsType = {
+  requestId: string | undefined;
+};
+
+export default async function getMyChat(
+  props: getMyChatPropsType
+): Promise<any> {
   try {
     const response = await axiosInstance.post(
-      `${import.meta.env.VITE_API_ROUTE}/chat/getUserChat`
+      `${import.meta.env.VITE_API_ROUTE}/chat/getUserChat`,
+      props
     );
-
-    console.log(response);
+    return response;
   } catch (error) {
     console.error("Error fetching My Chat Data:", error);
     return false;

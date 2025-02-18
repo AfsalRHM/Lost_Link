@@ -31,7 +31,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 import chat_route from "./src/routes/chatRoute";
 import message_route from "./src/routes/messageRoute";
 app.use("/", chat_route);
-app.use("/message", message_route);
+app.use("/", message_route);
 
 import serverListening from "./src/config/serverConfig";
 serverListening(app);

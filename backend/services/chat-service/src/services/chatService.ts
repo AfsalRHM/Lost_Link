@@ -4,6 +4,7 @@ import chatRepository from "../repositories/chatRepository";
 import { createCorrelationId } from "../utils/correlationId";
 import eventEmitter from "../utils/eventEmitter";
 import sendToService from "../rabbitmq/producer";
+import IchatModel from "../interface/IchatModel";
 
 export default class chatService implements IchatService {
   private _chatRepository: chatRepository;
@@ -13,26 +14,39 @@ export default class chatService implements IchatService {
   }
 
   // Function to Get the Chat if created OR Create the Chat
-  async getUserChat({ userId }: { userId: string }): Promise<any> {
+  async getUserChat({
+    userId,
+    requestId,
+  }: {
+    userId: string;
+    requestId: string;
+  }): Promise<any> {
     try {
       let chatData = await this._chatRepository.findOne({
         is_group_chat: false,
-        users: { $elemMatch: { $eq: userId } },
+        user_id: userId,
       });
 
+      // For the User Data
       const replyQueue = process.env.USER_QUEUE;
       const correlationId = createCorrelationId(userId);
 
-      if (!replyQueue) {
+      // For the Request Data
+      const replyQueue2 = process.env.REQUEST_QUEUE;
+      const correlationId2 = createCorrelationId(requestId);
+
+      if (!replyQueue || !replyQueue2) {
         throw new Error("replyQueue is empty...!");
       }
 
-      let props: { userId?: string } = {};
+      let props: { userId?: string; requestId?: string } = {};
 
-      if (userId) {
+      if (userId && requestId) {
         props.userId = userId;
+        props.requestId = requestId;
       }
 
+      // For the User Data
       sendToService({
         sendingTo: replyQueue,
         correlationId: correlationId,
@@ -41,6 +55,17 @@ export default class chatService implements IchatService {
         props,
       });
 
+      // For the Request Data
+      sendToService({
+        sendingTo: replyQueue2,
+        correlationId: correlationId2,
+        correlationIdIdentifier: requestId,
+        source: "get request data by requestId",
+        props,
+      });
+
+      // Change to the GRPC
+      // For the User Data
       const userDataResponse: any = await new Promise((resolve, reject) => {
         const timeout = setTimeout(() => {
           reject(new Error("Response timeout"));
@@ -52,7 +77,19 @@ export default class chatService implements IchatService {
         });
       });
 
-      if (userDataResponse.status) {
+      // For the Request Data
+      const requestDataResponse: any = await new Promise((resolve, reject) => {
+        const timeout = setTimeout(() => {
+          reject(new Error("Response timeout"));
+        }, 10000);
+
+        eventEmitter.once(correlationId2, (data) => {
+          clearTimeout(timeout);
+          resolve(data);
+        });
+      });
+
+      if (userDataResponse.status && requestDataResponse.status) {
         if (chatData) {
           return {
             status: true,
@@ -64,12 +101,13 @@ export default class chatService implements IchatService {
           };
         } else {
           const chatDataToInsert = {
-            chat_name: "sender",
-            users: [userId],
+            user_name: userDataResponse.data._doc.full_name,
+            user_id: userDataResponse.data._doc._id,
+            request_name: requestDataResponse.data.product_name,
+            request_id: requestDataResponse.data._id,
           };
-          const newChatData = await this._chatRepository.insertChat(
-            chatDataToInsert
-          );
+          const newChatData: IchatModel | null =
+            await this._chatRepository.insertChat(chatDataToInsert);
           if (newChatData) {
             return {
               status: true,
@@ -88,7 +126,7 @@ export default class chatService implements IchatService {
           }
         }
       } else {
-        throw new Error("User Data Didn't get");
+        throw new Error("User Data or Request Data Didn't get");
       }
     } catch (error) {
       console.log(error, "error on the getUserChat/chatService");
@@ -96,17 +134,41 @@ export default class chatService implements IchatService {
     }
   }
 
-  async fetchChats(): Promise<any> {
+  // Fetch All the Chats
+  async getAllChats(): Promise<any> {
     try {
-      
+      const chatData = await this._chatRepository.findAll();
+
+      if (chatData) {
+        return {
+          status: true,
+          data: chatData,
+          message: "Fetched all the Chats",
+        };
+      } else {
+        return {
+          status: true,
+          data: null,
+          message: "Chat Data is Empty",
+        };
+      }
     } catch (error) {
-      console.log(error, "error on the fetchChats/chatService");
-      return false;
+      console.log(error, "error on the getAllChats/chatService");
+      return {
+        status: false,
+        data: null,
+        message: "Failed to get all the Chats",
+      };
     }
   }
 }
 
-// to access the userDetails from the queue after registration
+// to access the userDetails from the queue
 export function getUserDataByUserId(correlationId: string, params: any) {
+  eventEmitter.emit(correlationId, params);
+}
+
+// to access the requestDetails from the queue
+export function getRequestDataByRequestId(correlationId: string, params: any) {
   eventEmitter.emit(correlationId, params);
 }

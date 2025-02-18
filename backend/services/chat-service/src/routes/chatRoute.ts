@@ -2,7 +2,7 @@ import express from "express";
 const chat_route = express.Router();
 
 import chatController from "../controllers/chatController";
-import verifyAccessToken from "../middlewares/jwtVerifyUser";
+import verifyAccessToken, { verifyAdminAccessToken } from "../middlewares/jwtVerifyUser";
 
 const ChatController = new chatController();
 
@@ -17,6 +17,7 @@ chat_route.post("/getUserChat", verifyAccessToken, ChatController.getUserChat); 
 
 /*************************      Admin Side       *******************************/
 // Get Requests
+chat_route.get("/all-chats", verifyAdminAccessToken, ChatController.getAllChats); // To get all the chats to show in the chat part of admin
 
 // Post Requests
 

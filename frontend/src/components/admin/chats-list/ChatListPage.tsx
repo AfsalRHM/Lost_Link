@@ -2,30 +2,30 @@ import { useEffect, useState } from "react";
 import ChatListPart from "./ChatListPart";
 import { Bell, Menu, Search } from "lucide-react";
 import { Sidebar } from "../shared/Sidebar";
-import fetchAllAdmins from "../../../api/admin-api/allAdminsAPI";
 import { useAdminJwtErrors } from "../../../utils/JwtErrors";
 import adminLogout from "../../../api/admin-api/adminLogoutAPI";
-import { useSelector } from "react-redux";
-import { RootState } from "../../../redux/store";
+// import { useSelector } from "react-redux";
+// import { RootState } from "../../../redux/store";
+import fetchAllChats from "../../../api/admin-api/allChatsAPI";
 
 const ChatListPage = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { adminAccessToken } = useSelector(
-    (state: RootState) => state.accessToken
-  );
+  // const { adminAccessToken } = useSelector(
+  //   (state: RootState) => state.accessToken
+  // );
   const JwtErrors = useAdminJwtErrors();
   const [chatList, setchatList] = useState([]);
 
   const getAllChats = async () => {
     try {
-      const response = await fetchAllAdmins(); // Change the API
+      const response = await fetchAllChats();
 
       if (response && response.data && response.data.status) {
         setchatList(response.data.data);
       } else if (response === false) {
         JwtErrors({ reason: "session expiration" });
         try {
-          await adminLogout({ accessToken: adminAccessToken });
+          await adminLogout();
         } catch (logoutError) {
           console.error("Error during admin logout:", logoutError);
         }
@@ -79,7 +79,7 @@ const ChatListPage = () => {
         </header>
 
         <main className="p-6">
-          <ChatListPart allChats={chatList} allChatsFunc={getAllChats} />
+          <ChatListPart allChats={chatList} />
         </main>
       </div>
     </div>

@@ -12,6 +12,7 @@ interface sendToServiceType {
     email?: string;
     role?: string;
     requestId?: string;
+    response?: any
   };
 }
 
@@ -27,12 +28,12 @@ export default async function sendToService(props: sendToServiceType) {
     }
 
     // Invoking the queue to take actions
-    channel.sendToQueue(sendingTo, Buffer.from(JSON.stringify(props)), {
+    channel.sendToQueue(sendingTo, Buffer.from(JSON.stringify(props.props)), {
       replyTo: currentQueue,
       correlationId: correlationId,
       headers: {
         source: props.source,
-        correlationIdString: props?.correlationIdIdentifier,
+        correlationIdIdentifier: props.correlationIdIdentifier,
       },
     });
   } catch (error) {

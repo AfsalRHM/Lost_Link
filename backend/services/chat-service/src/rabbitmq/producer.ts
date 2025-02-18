@@ -32,7 +32,7 @@ export default async function sendToService(props: sendToServiceType) {
       correlationId: correlationId,
       headers: {
         source: props.source,
-        correlationIdString: props?.correlationIdIdentifier,
+        correlationIdIdentifier: props?.correlationIdIdentifier,
       },
     });
   } catch (error) {

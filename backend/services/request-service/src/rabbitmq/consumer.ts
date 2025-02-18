@@ -1,6 +1,7 @@
 import configCommunication, { getChannel } from "../config/communicationConfig";
 import requestService from "../services/requestService";
 import dotenv from "dotenv";
+import sendToService from "./producer";
 
 export async function manageQueue() {
   try {
@@ -15,7 +16,7 @@ export async function manageQueue() {
     const REQUEST_QUEUE = process.env.REQUEST_QUEUE;
 
     if (!REQUEST_QUEUE) {
-      console.log('not getting th equee')
+      console.log("not getting th equee");
     }
 
     // Setting up the Consumer
@@ -25,22 +26,41 @@ export async function manageQueue() {
       if (msg) {
         const messageContent = JSON.parse(msg.content.toString());
 
-        // if (msg?.properties?.headers?.source == "user data insert request") {
-        //   const response = await _userService.insertuser(
-        //     messageContent.full_name,
-        //     messageContent.user_name,
-        //     messageContent.location,
-        //     messageContent.email,
-        //     messageContent.password
-        //   );
+        console.log(msg.properties, "This is the msg");
 
-        //   channel.sendToQueue("AUTH", Buffer.from(JSON.stringify(response)), {
-        //     correlationId: msg.properties.correlationId,
-        //     headers: { source: "user register complete info" },
-        //   });
-        // } else {
-        //   console.log("No requestData found in message.");
-        // }
+        if (
+          msg?.properties?.headers?.source == "get request data by requestId"
+        ) {
+          console.log("This the message content", messageContent);
+          const response = await _requestService.getRequestDataById(
+            messageContent
+          );
+
+          // channel.sendToQueue(
+          //   msg.properties.replyTo,
+          //   Buffer.from(JSON.stringify(response)),
+          //   {
+          //     correlationId: msg.properties.correlationId,
+          //     headers: {
+          //       source: "get request data by requestId response",
+          //       correlationIdIdentifier:
+          //         msg?.properties?.headers?.correlationIdString,
+          //     },
+          //   }
+          // );
+          sendToService({
+            sendingTo: msg.properties.replyTo,
+            source: "get request data by requestId response",
+            correlationId: msg.properties.correlationId,
+            correlationIdIdentifier:
+              msg?.properties?.headers?.correlationIdIdentifier,
+            props: {
+              ...response,
+            },
+          });
+        } else {
+          console.log("No Match Found for the source.");
+        }
 
         channel.ack(msg);
       } else {

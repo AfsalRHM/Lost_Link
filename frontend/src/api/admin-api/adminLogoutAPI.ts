@@ -1,15 +1,9 @@
-import { logoutProps } from "../../interface/IapiProps";
-import adminAxiosInstance from "../axios-api/adminAxiosInterceptorAPI";
+import axios from "axios";
 
-export default async function adminLogout(props: logoutProps): Promise<any> {
+export default async function adminLogout(): Promise<any> {
   try {
-    const response = await adminAxiosInstance.post(
-      `${import.meta.env.VITE_API_ROUTE}/admin/logout`,
-      {
-        headers: {
-          Authorization: `Bearer ${props.accessToken}`,
-        },
-      }
+    const response = await axios.post(
+      `${import.meta.env.VITE_API_ROUTE}/admin/logout`
     );
 
     return response;
