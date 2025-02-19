@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import ImessageController from "../interface/ImessageController";
 import messageService from "../services/messageService";
 
-import { getUserIdFromToken } from "../utils/helpers";
+import { getAdminIdFromToken, getUserIdFromToken } from "../utils/helpers";
 
 export default class messageController implements ImessageController {
   private _messageService: messageService;
@@ -11,6 +11,7 @@ export default class messageController implements ImessageController {
     this._messageService = new messageService();
   }
 
+  // To send the user messages
   public sendMessage = async (req: Request, res: Response): Promise<void> => {
     try {
       const { content, chatId } = req.body; // Add Type
@@ -39,6 +40,48 @@ export default class messageController implements ImessageController {
         content,
         chatId,
         userId,
+      });
+
+      if (response.status) {
+        res.status(200).json(response);
+      } else {
+        res.status(402).json(response);
+      }
+    } catch (error) {
+      console.log("error in sendMessage/messageController", error);
+      return;
+    }
+  };
+
+  // To save the admin messages
+  public sendAdminMessage = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { content, chatId } = req.body; // Add Type
+      if (!content || !chatId) {
+        console.log("invalid data passed to the request send-admin-message");
+        res.status(404);
+        return;
+      }
+
+      const token = req.header("Authorization")?.split(" ")[1];
+
+      if (!token) {
+        console.log("invalid data passed to the request send-admin-message");
+        res.status(401);
+        return;
+      }
+      const adminId = await getAdminIdFromToken({ token });
+
+      if (!adminId) {
+        console.log("invalid Token On messageController");
+        res.status(401);
+        return;
+      }
+
+      const response = await this._messageService.sendAdminMessage({
+        content,
+        chatId,
+        adminId,
       });
 
       if (response.status) {

@@ -8,5 +8,14 @@ export default interface ImessageService {
     content: string;
     chatId: string;
   }): Promise<any>;
+  sendAdminMessage({
+    content,
+    chatId,
+    adminId,
+  }: {
+    adminId: string;
+    content: string;
+    chatId: string;
+  }): Promise<any>;
   getMessages({ chatId }: { chatId: string }): Promise<any>;
 }

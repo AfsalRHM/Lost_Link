@@ -25,7 +25,7 @@ const RequestListPage = () => {
       } else if (response === false) {
         JwtErrors({ reason: "session expiration" });
         try {
-          await adminLogout({ accessToken: adminAccessToken });
+          await adminLogout();
         } catch (logoutError) {
           console.error("Error during admin logout:", logoutError);
         }

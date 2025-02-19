@@ -15,7 +15,7 @@ export default class messageService implements ImessageService {
     this._chatRepository = new chatRepository();
   }
 
-  // Function to Send/Create a Message
+  // Function to Send/Create a User Message
   async sendMessage({
     content,
     chatId,
@@ -68,6 +68,60 @@ export default class messageService implements ImessageService {
     }
   }
 
+  // Function to Send/Create an Admin Message
+  async sendAdminMessage({
+    content,
+    chatId,
+    adminId,
+  }: {
+    adminId: string;
+    content: string;
+    chatId: string;
+  }): Promise<any> {
+    try {
+      if (!adminId || !content || !chatId) {
+        return {
+          status: false,
+          data: null,
+          message: "Data no Reached to the sendMessage/messageService",
+        };
+      }
+
+      const newMessage = {
+        sender: adminId,
+        content: content,
+        chat: chatId,
+      };
+
+      const messageData = await (
+        await this._messageRepository.insert(newMessage)
+      ).populate("chat");
+
+      if (!messageData) {
+        return {
+          status: false,
+          data: null,
+          message:
+            "Error while inserting the message on the sendAdminMessage/messageService",
+        };
+      }
+
+      await this._chatRepository.findByIdAndUpdate(chatId, {
+        latest_message: messageData,
+      });
+
+      return {
+        status: true,
+        data: messageData,
+        message: "New Message Created",
+      };
+    } catch (error) {
+      console.log(error, "error on the sendAdminMessage/messageService");
+      return false;
+    }
+  }
+
+  // To get all the messages of a specific chat
   async getMessages({ chatId }: { chatId: string }): Promise<any> {
     try {
       if (!chatId) {

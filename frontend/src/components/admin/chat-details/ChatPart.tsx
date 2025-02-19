@@ -1,27 +1,40 @@
 import { ArrowLeft, Info, Send } from "lucide-react";
-import { useLocation, useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
-import IchatModel from "../../../interface/Ichat";
-
-interface ChatMessage {
-  id: string;
-  sender: "user" | "admin";
-  content: string;
-  timestamp: string;
-}
+import { useNavigate } from "react-router-dom";
+import { useState, useEffect, FormEvent } from "react";
+import IchatModel, { ImessageModel } from "../../../interface/Ichat";
+import fetchUserMessages from "../../../api/admin-api/getMessagesAPI";
+import { showErrorToast2 } from "../../../utils/iziToastUtils";
+import { useSelector } from "react-redux";
+import { RootState } from "../../../redux/store";
+import saveAdminMessage from "../../../api/admin-api/sendAdminMessage";
 
 const ChatPart = ({ chatDetails }: { chatDetails: IchatModel | undefined }) => {
   const navigate = useNavigate();
-  const location = useLocation();
-  const chatId = location.state?.chatId;
 
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const { adminId } = useSelector((state: RootState) => state.adminDetails);
+
+  console.log(chatDetails);
+
+  const [messages, setMessages] = useState<ImessageModel[]>([]);
 
   const [newMessage, setNewMessage] = useState("");
 
   useEffect(() => {
-    console.log("Fetching details for chat ID:", chatId);
-  }, [chatId]);
+    const getMessages = async () => {
+      try {
+        const response = await fetchUserMessages({ chatId: chatDetails?._id });
+        if (response.status === 200) {
+          setMessages([...messages, ...response.data.data]);
+        } else {
+          showErrorToast2(response.data.message);
+        }
+      } catch (error) {
+        console.error("Failed to fetch Chat:", error);
+      }
+    };
+
+    getMessages();
+  }, []);
 
   const handleBack = () => {
     navigate(-1);
@@ -37,29 +50,31 @@ const ChatPart = ({ chatDetails }: { chatDetails: IchatModel | undefined }) => {
     });
   };
 
-  const handleSendMessage = (e: React.FormEvent) => {
+  const handleSendMessage = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (newMessage.trim() === "") return;
-
-    const newMsg: ChatMessage = {
-      id: (messages.length + 1).toString(),
-      sender: "admin",
-      content: newMessage,
-      timestamp: new Date().toISOString(),
-    };
-
-    setMessages([...messages, newMsg]);
-    setNewMessage("");
-  };
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const hours = date.getHours();
-    const minutes = date.getMinutes();
-    const ampm = hours >= 12 ? "PM" : "AM";
-    const formattedHours = hours % 12 || 12; 
-    const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
-    return `${formattedHours}:${formattedMinutes} ${ampm}`;
+    if (newMessage.trim() !== "") {
+      if (chatDetails) {
+        const response = await saveAdminMessage({
+          chatId: chatDetails._id,
+          content: newMessage,
+        });
+        if (response.status === 200) {
+          setMessages([
+            ...messages,
+            {
+              sender: adminId,
+              chat: chatDetails._id,
+              content: newMessage,
+              createdAt: new Date(),
+              updatedAt: new Date(),
+            },
+          ]);
+          setNewMessage("");
+        } else {
+          showErrorToast2(response.data.message);
+        }
+      }
+    }
   };
 
   return (
@@ -132,29 +147,33 @@ const ChatPart = ({ chatDetails }: { chatDetails: IchatModel | undefined }) => {
         </div>
 
         <div className="flex-grow overflow-y-auto p-4 space-y-4 max-h-[400px]">
-          {messages.map((message) => (
+          {messages.map((message, index) => (
             <div
-              key={message.id}
+              key={index}
               className={`flex ${
-                message.sender === "admin" ? "justify-end" : "justify-start"
+                message.sender === adminId ? "justify-end" : "justify-start"
               }`}
             >
               <div
                 className={`max-w-3/4 rounded-lg p-3 ${
-                  message.sender === "admin"
-                    ? "bg-blue-600 text-white"
-                    : "bg-blue-400 text-black"
+                  message.sender === adminId
+                    ? "bg-blue-600 text-white rounded-tr-none"
+                    : "bg-blue-400 text-black rounded-tl-none"
                 } shadow-md`}
               >
                 <p>{message.content}</p>
                 <p
                   className={`text-xs mt-1 ${
-                    message.sender === "admin"
+                    message.sender === adminId
                       ? "text-blue-200"
                       : "text-blue-900"
                   }`}
                 >
-                  {formatDate(message.timestamp)}
+                  {new Date(message.createdAt).toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    hour12: true,
+                  })}
                 </p>
               </div>
             </div>

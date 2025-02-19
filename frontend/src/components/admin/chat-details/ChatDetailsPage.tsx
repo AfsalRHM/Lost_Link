@@ -10,42 +10,46 @@ import { useParams } from "react-router-dom";
 import { useAdminJwtErrors } from "../../../utils/JwtErrors";
 import adminLogout from "../../../api/admin-api/adminLogoutAPI";
 import fetchChatDetails from "../../../api/admin-api/getChatDetails";
+import ChatListSkeleton from "./loading/ChatDetailsPageLoadin";
 
 const ChatListPage = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [loading, setLoading] = useState<boolean>(true);
+  
   const { id } = useParams<{ id: string }>();
-  console.log("Chat ID:", id);
-  // const { adminAccessToken } = useSelector(
-  //   (state: RootState) => state.accessToken
-  // );
-    const JwtErrors = useAdminJwtErrors();
+
+  const JwtErrors = useAdminJwtErrors();
 
   const [chatDetails, setChatDetails] = useState<IchatModel>();
 
-    const getChatDetails = async () => {
-      try {
-        const response = await fetchChatDetails({chatId: id});
-
-        if (response && response.data && response.data.status) {
-          setChatDetails(response.data.data);
-        } else if (response === false) {
-          JwtErrors({ reason: "session expiration" });
-          try {
-            await adminLogout();
-          } catch (logoutError) {
-            console.error("Error during admin logout:", logoutError);
-          }
-        } else {
-          console.log("Unexpected response:", response);
+  const getChatDetails = async () => {
+    try {
+      const response = await fetchChatDetails({ chatId: id });
+      if (response && response.data && response.data.status) {
+        setChatDetails(response.data.data);
+        setLoading(false);
+      } else if (response === false) {
+        JwtErrors({ reason: "session expiration" });
+        try {
+          await adminLogout();
+        } catch (logoutError) {
+          console.error("Error during admin logout:", logoutError);
         }
-      } catch (error) {
-        console.error("Error in getChatDetails:", error);
+      } else {
+        console.log("Unexpected response:", response);
       }
-    };
+    } catch (error) {
+      console.error("Error in getChatDetails:", error);
+    }
+  };
 
-    useEffect(() => {
-      getChatDetails();
-    }, []);
+  useEffect(() => {
+    getChatDetails();
+  }, []);
+
+  if (loading) {
+    return <ChatListSkeleton />;
+  }
 
   return (
     <div className="flex min-h-screen bg-blue-900 text-white">
@@ -85,7 +89,11 @@ const ChatListPage = () => {
         </header>
 
         <main className="p-6">
-          <ChatPart chatDetails={chatDetails} />
+          {chatDetails ? (
+            <ChatPart chatDetails={chatDetails} />
+          ) : (
+            <div className="text-center">Chat Data not found.</div>
+          )}
         </main>
       </div>
     </div>

@@ -37,7 +37,7 @@ const ChatPart = ({
   useEffect(() => {
     const getChatData = async () => {
       try {
-        const response = await getMyChat({requestId});
+        const response = await getMyChat({ requestId });
         if (response.status === 200) {
           setChat(response.data.data.chatData);
           getMessages(response.data.data.chatData._id);
@@ -153,6 +153,7 @@ const ChatPart = ({
                   {new Date(msg.createdAt).toLocaleTimeString([], {
                     hour: "2-digit",
                     minute: "2-digit",
+                    hour12: true,
                   })}
                 </span>
               </div>

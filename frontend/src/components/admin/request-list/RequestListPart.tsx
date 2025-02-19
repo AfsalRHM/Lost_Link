@@ -1,5 +1,4 @@
-import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "../../../redux/store";
+import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useAdminJwtErrors } from "../../../utils/JwtErrors";
@@ -34,9 +33,6 @@ const RequestListPart = ({
   allRequestsFunc,
 }: RequestListPartProps) => {
   const dispatch = useDispatch();
-  const { adminAccessToken } = useSelector(
-    (state: RootState) => state.accessToken
-  );
   const navigate = useNavigate();
 
   const [searchTerm, setSearchTerm] = useState("");
@@ -75,9 +71,7 @@ const RequestListPart = ({
       showSuccessToast("Request Status Changed");
     } else if (response === false) {
       JwtErrors({ reason: "session expiration" });
-      await adminLogout({
-        accessToken: adminAccessToken,
-      });
+      await adminLogout();
     } else {
       console.log("Unexpected response:", response);
     }

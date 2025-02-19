@@ -7,7 +7,10 @@ interface propsType {
 export default async function fetchChatDetails(Props: propsType): Promise<any> {
   try {
     const result = await adminAxiosInstance
-      .post(`${import.meta.env.VITE_API_ROUTE}/chat/get-user-chat-details`, Props)
+      .post(
+        `${import.meta.env.VITE_API_ROUTE}/chat/get-user-chat-details`,
+        Props
+      )
       .then((response) => {
         return response;
       });

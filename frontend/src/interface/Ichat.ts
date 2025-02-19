@@ -13,7 +13,7 @@ export default interface IchatModel {
 }
 
 export interface ImessageModel {
-  _id: string;
+  _id?: string;
   sender: string;
   content: string;
   chat: string;
