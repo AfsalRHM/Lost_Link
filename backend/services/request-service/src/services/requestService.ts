@@ -352,6 +352,33 @@ export default class requestService implements IrequestService {
     }
   }
 
+  // To Fetch all the Redeem Requests
+  async getAllRedeemRequests(): Promise<any> {
+    try {
+      const redeemRrequests = await this._requestRedeemRepository.findAllRedeemRequest();
+      if (redeemRrequests) {
+        return {
+          status: true,
+          data: redeemRrequests,
+          message: "All Redeem Request recieved",
+        };
+      } else {
+        return {
+          status: false,
+          data: null,
+          message: "All Redeem Request Failed to fetch",
+        };
+      }
+    } catch (error) {
+      return {
+        status: false,
+        data: null,
+        message:
+          "Error occured while getting all requests - from getAllRedeemRequests/requestService",
+      };
+    }
+  }
+
   async makePayment(formData: any): Promise<any> {
     try {
       const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;

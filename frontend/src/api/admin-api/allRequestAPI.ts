@@ -1,18 +1,9 @@
 import adminAxiosInstance from "../axios-api/adminAxiosInterceptorAPI";
 
-interface Props {
-  adminAccessToken: string;
-}
-
-export default async function fetchAllRequests(props: Props): Promise<any> {
+export default async function fetchAllRequests(): Promise<any> {
   try {
     const result = await adminAxiosInstance.get(
-      `${import.meta.env.VITE_API_ROUTE}/request/getAllRequestsAdmin`,
-      {
-        headers: {
-          Authorization: `Bearer ${props.adminAccessToken}`,
-        },
-      }
+      `${import.meta.env.VITE_API_ROUTE}/request/getAllRequestsAdmin`
     );
     return result;
   } catch (error) {

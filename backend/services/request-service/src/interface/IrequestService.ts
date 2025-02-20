@@ -8,9 +8,7 @@ export default interface IrequestService {
   }): Promise<any>;
   getUserRequests(requestIds: [string]): Promise<any>;
   getRequestDetails(requestIds: [string]): Promise<any>;
-  getRequests(): Promise<any>;
   makePayment(formData: any): Promise<any>;
-  changeRequestStatus(props: { requestId: string }): Promise<any>;
   getRequestDataById({ requestId }: { requestId: string }): Promise<any>;
   createRedeemRequest({
     requestId,
@@ -25,4 +23,8 @@ export default interface IrequestService {
     requestRedeemId: string;
   }): Promise<any>;
   getUserRedeemRequests({ userId }: { userId: string }): Promise<any>;
+
+  getRequests(): Promise<any>;
+  changeRequestStatus(props: { requestId: string }): Promise<any>;
+  getAllRedeemRequests(): Promise<any>;
 }

@@ -40,6 +40,7 @@ export default class RequestController implements IrequestController {
     }
   };
 
+  // To fetch all the requests to the Admin side
   public getAllRequests = async (
     req: Request,
     res: Response
@@ -52,9 +53,25 @@ export default class RequestController implements IrequestController {
         const requestData = await this._requestService.getRequests();
 
         res
-          .setHeader("Authorization", `Bearer ${accessToken}`)
           .status(200)
           .json({ status: requestData.status, data: requestData.data });
+      }
+    } catch (error) {
+      console.log("error in requestController", error);
+    }
+  };
+
+  // To fetch all the redeem requests to the Admin side
+  public getAllRedeemRequests = async (
+    req: Request,
+    res: Response
+  ): Promise<void> => {
+    try {
+      const response = await this._requestService.getAllRedeemRequests();
+      if (response.status) {
+        res.status(200).json(response);
+      } else {
+        res.status(400).json(response);
       }
     } catch (error) {
       console.log("error in requestController", error);

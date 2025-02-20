@@ -31,6 +31,8 @@ request_route.patch("/cancelRequest", verifyAccessToken, RequestController.cance
 // Get Requests
 request_route.get("/getAllRequestsAdmin", verifyAdminAccessToken, RequestController.getAllRequests); // To get all the requests in the admin side
 
+request_route.get("/get-all-redeem-requests", verifyAdminAccessToken, RequestController.getAllRedeemRequests); // To get all the redeem requests in the admin side
+
 // Post Requests
 request_route.post("/changeRequestStatus", verifyAdminAccessToken, RequestController.changeRequestStatus); // To change the request status
 

@@ -32,6 +32,16 @@ export default class BaseRepository<T extends Document>
     }
   }
 
+  async findAllRedeemRequest(
+    filter?: FilterQuery<T> | undefined
+  ): Promise<T[]> {
+    if (filter) {
+      return this.model.find(filter).populate("request_id");
+    } else {
+      return this.model.find().populate("request_id");
+    }
+  }
+
   async findByIdAndUpdate(Id: string, update: Partial<T>): Promise<T | null> {
     return this.model.findByIdAndUpdate(Id, update, { new: true });
   }
