@@ -126,7 +126,13 @@ const ChatListPart = ({ allChats = [] }: ChatListPartProps) => {
                         <div className="text-sm text-black">
                           {chat.latest_message ? (
                             <span className="font-medium">
-                              last message : {chat.latest_message.content}
+                              last message:{" "}
+                              {chat.latest_message.content.length > 20
+                                ? `${chat.latest_message.content.slice(
+                                    0,
+                                    20
+                                  )}...`
+                                : chat.latest_message.content}
                             </span>
                           ) : (
                             <span className="font-medium">
@@ -154,7 +160,7 @@ const ChatListPart = ({ allChats = [] }: ChatListPartProps) => {
                       <td className="px-6 py-4 whitespace-nowrap text-center">
                         <button
                           onClick={() => handleDetailsPage(chat._id)}
-                          className="inline-flex items-center px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                          className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                         >
                           More...
                         </button>

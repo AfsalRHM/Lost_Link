@@ -5,7 +5,7 @@ interface sendToServiceType {
   sendingTo: string;
   correlationId: string;
   source: string;
-  correlationIdString?: string;
+  correlationIdentifier?: string;
   props?: {
     userId?: string;
     userMail?: string;
@@ -31,7 +31,7 @@ export default async function sendToService(props: sendToServiceType) {
       correlationId: correlationId,
       headers: {
         source: props.source,
-        correlationIdString: props.correlationIdString,
+        correlationIdentifier: props.correlationIdentifier,
       },
     });
   } catch (error) {

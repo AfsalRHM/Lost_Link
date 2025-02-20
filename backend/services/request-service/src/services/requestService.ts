@@ -60,6 +60,7 @@ export default class requestService implements IrequestService {
       if (insertedData) {
         const sendingTo = process.env.USER_QUEUE;
         const source = "Add the request Id to the user";
+        console.log('Haaaa----------------', insertedData._id.toString())
         const props = {
           userId,
           requestId: insertedData._id.toString(),

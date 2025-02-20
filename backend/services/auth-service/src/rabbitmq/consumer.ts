@@ -42,7 +42,7 @@ export async function manageQueue() {
             } else {
               console.log("Error on messageContent on auth managing Queue 1");
             }
-          } else if (msg?.properties?.headers?.source == "user login info") {
+          } else if (msg?.properties?.headers?.source == "user login request response") {
             if (messageContent) {
               loginDetails(correlationId, messageContent);
             } else {

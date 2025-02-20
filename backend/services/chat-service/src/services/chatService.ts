@@ -1,5 +1,6 @@
 import IchatService from "../interface/IchatService";
 import chatRepository from "../repositories/chatRepository";
+import messageRepository from "../repositories/messageRepository";
 
 import { createCorrelationId } from "../utils/correlationId";
 import eventEmitter from "../utils/eventEmitter";
@@ -8,9 +9,11 @@ import IchatModel from "../interface/IchatModel";
 
 export default class chatService implements IchatService {
   private _chatRepository: chatRepository;
+  private _messageRepository: messageRepository;
 
   constructor() {
     this._chatRepository = new chatRepository();
+    this._messageRepository = new messageRepository();
   }
 
   // Function to Get the Chat if created OR Create the Chat
@@ -46,6 +49,7 @@ export default class chatService implements IchatService {
         props.requestId = requestId;
       }
 
+      // Change to the GRPC
       // For the User Data
       sendToService({
         sendingTo: replyQueue,
@@ -55,16 +59,6 @@ export default class chatService implements IchatService {
         props,
       });
 
-      // For the Request Data
-      sendToService({
-        sendingTo: replyQueue2,
-        correlationId: correlationId2,
-        correlationIdIdentifier: requestId,
-        source: "get request data by requestId",
-        props,
-      });
-
-      // Change to the GRPC
       // For the User Data
       const userDataResponse: any = await new Promise((resolve, reject) => {
         const timeout = setTimeout(() => {
@@ -75,6 +69,15 @@ export default class chatService implements IchatService {
           clearTimeout(timeout);
           resolve(data);
         });
+      });
+
+      // For the Request Data
+      sendToService({
+        sendingTo: replyQueue2,
+        correlationId: correlationId2,
+        correlationIdIdentifier: requestId,
+        source: "get request data by requestId",
+        props,
       });
 
       // For the Request Data
@@ -110,6 +113,13 @@ export default class chatService implements IchatService {
           const newChatData: IchatModel | null =
             await this._chatRepository.insertChat(chatDataToInsert);
           if (newChatData) {
+            // Add the first Auto Message
+            const newChatId: string = newChatData._id as string;
+            await this._messageRepository.insertMessage({
+              chat: newChatId,
+              sender: "admin",
+              content: "Hello! How can I assist you today?",
+            });
             return {
               status: true,
               data: {

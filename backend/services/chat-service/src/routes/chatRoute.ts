@@ -10,7 +10,7 @@ const ChatController = new chatController();
 // Get Requests
 
 // Post Requests
-chat_route.post("/getUserChat", verifyAccessToken, ChatController.getUserChat); // To get all the requests to show in the request part
+chat_route.post("/getUserChat", verifyAccessToken, ChatController.getUserChat); // To get the chat of the user or create it
 
 // Patch Requests
 

@@ -1,6 +1,6 @@
 import { ArrowLeft, Info, Send } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useState, useEffect, FormEvent } from "react";
+import { useState, useEffect, FormEvent, useRef } from "react";
 import IchatModel, { ImessageModel } from "../../../interface/Ichat";
 import fetchUserMessages from "../../../api/admin-api/getMessagesAPI";
 import { showErrorToast2 } from "../../../utils/iziToastUtils";
@@ -23,6 +23,16 @@ const ChatPart = ({ chatDetails }: { chatDetails: IchatModel | undefined }) => {
 
   const socket = getSocket();
 
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
   useEffect(() => {
     socket.emit("joinRoom", chatDetails?._id);
 
@@ -44,7 +54,7 @@ const ChatPart = ({ chatDetails }: { chatDetails: IchatModel | undefined }) => {
 
   useEffect(() => {
     socket.on("userMessageRecieved", (newMessageRecieved) => {
-      console.log("new User message recieved", newMessageRecieved)
+      console.log("new User message recieved", newMessageRecieved);
       setMessages([...messages, newMessageRecieved]);
     });
   });
@@ -168,37 +178,61 @@ const ChatPart = ({ chatDetails }: { chatDetails: IchatModel | undefined }) => {
         </div>
 
         <div className="flex-grow overflow-y-auto p-4 space-y-4 max-h-[400px]">
-          {messages.map((message, index) => (
-            <div
-              key={index}
-              className={`flex ${
-                message.sender === adminId ? "justify-end" : "justify-start"
-              }`}
-            >
-              <div
-                className={`max-w-3/4 rounded-lg p-3 ${
-                  message.sender === adminId
-                    ? "bg-blue-600 text-white rounded-tr-none"
-                    : "bg-blue-400 text-black rounded-tl-none"
-                } shadow-md`}
-              >
-                <p>{message.content}</p>
-                <p
-                  className={`text-xs mt-1 ${
-                    message.sender === adminId
-                      ? "text-blue-200"
-                      : "text-blue-900"
+          {messages.map((message, index) => {
+            // Extract current and previous message dates (in YYYY-MM-DD format for comparison)
+            const currentDate = new Date(
+              message.createdAt
+            ).toLocaleDateString();
+            const previousDate =
+              index > 0
+                ? new Date(messages[index - 1].createdAt).toLocaleDateString()
+                : null;
+
+            return (
+              <div key={index}>
+                {currentDate !== previousDate && (
+                  <div className="text-center text-sm text-white underline rounded-lg">
+                    {currentDate == new Date().toLocaleDateString()
+                      ? "Today"
+                      : currentDate}
+                  </div>
+                )}
+
+                <div
+                  className={`flex ${
+                    message.sender === adminId || message.sender === "admin"
+                      ? "justify-end"
+                      : "justify-start"
                   }`}
                 >
-                  {new Date(message.createdAt).toLocaleTimeString([], {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                    hour12: true,
-                  })}
-                </p>
+                  <div
+                    className={`p-3 rounded-2xl max-w-sm md:max-w-2xl break-words whitespace-pre-wrap ${
+                      message.sender === adminId || message.sender === "admin"
+                        ? "bg-blue-600 text-white rounded-tr-none"
+                        : "bg-blue-400 text-black rounded-tl-none"
+                    }`}
+                  >
+                    <p>{message.content}</p>
+
+                    <p
+                      className={`text-xs mt-1 ${
+                        message.sender === adminId || message.sender === "admin"
+                          ? "text-blue-200"
+                          : "text-blue-900"
+                      }`}
+                    >
+                      {new Date(message.createdAt).toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        hour12: true,
+                      })}
+                    </p>
+                  </div>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
+          <div ref={messagesEndRef} />
         </div>
 
         <form

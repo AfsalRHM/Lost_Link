@@ -25,8 +25,6 @@ export const initializeSocket = (server: any) => {
   console.log("Socket.IO initialized");
 
   io.on("connection", (socket: TypedSocket) => {
-    console.log(`User connected: ${socket.id}`);
-
     // Setting Up the Socket
     socket.on("setup", (userId: string) => {
       socket.join(userId);
@@ -36,7 +34,6 @@ export const initializeSocket = (server: any) => {
     // Joining the Room for Chat
     socket.on("joinRoom", (room) => {
       socket.join(room);
-      console.log("joinneeedd roooom" + room);
       socket.emit("userJoined", room, socket.id);
     });
 

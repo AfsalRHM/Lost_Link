@@ -4,7 +4,7 @@ import getMyChat from "../../../api/user-api/getChat";
 import { showErrorToast2 } from "../../../utils/iziToastUtils";
 import ChatPartLoading from "./loading/ChatPartLoading";
 import saveMessage from "../../../api/user-api/sendMessage";
-import IchatModel from "../../../interface/Ichat";
+import IchatModel, { ImessageModel } from "../../../interface/Ichat";
 import getAllMessagesOfChat from "../../../api/user-api/getAllMessages";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../redux/store";
@@ -21,17 +21,9 @@ const ChatPart = ({
 
   const socket = getSocket();
 
-  const [socketConnected, setSocketConnected] = useState<boolean>(false);
-
   const [chat, setChat] = useState<IchatModel>();
   const [loading, setLoading] = useState(true);
-  const [messages, setMessages] = useState([
-    {
-      sender: "admin",
-      content: "Hello! How can I assist you today?",
-      createdAt: new Date().toString(),
-    },
-  ]);
+  const [messages, setMessages] = useState<ImessageModel[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
@@ -39,11 +31,15 @@ const ChatPart = ({
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
   // Initializing the Socket
   useEffect(() => {
     // Join in a room
     socket.emit("setup", userId);
-    socket.on("connected", () => setSocketConnected(true));
+    socket.on("connected", () => true);
 
     // return () => socket.disconnect();
   }, [userId]);
@@ -83,14 +79,10 @@ const ChatPart = ({
 
   useEffect(() => {
     socket.on("adminMessageRecieved", (newMessageRecieved) => {
-      console.log("new Admin message recieved", newMessageRecieved)
+      console.log("new Admin message recieved", newMessageRecieved);
       setMessages([...messages, newMessageRecieved]);
     });
   });
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -117,9 +109,11 @@ const ChatPart = ({
           setMessages([
             ...messages,
             {
+              chat: chat._id,
               sender: userId,
               content: newMessage,
-              createdAt: new Date().toString(),
+              createdAt: new Date(),
+              updatedAt: new Date(),
             },
           ]);
           setNewMessage("");
@@ -158,37 +152,61 @@ const ChatPart = ({
         </div>
 
         <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-violet-50">
-          {messages.map((msg, index) => (
-            <div
-              key={index}
-              className={`flex ${
-                msg.sender === userId ? "justify-end" : "justify-start"
-              }`}
-            >
-              <div
-                className={`flex flex-col ${
-                  msg.sender === userId ? "items-end" : "items-start"
-                }`}
-              >
+          {messages.map((msg, index) => {
+            // Get the date of the current and previous message
+            const currentDate = new Date(msg.createdAt).toLocaleDateString();
+            const previousDate =
+              index > 0
+                ? new Date(messages[index - 1].createdAt).toLocaleDateString()
+                : null;
+
+            return (
+              <div key={index}>
+                {currentDate !== previousDate && (
+                  <div className="text-center text-sm p-2 bg-gray-200 rounded-lg text-gray-500 my-4">
+                    {currentDate == new Date().toLocaleDateString()
+                      ? "Today"
+                      : currentDate}
+                  </div>
+                )}
+
                 <div
-                  className={`p-3 rounded-2xl max-w-md ${
-                    msg.sender === userId
-                      ? "bg-violet-600 text-white rounded-tr-none"
-                      : "bg-white text-gray-800 rounded-tl-none shadow-sm"
+                  className={`flex ${
+                    msg.sender === userId ? "justify-end" : "justify-start"
                   }`}
                 >
-                  {msg.content}
+                  <div
+                    className={`flex flex-col ${
+                      msg.sender === userId ? "items-end" : "items-start"
+                    }`}
+                  >
+                    <div
+                      className={`p-3 rounded-2xl max-w-sm md:max-w-md break-words whitespace-pre-wrap shadow-sm ${
+                        msg.sender === userId
+                          ? "bg-violet-600 text-white rounded-tr-none"
+                          : "bg-white text-gray-800 rounded-tl-none"
+                      }`}
+                    >
+                      {msg.content}
+                      <p
+                        className={`text-xs flex mt-1 ${
+                          msg.sender === userId
+                            ? "text-blue-200 justify-end"
+                            : "text-blue-900"
+                        }`}
+                      >
+                        {new Date(msg.createdAt).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          hour12: true,
+                        })}
+                      </p>
+                    </div>
+                  </div>
                 </div>
-                <span className="text-xs text-gray-500 mt-1">
-                  {new Date(msg.createdAt).toLocaleTimeString([], {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                    hour12: true,
-                  })}
-                </span>
               </div>
-            </div>
-          ))}
+            );
+          })}
           <div ref={messagesEndRef} />
         </div>
 
