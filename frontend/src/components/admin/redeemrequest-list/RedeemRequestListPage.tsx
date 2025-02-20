@@ -1,39 +1,38 @@
-import { Bell, Menu, Search } from "lucide-react";
-import { Sidebar } from "../shared/Sidebar";
 import { useEffect, useState } from "react";
-import adminLogout from "../../../api/admin-api/adminLogoutAPI";
+import RedeemRequestListPart from "./RedeemRequestListPart";
 import { useAdminJwtErrors } from "../../../utils/JwtErrors";
-import fetchAllRequests from "../../../api/admin-api/allRequestAPI";
-import RequestListPart from "./RequestListPart";
+import adminLogout from "../../../api/admin-api/adminLogoutAPI";
+import { showErrorToast } from "../../../utils/toastUtils";
+import { Sidebar } from "../shared/Sidebar";
+import { Bell, Menu, Search } from "lucide-react";
+import fetchAllRedeemRequests from "../../../api/admin-api/allRedeemRequestsAPI";
 
-const RequestListPage = () => {
+const RedeemRequestListPage = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [redeemRequestList, setRedeemRequestList] = useState([]);
   const JwtErrors = useAdminJwtErrors();
-  const [requestList, setRequestList] = useState([]);
 
-  const getAllRequest = async () => {
+  const getAllRedeemRequests = async () => {
     try {
-      const response = await fetchAllRequests();
-
+      const response = await fetchAllRedeemRequests();
       if (response && response.data && response.data.status) {
-        setRequestList(response.data.data);
+        setRedeemRequestList(response.data.data);
       } else if (response === false) {
         JwtErrors({ reason: "session expiration" });
-        try {
-          await adminLogout();
-        } catch (logoutError) {
-          console.error("Error during admin logout:", logoutError);
-        }
+        await adminLogout();
       } else {
         console.log("Unexpected response:", response);
       }
     } catch (error) {
-      console.error("Error in getAllRequests:", error);
+      console.error("Error in getAllRedeemRequests:", error);
+      showErrorToast(
+        "An unexpected error occurred while fetching Redeem Requests"
+      );
     }
   };
 
   useEffect(() => {
-    getAllRequest();
+    getAllRedeemRequests();
   }, []);
 
   return (
@@ -74,11 +73,11 @@ const RequestListPage = () => {
         </header>
 
         <main className="p-6">
-          <RequestListPart allRequests={requestList} allRequestsFunc={getAllRequest} />
+          <RedeemRequestListPart allRedeemRequests={redeemRequestList} />
         </main>
       </div>
     </div>
   );
 };
 
-export default RequestListPage;
+export default RedeemRequestListPage;
