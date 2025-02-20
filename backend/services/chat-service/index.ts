@@ -33,8 +33,14 @@ import message_route from "./src/routes/messageRoute";
 app.use("/", chat_route);
 app.use("/", message_route);
 
+// Setting up the Server
 import serverListening from "./src/config/serverConfig";
-serverListening(app);
+const server = serverListening(app);
 
+// Initialize Socket.IO
+import { initializeSocket } from "./src/socket/socket";
+initializeSocket(server);
+
+// Setting Up the Rabbit MQ
 import { manageQueue } from "./src/rabbitmq/consumer";
 manageQueue();

@@ -8,6 +8,7 @@ import IchatModel from "../../../interface/Ichat";
 import getAllMessagesOfChat from "../../../api/user-api/getAllMessages";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../redux/store";
+import { getSocket } from "../../../socket/socket";
 
 const ChatPart = ({
   onClose,
@@ -17,6 +18,10 @@ const ChatPart = ({
   requestId: string | undefined;
 }) => {
   const userId = useSelector((state: RootState) => state.userDetails.userId);
+
+  const socket = getSocket();
+
+  const [socketConnected, setSocketConnected] = useState<boolean>(false);
 
   const [chat, setChat] = useState<IchatModel>();
   const [loading, setLoading] = useState(true);
@@ -33,6 +38,15 @@ const ChatPart = ({
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
+
+  // Initializing the Socket
+  useEffect(() => {
+    // Join in a room
+    socket.emit("setup", userId);
+    socket.on("connected", () => setSocketConnected(true));
+
+    // return () => socket.disconnect();
+  }, [userId]);
 
   useEffect(() => {
     const getChatData = async () => {
@@ -60,10 +74,19 @@ const ChatPart = ({
     if (messagesResponse.status === 200) {
       setMessages([...messages, ...messagesResponse.data.data]);
       setLoading(false);
+
+      socket.emit("joinRoom", chatIdProp);
     } else {
       showErrorToast2(messagesResponse.data.message);
     }
   }
+
+  useEffect(() => {
+    socket.on("adminMessageRecieved", (newMessageRecieved) => {
+      console.log("new Admin message recieved", newMessageRecieved)
+      setMessages([...messages, newMessageRecieved]);
+    });
+  });
 
   useEffect(() => {
     scrollToBottom();
@@ -84,6 +107,13 @@ const ChatPart = ({
           content: newMessage,
         });
         if (response.status === 200) {
+          socket.emit("newUserMessage", {
+            sender: userId,
+            chat: chat._id,
+            content: newMessage,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          });
           setMessages([
             ...messages,
             {

@@ -7,6 +7,8 @@ import { showErrorToast2 } from "../../../utils/iziToastUtils";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../redux/store";
 import saveAdminMessage from "../../../api/admin-api/sendAdminMessage";
+import { getSocket } from "../../../socket/socket";
+// import getSocket
 
 const ChatPart = ({ chatDetails }: { chatDetails: IchatModel | undefined }) => {
   const navigate = useNavigate();
@@ -19,7 +21,11 @@ const ChatPart = ({ chatDetails }: { chatDetails: IchatModel | undefined }) => {
 
   const [newMessage, setNewMessage] = useState("");
 
+  const socket = getSocket();
+
   useEffect(() => {
+    socket.emit("joinRoom", chatDetails?._id);
+
     const getMessages = async () => {
       try {
         const response = await fetchUserMessages({ chatId: chatDetails?._id });
@@ -35,6 +41,13 @@ const ChatPart = ({ chatDetails }: { chatDetails: IchatModel | undefined }) => {
 
     getMessages();
   }, []);
+
+  useEffect(() => {
+    socket.on("userMessageRecieved", (newMessageRecieved) => {
+      console.log("new User message recieved", newMessageRecieved)
+      setMessages([...messages, newMessageRecieved]);
+    });
+  });
 
   const handleBack = () => {
     navigate(-1);
@@ -59,6 +72,14 @@ const ChatPart = ({ chatDetails }: { chatDetails: IchatModel | undefined }) => {
           content: newMessage,
         });
         if (response.status === 200) {
+          socket.emit("newAdminMessage", {
+            sender: adminId,
+            chat: chatDetails._id,
+            content: newMessage,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          });
+
           setMessages([
             ...messages,
             {
