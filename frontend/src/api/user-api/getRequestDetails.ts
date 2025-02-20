@@ -5,7 +5,7 @@ export default async function getRequestDetails(
 ): Promise<any> {
   try {
     const response = await axiosInstance.post(
-      `${import.meta.env.VITE_API_ROUTE}/request/getRequestDetails`,
+      `${import.meta.env.VITE_API_ROUTE}/request/get-request-details`,
       { requestId }
     );
 

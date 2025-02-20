@@ -11,6 +11,8 @@ const RequestDetails = ({}) => {
   const requestId = searchParams.get("id");
 
   const [loading, setLoading] = useState(true);
+  const [requestAlreadyRedeemed, setRequestAlreadyRedeemed] =
+    useState<boolean>(false);
   const [requestData, setRequestData] = useState<IrequestModel | undefined>(
     undefined
   );
@@ -26,7 +28,10 @@ const RequestDetails = ({}) => {
         } else {
           const response = await getRequestDetails(requestId);
           if (response.status === 200) {
-            setRequestData(response.data.data);
+            setRequestData(response.data.data.requestData);
+            if (response.data.data.redeemRequestData) {
+              setRequestAlreadyRedeemed(true);
+            }
           } else {
             showErrorToast2(response.data.message);
           }
@@ -220,16 +225,22 @@ const RequestDetails = ({}) => {
           </div>
 
           <div className="md:flex justify-center md:gap-5 md:my-8">
-            <button
-              className="w-full md:w-1/3 px-6 py-3 bg-violet-600 text-white rounded-full font-semibold hover:bg-violet-700 transition-all duration-300 shadow-md hover:shadow-lg md:mb-0 mb-3"
-              onClick={() =>
-                handleRedeemRequest(
-                  requestData && requestData._id ? requestData._id : ""
-                )
-              }
-            >
-              Redeem Request
-            </button>
+            {requestAlreadyRedeemed ? (
+              <h2 className="text-xl font-semibold mb-2 text-orange-600">
+                Request Already Redeemed!
+              </h2>
+            ) : (
+              <button
+                className="w-full md:w-1/3 px-6 py-3 bg-violet-600 text-white rounded-full font-semibold hover:bg-violet-700 transition-all duration-300 shadow-md hover:shadow-lg md:mb-0 mb-3"
+                onClick={() =>
+                  handleRedeemRequest(
+                    requestData && requestData._id ? requestData._id : ""
+                  )
+                }
+              >
+                Redeem Request
+              </button>
+            )}
           </div>
         </div>
       </div>

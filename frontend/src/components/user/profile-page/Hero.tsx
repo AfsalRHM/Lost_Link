@@ -79,7 +79,7 @@ const Hero = () => {
           <div className="bg-white shadow-lg rounded-xl p-6">
             <UserDetails userData={userData} />
             <TierSection />
-            <VerifyButton />
+            {/* <VerifyButton /> */}
           </div>
         </div>
         <div className="flex flex-col md:flex-row md:w-4/6 gap-5 mb-24 w-full">

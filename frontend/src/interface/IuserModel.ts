@@ -7,7 +7,7 @@ export interface userDataType {
   email: string;
   phone?: number | null;
   status: string;
-  password: string;
+  password?: string;
   requests: string[];
   completed_requests: string[];
   points: number;

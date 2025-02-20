@@ -21,6 +21,13 @@ export default interface IuserService {
     updateFormData: updateFormDataType;
     userId: string;
   }): Promise<any>;
+  addRequestId({
+    requestId,
+    userId,
+  }: {
+    requestId: string;
+    userId: string;
+  }): Promise<any>;
 }
 
 export interface updateFormDataType {

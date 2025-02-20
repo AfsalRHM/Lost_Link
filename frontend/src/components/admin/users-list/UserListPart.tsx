@@ -39,7 +39,7 @@ const UserListPart = ({ allUsers, allUsersFunc }: UserListPartProps) => {
 
   const handleDetailsPage = (id: string) => {
     if (id) {
-      navigate(`/admin/userdetails`, { state: { userId: id } });
+      navigate(`/admin/users/user-details/${id}`);
     }
   };
 
