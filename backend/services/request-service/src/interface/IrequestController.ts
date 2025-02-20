@@ -8,6 +8,8 @@ export default interface IrequestController {
   getRequestDetails(req: Request, res: Response): Promise<void>;
   cancelRequest(req: Request, res: Response): Promise<void>;
   createRedeemRequest(req: Request, res: Response): Promise<void>;
+  getUserRedeemRequests(req: Request, res: Response): Promise<void>;
+  getRedeemRequestDetails(req: Request, res: Response): Promise<void>;
 
   changeRequestStatus(req: Request, res: Response): Promise<void>;
 }

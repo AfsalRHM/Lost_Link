@@ -9,6 +9,7 @@ import ReqeustDetailsPage from "../pages/user/RequestDetailsPage";
 import RequestRedeemPage from "../pages/user/RequestRedeemPage";
 
 import { IsUserLogin } from "../utils/IsUserLogin";
+import RequestRedeemDetailsPage from "../pages/user/RequestRedeemDetailsPage";
 
 const UserRoutes = () => {
   return (
@@ -17,6 +18,7 @@ const UserRoutes = () => {
         <Route path="/home" element={<HomePage />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/my_request_details" element={<MyReqeustDetailsPage />} />
+        <Route path="/redeem_request_details" element={<RequestRedeemDetailsPage />} />
         <Route path="/create_request" element={<CreateRequestPage />} />
         <Route path="/requests" element={<AllRequestsPage />} />
         <Route path="/requests/request-details" element={<ReqeustDetailsPage />} />

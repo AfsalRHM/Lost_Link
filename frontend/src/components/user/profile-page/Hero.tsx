@@ -10,6 +10,7 @@ import getProfile from "../../../api/user-api/getProfileAPI.ts";
 import UserDetailsLoading from "./loading/UserDetailsLoading.tsx";
 import VerifyButton from "./VerifyButton";
 import MyRequests from "./MyRequests.tsx";
+import RedeemRequests from "./RedeemRequests.tsx";
 
 const Hero = () => {
   const [loading, setLoading] = useState<boolean>(true);
@@ -94,6 +95,8 @@ const Hero = () => {
               <LocationInfo />
             ) : selectedItem === "My Requests" ? (
               <MyRequests userData={userData} />
+            ) : selectedItem === "Redeem Requests" ? (
+              <RedeemRequests userData={userData} />
             ) : (
               <LocationInfo />
             )}

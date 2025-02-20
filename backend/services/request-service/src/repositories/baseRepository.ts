@@ -20,9 +20,13 @@ export default class BaseRepository<T extends Document>
     return this.model.findOne(filter);
   }
 
+  async findOneRedeemRequest(filter: FilterQuery<T>): Promise<T | null> {
+    return this.model.findOne(filter).populate("request_id");
+  }
+
   async findAll(filter?: FilterQuery<T> | undefined): Promise<T[]> {
     if (filter) {
-      return this.model.find(filter);
+      return this.model.find(filter).populate("request_id");
     } else {
       return this.model.find();
     }

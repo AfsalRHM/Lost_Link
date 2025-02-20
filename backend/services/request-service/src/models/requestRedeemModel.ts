@@ -5,6 +5,11 @@ import IrequestRedeemModel from "../interface/IrequestRedeemModel";
 const requestRedeemSchema = new Schema(
   {
     request_id: {
+      type: mongoose.Types.ObjectId,
+      ref: "Request",
+      required: true,
+    },
+    user_id: {
       type: String,
       required: true,
     },

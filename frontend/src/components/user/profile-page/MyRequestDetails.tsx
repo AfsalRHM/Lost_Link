@@ -91,7 +91,7 @@ const MyRequestDetails = () => {
             className="px-6 py-2.5 text-gray-700 hover:text-gray-900 bg-white rounded-full shadow-md hover:shadow-lg transition-all duration-300 font-semibold"
             onClick={goBackButton}
           >
-            ← Back to Profile
+            ← Back
           </button>
           <div
             className={`px-4 py-2 rounded-full text-sm font-semibold border border-black ${
@@ -260,7 +260,10 @@ const MyRequestDetails = () => {
             </div>
           </div>
           <div className="md:flex justify-center md:gap-5 md:my-8">
-            <button className="w-full md:w-1/3 px-6 py-3 bg-blue-400 text-white rounded-full font-semibold hover:bg-blue-500 transition-all duration-300 shadow-md hover:shadow-lg md:mb-0 mb-3" onClick={() => setShowChat(true)}>
+            <button
+              className="w-full md:w-1/3 px-6 py-3 bg-blue-400 text-white rounded-full font-semibold hover:bg-blue-500 transition-all duration-300 shadow-md hover:shadow-lg md:mb-0 mb-3"
+              onClick={() => setShowChat(true)}
+            >
               Chat with Admin
             </button>
             {requestData?.status == "active" ? (
@@ -271,7 +274,12 @@ const MyRequestDetails = () => {
                 Cancel Request
               </button>
             ) : null}
-            {showChat && <ChatPart requestId={requestData?._id} onClose={() => setShowChat(false)} />}
+            {showChat && (
+              <ChatPart
+                requestId={requestData?._id}
+                onClose={() => setShowChat(false)}
+              />
+            )}
           </div>
         </div>
       </div>

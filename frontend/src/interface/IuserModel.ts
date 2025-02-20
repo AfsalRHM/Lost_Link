@@ -1,4 +1,5 @@
 export interface userDataType {
+  _id: string;
   profile_pic: string;
   full_name: string;
   user_name: string;

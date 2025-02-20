@@ -224,12 +224,15 @@ export default class requestService implements IrequestService {
   async createRedeemRequest({
     requestId,
     formData,
+    userId
   }: {
     requestId: string;
     formData: any;
+    userId: string;
   }): Promise<any> {
     try {
       const updatedFormData = {
+        user_id: userId,
         request_id: requestId,
         found_location: formData.foundLocation,
         found_date: formData.foundDate,
@@ -266,6 +269,63 @@ export default class requestService implements IrequestService {
     }
   }
 
+  // To find all the user redeem requests
+  async getUserRedeemRequests({userId}: {userId: string}): Promise<any> {
+    try {
+      const redeemRequests = await this._requestRedeemRepository.findAll({user_id: userId});
+      console.log(redeemRequests)
+      if (redeemRequests) {
+        return {
+          status: true,
+          data: redeemRequests,
+          message: "All Redeem Request recieved",
+        };
+      } else {
+        return {
+          status: false,
+          data: null,
+          message: "All Redeem Request Failed to fetch",
+        };
+      }
+    } catch (error) {
+      return {
+        status: false,
+        data: null,
+        message:
+          "Error occured while getting all redeem requests - from getUserRedeemRequests/requestService",
+      };
+    }
+  }
+
+  // To fetch the request redeem data
+  async getRedeemRequestDetails({requestRedeemId}: {requestRedeemId: string}): Promise<any> {
+    try {
+      const redeemRequestData = await this._requestRedeemRepository.findOneRedeemRequest({_id: requestRedeemId});
+      console.log(redeemRequestData)
+      if (redeemRequestData) {
+        return {
+          status: true,
+          data: redeemRequestData,
+          message: "Fetched the Redeem Request Data",
+        };
+      } else {
+        return {
+          status: false,
+          data: null,
+          message: "Failed to fetch the Redeem Request Data",
+        };
+      }
+    } catch (error) {
+      return {
+        status: false,
+        data: null,
+        message:
+          "Error occured while getting all redeem requests - from getUserRedeemRequests/requestService",
+      };
+    }
+  }
+
+  // To find all the requests
   async getRequests(): Promise<any> {
     try {
       const requests = await this._requestRepository.findAllRequests();
