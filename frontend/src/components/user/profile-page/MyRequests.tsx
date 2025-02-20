@@ -138,7 +138,10 @@ const MyRequests = ({ userData }: { userData: userDataType | undefined }) => {
                         {indexOfFirstRequest + index + 1}
                       </td>
                       <td className="px-6 py-3 text-sm text-gray-700">
-                        {request.product_name}
+                        {request.product_name.length <= 25
+                          ? request.product_name
+                          : request.product_name.slice(0, 25) +
+                            "..."}
                       </td>
                       <td
                         className={`px-6 py-3 text-sm ${

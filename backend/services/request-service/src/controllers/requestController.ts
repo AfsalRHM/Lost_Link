@@ -137,8 +137,6 @@ export default class RequestController implements IrequestController {
       } else {
         const decoded = await jwtFunctions.verifyAccessToken(accessToken);
 
-        console.log("Request Id 2", req.body, decoded);
-
         const response = await this._requestService.cancelRequest({
           requestId: req.body.requestId,
           userId: decoded?.id,
@@ -157,19 +155,95 @@ export default class RequestController implements IrequestController {
     res: Response
   ): Promise<void> => {
     try {
-      const response = await this._requestService.createRedeemRequest({
-        requestId: req.body.requestId,
-        formData: req.body.formData,
-      });
-      if (response.status) {
-        res.status(200).json(response);
+      const accessToken = req.headers["authorization"]?.split(" ")[1];
+      if (!accessToken) {
+        res.status(400).json({ message: "No authorization token provided" });
       } else {
-        res.status(400).json(response);
+        const decoded = await jwtFunctions.verifyAccessToken(accessToken);
+
+        if (!decoded) {
+          res
+            .status(400)
+            .json({ message: "Unable to decode the Access Token" });
+        } else {
+          const response = await this._requestService.createRedeemRequest({
+            requestId: req.body.requestId,
+            formData: req.body.formData,
+            userId: decoded.id,
+          });
+          if (response.status) {
+            res.status(200).json(response);
+          } else {
+            res.status(400).json(response);
+          }
+        }
       }
     } catch (error) {
       res
         .status(300)
         .json({ message: "error on the createRedeemRequest/adminController" });
+    }
+  };
+
+  public getUserRedeemRequests = async (
+    req: Request,
+    res: Response
+  ): Promise<void> => {
+    try {
+      const accessToken = req.headers["authorization"]?.split(" ")[1];
+      if (!accessToken) {
+        res.status(400).json({ message: "No authorization token provided" });
+      } else {
+        const decoded = await jwtFunctions.verifyAccessToken(accessToken);
+
+        if (!decoded) {
+          res
+            .status(400)
+            .json({ message: "Unable to decode the Access Token" });
+        } else {
+          const response = await this._requestService.getUserRedeemRequests({
+            userId: decoded.id,
+          });
+          if (response.status) {
+            res.status(200).json(response);
+          } else {
+            res.status(400).json(response);
+          }
+        }
+      }
+    } catch (error) {
+      res
+        .status(300)
+        .json({ message: "error on the createRedeemRequest/adminController" });
+    }
+  };
+
+  // To get the redeem request details
+  public getRedeemRequestDetails = async (
+    req: Request,
+    res: Response
+  ): Promise<void> => {
+    try {
+      const requestRedeemId = req.body.requestRedeemId;
+      if (!requestRedeemId) {
+        res.status(401).json({
+          message:
+            "requestRedeemId no getting on the the getRedeemRequestDetails/adminController",
+        });
+      } else {
+        const response = await this._requestService.getRedeemRequestDetails({
+          requestRedeemId,
+        });
+        if (response.status) {
+          res.status(200).json(response);
+        } else {
+          res.status(400).json(response);
+        }
+      }
+    } catch (error) {
+      res.status(300).json({
+        message: "error on the getRedeemRequestDetails/adminController",
+      });
     }
   };
 

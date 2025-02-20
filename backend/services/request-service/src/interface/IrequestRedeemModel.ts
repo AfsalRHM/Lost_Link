@@ -2,7 +2,8 @@ import mongoose, { Document } from "mongoose";
 
 export default interface IrequestRedeemModel extends Document {
   _id: mongoose.Types.ObjectId;
-  requestId: string;
+  user_id: string;
+  request_id: string;
   found_location: String;
   found_date: Date;
   damage_issues: String;

@@ -52,7 +52,7 @@ const ProfileSidebar = ({
     "Location Info",
     "Tier Information",
     "My Requests",
-    "Completed Requests",
+    "Redeem Requests",
     "Payment History",
     "Logout",
   ];
