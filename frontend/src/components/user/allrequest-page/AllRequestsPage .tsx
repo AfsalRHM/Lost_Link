@@ -2,10 +2,7 @@ import { useEffect, useState } from "react";
 import FilterSideBar from "./FilterSideBar";
 import getAllRequests from "../../../api/user-api/getAllRequestsAPI";
 import { useDispatch } from "react-redux";
-import {
-  assignAccessToken,
-  removeAccessToken,
-} from "../../../redux/slice/accessTokenSlice";
+import { removeAccessToken } from "../../../redux/slice/accessTokenSlice";
 import { removeUserDetails } from "../../../redux/slice/userDetailsSlice";
 import { useNavigate } from "react-router-dom";
 import { showErrorToast } from "../../../utils/toastUtils";
@@ -37,9 +34,6 @@ const AllRequests = () => {
           navigate("/login");
           showErrorToast(response.data.message);
         } else if (response.data.status) {
-          const newAccessToken =
-            response.headers["authorization"].split(" ")[1];
-          dispatch(assignAccessToken(newAccessToken));
           setallRequests(response.data.data);
         } else {
           showErrorToast("Failed to Fetch requests from browser...!");
@@ -58,7 +52,7 @@ const AllRequests = () => {
     setFilteredRequests(allRequests);
   }, [allRequests]);
 
-  if (loading)
+  if (loading) {
     return (
       <div className="bg-activity min-h-screen flex flex-col lg:flex-row">
         <FilterSideBar
@@ -70,6 +64,7 @@ const AllRequests = () => {
         <RequestLoading />
       </div>
     );
+  };
 
   return (
     <div className="bg-activity min-h-screen flex flex-col lg:flex-row">

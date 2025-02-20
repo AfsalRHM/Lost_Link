@@ -11,6 +11,8 @@ const MyRequests = ({ userData }: { userData: userDataType | undefined }) => {
   const [loading, setLoading] = useState<boolean>(true);
   const [requests, setRequests] = useState<any>([]);
 
+  const [currentStatus, setCurrentStatus] = useState<string>("active");
+
   useEffect(() => {
     const getUserRequests = async () => {
       try {
@@ -45,14 +47,19 @@ const MyRequests = ({ userData }: { userData: userDataType | undefined }) => {
 
   const indexOfLastRequest = currentPage * itemsPerPage;
   const indexOfFirstRequest = indexOfLastRequest - itemsPerPage;
-  const currentRequests = requests.slice(
-    indexOfFirstRequest,
-    indexOfLastRequest
+
+  const filteredRequests = requests.filter(
+    (request: any) => request.status === currentStatus
   );
 
   const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
 
   const totalPages = Math.ceil(requests.length / itemsPerPage);
+
+  function handleStatusField(status: string) {
+    setCurrentStatus(status);
+    setCurrentPage(1);
+  }
 
   if (loading) return <MyRequestsLoading />;
 
@@ -62,7 +69,23 @@ const MyRequests = ({ userData }: { userData: userDataType | undefined }) => {
         My Requests
       </h2>
 
-      {requests.length === 0 ? (
+      <div className="flex space-x-4 mb-6 border-b-2 pb-2">
+        {["active", "completed", "cancelled"].map((status) => (
+          <button
+            key={status}
+            onClick={() => handleStatusField(status)}
+            className={`text-sm font-medium capitalize focus:outline-none ${
+              currentStatus === status
+                ? "text-blue-600 border-b-2 border-blue-600"
+                : "text-gray-600 hover:text-blue-500"
+            }`}
+          >
+            {status}
+          </button>
+        ))}
+      </div>
+
+      {filteredRequests.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 text-center text-gray-500">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -78,38 +101,14 @@ const MyRequests = ({ userData }: { userData: userDataType | undefined }) => {
               d="M9 17v-6m6 6v-4M3 3l18 18M4 4l16 16"
             />
           </svg>
-          <p className="text-lg font-semibold">No Requests Available</p>
+          <p className="text-lg font-semibold">No {currentStatus} Requests</p>
           <p className="text-sm text-gray-400">
-            You haven’t made any requests yet.
+            You currently have no {currentStatus.toLowerCase()} requests.
           </p>
         </div>
       ) : (
         <>
-          {/* Mobile View */}
-          <div className="md:hidden space-y-4">
-            {currentRequests.map((request: any, index: number) => (
-              <div
-                key={request._id}
-                className="border rounded-lg p-4 space-y-3 hover:bg-gray-50"
-              >
-                <div className="flex justify-between items-center">
-                  <span className="text-sm font-semibold text-gray-600">
-                    #{indexOfFirstRequest + index + 1}
-                  </span>
-                  <button
-                    className="inline-flex items-center px-3 py-1.5 border border-gray-300 text-sm rounded-md hover:bg-gray-100 transition-colors"
-                    onClick={() => handleDetailsPageClick(request._id)}
-                  >
-                    <span className="mr-2">👁️</span>Details
-                  </button>
-                </div>
-                <div className="text-gray-800">{request.product_name}</div>
-              </div>
-            ))}
-          </div>
-
-          {/* Desktop View */}
-          <div className="hidden md:block">
+          <div>
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead className="bg-gray-200">
@@ -120,7 +119,7 @@ const MyRequests = ({ userData }: { userData: userDataType | undefined }) => {
                     <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">
                       Request Name
                     </th>
-                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">
+                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700 hidden md:block">
                       Status
                     </th>
                     <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">
@@ -129,41 +128,46 @@ const MyRequests = ({ userData }: { userData: userDataType | undefined }) => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
-                  {currentRequests.map((request: any, index: number) => (
-                    <tr
-                      key={request._id}
-                      className="hover:bg-gray-50 transition-colors"
-                    >
-                      <td className="px-6 py-3 text-sm text-gray-700">
-                        {indexOfFirstRequest + index + 1}
-                      </td>
-                      <td className="px-6 py-3 text-sm text-gray-700">
-                        {request.product_name.length <= 25
-                          ? request.product_name
-                          : request.product_name.slice(0, 25) +
-                            "..."}
-                      </td>
-                      <td
-                        className={`px-6 py-3 text-sm ${
-                          request?.status === "active"
-                            ? "text-green-700"
-                            : request?.status === "cancelled"
-                            ? "text-red-700"
-                            : "text-orange-700"
-                        }`}
-                      >
-                        {request.status}
-                      </td>
-                      <td className="px-6 py-3 text-sm">
-                        <button
-                          className="inline-flex items-center px-3 py-1.5 border border-gray-300 rounded-md hover:bg-gray-100 transition-colors"
-                          onClick={() => handleDetailsPageClick(request._id)}
+                  {filteredRequests
+                    .slice(indexOfFirstRequest, indexOfLastRequest)
+                    .map((request: any, index: number) =>
+                      request.status !== currentStatus ? null : (
+                        <tr
+                          key={request._id}
+                          className="hover:bg-gray-50 transition-colors"
                         >
-                          <span className="mr-2">👁️</span>Details
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
+                          <td className="px-6 py-3 text-sm text-gray-700">
+                            {indexOfFirstRequest + index + 1}
+                          </td>
+                          <td className="px-6 py-3 text-sm text-gray-700">
+                            {request.product_name.length <= 25
+                              ? request.product_name
+                              : request.product_name.slice(0, 25) + "..."}
+                          </td>
+                          <td
+                            className={`px-6 py-3 text-sm hidden md:block ${
+                              request?.status === "active"
+                                ? "text-green-700"
+                                : request?.status === "cancelled"
+                                ? "text-red-700"
+                                : "text-orange-700"
+                            }`}
+                          >
+                            {request.status}
+                          </td>
+                          <td className="px-6 py-3 text-sm">
+                            <button
+                              className="inline-flex items-center px-3 py-1.5 border border-gray-300 rounded-md hover:bg-gray-100 transition-colors"
+                              onClick={() =>
+                                handleDetailsPageClick(request._id)
+                              }
+                            >
+                              <span className="mr-2">👁️</span>Details
+                            </button>
+                          </td>
+                        </tr>
+                      )
+                    )}
                 </tbody>
               </table>
             </div>

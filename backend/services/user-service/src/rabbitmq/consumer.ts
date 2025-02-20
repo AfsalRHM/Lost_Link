@@ -109,8 +109,7 @@ export async function manageQueue() {
         } else if (
           msg?.properties?.headers?.source == "Add the request Id to the user"
         ) {
-          console.log(messageContent);
-          await _userService.addRequestId(messageContent.props);
+          await _userService.addRequestId(messageContent);
         } else {
           console.log("No userData found in message.");
         }

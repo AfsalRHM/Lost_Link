@@ -1,94 +1,222 @@
 import { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
-import { userDataType } from "../../../interface/IuserModel";
+import { useNavigate, useParams } from "react-router-dom";
+import {
+  MapPin,
+  Mail,
+  Phone,
+  Calendar,
+  AlertCircle,
+  CheckCircle,
+  CreditCard,
+} from "lucide-react";
+import fetchUserDetails from "../../../api/admin-api/getUserDetailsAPI";
+import {
+  showErrorToast2,
+  showSuccessToast2,
+} from "../../../utils/iziToastUtils";
+import adminLogout from "../../../api/admin-api/adminLogoutAPI";
+import { useAdminJwtErrors } from "../../../utils/JwtErrors";
+import changeStatus from "../../../api/admin-api/changeUserStatus";
+import UserDetailsPartLoading from "./loading/UserDetailsPartLoading";
 
 const UserDetailsPart = () => {
-  const location = useLocation();
-  const state = location.state as { userId?: string };
-  const userId = state?.userId;
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
 
-  const [user, setUser] = useState<userDataType | undefined>(undefined);
+  const [loading, setLoading] = useState(true);
+  const [userData, setUserData] = useState<any>(undefined);
+
+  const JwtErrors = useAdminJwtErrors();
 
   useEffect(() => {
-    // call the api here
-    if (userId) {
-      const userData = {
-        full_name: "John Doe",
-        user_name: "john_doe",
-        location: "New York, USA",
-        email: "john.doe@example.com",
-        password: "securepassword123", // Note: Do not display passwords in production
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-      setUser(userData);
+    const getUserData = async () => {
+      try {
+        if (!id) {
+          showErrorToast2("Unable To Get User Details");
+          console.log("user id didn't passed through the url");
+          navigate(-1);
+        }
+        const response = await fetchUserDetails({ userId: id });
+        if (response && response.data && response.data.status) {
+          setUserData(response.data.data);
+          setLoading(false);
+        } else if (response === false) {
+          JwtErrors({ reason: "session expiration" });
+          try {
+            await adminLogout();
+          } catch (logoutError) {
+            console.error("Error during admin logout:", logoutError);
+          }
+        } else {
+          console.log("Unexpected response:", response);
+        }
+      } catch (error) {
+        console.error("Failed to fetch User Data:", error);
+        setLoading(false);
+      }
+    };
+
+    getUserData();
+  }, [id]);
+
+  function handleBack() {
+    navigate(-1);
+  }
+
+  async function handleStatusChange() {
+    const response = await changeStatus({ userId: id });
+    if (response.status) {
+      const newStatus = userData.status === "active" ? "inactive" : "active";
+      setUserData({ ...userData, status: newStatus });
+      showSuccessToast2("User Status Changed");
     }
-  }, [userId]);
+  }
+
+  if (loading) {
+    return <UserDetailsPartLoading />;
+  }
 
   return (
-    <div className="p-8 bg-blue-670 min-h-screen text-white">
-      <div className="max-w-4xl mx-auto">
-        {/* Header Section */}
-        <h1 className="text-4xl font-extrabold mb-8 text-center underline">User Details</h1>
-
-        {/* Card Section */}
-        <div className="bg-gray-800 rounded-xl shadow-lg p-8">
-          <div className="flex flex-col sm:flex-row items-center sm:items-start mb-6">
-            {/* User Avatar */}
-            <div className="w-28 h-28 bg-blue-600 rounded-full flex items-center justify-center text-3xl font-bold text-white shadow-lg">
-              {user?.full_name
-                .split(" ")
-                .map((n) => n[0])
-                .join("")}
-            </div>
-            {/* User Info */}
-            <div className="sm:ml-6 mt-4 sm:mt-0 text-center sm:text-left">
-              <h2 className="text-2xl font-bold mb-2">{user?.full_name}</h2>
-              <p className="text-gray-400 text-lg">@{user?.user_name}</p>
-            </div>
-          </div>
-
-          {/* User Details */}
-          <div className="border-t border-gray-700 pt-6">
-            <div className="mb-4">
-              <h3 className="text-xl font-semibold text-blue-400">Location:</h3>
-              <p className="text-gray-300 text-lg">{user?.location}</p>
-            </div>
-            <div className="mb-4">
-              <h3 className="text-xl font-semibold text-blue-400">Email:</h3>
-              <p className="text-gray-300 text-lg">{user?.email}</p>
-            </div>
-            <div className="mb-4">
-              <h3 className="text-xl font-semibold text-blue-400">
-                Account Created:
-              </h3>
-              <p className="text-gray-300 text-lg">
-                {user?.createdAt
-                  ? new Date(user.createdAt).toLocaleDateString()
-                  : "-"}
-              </p>
-            </div>
-            <div>
-              <h3 className="text-xl font-semibold text-blue-400">
-                Last Updated:
-              </h3>
-              <p className="text-gray-300 text-lg">
-                {user?.updatedAt
-                  ? new Date(user.updatedAt).toLocaleDateString()
-                  : "-"}
-              </p>
-            </div>
+    <div className="w-full bg-blue-500 min-h-screen">
+      <div className="max-w-7xl mx-auto p-4 md:p-8">
+        <div className="flex items-center justify-between mb-8">
+          <button
+            className="px-6 py-2.5 text-violet-700 hover:text-violet-900 bg-white rounded-full shadow-md hover:shadow-lg transition-all duration-300 font-semibold"
+            onClick={handleBack}
+          >
+            ← Back
+          </button>
+          <div className="px-4 py-2 rounded-full text-sm font-semibold border border-violet-200 bg-violet-100 text-violet-700">
+            {userData?.status?.toUpperCase()}
           </div>
         </div>
 
-        {/* Action Buttons */}
-        <div className="mt-8 flex justify-center space-x-6">
-          <button className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-transform transform hover:scale-105 shadow-lg">
-            Edit Details
-          </button>
-          <button className="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-transform transform hover:scale-105 shadow-lg">
-            Delete User
-          </button>
+        <div className="bg-white rounded-2xl shadow-xl p-6 md:p-10">
+          <div className="border-b border-gray-100 pb-6 mb-8">
+            <div className="flex items-center gap-6 mb-4">
+              {userData?.profile_pic ? (
+                <img
+                  src={userData.profile_pic}
+                  alt={userData.full_name}
+                  className="w-24 h-24 rounded-full border-4 border-violet-200"
+                />
+              ) : (
+                <div className="w-24 h-24 rounded-full bg-violet-600 flex items-center justify-center text-2xl font-bold text-white">
+                  {userData?.full_name
+                    ?.split(" ")
+                    .map((n: string) => n[0])
+                    .join("")}
+                </div>
+              )}
+              <div>
+                <h1 className="text-3xl md:text-4xl font-bold text-violet-800">
+                  {userData?.full_name}
+                </h1>
+                <p className="text-violet-600">@{userData?.user_name}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-10">
+            <div className="space-y-8">
+              <div>
+                <h2 className="text-xl font-bold text-violet-800 mb-4">
+                  Basic Information
+                </h2>
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3">
+                    <Mail className="w-5 h-5 text-violet-600" />
+                    <span className="text-violet-900">{userData?.email}</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Phone className="w-5 h-5 text-violet-600" />
+                    <span className="text-violet-900">
+                      {userData?.phone
+                        ? userData.phone
+                        : "Mobile Number not Available"}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <MapPin className="w-5 h-5 text-violet-600" />
+                    <span className="text-violet-900">
+                      {userData?.location}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Calendar className="w-5 h-5 text-violet-600" />
+                    <span className="text-violet-900">
+                      Joined:{" "}
+                      {new Date(userData?.createdAt).toLocaleDateString()}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <h2 className="text-xl font-bold text-violet-800 mb-4">
+                  Account Statistics
+                </h2>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-violet-50 p-4 rounded-xl">
+                    <div className="flex items-center gap-2 mb-2">
+                      <AlertCircle className="w-5 h-5 text-violet-600" />
+                      <p className="text-violet-600 text-sm">Active Requests</p>
+                    </div>
+                    <p className="font-semibold text-violet-900">
+                      {userData?.requests?.length || 0}
+                    </p>
+                  </div>
+                  <div className="bg-violet-50 p-4 rounded-xl">
+                    <div className="flex items-center gap-2 mb-2">
+                      <CheckCircle className="w-5 h-5 text-violet-600" />
+                      <p className="text-violet-600 text-sm">Completed</p>
+                    </div>
+                    <p className="font-semibold text-violet-900">
+                      {userData?.completed_requests?.length || 0}
+                    </p>
+                  </div>
+                  <div className="bg-violet-50 p-4 rounded-xl">
+                    <div className="flex items-center gap-2 mb-2">
+                      <CreditCard className="w-5 h-5 text-violet-600" />
+                      <p className="text-violet-600 text-sm">Points</p>
+                    </div>
+                    <p className="font-semibold text-violet-900">
+                      {userData?.points || 0}
+                    </p>
+                  </div>
+                  <div className="bg-violet-50 p-4 rounded-xl">
+                    <p className="text-violet-600 text-sm mb-2">Current Tier</p>
+                    <p className="font-semibold text-violet-900">
+                      {userData?.current_tier}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-8">
+              <div>
+                <h2 className="text-xl font-bold text-violet-800 mb-4">
+                  Account Activity
+                </h2>
+                <div className="bg-violet-50 p-6 rounded-xl">
+                  <p className="text-violet-600 mb-2">Last Profile Updated:</p>
+                  <p className="font-semibold text-violet-900">
+                    {new Date(userData?.updatedAt).toLocaleString()}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex justify-center gap-4 mt-8">
+            <button
+              className="px-6 py-3 bg-violet-600 text-white rounded-full font-semibold hover:bg-violet-700 transition-all duration-300 shadow-md hover:shadow-lg w-full md:w-1/3"
+              onClick={handleStatusChange}
+            >
+              {userData?.status === "active" ? "Block User" : "Unblock User"}
+            </button>
+          </div>
         </div>
       </div>
     </div>

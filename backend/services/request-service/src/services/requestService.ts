@@ -60,7 +60,7 @@ export default class requestService implements IrequestService {
       if (insertedData) {
         const sendingTo = process.env.USER_QUEUE;
         const source = "Add the request Id to the user";
-        console.log('Haaaa----------------', insertedData._id.toString())
+        console.log("Haaaa----------------", insertedData._id.toString());
         const props = {
           userId,
           requestId: insertedData._id.toString(),
@@ -119,17 +119,36 @@ export default class requestService implements IrequestService {
     }
   }
 
-  async getRequestDetails(requestId: [string]): Promise<any> {
+  async getRequestDetails({
+    requestId,
+    userId,
+  }: {
+    requestId: string;
+    userId: string;
+  }): Promise<any> {
     try {
       const requestData = await this._requestRepository.findOne({
         _id: requestId,
       });
+
       if (requestData) {
-        return {
-          status: true,
-          data: requestData,
-          message: "Request Data Found",
-        };
+        const redeemRequestData = await this._requestRedeemRepository.findOne({
+          request_id: requestId,
+          user_id: userId,
+        });
+        if (redeemRequestData) {
+          return {
+            status: true,
+            data: { requestData, redeemRequestData },
+            message: "Request Data Found",
+          };
+        } else {
+          return {
+            status: true,
+            data: { requestData },
+            message: "Request Data Found",
+          };
+        }
       } else {
         return {
           status: false,
@@ -155,7 +174,6 @@ export default class requestService implements IrequestService {
     userId: string | undefined;
   }): Promise<any> {
     try {
-      console.log("Request Id 2", requestId);
       const requestData: IrequestModel | null =
         await this._requestRepository.findOne({ _id: requestId });
       if (!requestData) {
@@ -202,7 +220,9 @@ export default class requestService implements IrequestService {
 
   async getRequestDataById({ requestId }: { requestId: string }): Promise<any> {
     try {
-      const requestData = await this._requestRepository.findOne({ _id: requestId });
+      const requestData = await this._requestRepository.findOne({
+        _id: requestId,
+      });
       if (requestData) {
         return {
           status: true,
@@ -224,7 +244,7 @@ export default class requestService implements IrequestService {
   async createRedeemRequest({
     requestId,
     formData,
-    userId
+    userId,
   }: {
     requestId: string;
     formData: any;
@@ -245,7 +265,10 @@ export default class requestService implements IrequestService {
         images: formData.images,
       };
       console.log(updatedFormData);
-      const requestRedeemData = await this._requestRedeemRepository.insertRequestRedeemForm(updatedFormData);
+      const requestRedeemData =
+        await this._requestRedeemRepository.insertRequestRedeemForm(
+          updatedFormData
+        );
       if (requestRedeemData) {
         return {
           status: true,
@@ -270,10 +293,12 @@ export default class requestService implements IrequestService {
   }
 
   // To find all the user redeem requests
-  async getUserRedeemRequests({userId}: {userId: string}): Promise<any> {
+  async getUserRedeemRequests({ userId }: { userId: string }): Promise<any> {
     try {
-      const redeemRequests = await this._requestRedeemRepository.findAll({user_id: userId});
-      console.log(redeemRequests)
+      const redeemRequests = await this._requestRedeemRepository.findAll({
+        user_id: userId,
+      });
+      console.log(redeemRequests);
       if (redeemRequests) {
         return {
           status: true,
@@ -298,10 +323,17 @@ export default class requestService implements IrequestService {
   }
 
   // To fetch the request redeem data
-  async getRedeemRequestDetails({requestRedeemId}: {requestRedeemId: string}): Promise<any> {
+  async getRedeemRequestDetails({
+    requestRedeemId,
+  }: {
+    requestRedeemId: string;
+  }): Promise<any> {
     try {
-      const redeemRequestData = await this._requestRedeemRepository.findOneRedeemRequest({_id: requestRedeemId});
-      console.log(redeemRequestData)
+      const redeemRequestData =
+        await this._requestRedeemRepository.findOneRedeemRequest({
+          _id: requestRedeemId,
+        });
+      console.log(redeemRequestData);
       if (redeemRequestData) {
         return {
           status: true,
@@ -355,7 +387,8 @@ export default class requestService implements IrequestService {
   // To Fetch all the Redeem Requests
   async getAllRedeemRequests(): Promise<any> {
     try {
-      const redeemRrequests = await this._requestRedeemRepository.findAllRedeemRequest();
+      const redeemRrequests =
+        await this._requestRedeemRepository.findAllRedeemRequest();
       if (redeemRrequests) {
         return {
           status: true,

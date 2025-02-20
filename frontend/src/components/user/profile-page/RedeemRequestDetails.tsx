@@ -64,7 +64,7 @@ const RedeemRequestDetails = () => {
   };
 
   const goToRequestDetails = (id: string) => {
-    navigate(`/my_request_details`, { state: { requestId: id } });
+    navigate(`/requests/request-details?id=${id}`);
   };
 
   return (

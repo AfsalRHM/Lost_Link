@@ -141,7 +141,11 @@ export default class chatService implements IchatService {
       }
     } catch (error) {
       console.log(error, "error on the getUserChat/chatService");
-      return false;
+      return {
+        status: false,
+        data: null,
+        message: "Failed to get the User Chat",
+      };
     }
   }
 

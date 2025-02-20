@@ -224,6 +224,33 @@ export default class userService implements IuserService {
     }
   }
 
+  // To get the user details to the admin side
+  async getUserData({ userId }: { userId: string }): Promise<any> {
+    try {
+      const userData = await this._userRepository.findOne({ _id: userId });
+      if (userData) {
+        return {
+          status: true,
+          data: userData,
+          message: "User Data Fetched Successfully",
+        };
+      } else {
+        return {
+          status: true,
+          data: null,
+          message: "Failed to Fetch User Data",
+        };
+      }
+    } catch (error) {
+      console.log(error, "error on the getUserData/userService");
+      return {
+        status: false,
+        data: null,
+        message: "Failed to get the User Data",
+      };
+    }
+  }
+
   async changeUserStatus(props: { userId: string }): Promise<any> {
     try {
       const userData = await this._userRepository.changeStatus(props.userId);

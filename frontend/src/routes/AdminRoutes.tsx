@@ -21,7 +21,7 @@ const AdminRoutes = () => {
       <Route element={<IsAdminLogin />}>
         <Route path="/admin" element={<Dashboard />} /> 
         <Route path="/admin/users" element={<UsersList />} />
-        <Route path="/admin/userdetails" element={<UserDetailsPage />} />
+        <Route path="/admin/users/user-details/:id" element={<UserDetailsPage />} />
         <Route path="/admin/admins" element={<AdminList />} />
         <Route path="/admin/addadmin" element={<AddAdmin />} />
         <Route path="/admin/requests" element={<RequestList />} />

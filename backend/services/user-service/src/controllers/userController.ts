@@ -73,6 +73,26 @@ export default class UserController implements IuserController {
     }
   };
 
+  public getUserData = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const userId = req.params.id;
+      if (!userId) {
+        throw new Error("User Id not passed correctly through params");
+      }
+
+      const response = await this._userService.getUserData({ userId });
+
+      if (response.status) {
+        res.status(200).json(response);
+      } else {
+        res.status(400).json(response);
+      }
+    } catch (error) {
+      console.log("error in getUserData/chatController", error);
+      return;
+    }
+  };
+
   public updateUser = async (req: Request, res: Response): Promise<void> => {
     try {
       const errors = validationResult(req);

@@ -133,8 +133,23 @@ export default class RequestController implements IrequestController {
         });
         return;
       }
+      const accessToken = req.headers["authorization"]?.split(" ")[1];
+      if (!accessToken) {
+        res.status(400).json({
+          status: false,
+          message: "Access Token Not Found",
+        });
+      } 
+      const decoded = jwtFunctions.verifyAccessToken(accessToken!);
+      if (!decoded) {
+        res.status(400).json({
+          status: false,
+          message: "Access Token Data Can't Get",
+        });
+      } 
+
       const response = await this._requestService.getRequestDetails(
-        req.body.requestId
+        {requestId: req.body.requestId, userId: decoded?.id!}
       );
       if (response.status) {
         res.status(200).json(response);

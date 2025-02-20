@@ -17,7 +17,7 @@ request_route.post("/create_checkout_session", verifyAccessToken, RequestControl
 
 request_route.post("/create_request", verifyAccessToken, RequestController.createRequest); // To create new Requests
 request_route.post("/getMyRequests", verifyAccessToken, RequestController.getUserRequests); // To get the user requests
-request_route.post("/getRequestDetails", verifyAccessToken, RequestController.getRequestDetails); // To get the details of the request
+request_route.post("/get-request-details", verifyAccessToken, RequestController.getRequestDetails); // To get the details of the request
 
 request_route.post("/create-redeem-request", verifyAccessToken, RequestController.createRedeemRequest); // To save the request redeem details
 request_route.post("/getUserRedeemRequests", verifyAccessToken, RequestController.getUserRedeemRequests); // To get all the redeem requests to show in the profile
