@@ -4,22 +4,16 @@ import { showSuccessToast, showErrorToast } from "../../../utils/toastUtils";
 import insertAdmin from "../../../api/admin-api/insertAdminAPI";
 import { useAdminJwtErrors } from "../../../utils/JwtErrors";
 import adminLogout from "../../../api/admin-api/adminLogoutAPI";
-import { useSelector } from "react-redux";
-import { RootState } from "../../../redux/store";
 
 const AddAdminForm = () => {
   const navigate = useNavigate();
 
-  const { adminAccessToken } = useSelector(
-    (state: RootState) => state.accessToken
-  );
-
   const [formData, setFormData] = useState({
     email: "",
     name: "",
-    role: "Admin", // Default value
+    role: "Admin",
     password: "",
-    status: "active", // Default value
+    status: "active",
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -58,9 +52,7 @@ const AddAdminForm = () => {
         navigate("/admin/admins");
       } else if (response === false) {
         JwtErrors({ reason: "session expiration" });
-        await adminLogout({
-          accessToken: adminAccessToken,
-        });
+        await adminLogout();
       } else {
         console.log("Unexpected response:", response);
       }

@@ -485,8 +485,6 @@ export default class authService implements IauthService {
 
       const newUserData = userDataResponse.data._doc;
 
-      console.log("userDataResponse is here", userDataResponse);
-
       if (newUserData.status !== "active") {
         return {
           status: false,

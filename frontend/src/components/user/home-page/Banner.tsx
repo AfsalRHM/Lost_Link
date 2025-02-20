@@ -1,4 +1,4 @@
-const Main = () => {
+const Main = ({ scrollToContact }: { scrollToContact: any }) => {
   return (
     <div className="w-full bg-banner flex md:flex-row">
       <div className="w-full md:w-2/3 px-10 md:px-32 py-5 md:py-20">
@@ -7,7 +7,10 @@ const Main = () => {
           style={{ lineHeight: "1" }}
         >
           What’s lost can be found.<br></br>
-          <span className="text-[30px] md:text-[45px] font-semibold md:font-bold" style={{ lineHeight: "1" }}>
+          <span
+            className="text-[30px] md:text-[45px] font-semibold md:font-bold"
+            style={{ lineHeight: "1" }}
+          >
             Together, we make it <br></br> Happen.
           </span>
         </div>
@@ -17,7 +20,10 @@ const Main = () => {
           away from being found.
         </div>
         <div>
-          <button className="px-8 py-3 rounded-full bg-blue-400 shadow-lg hover:bg-blue-500 ease-in-out transition-all duration-300 font-semibold text-lg">
+          <button
+            onClick={scrollToContact}
+            className="px-8 py-3 rounded-full bg-blue-400 shadow-lg hover:bg-blue-500 ease-in-out transition-all duration-300 font-semibold text-lg"
+          >
             Talk to Us
           </button>
         </div>

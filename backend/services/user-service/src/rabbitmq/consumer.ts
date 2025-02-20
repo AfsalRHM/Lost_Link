@@ -17,8 +17,6 @@ export async function manageQueue() {
       if (msg) {
         const messageContent = JSON.parse(msg.content.toString());
 
-        console.log(messageContent, "this is the msg");
-
         if (msg?.properties?.headers?.source == "user data insert request") {
           const response = await _userService.insertuser(
             messageContent.userData.full_name,
@@ -94,7 +92,6 @@ export async function manageQueue() {
         } else if (
           msg?.properties?.headers?.source == "get user data by userId"
         ) {
-          console.log("This the message content", messageContent);
           const response = await _userService.getUserDataById(messageContent);
 
           channel.sendToQueue(

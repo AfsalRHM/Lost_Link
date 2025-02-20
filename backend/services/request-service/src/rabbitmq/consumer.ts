@@ -26,12 +26,9 @@ export async function manageQueue() {
       if (msg) {
         const messageContent = JSON.parse(msg.content.toString());
 
-        console.log(msg.properties, "This is the msg");
-
         if (
           msg?.properties?.headers?.source == "get request data by requestId"
         ) {
-          console.log("This the message content", messageContent);
           const response = await _requestService.getRequestDataById(
             messageContent
           );
