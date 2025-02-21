@@ -51,6 +51,8 @@ const LoginForm: React.FC = () => {
         showErrorToast("Admin Login Failed...!");
       } else if (result.data.data.status == false) {
         setAdminLoginValidationError({display: true, content: "Invalid Credentials"})
+      } else if (result.data.data.data.status !== "active") {
+        setAdminLoginValidationError({display: true, content: "You are Blocked from this Site"})
       } else {
         dispatch(assignAdminAccessToken(result.authorizationHeader.split(' ')[1]));
         dispatch(assignAdminDetails(result.data.data.data))

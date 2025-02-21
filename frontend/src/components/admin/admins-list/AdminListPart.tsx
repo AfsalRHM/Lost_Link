@@ -1,10 +1,8 @@
 import { Search, UserPlus } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import adminLogout from "../../../api/admin-api/adminLogoutAPI";
 import { showSuccessToast } from "../../../utils/toastUtils";
 import { useAdminJwtErrors } from "../../../utils/JwtErrors";
-import { useSelector } from "react-redux";
-import { RootState } from "../../../redux/store";
 import { useState } from "react";
 import changeAdminStatus from "../../../api/admin-api/changeAdminStatus";
 
@@ -27,10 +25,6 @@ const AdminListPart = ({
   allAdmins = [],
   allAdminsFunc,
 }: AdminListPartProps) => {
-  const { adminAccessToken } = useSelector(
-    (state: RootState) => state.accessToken
-  );
-  const navigate = useNavigate();
 
   const [searchTerm, setSearchTerm] = useState("");
   const [sortField, setSortField] = useState<keyof Admin>("name");
@@ -49,12 +43,6 @@ const AdminListPart = ({
     }
   };
 
-  const handleDetailsPage = (id: string) => {
-    if (id) {
-      navigate(`/admin/userdetails`, { state: { adminId: id } });
-    }
-  };
-
   const JwtErrors = useAdminJwtErrors();
 
   const handleStatusChange = async (id: string) => {
@@ -64,9 +52,7 @@ const AdminListPart = ({
       showSuccessToast("Admin Status Changed");
     } else if (response === false) {
       JwtErrors({ reason: "session expiration" });
-      await adminLogout({
-        accessToken: adminAccessToken,
-      });
+      await adminLogout();
     } else {
       console.log("Unexpected response:", response);
     }
@@ -154,9 +140,6 @@ const AdminListPart = ({
                 <th className="px-6 py-3 text-center text-xs font-medium text-white uppercase tracking-wider">
                   Actions
                 </th>
-                <th className="px-6 py-3 text-center text-xs font-medium text-white uppercase tracking-wider">
-                  Details
-                </th>
               </tr>
             </thead>
             <tbody className="bg-blue-400 divide-y divide-gray-200">
@@ -199,14 +182,6 @@ const AdminListPart = ({
                       }`}
                     >
                       {admin.status === "active" ? "Block" : "Unblock"}
-                    </button>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-center">
-                    <button
-                      onClick={() => handleDetailsPage(admin._id)}
-                      className="inline-flex items-center px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-                    >
-                      Details
                     </button>
                   </td>
                 </tr>

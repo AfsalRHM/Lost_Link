@@ -1,7 +1,7 @@
 import adminAxiosInstance from "../axios-api/adminAxiosInterceptorAPI";
 
 interface propsType {
-  requestId: string;
+  requestId: string | undefined;
 }
 
 export default async function changeRequestStatus(Props: propsType): Promise<any> {

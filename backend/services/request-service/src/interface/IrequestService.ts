@@ -33,4 +33,6 @@ export default interface IrequestService {
   getRequests(): Promise<any>;
   changeRequestStatus(props: { requestId: string }): Promise<any>;
   getAllRedeemRequests(): Promise<any>;
+
+  adminGetRequestDetails({ requestId }: { requestId: string }): Promise<any>;
 }

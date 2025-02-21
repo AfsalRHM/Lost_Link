@@ -1,40 +1,10 @@
-import { useEffect, useState } from "react";
-import AdminListPart from "./AdminListPart";
-import { Bell, Menu, Search } from "lucide-react";
+import { useState } from "react";
 import { Sidebar } from "../shared/Sidebar";
-import fetchAllAdmins from "../../../api/admin-api/allAdminsAPI";
-import { useAdminJwtErrors } from "../../../utils/JwtErrors";
-import adminLogout from "../../../api/admin-api/adminLogoutAPI";
+import { Bell, Menu, Search } from "lucide-react";
+import RequestDetailsPart from "./RequestDetailsPart";
 
-const UserListPage = () => {
+const RequestDetailsPage = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const JwtErrors = useAdminJwtErrors();
-  const [adminList, setAdminList] = useState([]);
-
-  const getAllAdmins = async () => {
-    try {
-      const response = await fetchAllAdmins();
-
-      if (response && response.data && response.data.status) {
-        setAdminList(response.data.data);
-      } else if (response === false) {
-        JwtErrors({ reason: "session expiration" });
-        try {
-          await adminLogout();
-        } catch (logoutError) {
-          console.error("Error during admin logout:", logoutError);
-        }
-      } else {
-        console.log("Unexpected response:", response);
-      }
-    } catch (error) {
-      console.error("Error in getAllAdmins:", error);
-    }
-  };
-
-  useEffect(() => {
-    getAllAdmins();
-  }, []);
 
   return (
     <div className="flex min-h-screen bg-blue-900 text-white">
@@ -46,7 +16,7 @@ const UserListPage = () => {
         <Sidebar isOpen={sidebarOpen} toggle={() => setSidebarOpen(false)} />
       </div>
 
-      <div className="flex-1 ml-0 lg:ml-64">
+      <div className="flex-1 ml-0 lg:ml-64"> 
         <header className="sticky top-0 z-20 bg-blue-800 shadow-sm">
           <div className="flex items-center justify-between p-4">
             <button onClick={() => setSidebarOpen(true)} className="lg:hidden">
@@ -74,11 +44,12 @@ const UserListPage = () => {
         </header>
 
         <main className="p-6">
-          <AdminListPart allAdmins={adminList} allAdminsFunc={getAllAdmins} />
+          <RequestDetailsPart />
         </main>
       </div>
     </div>
   );
 };
 
-export default UserListPage;
+export default RequestDetailsPage;
+
