@@ -17,6 +17,8 @@ const MyRequestDetails = () => {
 
   const requestId = location.state?.requestId;
 
+  console.log(requestId, "This is the request id")
+
   function goBackButton() {
     navigate(-1);
   }
@@ -36,8 +38,9 @@ const MyRequestDetails = () => {
           return;
         } else {
           const response = await getRequestDetails(requestId);
+          console.log(response)
           if (response.status === 200) {
-            setRequestData(response.data.data);
+            setRequestData(response.data.data.requestData);
           } else {
             showErrorToast2(response.data.message);
           }

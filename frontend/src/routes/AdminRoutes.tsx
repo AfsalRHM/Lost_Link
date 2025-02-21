@@ -12,6 +12,7 @@ import ChatDetails from "../pages/admin/ChatDetails";
 import RedeemRequestList from "../pages/admin/RedeemRequestList";
 import UserDetails from "../pages/admin/UserDetails";
 import RequestDetails from "../pages/admin/RequestDetails";
+import RedeemRequestDetails from "../pages/admin/RedeemRequestDetails";
 
 const AdminRoutes = () => {
   return (
@@ -32,6 +33,10 @@ const AdminRoutes = () => {
         />
         <Route path="/admin/chats" element={<ChatList />} />
         <Route path="/admin/redeem-requests" element={<RedeemRequestList />} />
+        <Route
+          path="/admin/redeem-requests/details/:id"
+          element={<RedeemRequestDetails />}
+        />
         <Route path="/admin/chats/chat-details/:id" element={<ChatDetails />} />
       </Route>
     </>

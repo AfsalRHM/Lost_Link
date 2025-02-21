@@ -16,4 +16,33 @@ export default class RequestRedeemRepository
   ): Promise<IrequestRedeemModel | null> {
     return this.insert(requestRedeemData);
   }
+
+  async changeStatus({
+    changeTo,
+    redeemRequestId,
+  }: {
+    redeemRequestId: string;
+    changeTo: string;
+  }): Promise<IrequestRedeemModel | null> {
+    try {
+      const request = await this.model.findById(redeemRequestId);
+      if (!request) {
+        console.log("Redeem Request not Found");
+        throw new Error("Request not found");
+      }
+
+      const updatedRequest = await this.model.findByIdAndUpdate(
+        redeemRequestId,
+        {
+          status: changeTo,
+        },
+        { new: true }
+      );
+
+      return updatedRequest;
+    } catch (error) {
+      console.error("Error updating status:", error);
+      return null;
+    }
+  }
 }

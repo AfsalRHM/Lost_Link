@@ -180,7 +180,7 @@ export default class RequestController implements IrequestController {
       }
 
       const response = await this._requestService.adminGetRequestDetails({
-        requestId: requestId
+        requestId: requestId,
       });
       if (response.status) {
         res.status(200).json(response);
@@ -281,13 +281,18 @@ export default class RequestController implements IrequestController {
     }
   };
 
-  // To get the redeem request details
+  // To get the redeem request details for the user and admin
   public getRedeemRequestDetails = async (
     req: Request,
     res: Response
   ): Promise<void> => {
     try {
-      const requestRedeemId = req.body.requestRedeemId;
+      let requestRedeemId;
+      if (req.body.requestRedeemId) {
+        requestRedeemId = req.body.requestRedeemId;
+      } else if (req.params.id) {
+        requestRedeemId = req.params.id;
+      }
       if (!requestRedeemId) {
         res.status(401).json({
           message:
@@ -310,6 +315,7 @@ export default class RequestController implements IrequestController {
     }
   };
 
+  // TO change the request status
   public changeRequestStatus = async (
     req: Request,
     res: Response
@@ -326,6 +332,37 @@ export default class RequestController implements IrequestController {
           .setHeader("Authorization", `Bearer ${accessToken}`)
           .status(200)
           .json(response);
+      }
+    } catch (error) {
+      res
+        .status(300)
+        .json({ message: "error on the changeUserStatus/adminController" });
+    }
+  };
+
+  // To change the redeem request status
+  public changeRedeemRequestStatus = async (
+    req: Request,
+    res: Response
+  ): Promise<void> => {
+    try {
+      console.log(req.body.Props)
+      const { redeemRequestId, changeTo } = req.body.Props;
+      if (!redeemRequestId || !changeTo) {
+        res.status(401).json({
+          message:
+            "Data are missing from the body getRedeemRequestDetails/adminController",
+        });
+      }
+      const response = await this._requestService.changeRedeemRequestStatus({
+        redeemRequestId,
+        changeTo,
+      });
+
+      if (response.status) {
+        res.status(200).json(response);
+      } else {
+        res.status(400).json(response);
       }
     } catch (error) {
       res
