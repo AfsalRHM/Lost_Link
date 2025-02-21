@@ -119,6 +119,7 @@ export default class requestService implements IrequestService {
     }
   }
 
+    // To get the request details for user side with the redeem request data also.
   async getRequestDetails({
     requestId,
     userId,
@@ -135,6 +136,51 @@ export default class requestService implements IrequestService {
         const redeemRequestData = await this._requestRedeemRepository.findOne({
           request_id: requestId,
           user_id: userId,
+        });
+        if (redeemRequestData) {
+          return {
+            status: true,
+            data: { requestData, redeemRequestData },
+            message: "Request Data Found",
+          };
+        } else {
+          return {
+            status: true,
+            data: { requestData },
+            message: "Request Data Found",
+          };
+        }
+      } else {
+        return {
+          status: false,
+          data: null,
+          message: "Request Data not Found",
+        };
+      }
+    } catch (error) {
+      return {
+        status: false,
+        data: null,
+        message:
+          "Error occured while Fetching Request Data - from getRequestDetails/requestService",
+      };
+    }
+  }
+
+  // To get the request details for admin side with the redeem request data also.
+  async adminGetRequestDetails({
+    requestId,
+  }: {
+    requestId: string;
+  }): Promise<any> {
+    try {
+      const requestData = await this._requestRepository.findOne({
+        _id: requestId,
+      });
+
+      if (requestData) {
+        const redeemRequestData = await this._requestRedeemRepository.findAllRedeemRequest({
+          request_id: requestId
         });
         if (redeemRequestData) {
           return {

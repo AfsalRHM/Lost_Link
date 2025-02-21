@@ -20,7 +20,7 @@ interface Request {
   expirationLimit: string;
   images: File[];
   additionalInfo: string;
-  status: "active" | "inactive";
+  status: "active" | "inactive" | "cancelled";
 }
 
 interface RequestListPartProps {
@@ -40,7 +40,7 @@ const RequestListPart = ({
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
 
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(10); 
+  const [itemsPerPage] = useState(10);
 
   const request: Request[] = allRequests;
 
@@ -55,7 +55,7 @@ const RequestListPart = ({
 
   const handleDetailsPage = (id: string) => {
     if (id) {
-      navigate(`/admin/requestDetails`, { state: { userId: id } });
+      navigate(`/admin/requests/request-details/${id}`);
     }
   };
 
@@ -188,17 +188,24 @@ const RequestListPart = ({
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-center">
-                    <button
-                      onClick={() => handleStatusChange(request._id)}
-                      className={`inline-flex items-center px-4 py-2 text-white rounded-lg transition-colors ${
-                        request.status === "active"
-                          ? "bg-red-600 hover:bg-red-700"
-                          : "bg-green-600 hover:bg-green-700"
-                      }`}
-                    >
-                      {request.status === "active" ? "Block" : "Unblock"}
-                    </button>
+                    {request.status === "cancelled" ? (
+                      <p className="text-red-600 bg-white px-2 py-1 rounded-lg font-semibold text-lg">
+                        Cancelled
+                      </p>
+                    ) : (
+                      <button
+                        onClick={() => handleStatusChange(request._id)}
+                        className={`inline-flex items-center px-4 py-2 text-white rounded-lg transition-colors ${
+                          request.status === "active"
+                            ? "bg-red-600 hover:bg-red-700"
+                            : "bg-green-600 hover:bg-green-700"
+                        }`}
+                      >
+                        {request.status === "active" ? "Block" : "Unblock"}
+                      </button>
+                    )}
                   </td>
+
                   <td className="px-6 py-4 whitespace-nowrap text-center">
                     <button
                       onClick={() => handleDetailsPage(request._id)}

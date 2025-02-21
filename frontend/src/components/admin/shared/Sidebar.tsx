@@ -1,12 +1,21 @@
 import React, { useEffect, useState } from "react";
-import { BarChart, Activity, Users, X, Notebook, LogOut } from "lucide-react";
+import {
+  BarChart,
+  Activity,
+  Users,
+  X,
+  Notebook,
+  MessageSquare,
+  LogOut,
+} from "lucide-react";
 import { SidebarProps } from "../../../interface/IadminDashboard";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { removeAdminDetails } from "../../../redux/slice/adminDetailsSlice";
 import adminLogout from "../../../api/admin-api/adminLogoutAPI";
 import { showErrorToast, showSuccessToast } from "../../../utils/toastUtils";
 import { removeAdminAccessToken } from "../../../redux/slice/accessTokenSlice";
+import { RootState } from "../../../redux/store";
 
 export const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggle }) => {
   const location = useLocation();
@@ -14,6 +23,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggle }) => {
   const dispatch = useDispatch();
 
   const [currentLocation, setCurrentLocation] = useState("");
+
+  const { adminRole } = useSelector((state: RootState) => state.adminDetails);
 
   useEffect(() => {
     setCurrentLocation(location.pathname);
@@ -36,20 +47,62 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggle }) => {
     }
   };
 
-  const navItems = [
-    { text: "Dashboard", icon: <BarChart size={20} />, path: "/admin" },
-    {
-      text: "Analytics",
-      icon: <Activity size={20} />,
-      path: "/admin/analytics",
-    },
-    { text: "Users", icon: <Users size={20} />, path: "/admin/users" },
-    { text: "Admins", icon: <Users size={20} />, path: "/admin/admins" },
-    { text: "Requests", icon: <Notebook size={20} />, path: "/admin/requests" },
-    { text: "Redeem Requests", icon: <Notebook size={20} />, path: "/admin/redeem-requests" },
-    { text: "Chats", icon: <Notebook size={20} />, path: "/admin/chats" },
-    { text: "Logout", icon: <LogOut size={20} />, path: "/" },
-  ];
+  let navItems = [];
+
+  if (adminRole == "Admin") {
+    navItems = [
+      { text: "Dashboard", icon: <BarChart size={20} />, path: "/admin" },
+      {
+        text: "Analytics",
+        icon: <Activity size={20} />,
+        path: "/admin/analytics",
+      },
+      { text: "Users", icon: <Users size={20} />, path: "/admin/users" },
+      { text: "Admins", icon: <Users size={20} />, path: "/admin/admins" },
+      {
+        text: "Requests",
+        icon: <Notebook size={20} />,
+        path: "/admin/requests",
+      },
+      {
+        text: "Redeem Requests",
+        icon: <Notebook size={20} />,
+        path: "/admin/redeem-requests",
+      },
+      {
+        text: "Chats",
+        icon: <MessageSquare size={20} />,
+        path: "/admin/chats",
+      },
+      { text: "Logout", icon: <LogOut size={20} />, path: "/" },
+    ];
+  } else {
+    navItems = [
+      { text: "Dashboard", icon: <BarChart size={20} />, path: "/admin" },
+      {
+        text: "Analytics",
+        icon: <Activity size={20} />,
+        path: "/admin/analytics",
+      },
+      { text: "Users", icon: <Users size={20} />, path: "/admin/users" },
+      {
+        text: "Requests",
+        icon: <Notebook size={20} />,
+        path: "/admin/requests",
+      },
+      {
+        text: "Redeem Requests",
+        icon: <Notebook size={20} />,
+        path: "/admin/redeem-requests",
+      },
+      {
+        text: "Chats",
+        icon: <MessageSquare size={20} />,
+        path: "/admin/chats",
+      },
+      { text: "Logout", icon: <LogOut size={20} />, path: "/" },
+    ];
+  }
 
   return (
     <div

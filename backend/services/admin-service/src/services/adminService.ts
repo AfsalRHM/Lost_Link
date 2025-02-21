@@ -267,6 +267,10 @@ export default class adminService implements IadminService {
         return { status: false, message: "Admin Not Found" };
       }
 
+      if (adminData.status !== "active") {
+        return { status: false, message: "Admin is Blocked" };
+      }
+
       console.log(adminData._id, "this is the admin Data");
 
       const newAccessToken = jwtFunctions.generateAdminAccessToken({

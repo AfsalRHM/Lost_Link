@@ -121,6 +121,7 @@ export default class RequestController implements IrequestController {
     }
   };
 
+  // To get request details for the user side
   public getRequestDetails = async (
     req: Request,
     res: Response
@@ -139,18 +140,19 @@ export default class RequestController implements IrequestController {
           status: false,
           message: "Access Token Not Found",
         });
-      } 
+      }
       const decoded = jwtFunctions.verifyAccessToken(accessToken!);
       if (!decoded) {
         res.status(400).json({
           status: false,
           message: "Access Token Data Can't Get",
         });
-      } 
+      }
 
-      const response = await this._requestService.getRequestDetails(
-        {requestId: req.body.requestId, userId: decoded?.id!}
-      );
+      const response = await this._requestService.getRequestDetails({
+        requestId: req.body.requestId,
+        userId: decoded?.id!,
+      });
       if (response.status) {
         res.status(200).json(response);
       } else {
@@ -158,6 +160,35 @@ export default class RequestController implements IrequestController {
       }
     } catch (error) {
       console.log("error in getRequestDetails/requestController", error);
+    }
+  };
+
+  // To get request details for the admin side
+  public adminGetRequestDetails = async (
+    req: Request,
+    res: Response
+  ): Promise<void> => {
+    try {
+      const requestId = req.params.id;
+      if (!requestId) {
+        res.status(400).json({
+          status: false,
+          message:
+            "Request Id not found on the adminGetRequestDetails Get Request",
+        });
+        return;
+      }
+
+      const response = await this._requestService.adminGetRequestDetails({
+        requestId: requestId
+      });
+      if (response.status) {
+        res.status(200).json(response);
+      } else {
+        res.status(400).json(response);
+      }
+    } catch (error) {
+      console.log("error in adminGetRequestDetails/requestController", error);
     }
   };
 

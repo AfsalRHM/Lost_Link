@@ -17,7 +17,7 @@ if (process.env.ADMIN_JWT_REFRESH_SECRETKEY) {
   console.log("No process.env.ADMIN_JWT_REFRESH_SECRETKEY Available");
 }
 
-const accessExpiration = "1d";
+const accessExpiration = "15s";
 const refreshExpiration = "2w";
 
 export default class jwtFunctions {

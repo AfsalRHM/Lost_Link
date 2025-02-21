@@ -13,4 +13,6 @@ export default interface IrequestController {
   getAllRequests(req: Request, res: Response): Promise<void>;
   changeRequestStatus(req: Request, res: Response): Promise<void>;
   getAllRedeemRequests(req: Request, res: Response): Promise<void>;
+
+  adminGetRequestDetails(req: Request, res: Response): Promise<void>;
 }
