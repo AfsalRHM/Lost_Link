@@ -64,7 +64,9 @@ const RequestDetailsPart = () => {
     navigate(-1);
   }
 
-  function handleRedeemRequestDetails(redeemRequestId: string) {}
+  function handleRedeemRequestDetails(redeemRequestId: string) {
+    
+  }
 
   async function handleStatusChange() {
     const response = await changeRequestStatus({ requestId: id });

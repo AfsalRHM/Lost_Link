@@ -16,17 +16,9 @@ const RedeemRequestListPart = ({ allRedeemRequests }: UserListPartProps) => {
 
   const handleDetailsPage = (id: string) => {
     if (id) {
-      navigate(`/admin/userdetails`, { state: { userId: id } });
+      navigate(`/admin/redeem-requests/details/${id}`);
     }
   };
-
-  //   const handleStatusChange = async (id: string) => {
-  //     const response = await changeStatus({ userId: id });
-  //     await allUsersFunc();
-  //     if (response.status) {
-  //       showSuccessToast("User Status Changed");
-  //     }
-  //   };
 
   const filteredRedeemRequests = allRedeemRequests.filter(
     (redeemRequest: requestRedeemType) =>

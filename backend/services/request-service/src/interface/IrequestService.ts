@@ -28,11 +28,16 @@ export default interface IrequestService {
   }: {
     requestRedeemId: string;
   }): Promise<any>;
-  getUserRedeemRequests({ userId }: { userId: string }): Promise<any>;
 
   getRequests(): Promise<any>;
   changeRequestStatus(props: { requestId: string }): Promise<any>;
   getAllRedeemRequests(): Promise<any>;
+
+  getUserRedeemRequests({ userId }: { userId: string }): Promise<any>;
+  changeRedeemRequestStatus(props: {
+    redeemRequestId: string;
+    changeTo: string;
+  }): Promise<any>;
 
   adminGetRequestDetails({ requestId }: { requestId: string }): Promise<any>;
 }

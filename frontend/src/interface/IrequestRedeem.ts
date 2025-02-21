@@ -14,4 +14,5 @@ export default interface requestRedeemType {
   account_holder_name: String;
   images: [String];
   status: string;
+  createdAt?: Date;
 }

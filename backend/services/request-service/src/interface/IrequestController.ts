@@ -15,4 +15,6 @@ export default interface IrequestController {
   getAllRedeemRequests(req: Request, res: Response): Promise<void>;
 
   adminGetRequestDetails(req: Request, res: Response): Promise<void>;
+
+  changeRedeemRequestStatus(req: Request, res: Response): Promise<void>;
 }

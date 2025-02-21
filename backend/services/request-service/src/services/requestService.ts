@@ -119,7 +119,7 @@ export default class requestService implements IrequestService {
     }
   }
 
-    // To get the request details for user side with the redeem request data also.
+  // To get the request details for user side with the redeem request data also.
   async getRequestDetails({
     requestId,
     userId,
@@ -179,9 +179,10 @@ export default class requestService implements IrequestService {
       });
 
       if (requestData) {
-        const redeemRequestData = await this._requestRedeemRepository.findAllRedeemRequest({
-          request_id: requestId
-        });
+        const redeemRequestData =
+          await this._requestRedeemRepository.findAllRedeemRequest({
+            request_id: requestId,
+          });
         if (redeemRequestData) {
           return {
             status: true,
@@ -528,6 +529,36 @@ export default class requestService implements IrequestService {
           status: false,
           data: response,
           message: "Request Status Changed Successfully.",
+        };
+      }
+    } catch (error) {
+      return {
+        status: false,
+        message: "Error in getAllUsers/adminService",
+        error: error,
+      };
+    }
+  }
+
+  async changeRedeemRequestStatus(props: {
+    redeemRequestId: string;
+    changeTo: string;
+  }): Promise<any> {
+    try {
+      const response = await this._requestRedeemRepository.changeStatus(
+        props
+      );
+      if (response) {
+        return {
+          status: true,
+          data: response,
+          message: "Redeem Request Status Changed Successfully.",
+        };
+      } else {
+        return {
+          status: false,
+          data: response,
+          message: "Redeeem Request Status Failed to Change.",
         };
       }
     } catch (error) {
