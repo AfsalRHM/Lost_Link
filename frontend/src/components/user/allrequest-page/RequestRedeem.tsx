@@ -41,7 +41,7 @@ const RequestRedeem = () => {
         } else {
           const response = await getRequestDetails(requestId);
           if (response.status === 200) {
-            setRequestData(response.data.data);
+            setRequestData(response.data.data.requestData);
           } else {
             showErrorToast2(response.data.message);
           }
@@ -146,7 +146,7 @@ const RequestRedeem = () => {
     const errors = validateRequestRedeemFormEntries({
       requestRedeemDetails: formData,
       requestCreationDate: requestData?.createdAt
-        ? requestData?.createdAt
+        ? requestData?.missing_date
         : new Date(),
     });
 

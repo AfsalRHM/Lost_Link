@@ -545,10 +545,13 @@ export default class requestService implements IrequestService {
     changeTo: string;
   }): Promise<any> {
     try {
-      const response = await this._requestRedeemRepository.changeStatus(
-        props
-      );
+      const response = await this._requestRedeemRepository.changeStatus(props);
       if (response) {
+        if (props.changeTo == "accepted") {
+          await this._requestRepository.findByIdAndUpdate(response.request_id, {
+            status: "completed",
+          });
+        }
         return {
           status: true,
           data: response,
