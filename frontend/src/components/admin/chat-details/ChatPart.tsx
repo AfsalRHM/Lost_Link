@@ -1,4 +1,4 @@
-import { ArrowLeft, Info, Send } from "lucide-react";
+import { ArrowLeft, Info, Send, Trash, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect, FormEvent, useRef } from "react";
 import IchatModel, { ImessageModel } from "../../../interface/Ichat";
@@ -8,23 +8,24 @@ import { useSelector } from "react-redux";
 import { RootState } from "../../../redux/store";
 import saveAdminMessage from "../../../api/admin-api/sendAdminMessage";
 import { getSocket } from "../../../socket/socket";
-// import getSocket
+import ImageModal from "../../shared/ImageModal";
+import ImageUpload from "../../shared/ImageUpload";
 
 const ChatPart = ({ chatDetails }: { chatDetails: IchatModel | undefined }) => {
   const navigate = useNavigate();
 
   const { adminId } = useSelector((state: RootState) => state.adminDetails);
 
-  console.log(chatDetails);
+  const [previewImages, setPreviewImages] = useState<string[]>([]);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [chatImage, setChatImage] = useState<string>("no image");
 
   const [messages, setMessages] = useState<ImessageModel[]>([]);
-
   const [newMessage, setNewMessage] = useState("");
 
   const socket = getSocket();
 
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
-
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -75,37 +76,56 @@ const ChatPart = ({ chatDetails }: { chatDetails: IchatModel | undefined }) => {
 
   const handleSendMessage = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (newMessage.trim() !== "") {
-      if (chatDetails) {
-        const response = await saveAdminMessage({
-          chatId: chatDetails._id,
+
+    if (!newMessage.trim() && chatImage == "no image") {
+      showErrorToast2("Cannot send an empty message.");
+      return;
+    }
+
+    if (chatDetails) {
+      const response = await saveAdminMessage({
+        chatId: chatDetails._id,
+        content: newMessage,
+        image: chatImage,
+      });
+      if (response.status === 200) {
+        socket.emit("newAdminMessage", {
+          sender: adminId,
+          chat: chatDetails._id,
           content: newMessage,
+          image: chatImage,
+          createdAt: new Date(),
+          updatedAt: new Date(),
         });
-        if (response.status === 200) {
-          socket.emit("newAdminMessage", {
+
+        setMessages([
+          ...messages,
+          {
             sender: adminId,
             chat: chatDetails._id,
             content: newMessage,
+            image: chatImage,
             createdAt: new Date(),
             updatedAt: new Date(),
-          });
-
-          setMessages([
-            ...messages,
-            {
-              sender: adminId,
-              chat: chatDetails._id,
-              content: newMessage,
-              createdAt: new Date(),
-              updatedAt: new Date(),
-            },
-          ]);
-          setNewMessage("");
-        } else {
-          showErrorToast2(response.data.message);
-        }
+          },
+        ]);
+        setNewMessage("");
+        setChatImage("no image");
+        setPreviewImages([]);
+      } else {
+        showErrorToast2(response.data.message);
       }
     }
+  };
+
+  // Remove Specific Image
+  const removeImage = (index: number) => {
+    setPreviewImages((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  // Remove all images
+  const removeAllImages = () => {
+    setPreviewImages([]);
   };
 
   return (
@@ -177,6 +197,13 @@ const ChatPart = ({ chatDetails }: { chatDetails: IchatModel | undefined }) => {
           <h2 className="text-xl font-medium">Messages</h2>
         </div>
 
+        {selectedImage && (
+          <ImageModal
+            image={selectedImage}
+            onClose={() => setSelectedImage(null)}
+          />
+        )}
+
         <div className="flex-grow overflow-y-auto p-4 space-y-4 max-h-[400px]">
           {messages.map((message, index) => {
             // Extract current and previous message dates (in YYYY-MM-DD format for comparison)
@@ -214,6 +241,18 @@ const ChatPart = ({ chatDetails }: { chatDetails: IchatModel | undefined }) => {
                   >
                     <p>{message.content}</p>
 
+                    {message.image !== "no image" && (
+                      <div className="rounded-lg overflow-hidden mt-1">
+                        <img
+                          src={message.image}
+                          alt="Message attachment"
+                          className="w-full max-w-[160px] min-w-[120px] object-cover rounded-lg hover:scale-105 transition-transform duration-200"
+                          loading="lazy"
+                          onClick={() => setSelectedImage(message.image!)}
+                        />
+                      </div>
+                    )}
+
                     <p
                       className={`text-xs mt-1 ${
                         message.sender === adminId || message.sender === "admin"
@@ -235,10 +274,43 @@ const ChatPart = ({ chatDetails }: { chatDetails: IchatModel | undefined }) => {
           <div ref={messagesEndRef} />
         </div>
 
+        {previewImages.length > 0 && (
+          <div className="relative bg-gray-50 p-3 rounded-xl border border-gray-200 mb-3">
+            <button
+              onClick={removeAllImages}
+              className="absolute -top-0 -right-0 bg-red-500 text-white p-1 rounded-full shadow-md hover:bg-red-600 transition"
+            >
+              <X size={16} />
+            </button>
+
+            <div className="flex gap-2 overflow-x-auto">
+              {previewImages.map((src, index) => (
+                <div key={index} className="relative">
+                  <img
+                    src={src}
+                    alt={`preview-${index}`}
+                    className="w-28 h-28 rounded-lg object-cover border shadow"
+                  />
+                  <button
+                    onClick={() => removeImage(index)}
+                    className="absolute -top-0 -right-0 bg-red-500 text-white p-1 rounded-full shadow-md hover:bg-red-600 transition"
+                  >
+                    <Trash size={13} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         <form
           onSubmit={handleSendMessage}
           className="p-4 border-t border-blue-700 flex"
         >
+          <ImageUpload
+            setChatImage={setChatImage}
+            setPreviewImages={setPreviewImages}
+          />
           <input
             type="text"
             placeholder="Type your message..."

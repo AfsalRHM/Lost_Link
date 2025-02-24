@@ -3,6 +3,7 @@ import adminAxiosInstance from "../axios-api/adminAxiosInterceptorAPI";
 interface Props {
   content: string;
   chatId: string;
+  image: string;
 }
 
 export default async function saveAdminMessage(props: Props): Promise<any> {

@@ -89,7 +89,6 @@ export default class jwtFunctions {
       const decoded = jwt.verify(token, adminAccessTokenSecret);
       return decoded as any;
     } catch (error) {
-      console.error("Error verifying token:", error);
       return null;
     }
   }

@@ -17,6 +17,7 @@ export interface ImessageModel {
   sender: string;
   content: string;
   chat: string;
+  image?: string;
   createdAt: Date;
   updatedAt: Date;
 }

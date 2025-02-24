@@ -9,6 +9,9 @@ import getAllMessagesOfChat from "../../../api/user-api/getAllMessages";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../redux/store";
 import { getSocket } from "../../../socket/socket";
+import { Trash, X } from "lucide-react";
+import ImageUpload from "../../shared/ImageUpload";
+import ImageModal from "../../shared/ImageModal";
 
 const ChatPart = ({
   onClose,
@@ -26,6 +29,11 @@ const ChatPart = ({
   const [messages, setMessages] = useState<ImessageModel[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
+
+  const [previewImages, setPreviewImages] = useState<string[]>([]);
+  const [chatImage, setChatImage] = useState<string>("no image");
+
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -91,37 +99,56 @@ const ChatPart = ({
     }
   };
 
+  // Send Message
   const sendMessage = async (chatIdProp: string | undefined) => {
-    if (newMessage.trim() !== "") {
-      if (chat) {
-        const response = await saveMessage({
-          chatId: chatIdProp!,
+    if (!newMessage.trim() && chatImage == "no image") {
+      showErrorToast2("Cannot send an empty message.");
+      return;
+    }
+
+    if (chat) {
+      const response = await saveMessage({
+        chatId: chatIdProp!,
+        content: newMessage,
+        image: chatImage,
+      });
+      if (response.status === 200) {
+        socket.emit("newUserMessage", {
+          sender: userId,
+          chat: chat._id,
           content: newMessage,
+          image: chatImage,
+          createdAt: new Date(),
+          updatedAt: new Date(),
         });
-        if (response.status === 200) {
-          socket.emit("newUserMessage", {
-            sender: userId,
+        setMessages([
+          ...messages,
+          {
             chat: chat._id,
+            sender: userId,
             content: newMessage,
+            image: chatImage,
             createdAt: new Date(),
             updatedAt: new Date(),
-          });
-          setMessages([
-            ...messages,
-            {
-              chat: chat._id,
-              sender: userId,
-              content: newMessage,
-              createdAt: new Date(),
-              updatedAt: new Date(),
-            },
-          ]);
-          setNewMessage("");
-        } else {
-          showErrorToast2(response.data.message);
-        }
+          },
+        ]);
+        setNewMessage("");
+        setChatImage("no image");
+        setPreviewImages([]);
+      } else {
+        showErrorToast2(response.data.message);
       }
     }
+  };
+
+  // Remove Specific Image
+  const removeImage = (index: number) => {
+    setPreviewImages((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  // Remove all images
+  const removeAllImages = () => {
+    setPreviewImages([]);
   };
 
   if (loading) {
@@ -151,6 +178,13 @@ const ChatPart = ({
           </button>
         </div>
 
+        {selectedImage && (
+          <ImageModal
+            image={selectedImage}
+            onClose={() => setSelectedImage(null)}
+          />
+        )}
+
         <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-violet-50">
           {messages.map((msg, index) => {
             // Get the date of the current and previous message
@@ -160,11 +194,13 @@ const ChatPart = ({
                 ? new Date(messages[index - 1].createdAt).toLocaleDateString()
                 : null;
 
+            const isOwnMessage = msg.sender === userId;
+
             return (
-              <div key={index}>
+              <div>
                 {currentDate !== previousDate && (
                   <div className="text-center text-sm p-2 bg-gray-200 rounded-lg text-gray-500 my-4">
-                    {currentDate == new Date().toLocaleDateString()
+                    {currentDate === new Date().toLocaleDateString()
                       ? "Today"
                       : currentDate}
                   </div>
@@ -172,25 +208,38 @@ const ChatPart = ({
 
                 <div
                   className={`flex ${
-                    msg.sender === userId ? "justify-end" : "justify-start"
+                    isOwnMessage ? "justify-end" : "justify-start"
                   }`}
                 >
                   <div
                     className={`flex flex-col ${
-                      msg.sender === userId ? "items-end" : "items-start"
+                      isOwnMessage ? "items-end" : "items-start"
                     }`}
                   >
                     <div
                       className={`p-3 rounded-2xl max-w-sm md:max-w-md break-words whitespace-pre-wrap shadow-sm ${
-                        msg.sender === userId
+                        isOwnMessage
                           ? "bg-violet-600 text-white rounded-tr-none"
                           : "bg-white text-gray-800 rounded-tl-none"
                       }`}
                     >
-                      {msg.content}
+                      <div className="mb-2">{msg.content}</div>
+
+                      {msg.image !== "no image" && (
+                        <div className="rounded-lg overflow-hidden">
+                          <img
+                            src={msg.image}
+                            alt="Message attachment"
+                            className="w-full max-w-[160px] min-w-[120px] object-cover rounded-lg hover:scale-105 transition-transform duration-200"
+                            loading="lazy"
+                            onClick={() => setSelectedImage(msg.image!)}
+                          />
+                        </div>
+                      )}
+
                       <p
-                        className={`text-xs flex mt-1 ${
-                          msg.sender === userId
+                        className={`text-xs flex mt-2 ${
+                          isOwnMessage
                             ? "text-blue-200 justify-end"
                             : "text-blue-900"
                         }`}
@@ -210,15 +259,50 @@ const ChatPart = ({
           <div ref={messagesEndRef} />
         </div>
 
-        <div className="p-4 bg-white border-t border-violet-100">
+        <div className="p-4 bg-white border-t border-violet-100 rounded-t-lg shadow-md">
+          {previewImages.length > 0 && (
+            <div className="relative bg-gray-50 p-3 rounded-xl border border-gray-200 mb-3">
+              <button
+                onClick={removeAllImages}
+                className="absolute -top-0 -right-0 bg-red-500 text-white p-1 rounded-full shadow-md hover:bg-red-600 transition"
+              >
+                <X size={16} />
+              </button>
+
+              <div className="flex gap-2 overflow-x-auto">
+                {previewImages.map((src, index) => (
+                  <div key={index} className="relative">
+                    <img
+                      src={src}
+                      alt={`preview-${index}`}
+                      className="w-28 h-28 rounded-lg object-cover border shadow"
+                    />
+                    <button
+                      onClick={() => removeImage(index)}
+                      className="absolute -top-0 -right-0 bg-red-500 text-white p-1 rounded-full shadow-md hover:bg-red-600 transition"
+                    >
+                      <Trash size={13} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div className="flex items-center gap-2">
+            <ImageUpload
+              setChatImage={setChatImage}
+              setPreviewImages={setPreviewImages}
+            />
+
             <textarea
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
-              onKeyPress={handleKeyPress}
-              className="flex-1 p-3 border border-violet-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500 resize-none"
+              onKeyDown={handleKeyPress}
+              className="flex-1 p-2 border border-violet-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500 resize-none"
               placeholder="Type a message..."
             />
+
             <button
               onClick={() => sendMessage(chat?._id)}
               className="bg-violet-600 text-white p-3 rounded-xl hover:bg-violet-700 transition-colors focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2"
@@ -226,8 +310,10 @@ const ChatPart = ({
               <IoSend size={20} />
             </button>
           </div>
+
           <p className="text-xs text-gray-500 mt-2 text-center">
-            Press Enter to send, Shift + Enter for new line
+            Press <strong>Enter</strong> to send, <strong>Shift + Enter</strong>{" "}
+            for a new line
           </p>
         </div>
       </div>

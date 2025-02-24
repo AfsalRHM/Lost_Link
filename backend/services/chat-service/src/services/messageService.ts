@@ -20,13 +20,15 @@ export default class messageService implements ImessageService {
     content,
     chatId,
     userId,
+    image,
   }: {
     userId: string;
     content: string;
     chatId: string;
+    image: string;
   }): Promise<any> {
     try {
-      if (!userId || !content || !chatId) {
+      if (!userId || !chatId) {
         return {
           status: false,
           data: null,
@@ -38,6 +40,7 @@ export default class messageService implements ImessageService {
         sender: userId,
         content: content,
         chat: chatId,
+        image: image,
       };
 
       const messageData = await (
@@ -73,13 +76,15 @@ export default class messageService implements ImessageService {
     content,
     chatId,
     adminId,
+    image,
   }: {
     adminId: string;
     content: string;
     chatId: string;
+    image: string;
   }): Promise<any> {
     try {
-      if (!adminId || !content || !chatId) {
+      if (!adminId || !chatId) {
         return {
           status: false,
           data: null,
@@ -91,6 +96,7 @@ export default class messageService implements ImessageService {
         sender: adminId,
         content: content,
         chat: chatId,
+        image: image,
       };
 
       const messageData = await (
