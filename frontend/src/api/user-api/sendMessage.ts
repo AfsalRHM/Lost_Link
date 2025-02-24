@@ -3,6 +3,7 @@ import axiosInstance from "../axios-api/axiosInterceptorAPI";
 interface Props {
   content: string;
   chatId: string;
+  image: string;
 }
 
 export default async function saveMessage(props: Props): Promise<any> {

@@ -14,9 +14,9 @@ export default class messageController implements ImessageController {
   // To send the user messages
   public sendMessage = async (req: Request, res: Response): Promise<void> => {
     try {
-      const { content, chatId } = req.body; // Add Type
-      if (!content || !chatId) {
-        console.log("invalid data passed to the request send-message");
+      const { content, chatId, image } = req.body; // Add Type
+      if ( !chatId) {
+        console.log("invalid data passed to the request send-message 1");
         res.status(404);
         return;
       }
@@ -24,7 +24,7 @@ export default class messageController implements ImessageController {
       const token = req.header("Authorization")?.split(" ")[1];
 
       if (!token) {
-        console.log("invalid data passed to the request send-message");
+        console.log("invalid data passed to the request send-message 2");
         res.status(401);
         return;
       }
@@ -40,6 +40,7 @@ export default class messageController implements ImessageController {
         content,
         chatId,
         userId,
+        image
       });
 
       if (response.status) {
@@ -56,8 +57,8 @@ export default class messageController implements ImessageController {
   // To save the admin messages
   public sendAdminMessage = async (req: Request, res: Response): Promise<void> => {
     try {
-      const { content, chatId } = req.body; // Add Type
-      if (!content || !chatId) {
+      const { content, chatId, image } = req.body; // Add Type
+      if (!chatId) {
         console.log("invalid data passed to the request send-admin-message");
         res.status(404);
         return;
@@ -82,6 +83,7 @@ export default class messageController implements ImessageController {
         content,
         chatId,
         adminId,
+        image
       });
 
       if (response.status) {

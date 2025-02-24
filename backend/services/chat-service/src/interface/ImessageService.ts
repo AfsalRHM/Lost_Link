@@ -3,10 +3,12 @@ export default interface ImessageService {
     userId,
     content,
     chatId,
+    image,
   }: {
     userId: string;
     content: string;
     chatId: string;
+    image: string;
   }): Promise<any>;
   sendAdminMessage({
     content,
