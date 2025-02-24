@@ -7,8 +7,8 @@ const TopBar = () => {
 
   const linkClass =
     "py-[2px] px-[4px] rounded-full transition-all ease-in-out duration-300";
-  const hoverClass = "hover:bg-[#8695ae]";
-  const activeClass = "bg-[#8695ae]";
+  const hoverClass = "hover:bg-[#ccdfff]";
+  const activeClass = "bg-[#ccdfff]";
 
   return (
     <>
