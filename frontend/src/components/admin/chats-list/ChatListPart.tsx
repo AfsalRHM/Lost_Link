@@ -31,10 +31,6 @@ const ChatListPart = ({ allChats = [] }: ChatListPartProps) => {
     }
   };
 
-  const handleStartChat = () => {
-    navigate("/admin/requests");
-  };
-
   const filteredChats = allChats
     .filter((chat) =>
       chat.user_name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -85,12 +81,6 @@ const ChatListPart = ({ allChats = [] }: ChatListPartProps) => {
           <div className="text-center pt-8 pb-4 text-white">
             No chats available
           </div>
-          <button
-            onClick={handleStartChat}
-            className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
-          >
-            Start Chat
-          </button>
         </div>
       ) : (
         <>
