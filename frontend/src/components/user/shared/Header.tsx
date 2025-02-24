@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 
 import TopBar from "./TopBar";
 import TopBarIcons from "./TopBarIcons";
+import { useNavigate } from "react-router-dom";
 
 const Header = () => {
   useEffect(() => {
@@ -10,6 +11,8 @@ const Header = () => {
   }, []);
 
   const [menuOpen, setMenuOpen] = useState(false);
+
+  const navigate = useNavigate();
 
   const onToggleMenu = (e: React.MouseEvent<HTMLElement>) => {
     const navLinks = document.querySelector(".nav-links");
@@ -19,10 +22,17 @@ const Header = () => {
     navLinks?.classList.toggle("top-[9%]");
   };
 
+  function handleLogoClick() {
+    navigate("/home");
+  }
+
   return (
     <header className="bg-header shadow-2xl md:px-16 p-3 z-10">
       <nav className="flex justify-between items-center w-[92%] mx-auto">
-        <div className="flex items-center">
+        <div
+          className="flex items-center cursor-pointer"
+          onClick={handleLogoClick}
+        >
           <img className="w-11 rounded-2xl p-1" src="/Logo.png" alt="" />
           <p className="text-xl font-bold">LostLink</p>
         </div>

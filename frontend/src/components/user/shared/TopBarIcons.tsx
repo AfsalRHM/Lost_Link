@@ -10,8 +10,8 @@ const TopBarIcons = () => {
 
   const linkClass =
     "rounded-full p-1 transition-all ease-in-out duration-300 hidden md:inline-flex";
-  const hoverClass = "hover:bg-[#8695ae]";
-  const activeClass = "bg-[#8695ae]"; // Permanent background color for the active page
+  const hoverClass = "hover:bg-[#ccdfff]";
+  const activeClass = "bg-[#ccdfff]"; // Permanent background color for the active page
 
   return (
     <>
