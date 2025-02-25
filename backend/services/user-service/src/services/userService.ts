@@ -202,6 +202,34 @@ export default class userService implements IuserService {
     }
   }
 
+  // Add the Completed Request Details to the User Data
+  async addCompletedRequestDetails({
+    requestId,
+    userId,
+    points,
+  }: {
+    requestId: string;
+    userId: string;
+    points: number;
+  }): Promise<void> {
+    try {
+      console.log(
+        requestId,
+        userId,
+        points,
+        "This is from the addCompletedRequestDetails/userService"
+      );
+      const userData: IuserModel | null =
+        await this._userRepository.findByIdAndAddCompletedRequestIdAndPoints(
+          userId,
+          requestId,
+          points
+        );
+    } catch (error) {
+      console.log(error, "error on the addCompletedRequestDetails/userService");
+    }
+  }
+
   /****************************           Admin Side             **************************************/
   async getAllUsers(): Promise<any> {
     try {

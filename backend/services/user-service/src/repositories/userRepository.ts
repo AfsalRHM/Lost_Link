@@ -3,6 +3,7 @@ import IbaseRepository from "../interface/IbaseRepository";
 import BaseRepository from "./baseRepository";
 import IuserModel from "../interface/IuserModel";
 import userModel from "../models/userModel";
+import { getTierByPoints } from "../utils/tier";
 
 export default class UserRepository
   extends BaseRepository<IuserModel>
@@ -60,7 +61,41 @@ export default class UserRepository
         { new: true }
       );
 
-       console.log(updatedUser)
+      console.log(updatedUser);
+      return updatedUser;
+    } catch (error) {
+      console.error("Error adding request ID:", error);
+      return null;
+    }
+  }
+
+  async findByIdAndAddCompletedRequestIdAndPoints(
+    userId: string,
+    requestId: string,
+    points: number
+  ): Promise<IuserModel | null> {
+    try {
+      const updatedUser = await this.model.findByIdAndUpdate(
+        userId,
+        {
+          $push: {
+            completed_requests: {
+              request_id: requestId,
+              points_earned: points,
+            },
+          },
+          $inc: {
+            points: points,
+          },
+        },
+        { new: true }
+      );
+
+      if (!updatedUser) {
+        console.log("User not updated form the userRepository");
+        return null;
+      }
+
       return updatedUser;
     } catch (error) {
       console.error("Error adding request ID:", error);

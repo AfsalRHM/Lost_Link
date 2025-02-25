@@ -132,7 +132,7 @@ const RedeemRequests = ({
                 <tbody className="divide-y divide-gray-200">
                   {currentRedeemRequests.map((request: any, index: number) =>
                     request.status !== currentStatus ? (
-                      <tr>
+                      <tr key={index}>
                         <td
                           colSpan={4}
                           className="py-6 text-center text-gray-500"

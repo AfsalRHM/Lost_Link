@@ -9,9 +9,12 @@ export interface userDataType {
   status: string;
   password?: string;
   requests: string[];
-  completed_requests: string[];
+  completed_requests: {
+    request_id: string;
+    completed_at: Date;
+    points_earned: number;
+  }[];
   points: number;
-  current_tier: string;
   payment_history: string[];
   createdAt?: Date;
   updatedAt?: Date;
