@@ -60,7 +60,6 @@ export default class requestService implements IrequestService {
       if (insertedData) {
         const sendingTo = process.env.USER_QUEUE;
         const source = "Add the request Id to the user";
-        console.log("Haaaa----------------", insertedData._id.toString());
         const props = {
           userId,
           requestId: insertedData._id.toString(),
@@ -311,7 +310,6 @@ export default class requestService implements IrequestService {
         account_holder_name: formData.accountHolderName,
         images: formData.images,
       };
-      console.log(updatedFormData);
       const requestRedeemData =
         await this._requestRedeemRepository.insertRequestRedeemForm(
           updatedFormData
@@ -345,7 +343,6 @@ export default class requestService implements IrequestService {
       const redeemRequests = await this._requestRedeemRepository.findAll({
         user_id: userId,
       });
-      console.log(redeemRequests);
       if (redeemRequests) {
         return {
           status: true,
@@ -380,7 +377,6 @@ export default class requestService implements IrequestService {
         await this._requestRedeemRepository.findOneRedeemRequest({
           _id: requestRedeemId,
         });
-      console.log(redeemRequestData);
       if (redeemRequestData) {
         return {
           status: true,
@@ -534,7 +530,7 @@ export default class requestService implements IrequestService {
     } catch (error) {
       return {
         status: false,
-        message: "Error in getAllUsers/adminService",
+        message: "Error in changeRequestStatus/requestService",
         error: error,
       };
     }
@@ -548,9 +544,41 @@ export default class requestService implements IrequestService {
       const response = await this._requestRedeemRepository.changeStatus(props);
       if (response) {
         if (props.changeTo == "accepted") {
-          await this._requestRepository.findByIdAndUpdate(response.request_id, {
-            status: "completed",
-          });
+          const requestData = await this._requestRepository.findByIdAndUpdate(
+            response.request_id,
+            {
+              status: "completed",
+            }
+          );
+
+          if (requestData) {
+            // Calculate the Points
+            const calculatedPoints = Math.round(
+              2.508 * Math.pow(requestData.reward_amount, 1.0003)
+            );
+
+            const sendingTo = process.env.USER_QUEUE;
+            const source = "Add the completed request details to the user";
+            const props = {
+              userId: requestData?.user_id,
+              requestId: requestData?._id.toString(),
+              points: calculatedPoints,
+            };
+
+            if (!sendingTo) {
+              throw new Error("sendingTo is emplty...");
+            }
+
+            sendToService({
+              sendingTo,
+              source,
+              props,
+            });
+          } else {
+            console.log(
+              "Unable to Change the Request Status and Adding the Points"
+            );
+          }
         }
         return {
           status: true,
@@ -567,7 +595,7 @@ export default class requestService implements IrequestService {
     } catch (error) {
       return {
         status: false,
-        message: "Error in getAllUsers/adminService",
+        message: "Error in changeRedeemRequestStatus/requestService",
         error: error,
       };
     }

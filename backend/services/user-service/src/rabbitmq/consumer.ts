@@ -31,14 +31,17 @@ export async function manageQueue() {
             headers: { source: "user register complete info" },
           });
         } else if (msg?.properties?.headers?.source == "user login request") {
-
           const response = await _userService.loginUser(
             messageContent.userMail
           );
 
           channel.sendToQueue("AUTH", Buffer.from(JSON.stringify(response)), {
             correlationId: msg.properties.correlationId,
-            headers: { source: "user login request response", correlationIdentifier: msg.properties.headers.correlationIdentifier },
+            headers: {
+              source: "user login request response",
+              correlationIdentifier:
+                msg.properties.headers.correlationIdentifier,
+            },
           });
         } else if (
           msg?.properties?.headers?.source == "user mail duplication request"
@@ -110,6 +113,10 @@ export async function manageQueue() {
           msg?.properties?.headers?.source == "Add the request Id to the user"
         ) {
           await _userService.addRequestId(messageContent);
+        } else if (
+          msg?.properties?.headers?.source == "Add the completed request details to the user"
+        ) {
+          await _userService.addCompletedRequestDetails(messageContent);
         } else {
           console.log("No userData found in message.");
         }

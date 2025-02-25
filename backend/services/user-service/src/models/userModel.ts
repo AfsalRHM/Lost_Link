@@ -7,7 +7,7 @@ const userSchema = new Schema(
     profile_pic: {
       type: String,
       default:
-        "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png"
+        "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png",
     },
     full_name: {
       type: String,
@@ -44,16 +44,18 @@ const userSchema = new Schema(
       default: [],
     },
     completed_requests: {
-      type: [String],
+      type: [
+        {
+          request_id: { type: String, required: true },
+          completed_at: { type: Date, default: Date.now() },
+          points_earned: { type: Number, required: true },
+        },
+      ],
       default: [],
     },
     points: {
       type: Number,
       default: 0,
-    },
-    current_tier: {
-      type: String,
-      default: "Rookie Explorer",
     },
     payment_history: {
       type: [String],

@@ -3,14 +3,15 @@ import LocationInfo from "./LocationInfo";
 import ProfileSidebar from "./ProfileSidebar.tsx";
 import TierSection from "./TierSection";
 import UserDetails from "./UserDetails";
+import VerifyButton from "./VerifyButton";
+import MyRequests from "./MyRequests.tsx";
+import RedeemRequests from "./RedeemRequests.tsx";
+import TierInfo from "./TierInfo.tsx";
 import { useDispatch } from "react-redux";
 import { showErrorToast } from "../../../utils/toastUtils.ts";
 import { assignAccessToken } from "../../../redux/slice/accessTokenSlice.ts";
 import getProfile from "../../../api/user-api/getProfileAPI.ts";
 import UserDetailsLoading from "./loading/UserDetailsLoading.tsx";
-import VerifyButton from "./VerifyButton";
-import MyRequests from "./MyRequests.tsx";
-import RedeemRequests from "./RedeemRequests.tsx";
 
 const Hero = () => {
   const [loading, setLoading] = useState<boolean>(true);
@@ -52,7 +53,7 @@ const Hero = () => {
           <div className="w-full md:w-4/6 mt-12">
             <div className="bg-white shadow-lg rounded-xl p-6">
               <UserDetailsLoading />
-              <TierSection />
+              <TierSection userData={userData} />
               <VerifyButton />
             </div>
           </div>
@@ -78,7 +79,7 @@ const Hero = () => {
         <div className="w-full md:w-4/6 mt-12">
           <div className="bg-white shadow-lg rounded-xl p-6">
             <UserDetails userData={userData} />
-            <TierSection />
+            <TierSection userData={userData} />
             {/* <VerifyButton /> */}
           </div>
         </div>
@@ -97,6 +98,8 @@ const Hero = () => {
               <MyRequests userData={userData} />
             ) : selectedItem === "Redeem Requests" ? (
               <RedeemRequests userData={userData} />
+            ) : selectedItem === "Tier Information" ? (
+              <TierInfo userData={userData} />
             ) : (
               <LocationInfo />
             )}
