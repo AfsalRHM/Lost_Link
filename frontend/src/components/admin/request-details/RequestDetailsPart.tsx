@@ -64,8 +64,10 @@ const RequestDetailsPart = () => {
     navigate(-1);
   }
 
-  function handleRedeemRequestDetails(redeemRequestId: string) {
-    
+  function handleRedeemRequestDetails(id: string) {
+    if (id) {
+      navigate(`/admin/redeem-requests/details/${id}`);
+    }
   }
 
   async function handleStatusChange() {
@@ -124,6 +126,8 @@ const RequestDetailsPart = () => {
             className={`px-4 py-2 rounded-full text-sm font-semibold border ${
               requestData?.status === "active"
                 ? "border-green-200 bg-green-100 text-green-700"
+                : requestData?.status == "completed"
+                ? "bg-green-600 border-green-200"
                 : "border-red-200 bg-red-100 text-red-700"
             }`}
           >
@@ -284,13 +288,11 @@ const RequestDetailsPart = () => {
                               <td className="px-4 py-3">
                                 <button
                                   onClick={() =>
-                                    handleRedeemRequestDetails(
-                                      request.request_id?._id
-                                    )
+                                    handleRedeemRequestDetails(request?._id)
                                   }
                                   className="bg-violet-600 text-white px-3 py-1.5 rounded-md hover:bg-violet-700 transition-all"
                                 >
-                                  View Details
+                                  Details
                                 </button>
                               </td>
                             </tr>
@@ -354,6 +356,10 @@ const RequestDetailsPart = () => {
             {requestData?.status === "cancelled" ? (
               <p className="text-red-600 font-semibold text-lg">
                 Request Cancelled
+              </p>
+            ) : requestData?.status == "completed" ? (
+              <p className="text-green-600 font-semibold text-lg">
+                Request Completed
               </p>
             ) : (
               <>

@@ -560,7 +560,7 @@ export default class requestService implements IrequestService {
             const sendingTo = process.env.USER_QUEUE;
             const source = "Add the completed request details to the user";
             const props = {
-              userId: requestData?.user_id,
+              userId: response?.user_id,
               requestId: requestData?._id.toString(),
               points: calculatedPoints,
             };
