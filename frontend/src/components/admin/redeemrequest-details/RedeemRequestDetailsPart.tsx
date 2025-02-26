@@ -28,6 +28,7 @@ const RedeemRequestDetailsPart = () => {
           navigate(-1);
           return;
         }
+        console.log(id, "this is the id ");
         const response = await fetchRedeemRequestDetails({
           redeemRequestId: id,
         });
@@ -256,7 +257,7 @@ const RedeemRequestDetailsPart = () => {
                 </button>
               </>
             ) : (
-              <div className="text-lg font-semibold text-violet-800">
+              <div className="text-lg font-semibold text-green-700 bg-green-400 border px-3 py-1 rounded-md">
                 {redeemRequestData?.status}
               </div>
             )}

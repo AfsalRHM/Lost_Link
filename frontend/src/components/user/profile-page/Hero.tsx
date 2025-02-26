@@ -12,6 +12,7 @@ import { showErrorToast } from "../../../utils/toastUtils.ts";
 import { assignAccessToken } from "../../../redux/slice/accessTokenSlice.ts";
 import getProfile from "../../../api/user-api/getProfileAPI.ts";
 import UserDetailsLoading from "./loading/UserDetailsLoading.tsx";
+import TierSectionLoading from "./loading/TierSectionLoading.tsx";
 
 const Hero = () => {
   const [loading, setLoading] = useState<boolean>(true);
@@ -53,7 +54,7 @@ const Hero = () => {
           <div className="w-full md:w-4/6 mt-12">
             <div className="bg-white shadow-lg rounded-xl p-6">
               <UserDetailsLoading />
-              <TierSection userData={userData} />
+              <TierSectionLoading />
               <VerifyButton />
             </div>
           </div>
