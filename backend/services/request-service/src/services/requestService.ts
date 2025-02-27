@@ -122,14 +122,37 @@ export default class requestService implements IrequestService {
   async getRequestDetails({
     requestId,
     userId,
+    from,
   }: {
     requestId: string;
     userId: string;
+    from: string;
   }): Promise<any> {
     try {
       const requestData = await this._requestRepository.findOne({
         _id: requestId,
       });
+
+      if (from == "normalRequest") {
+        if (requestData?.user_id == userId) {
+          return {
+            status: false,
+            data: null,
+            message: "Invalid Access on the Request",
+          };
+        }
+
+        if (
+          requestData?.status == "cancelled" ||
+          requestData?.status == "inactive"
+        ) {
+          return {
+            status: false,
+            data: null,
+            message: "Request not Available",
+          };
+        }
+      }
 
       if (requestData) {
         const redeemRequestData = await this._requestRedeemRepository.findOne({

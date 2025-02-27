@@ -36,7 +36,7 @@ const MyRequestDetails = () => {
           showErrorToast2("Invalid Access Detected");
           return;
         } else {
-          const response = await getRequestDetails(requestId);
+          const response = await getRequestDetails({requestId, from:"profile"});
           console.log(response)
           if (response.status === 200) {
             setRequestData(response.data.data.requestData);

@@ -10,9 +10,11 @@ export default interface IrequestService {
   getRequestDetails({
     requestId,
     userId,
+    from
   }: {
     requestId: string;
     userId: string;
+    from: string;
   }): Promise<any>;
   makePayment(formData: any): Promise<any>;
   getRequestDataById({ requestId }: { requestId: string }): Promise<any>;
