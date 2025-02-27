@@ -1,13 +1,13 @@
 import { format } from "date-fns";
 import { MessageCircle, Send } from "lucide-react";
-import { showErrorToast2 } from "../../../utils/iziToastUtils";
+import { showErrorToast2 } from "../../utils/iziToastUtils";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { RootState } from "../../../redux/store";
-import createComment from "../../../api/user-api/createCommentAPI";
-import getRequestComments from "../../../api/user-api/getRequestCommentsAPI";
+import { RootState } from "../../redux/store";
+import createComment from "../../api/user-api/createCommentAPI";
+import getRequestComments from "../../api/user-api/getRequestCommentsAPI";
 
-interface IComment {
+interface ICommentModel {
   _id?: string;
   user_id: {
     _id: string;
@@ -19,8 +19,14 @@ interface IComment {
   comment_likes: string[];
 }
 
-const CommentSection = ({ requestId }: { requestId: string | null }) => {
-  const [comments, setComments] = useState<IComment[]>([]);
+const CommentSection = ({
+  requestId,
+  noField,
+}: {
+  requestId: string | null | undefined;
+  noField: boolean;
+}) => {
+  const [comments, setComments] = useState<ICommentModel[]>([]);
   const [commentText, setCommentText] = useState<string>("");
   const [loadingComments, setLoadingComments] = useState<boolean>(false);
   const [commentCount, setCommentCount] = useState<number>(0);
@@ -38,12 +44,16 @@ const CommentSection = ({ requestId }: { requestId: string | null }) => {
   const fetchComments = async (count: number) => {
     setLoadingComments(true);
     try {
-      const response = await getRequestComments({ requestId, count });
-      if (response.status === 200) {
-        setComments(response.data.data.newCommentDatas);
-        setCommentCount(response.data.data.totalCommentLength);
+      if (requestId) {
+        const response = await getRequestComments({ requestId, count });
+        if (response.status === 200) {
+          setComments(response.data.data.newCommentDatas);
+          setCommentCount(response.data.data.totalCommentLength);
+        } else {
+          showErrorToast2(response.data.message);
+        }
       } else {
-        showErrorToast2(response.data.message);
+        showErrorToast2("Request Id not found");
       }
     } catch (error) {
       console.error("Failed to fetch comments:", error);
@@ -63,11 +73,9 @@ const CommentSection = ({ requestId }: { requestId: string | null }) => {
     try {
       setCommentText("");
 
-      // This is a placeholder - replace with your actual API call
       const response = await createComment({ requestId, commentText, userId });
       console.log("This is the response while creating comment", response);
       if (response.status == 200) {
-        // Revert optimistic update on failure
         setComments((prev) => [response.data.data, ...prev]);
         setCommentCount((prev) => prev + 1);
       } else {
@@ -95,43 +103,43 @@ const CommentSection = ({ requestId }: { requestId: string | null }) => {
         <MessageCircle size={20} /> Comments ({commentCount})
       </h2>
 
-      {/* Comment Form */}
-      <div className="bg-violet-50 p-4 rounded-xl mb-8">
-        <div className="flex items-start gap-3">
-          <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
-            <img
-              src={userProfile}
-              alt="Your profile"
-              className="w-full h-full object-cover"
-              onError={(e) => {
-                const target = e.target as HTMLImageElement;
-                target.src = "https://i.pravatar.cc/150?img=3";
-              }}
-            />
-          </div>
-          <div className="flex-grow">
-            <h4 className="font-semibold text-violet-800">{userName}</h4>
-            <textarea
-              className="w-full p-3 rounded-lg border border-violet-300 focus:border-violet-500 focus:ring focus:ring-violet-200 focus:ring-opacity-50 transition-all resize-none"
-              rows={3}
-              placeholder="Share information or ask a question..."
-              value={commentText}
-              onChange={(e) => setCommentText(e.target.value)}
-            ></textarea>
-            <div className="flex justify-end mt-2">
-              <button
-                className="flex items-center gap-2 px-4 py-2 bg-violet-600 text-white rounded-lg font-medium hover:bg-violet-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                onClick={handleCommentSubmit}
-                disabled={!commentText.trim()}
-              >
-                <Send size={16} /> Post Comment
-              </button>
+      {noField ? null : (
+        <div className="bg-violet-50 p-4 rounded-xl mb-8">
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
+              <img
+                src={userProfile}
+                alt="Your profile"
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.src = "https://i.pravatar.cc/150?img=3";
+                }}
+              />
+            </div>
+            <div className="flex-grow">
+              <h4 className="font-semibold text-violet-800">{userName}</h4>
+              <textarea
+                className="w-full p-3 rounded-lg border border-violet-300 focus:border-violet-500 focus:ring focus:ring-violet-200 focus:ring-opacity-50 transition-all resize-none"
+                rows={3}
+                placeholder="Share information or ask a question..."
+                value={commentText}
+                onChange={(e) => setCommentText(e.target.value)}
+              ></textarea>
+              <div className="flex justify-end mt-2">
+                <button
+                  className="flex items-center gap-2 px-4 py-2 bg-violet-600 text-white rounded-lg font-medium hover:bg-violet-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  onClick={handleCommentSubmit}
+                  disabled={!commentText.trim()}
+                >
+                  <Send size={16} /> Post Comment
+                </button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
 
-      {/* Comments List */}
       <div className="space-y-6">
         {loadingComments ? (
           <div className="text-center py-4">
@@ -152,7 +160,7 @@ const CommentSection = ({ requestId }: { requestId: string | null }) => {
                     className="w-full h-full object-cover"
                     onError={(e) => {
                       const target = e.target as HTMLImageElement;
-                      target.src = "https://i.pravatar.cc/150?img=8"; // Fallback image
+                      target.src = "https://i.pravatar.cc/150?img=8";
                     }}
                   />
                 </div>
@@ -176,7 +184,8 @@ const CommentSection = ({ requestId }: { requestId: string | null }) => {
           <div className="text-center py-8 bg-gray-50 rounded-xl">
             <MessageCircle size={32} className="mx-auto text-gray-400 mb-2" />
             <p className="text-gray-500">
-              No comments yet. Be the first to share information!
+              No comments yet.{" "}
+              {noField ? null : "Be the first to share information!"}
             </p>
           </div>
         )}

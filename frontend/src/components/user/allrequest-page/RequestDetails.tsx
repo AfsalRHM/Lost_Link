@@ -16,7 +16,7 @@ import {
   Tag,
   Info,
 } from "lucide-react";
-import CommentSection from "./CommentSection";
+import CommentSection from "../../shared/CommentSection";
 
 const RequestDetails = ({}) => {
   const [searchParams] = useSearchParams();
@@ -296,8 +296,7 @@ const RequestDetails = ({}) => {
             )}
           </div>
 
-          {/* Comments Section */}
-          <CommentSection requestId={requestId} />
+          <CommentSection requestId={requestId} noField={false} />
         </div>
       </div>
     </div>
