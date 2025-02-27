@@ -246,7 +246,7 @@ export default class authService implements IauthService {
     sendToService({
       sendingTo: replyQueue,
       correlationId: correlationId,
-      correlationIdentifier: userEmail ,
+      correlationIdentifier: userEmail,
       source: "user login request",
       props,
     });

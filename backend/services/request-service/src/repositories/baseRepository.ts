@@ -32,6 +32,19 @@ export default class BaseRepository<T extends Document>
     }
   }
 
+  async findCommentsLimit({
+    request_id,
+    commentCount,
+  }: {
+    request_id: string;
+    commentCount: number;
+  }): Promise<T[]> {
+    return this.model
+      .find({ request_id: request_id })
+      .sort({ createdAt: -1 })
+      .limit(commentCount);
+  }
+
   async findAllRedeemRequest(
     filter?: FilterQuery<T> | undefined
   ): Promise<T[]> {
