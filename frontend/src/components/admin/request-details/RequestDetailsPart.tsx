@@ -14,6 +14,7 @@ import requestRedeemType from "../../../interface/IrequestRedeem";
 import changeRequestStatus from "../../../api/admin-api/changeRequestStatus";
 import { showSuccessToast } from "../../../utils/toastUtils";
 import cancelRequest from "../../../api/user-api/cancelRequestAPI";
+import CommentSection from "../../shared/CommentSection";
 
 const RequestDetailsPart = () => {
   const { id } = useParams<{ id: string }>();
@@ -383,6 +384,8 @@ const RequestDetailsPart = () => {
               </>
             )}
           </div>
+
+          <CommentSection requestId={id} noField={true} />
         </div>
       </div>
     </div>

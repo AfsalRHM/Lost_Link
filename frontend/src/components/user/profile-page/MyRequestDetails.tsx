@@ -10,14 +10,13 @@ import getRequestDetails from "../../../api/user-api/getRequestDetails";
 import MyRequestDetailsLoading from "./loading/MyRequestDetailsLoadin";
 import cancelRequest from "../../../api/user-api/cancelRequestAPI";
 import ChatPart from "./ChatPart";
+import CommentSection from "../../shared/CommentSection";
 
 const MyRequestDetails = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
   const requestId = location.state?.requestId;
-
-  console.log(requestId, "This is the request id")
 
   function goBackButton() {
     navigate(-1);
@@ -284,6 +283,7 @@ const MyRequestDetails = () => {
               />
             )}
           </div>
+          <CommentSection requestId={requestId} noField={true} />
         </div>
       </div>
     </div>
