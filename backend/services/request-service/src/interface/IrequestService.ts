@@ -39,5 +39,13 @@ export default interface IrequestService {
     changeTo: string;
   }): Promise<any>;
 
+  changeLikeStatus({
+    requestId,
+    userId,
+  }: {
+    requestId: string;
+    userId: string | undefined;
+  }): Promise<any>;
+
   adminGetRequestDetails({ requestId }: { requestId: string }): Promise<any>;
 }

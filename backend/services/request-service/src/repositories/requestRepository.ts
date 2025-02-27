@@ -74,4 +74,44 @@ export default class RequestRepository
       return null;
     }
   }
+
+  async findByIdAndDislike({
+    requestId,
+    userId,
+  }: {
+    requestId: string;
+    userId: string;
+  }): Promise<IrequestModel | null> {
+    try {
+      const requestData = await this.model.findByIdAndUpdate(
+        requestId,
+        { $pull: { users_liked: userId } },
+        { new: true }
+      );
+      return requestData;
+    } catch (error) {
+      console.error("Error disliking the Request:", error);
+      return null;
+    }
+  }
+
+  async findByIdAndLike({
+    requestId,
+    userId,
+  }: {
+    requestId: string;
+    userId: string;
+  }): Promise<IrequestModel | null> {
+    try {
+      const requestData = await this.model.findByIdAndUpdate(
+        requestId,
+        { $push: { users_liked: userId } },
+        { new: true }
+      );
+      return requestData;
+    } catch (error) {
+      console.error("Error disliking the Request:", error);
+      return null;
+    }
+  }
 }

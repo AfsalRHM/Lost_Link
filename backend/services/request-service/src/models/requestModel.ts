@@ -30,7 +30,7 @@ const requestSchema = new Schema(
     },
     missing_while: {
       type: String,
-      required: true
+      required: true,
     },
     missing_place: {
       type: String,
@@ -58,6 +58,21 @@ const requestSchema = new Schema(
     status: {
       type: String,
       default: "active",
+    },
+    users_liked: {
+      type: Array,
+      default: [],
+    },
+    comments: {
+      type: [
+        {
+          user_id: String,
+          user_name: String,
+          content: String,
+          created_at: { type: Date, default: new Date() },
+        },
+      ],
+      default: [],
     },
   },
   {

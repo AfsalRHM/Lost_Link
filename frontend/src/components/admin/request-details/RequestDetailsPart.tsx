@@ -9,7 +9,7 @@ import {
 import { useAdminJwtErrors } from "../../../utils/JwtErrors";
 import adminLogout from "../../../api/admin-api/adminLogoutAPI";
 import fetchRequestDetails from "../../../api/admin-api/getRequestDetails";
-import { RequestModel } from "../../../interface/IrequestModel";
+import IrequestModel from "../../../interface/IrequestModel";
 import requestRedeemType from "../../../interface/IrequestRedeem";
 import changeRequestStatus from "../../../api/admin-api/changeRequestStatus";
 import { showSuccessToast } from "../../../utils/toastUtils";
@@ -21,7 +21,7 @@ const RequestDetailsPart = () => {
   const JwtErrors = useAdminJwtErrors();
 
   const [loading, setLoading] = useState(true);
-  const [requestData, setRequestData] = useState<RequestModel | undefined>(
+  const [requestData, setRequestData] = useState<IrequestModel | undefined>(
     undefined
   );
   const [redeemRequests, setRedeemRequests] = useState<requestRedeemType | []>(
@@ -335,16 +335,16 @@ const RequestDetailsPart = () => {
                   Request Activity
                 </h2>
                 <div className="bg-violet-50 p-4 rounded-xl space-y-3">
+                  <div className="flex gap-1">
+                    <p className="text-violet-600 text-sm font-bold">Like Count: </p>
+                    <p className="text-red-500 font-bold mt-[-1px]">
+                      {requestData?.users_liked.length}
+                    </p>
+                  </div>
                   <div>
                     <p className="text-violet-600 text-sm">Created:</p>
                     <p className="font-semibold text-violet-900">
                       {new Date(requestData?.createdAt || "").toLocaleString()}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-violet-600 text-sm">Last Updated:</p>
-                    <p className="font-semibold text-violet-900">
-                      {new Date(requestData?.updatedAt || "").toLocaleString()}
                     </p>
                   </div>
                 </div>
