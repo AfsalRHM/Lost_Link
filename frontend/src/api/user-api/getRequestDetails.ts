@@ -1,17 +1,18 @@
 import axiosInstance from "../axios-api/axiosInterceptorAPI";
 
 export default async function getRequestDetails(
-  requestId: string
+  {requestId, from}:{requestId: string,
+  from: string}
 ): Promise<any> {
   try {
     const response = await axiosInstance.post(
       `${import.meta.env.VITE_API_ROUTE}/request/get-request-details`,
-      { requestId }
+      { requestId, from }
     );
 
     return response;
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error fetching Request Details:", error);
-    return false;
+    return error.response;
   }
 }

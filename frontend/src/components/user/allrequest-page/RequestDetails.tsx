@@ -3,7 +3,10 @@ import IrequestModel from "../../../interface/IrequestModel";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import RequestDetailsLoading from "./loading/RequestDetailsLoading";
 import getRequestDetails from "../../../api/user-api/getRequestDetails";
-import { showErrorToast2 } from "../../../utils/iziToastUtils";
+import {
+  showErrorToast2,
+  showSuccessToast2,
+} from "../../../utils/iziToastUtils";
 import changeLikeStatus from "../../../api/user-api/changeLikeStatusAPI";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../redux/store";
@@ -15,6 +18,7 @@ import {
   Calendar,
   Tag,
   Info,
+  Share2,
 } from "lucide-react";
 import CommentSection from "../../shared/CommentSection";
 
@@ -30,9 +34,7 @@ const RequestDetails = ({}) => {
     undefined
   );
 
-  const { userId } = useSelector(
-    (state: RootState) => state.userDetails
-  );
+  const { userId } = useSelector((state: RootState) => state.userDetails);
 
   const [hasLiked, setHasLiked] = useState<boolean>(false);
   const [likeCount, setLikeCount] = useState<number>(0);
@@ -46,7 +48,11 @@ const RequestDetails = ({}) => {
           showErrorToast2("Invalid Access Detected");
           return;
         } else {
-          const response = await getRequestDetails(requestId);
+          const response = await getRequestDetails({
+            requestId,
+            from: "normalRequest",
+          });
+          console.log(response);
           if (response.status === 200) {
             setRequestData(response.data.data.requestData);
             setLikeCount(response.data.data.requestData.users_liked.length);
@@ -58,6 +64,7 @@ const RequestDetails = ({}) => {
             }
           } else {
             showErrorToast2(response.data.message);
+            navigate("/requests");
           }
         }
       } catch (error) {
@@ -97,6 +104,12 @@ const RequestDetails = ({}) => {
     }
   };
 
+  function handleCopyLink() {
+    const shareUrl = window.location.href;
+    navigator.clipboard.writeText(shareUrl);
+    showSuccessToast2("Request link copied to clipboard");
+  }
+
   if (loading) {
     return <RequestDetailsLoading />;
   }
@@ -128,9 +141,21 @@ const RequestDetails = ({}) => {
 
         <div className="bg-white rounded-2xl shadow-xl p-6 md:p-10">
           <div className="border-b border-gray-100 pb-6 mb-8">
-            <h1 className="text-3xl md:text-4xl font-bold text-violet-800 mb-4">
-              {requestData?.product_name}
-            </h1>
+            <div className="flex justify-between">
+              <h1 className="text-3xl md:text-4xl font-bold text-violet-800 mb-4">
+                {requestData?.product_name}
+              </h1>
+              <div>
+                <button
+                  onClick={handleCopyLink}
+                  className="flex gap-2 px-4 py-2 md:ml-10 bg-blue-500 text-white rounded-full shadow-md hover:bg-blue-600 transition-all duration-300"
+                >
+                  <span className="hidden md:block">Share</span>
+                  <Share2 />
+                </button>
+              </div>
+            </div>
+
             <div className="flex flex-wrap items-center gap-4">
               <span className="text-2xl font-bold text-violet-600">
                 ₹{requestData?.reward_amount?.toLocaleString()}.00 Reward
