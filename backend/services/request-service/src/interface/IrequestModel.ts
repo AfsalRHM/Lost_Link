@@ -16,4 +16,13 @@ export default interface IrequestModel extends Document {
   expiration_date: Date;
   additional_information: string;
   status: string;
+  users_liked: string[];
+  comments: {
+    user_id: string;
+    user_name: string;
+    content: string;
+    created_at: Date;
+  }[];
+  createdAt?: Date;
+  updatedAt?: Date;
 }

@@ -27,7 +27,6 @@ const AllRequests = () => {
     const fetchRequests = async () => {
       try {
         const response = await getAllRequests();
-        console.log(response);
         if (response.status === 401) {
           dispatch(removeUserDetails());
           dispatch(removeAccessToken());
@@ -64,7 +63,7 @@ const AllRequests = () => {
         <RequestLoading />
       </div>
     );
-  };
+  }
 
   return (
     <div className="bg-activity min-h-screen flex flex-col lg:flex-row">

@@ -23,6 +23,7 @@ request_route.post("/get_redeem_request_details", verifyAccessToken, RequestCont
 
 // Patch Requests
 request_route.patch("/cancelRequest", verifyAccessToken, RequestController.cancelRequest); // To cancel a request
+request_route.patch("/change-like-status", verifyAccessToken, RequestController.changeLikeStatus); // To change the like status of the request
 
 
 /*************************      Admin Side       *******************************/

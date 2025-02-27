@@ -192,6 +192,7 @@ export default class RequestController implements IrequestController {
     }
   };
 
+  // To cancel a Request
   public cancelRequest = async (req: Request, res: Response): Promise<void> => {
     try {
       const accessToken = req.headers["authorization"]?.split(" ")[1];
@@ -209,7 +210,38 @@ export default class RequestController implements IrequestController {
     } catch (error) {
       res
         .status(300)
-        .json({ message: "error on the cancelRequest/adminController" });
+        .json({ message: "error on the cancelRequest/requestController" });
+    }
+  };
+
+  // To change the like status of request
+  public changeLikeStatus = async (
+    req: Request,
+    res: Response
+  ): Promise<void> => {
+    try {
+      if (!req.body.requestId) {
+        res.status(400).json({
+          message: "Request Id Not Reached here on the changeLikeStatus",
+        });
+        return;
+      }
+      const accessToken = req.headers["authorization"]?.split(" ")[1];
+      if (!accessToken) {
+        res.status(400).json({ message: "No authorization token provided" });
+      } else {
+        const decoded = await jwtFunctions.verifyAccessToken(accessToken);
+
+        const response = await this._requestService.changeLikeStatus({
+          requestId: req.body.requestId,
+          userId: decoded?.id
+        });
+        res.status(200).json(response);
+      }
+    } catch (error) {
+      res
+        .status(300)
+        .json({ message: "error on the changeLikeStatus/requestController" });
     }
   };
 
@@ -346,7 +378,7 @@ export default class RequestController implements IrequestController {
     res: Response
   ): Promise<void> => {
     try {
-      console.log(req.body.Props)
+      console.log(req.body.Props);
       const { redeemRequestId, changeTo } = req.body.Props;
       if (!redeemRequestId || !changeTo) {
         res.status(401).json({

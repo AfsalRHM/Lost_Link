@@ -264,6 +264,72 @@ export default class requestService implements IrequestService {
     }
   }
 
+  async changeLikeStatus({
+    requestId,
+    userId,
+  }: {
+    requestId: string;
+    userId: string | undefined;
+  }): Promise<any> {
+    try {
+      if (!requestId || !userId) {
+        return {
+          status: false,
+          data: null,
+          message:
+            "Data no reached here on the changeLikeStatus/requestService",
+        };
+      }
+      const requestData: IrequestModel | null =
+        await this._requestRepository.findOne({ _id: requestId });
+      if (!requestData) {
+        return {
+          status: false,
+          data: null,
+          message: "Request not found",
+        };
+      }
+
+      // change the add the user id to the users_liked array
+
+      let newRequestData;
+      if (requestData.users_liked.includes(userId)) {
+        newRequestData = await this._requestRepository.findByIdAndDislike({
+          requestId,
+          userId,
+        });
+      } else {
+        newRequestData = await this._requestRepository.findByIdAndLike({
+          requestId,
+          userId,
+        });
+      }
+
+      if (newRequestData) {
+        return {
+          status: true,
+          data: newRequestData,
+          message: "Changed the Like Status",
+        };
+      } else {
+        return {
+          status: false,
+          data: null,
+          message: "unable to Change the Like Status",
+        };
+      }
+      
+    } catch (error) {
+      console.log(error);
+      return {
+        status: false,
+        data: null,
+        message:
+          "Error occured while cancelling the request - from changeLikeStatus/requestService",
+      };
+    }
+  }
+
   async getRequestDataById({ requestId }: { requestId: string }): Promise<any> {
     try {
       const requestData = await this._requestRepository.findOne({

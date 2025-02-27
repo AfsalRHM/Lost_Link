@@ -4,6 +4,9 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import RequestDetailsLoading from "./loading/RequestDetailsLoading";
 import getRequestDetails from "../../../api/user-api/getRequestDetails";
 import { showErrorToast2 } from "../../../utils/iziToastUtils";
+import changeLikeStatus from "../../../api/user-api/changeLikeStatusAPI";
+import { useSelector } from "react-redux";
+import { RootState } from "../../../redux/store";
 
 const RequestDetails = ({}) => {
   const [searchParams] = useSearchParams();
@@ -17,6 +20,11 @@ const RequestDetails = ({}) => {
     undefined
   );
 
+  const { userId } = useSelector((state: RootState) => state.userDetails);
+
+  const [hasLiked, setHasLiked] = useState<boolean>(false);
+  const [likeCount, setLikeCount] = useState<number>(0);
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -29,6 +37,10 @@ const RequestDetails = ({}) => {
           const response = await getRequestDetails(requestId);
           if (response.status === 200) {
             setRequestData(response.data.data.requestData);
+            setLikeCount(response.data.data.requestData.users_liked.length);
+            setHasLiked(
+              response.data.data.requestData.users_liked.includes(userId)
+            );
             if (response.data.data.redeemRequestData) {
               setRequestAlreadyRedeemed(true);
             }
@@ -55,6 +67,24 @@ const RequestDetails = ({}) => {
     navigate("/requests/redeem-request", { state: { requestId: id } });
   }
 
+  const handleLikeRequest = async () => {
+    setHasLiked(!hasLiked);
+    setLikeCount((prev) => (hasLiked ? prev - 1 : prev + 1));
+    if (!requestId) return;
+    try {
+      const response = await changeLikeStatus({ requestId });
+      if (response.status === 200) {
+      } else {
+        setHasLiked(!hasLiked);
+        setLikeCount((prev) => (hasLiked ? prev - 1 : prev + 1));
+        showErrorToast2(response.message);
+      }
+    } catch (error) {
+      console.error("Failed to like request:", error);
+      showErrorToast2("Something went wrong!");
+    }
+  };
+
   if (loading) {
     return <RequestDetailsLoading />;
   }
@@ -69,8 +99,17 @@ const RequestDetails = ({}) => {
           >
             ← Back
           </button>
-          <div className="px-4 py-2 rounded-full text-sm font-semibold border border-violet-200 bg-violet-100 text-violet-700">
-            {requestData?.status?.toUpperCase()}
+          <div className="flex items-center justify-center my-6">
+            <button
+              onClick={handleLikeRequest}
+              className={`flex items-center gap-2 px-6 py-2 rounded-full font-semibold transition-all duration-300 shadow-md ${
+                hasLiked
+                  ? "bg-red-500 text-white"
+                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+              }`}
+            >
+              ❤️ {likeCount} Likes
+            </button>
           </div>
         </div>
 
