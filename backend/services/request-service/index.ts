@@ -30,6 +30,8 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 import request_route from "./src/routes/requestRoute";
 app.use("/", request_route);
+import comment_route from "./src/routes/commentRoute";
+app.use("/", comment_route);
 
 import serverListening from "./src/config/serverConfig";
 serverListening(app);

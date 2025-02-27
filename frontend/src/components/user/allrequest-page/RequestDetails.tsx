@@ -8,6 +8,16 @@ import changeLikeStatus from "../../../api/user-api/changeLikeStatusAPI";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../redux/store";
 
+import {
+  Heart,
+  ArrowLeft,
+  Clock,
+  Calendar,
+  Tag,
+  Info,
+} from "lucide-react";
+import CommentSection from "./CommentSection";
+
 const RequestDetails = ({}) => {
   const [searchParams] = useSearchParams();
 
@@ -20,7 +30,9 @@ const RequestDetails = ({}) => {
     undefined
   );
 
-  const { userId } = useSelector((state: RootState) => state.userDetails);
+  const { userId } = useSelector(
+    (state: RootState) => state.userDetails
+  );
 
   const [hasLiked, setHasLiked] = useState<boolean>(false);
   const [likeCount, setLikeCount] = useState<number>(0);
@@ -94,10 +106,10 @@ const RequestDetails = ({}) => {
       <div className="max-w-7xl mx-auto p-4 md:p-8">
         <div className="flex items-center justify-between mb-8">
           <button
-            className="px-6 py-2.5 text-violet-700 hover:text-violet-900 bg-white rounded-full shadow-md hover:shadow-lg transition-all duration-300 font-semibold"
+            className="px-6 py-2.5 text-violet-700 hover:text-violet-900 bg-white rounded-full shadow-md hover:shadow-lg transition-all duration-300 font-semibold flex items-center gap-2"
             onClick={handleBack}
           >
-            ← Back
+            <ArrowLeft size={18} /> Back
           </button>
           <div className="flex items-center justify-center my-6">
             <button
@@ -108,7 +120,8 @@ const RequestDetails = ({}) => {
                   : "bg-gray-200 text-gray-700 hover:bg-gray-300"
               }`}
             >
-              ❤️ {likeCount} Likes
+              <Heart size={18} fill={hasLiked ? "white" : "none"} /> {likeCount}{" "}
+              Likes
             </button>
           </div>
         </div>
@@ -124,7 +137,8 @@ const RequestDetails = ({}) => {
               </span>
             </div>
             <div className="flex flex-wrap items-center gap-4">
-              <span className="text-gray-500 font-medium">
+              <span className="text-gray-500 font-medium flex items-center gap-2">
+                <Calendar size={16} />
                 Posted On:{" "}
                 {requestData?.createdAt
                   ? new Date(requestData.createdAt).toLocaleDateString()
@@ -136,8 +150,8 @@ const RequestDetails = ({}) => {
           <div className="grid md:grid-cols-2 gap-10">
             <div className="space-y-8">
               <div>
-                <h2 className="text-xl font-bold text-violet-800 mb-4">
-                  Item Details
+                <h2 className="text-xl font-bold text-violet-800 mb-4 flex items-center gap-2">
+                  <Tag size={20} /> Item Details
                 </h2>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="bg-violet-50 p-4 rounded-xl">
@@ -194,8 +208,8 @@ const RequestDetails = ({}) => {
               </div>
 
               <div>
-                <h2 className="text-xl font-bold text-violet-800 mb-4">
-                  Timeline
+                <h2 className="text-xl font-bold text-violet-800 mb-4 flex items-center gap-2">
+                  <Clock size={20} /> Timeline
                 </h2>
                 <div className="space-y-3">
                   <div className="flex items-center gap-3">
@@ -230,8 +244,8 @@ const RequestDetails = ({}) => {
               </div>
 
               <div>
-                <h2 className="text-xl font-bold text-violet-800 mb-4">
-                  Additional Info
+                <h2 className="text-xl font-bold text-violet-800 mb-4 flex items-center gap-2">
+                  <Info size={20} /> Additional Info
                 </h2>
                 <p className="text-violet-600 leading-relaxed">
                   {requestData?.additional_information ||
@@ -281,6 +295,9 @@ const RequestDetails = ({}) => {
               </button>
             )}
           </div>
+
+          {/* Comments Section */}
+          <CommentSection requestId={requestId} />
         </div>
       </div>
     </div>

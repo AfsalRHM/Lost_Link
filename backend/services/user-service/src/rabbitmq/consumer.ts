@@ -110,11 +110,29 @@ export async function manageQueue() {
             }
           );
         } else if (
+          msg?.properties?.headers?.source == "get user's data by userId"
+        ) {
+          const response = await _userService.getUsersDataById(messageContent);
+
+          channel.sendToQueue(
+            msg.properties.replyTo,
+            Buffer.from(JSON.stringify(response)),
+            {
+              correlationId: msg.properties.correlationId,
+              headers: {
+                source: "get user's data by userId response",
+                correlationIdIdentifier:
+                  msg?.properties?.headers?.correlationIdIdentifier,
+              },
+            }
+          );
+        } else if (
           msg?.properties?.headers?.source == "Add the request Id to the user"
         ) {
           await _userService.addRequestId(messageContent);
         } else if (
-          msg?.properties?.headers?.source == "Add the completed request details to the user"
+          msg?.properties?.headers?.source ==
+          "Add the completed request details to the user"
         ) {
           await _userService.addCompletedRequestDetails(messageContent);
         } else {

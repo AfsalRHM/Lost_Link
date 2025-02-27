@@ -2,6 +2,10 @@ import configCommunication, { getChannel } from "../config/communicationConfig";
 import requestService from "../services/requestService";
 import dotenv from "dotenv";
 import sendToService from "./producer";
+import {
+  getUserDataByUserId,
+  getUsersDataByUserId,
+} from "../services/commentService";
 
 export async function manageQueue() {
   try {
@@ -55,6 +59,15 @@ export async function manageQueue() {
               ...response,
             },
           });
+        } else if (
+          msg?.properties?.headers?.source == "get user data by userId response"
+        ) {
+          getUserDataByUserId(msg.properties.correlationId, messageContent);
+        } else if (
+          msg?.properties?.headers?.source ==
+          "get user's data by userId response"
+        ) {
+          getUsersDataByUserId(msg.properties.correlationId, messageContent);
         } else {
           console.log("No Match Found for the source.");
         }

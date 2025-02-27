@@ -187,6 +187,23 @@ export default class userService implements IuserService {
     }
   }
 
+  // To get all the users data for the comments live load
+  async getUsersDataById({ userIds }: { userIds: string[] }): Promise<any> {
+    try {
+      let userDatas: any = [];
+      for (let userId of userIds) {
+        const userData = await this._userRepository.findOne({ _id: userId });
+        const newUserData = userData
+          ? (({ password, ...rest }) => rest)(userData.toObject())
+          : null;
+        userDatas.push(newUserData);
+      }
+      return userDatas;
+    } catch (error) {
+      console.log(error, "error on the getUsersDataById/userService");
+    }
+  }
+
   async addRequestId({
     requestId,
     userId,

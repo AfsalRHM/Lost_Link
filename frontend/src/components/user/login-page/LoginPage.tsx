@@ -74,6 +74,7 @@ const LoginPage = () => {
         const userData = {
           userId: result.data.data._id,
           userName: result.data.data.user_name,
+          userProfile: result.data.data.profile_pic,
         };
         const accessToken = result.authorizationHeader.split(" ")[1];
         dispatch(assignUserDetails(userData));
@@ -97,6 +98,7 @@ const LoginPage = () => {
           const userData = {
             userId: result.data.data._id,
             userName: result.data.data.user_name,
+            userProfile: result.data.data.profile_pic,
           };
           const accessToken = result.headers.authorization.split(" ")[1];
           dispatch(assignUserDetails(userData));

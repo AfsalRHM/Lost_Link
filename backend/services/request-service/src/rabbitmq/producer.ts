@@ -7,6 +7,7 @@ interface sendToServiceType {
   correlationIdIdentifier?: string;
   props?: {
     userId?: string;
+    userIds?: string[];
     token?: string;
     adminId?: string;
     email?: string;

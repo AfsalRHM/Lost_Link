@@ -336,7 +336,9 @@ const RequestDetailsPart = () => {
                 </h2>
                 <div className="bg-violet-50 p-4 rounded-xl space-y-3">
                   <div className="flex gap-1">
-                    <p className="text-violet-600 text-sm font-bold">Like Count: </p>
+                    <p className="text-violet-600 text-sm font-bold">
+                      Like Count:{" "}
+                    </p>
                     <p className="text-red-500 font-bold mt-[-1px]">
                       {requestData?.users_liked.length}
                     </p>
