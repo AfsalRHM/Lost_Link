@@ -13,14 +13,14 @@ export async function manageQueue() {
 
     console.log("Notification is Consuming to the Queue...");
 
-    const CHAT_QUEUE = process.env.CHAT_QUEUE;
+    const NOTIF_QUEUE = process.env.NOTIF_QUEUE;
 
-    if (!CHAT_QUEUE) {
+    if (!NOTIF_QUEUE) {
       console.log("not getting the queue");
     }
 
     // Setting up the Consumer
-    channel.consume(CHAT_QUEUE!, async (msg) => {
+    channel.consume(NOTIF_QUEUE!, async (msg) => {
       console.log("Consumer Queue triggered");
 
       if (msg) {

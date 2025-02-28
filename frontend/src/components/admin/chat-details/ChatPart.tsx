@@ -7,7 +7,7 @@ import { showErrorToast2 } from "../../../utils/iziToastUtils";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../redux/store";
 import saveAdminMessage from "../../../api/admin-api/sendAdminMessage";
-import { getSocket } from "../../../socket/socket";
+import { getNotifSocket, getSocket } from "../../../socket/socket";
 import ImageModal from "../../shared/ImageModal";
 import ImageUpload from "../../shared/ImageUpload";
 
@@ -24,6 +24,7 @@ const ChatPart = ({ chatDetails }: { chatDetails: IchatModel | undefined }) => {
   const [newMessage, setNewMessage] = useState("");
 
   const socket = getSocket();
+  const notifSocket = getNotifSocket();
 
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const scrollToBottom = () => {
@@ -97,7 +98,12 @@ const ChatPart = ({ chatDetails }: { chatDetails: IchatModel | undefined }) => {
           createdAt: new Date(),
           updatedAt: new Date(),
         });
-
+        notifSocket.emit("newAdminMessage", {
+          sender: "admin",
+          user: chatDetails.user_id,
+          chat: chatDetails._id,
+          request: chatDetails.request_id,
+        });
         setMessages([
           ...messages,
           {

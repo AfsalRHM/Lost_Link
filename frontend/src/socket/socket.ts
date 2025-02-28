@@ -1,14 +1,25 @@
 import { io, Socket } from "socket.io-client";
 
 const SOCKET_URL = import.meta.env.VITE_SOCKET_URL;
+const SOCKET_NOTIF_URL = import.meta.env.VITE_SOCKET_NOTIF_URL;
 
-let socket: Socket;
+let chatSocket: Socket;
+let notifSocket: Socket;
 
 export const getSocket = () => {
-  if (!socket) {
-    socket = io(SOCKET_URL, {
+  if (!chatSocket) {
+    chatSocket = io(SOCKET_URL, {
       withCredentials: true,
     });
   }
-  return socket;
+  return chatSocket;
+};
+
+export const getNotifSocket = () => {
+  if (!notifSocket) {
+    notifSocket = io(SOCKET_NOTIF_URL, {
+      withCredentials: true,
+    });
+  }
+  return notifSocket;
 };
