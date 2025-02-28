@@ -32,6 +32,8 @@ import request_route from "./src/routes/requestRoute";
 app.use("/", request_route);
 import comment_route from "./src/routes/commentRoute";
 app.use("/", comment_route);
+import report_route from "./src/routes/reportRoute";
+app.use("/", report_route);
 
 import serverListening from "./src/config/serverConfig";
 serverListening(app);

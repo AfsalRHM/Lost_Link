@@ -19,8 +19,10 @@ import {
   Tag,
   Info,
   Share2,
+  Flag,
 } from "lucide-react";
 import CommentSection from "../../shared/CommentSection";
+import ReportModal from "./ReportModal";
 
 const RequestDetails = ({}) => {
   const [searchParams] = useSearchParams();
@@ -38,6 +40,9 @@ const RequestDetails = ({}) => {
 
   const [hasLiked, setHasLiked] = useState<boolean>(false);
   const [likeCount, setLikeCount] = useState<number>(0);
+
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  const [reportAlreadySend, setReportAlreadySend] = useState(false);
 
   const navigate = useNavigate();
 
@@ -61,6 +66,9 @@ const RequestDetails = ({}) => {
             );
             if (response.data.data.redeemRequestData) {
               setRequestAlreadyRedeemed(true);
+            }
+            if (response.data.data.reportData) {
+              setReportAlreadySend(true);
             }
           } else {
             showErrorToast2(response.data.message);
@@ -92,14 +100,13 @@ const RequestDetails = ({}) => {
     if (!requestId) return;
     try {
       const response = await changeLikeStatus({ requestId });
-      if (response.status === 200) {
-      } else {
+      if (response.status !== 200) {
         setHasLiked(!hasLiked);
         setLikeCount((prev) => (hasLiked ? prev - 1 : prev + 1));
         showErrorToast2(response.message);
       }
     } catch (error) {
-      console.error("Failed to like request:", error);
+      console.error("Failed to Like Request:", error);
       showErrorToast2("Something went wrong!");
     }
   };
@@ -109,6 +116,10 @@ const RequestDetails = ({}) => {
     navigator.clipboard.writeText(shareUrl);
     showSuccessToast2("Request link copied to clipboard");
   }
+
+  const handleReportRequest = () => {
+    setIsReportModalOpen(true);
+  };
 
   if (loading) {
     return <RequestDetailsLoading />;
@@ -145,16 +156,42 @@ const RequestDetails = ({}) => {
               <h1 className="text-3xl md:text-4xl font-bold text-violet-800 mb-4">
                 {requestData?.product_name}
               </h1>
-              <div>
-                <button
-                  onClick={handleCopyLink}
-                  className="flex gap-2 px-4 py-2 md:ml-10 bg-blue-500 text-white rounded-full shadow-md hover:bg-blue-600 transition-all duration-300"
-                >
-                  <span className="hidden md:block">Share</span>
-                  <Share2 />
-                </button>
+              <div className="md:flex gap-2">
+                <div className="mb-2 md:mb-0">
+                  <button
+                    onClick={handleCopyLink}
+                    className="flex gap-2 px-4 py-2 md:ml-10 bg-blue-500 text-white rounded-full shadow-md hover:bg-blue-600 transition-all duration-300"
+                  >
+                    <span className="hidden md:block">Share</span>
+                    <Share2 />
+                  </button>
+                </div>
+                <div>
+                  <button
+                    onClick={handleReportRequest}
+                    disabled={reportAlreadySend}
+                    className={`flex items-center gap-2 px-5 py-2 rounded-full shadow-md transition-all duration-300 ${
+                      reportAlreadySend
+                        ? "bg-gray-400 text-white cursor-not-allowed"
+                        : "bg-red-500 text-white hover:bg-red-600"
+                    }`}
+                  >
+                    <Flag className="w-5 h-5" />
+                    <span className="hidden md:inline font-medium">
+                      {reportAlreadySend ? "Reported" : "Report"}
+                    </span>
+                  </button>
+                </div>
               </div>
             </div>
+
+            {isReportModalOpen ? (
+              <ReportModal
+                setIsReportModalOpen={setIsReportModalOpen}
+                requestId={requestId}
+                setReportAlreadySend={setReportAlreadySend}
+              />
+            ) : null}
 
             <div className="flex flex-wrap items-center gap-4">
               <span className="text-2xl font-bold text-violet-600">
