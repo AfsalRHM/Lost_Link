@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
 import IchatController from "../interface/IchatController";
 import chatService from "../services/chatService";
-import { validationResult } from "express-validator";
 
 import jwtFunctions from "../utils/jwt";
 
