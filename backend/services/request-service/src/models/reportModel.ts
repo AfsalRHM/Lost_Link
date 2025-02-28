@@ -13,6 +13,10 @@ const reportSchema = new Schema(
       type: String,
       required: true,
     },
+    user_name: {
+      type: String,
+      required: true,
+    },
     reason: {
       type: String,
       required: true,

@@ -1,6 +1,5 @@
-import { Document } from "mongoose";
-
-export default interface IreportModel extends Document {
+export default interface IreportModel {
+  _id: string;
   request_id: string;
   user_id: string;
   user_name: string;
