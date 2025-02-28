@@ -1,4 +1,4 @@
-import { Document, Model, FilterQuery } from "mongoose";
+import { Document, Model, FilterQuery, UpdateQuery, UpdateResult } from "mongoose";
 
 import IbaseRepository from "../interface/IbaseRepository";
 
@@ -26,6 +26,13 @@ export default class BaseRepository<T extends Document>
 
   async findSome(filter: FilterQuery<T>): Promise<T[] | null> {
     return this.model.find(filter);
+  }
+
+  async updateMany(
+    filter: FilterQuery<T>,
+    update: UpdateQuery<T>
+  ): Promise<UpdateResult> {
+    return this.model.updateMany(filter, update);
   }
 
   async findByIdAndUpdate(Id: string, update: Partial<T>): Promise<T | null> {

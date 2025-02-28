@@ -1,11 +1,13 @@
 import { Server } from "socket.io";
 import {
   ClientToServerEvents,
-  CustomSocketData,
-  InterServerEvents,
   ServerToClientEvents,
+  InterServerEvents,
+  CustomSocketData,
   TypedSocket,
 } from "./socketTypes";
+
+import NotificationService from "../services/notificationService";
 
 let io: Server<
   ClientToServerEvents,
@@ -15,6 +17,9 @@ let io: Server<
 >;
 
 export const initializeSocket = (server: any) => {
+
+  const notificationService = new NotificationService();
+
   io = new Server(server, {
     cors: {
       origin: `${process.env.MAIN_ROUTE}${process.env.FRONTEND_PORT}`,
@@ -28,23 +33,25 @@ export const initializeSocket = (server: any) => {
     // Setting Up the Socket
     socket.on("setup", (userId: string) => {
       socket.join(userId);
-      socket.emit("connected", userId);
+      socket.emit("notificationConnected", userId);
     });
 
-    // Joining the Room for Chat
+    // Joining the Room for Notifications
     socket.on("joinRoom", (room) => {
       socket.join(room);
-      socket.emit("userJoined", room, socket.id);
+      socket.emit("userNotificationJoined", room, socket.id);
     });
 
-    socket.on("newUserMessage", (newMessageRecieved) => {
-      const chatId = newMessageRecieved.chat;
-      socket.to(chatId).emit("userMessageRecieved", newMessageRecieved);
+    socket.on("newUserMessage", async (newMessageRecieved) => {
+      console.log("reached here on the socket", newMessageRecieved)
+      const notificationData = await notificationService.createNotification(newMessageRecieved);
+      console.log(notificationData, "this is form the here")
+      socket.to("admin").emit("adminNewNotification", notificationData.data);
     });
 
-    socket.on("newAdminMessage", (newMessageRecieved) => {
-      const chatId = newMessageRecieved.chat;
-      socket.to(chatId).emit("adminMessageRecieved", newMessageRecieved);
+    socket.on("newAdminMessage", async (newMessageRecieved) => {
+      const notificationData = await notificationService.createNotification(newMessageRecieved);
+      socket.to("admin").emit("userNewNotification", notificationData.data);
     });
 
     // To disconnect

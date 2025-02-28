@@ -1,17 +1,74 @@
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
+import { useState, useRef, useEffect } from "react";
 import { RootState } from "../../../redux/store";
+import NotificationSection from "../../shared/NotificationSection";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faQuestion, faComment } from "@fortawesome/free-solid-svg-icons";
+import { showErrorToast2 } from "../../../utils/iziToastUtils";
+import getNotifications from "../../../api/user-api/getNotificationsAPI";
+import { getNotifSocket } from "../../../socket/socket";
 
 const TopBarIcons = () => {
   const { currentPage } = useSelector((state: RootState) => state.currentPage);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const notificationRef = useRef<HTMLDivElement>(null);
+
+  const [notifications, setNotifications] = useState<any[]>([]);
+
+  const notifSocket = getNotifSocket();
+  notifSocket.emit("joinRoom", "admin");
 
   const linkClass =
     "rounded-full p-1 transition-all ease-in-out duration-300 hidden md:inline-flex";
   const hoverClass = "hover:bg-[#ccdfff]";
-  const activeClass = "bg-[#ccdfff]"; // Permanent background color for the active page
+  const activeClass = "bg-[#ccdfff]";
+
+  const userId = useSelector((state: RootState) => state.userDetails.userId);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        notificationRef.current &&
+        !notificationRef.current.contains(event.target as Node)
+      ) {
+        setNotifications([]);
+        setShowNotifications(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  useEffect(() => {
+    notifSocket.on("userNewNotification", (newNotificationRecieved: any) => {
+      console.log("new User Notification Recieved", newNotificationRecieved);
+      setNotifications([...notifications, newNotificationRecieved]);
+    });
+  });
+
+  useEffect(() => {
+    const getNotificationData = async () => {
+      try {
+        const response = await getNotifications({
+          userId,
+        });
+        console.log(response, "this is from the notification response");
+        if (response.status === 200) {
+          setNotifications(response.data.data);
+        } else {
+          showErrorToast2(response.data.message);
+        }
+      } catch (error) {
+        console.error("Failed to fetch Notifications:", error);
+      }
+    };
+
+    getNotificationData();
+  }, []);
 
   return (
     <>
@@ -37,19 +94,32 @@ const TopBarIcons = () => {
         </div>
       </Link>
 
-      <Link to="/notifications">
-        <div
-          className={`${linkClass} ${
+      {/* Notifications Icon with Dropdown */}
+      <div className="relative" ref={notificationRef}>
+        <button
+          className={`rounded-full p-2 inline-flex transition-all ease-in-out duration-300 cursor-pointer ${
             currentPage === "/notifications" ? activeClass : hoverClass
           }`}
           title="Notifications"
+          onClick={() => setShowNotifications((prev) => !prev)}
         >
           <ion-icon
             name="notifications-outline"
             style={{ fontSize: "20px" }}
           ></ion-icon>
-        </div>
-      </Link>
+
+          {notifications.length > 0 && (
+            <span className="absolute -top-1 -right-0 transform translate-x-1 translate-y-1 bg-red-500 text-white text-xs font-bold px-2 py-[2px] rounded-full">
+              {notifications.length}
+            </span>
+          )}
+        </button>
+
+        {/* Render NotificationSection when showNotifications is true */}
+        {showNotifications && (
+          <NotificationSection Notifications={notifications} />
+        )}
+      </div>
 
       <Link to="/profile">
         <div

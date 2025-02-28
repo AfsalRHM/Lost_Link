@@ -10,10 +10,10 @@ export interface ClientToServerEvents {
 
 // Server emits these events to the client
 export interface ServerToClientEvents {
-  connected: (userId: string) => void;
-  userMessageRecieved: (newMessageRecieved: any) => void;
-  adminMessageRecieved: (newMessageRecieved: any) => void;
-  userJoined: (room: string, userId: string) => void;
+  notificationConnected: (userId: string) => void;
+  adminNewNotification: (newMessageRecieved: any) => void;
+  userNewNotification: (newMessageRecieved: any) => void;
+  userNotificationJoined: (room: string, userId: string) => void;
 }
 
 // Events for server-to-server communication (optional)

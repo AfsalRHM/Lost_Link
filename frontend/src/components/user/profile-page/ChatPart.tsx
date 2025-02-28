@@ -8,7 +8,7 @@ import IchatModel, { ImessageModel } from "../../../interface/Ichat";
 import getAllMessagesOfChat from "../../../api/user-api/getAllMessages";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../redux/store";
-import { getSocket } from "../../../socket/socket";
+import { getNotifSocket, getSocket } from "../../../socket/socket";
 import { Trash, X } from "lucide-react";
 import ImageUpload from "../../shared/ImageUpload";
 import ImageModal from "../../shared/ImageModal";
@@ -23,6 +23,7 @@ const ChatPart = ({
   const userId = useSelector((state: RootState) => state.userDetails.userId);
 
   const socket = getSocket();
+  const notifSocket = getNotifSocket();
 
   const [chat, setChat] = useState<IchatModel>();
   const [loading, setLoading] = useState(true);
@@ -48,6 +49,9 @@ const ChatPart = ({
     // Join in a room
     socket.emit("setup", userId);
     socket.on("connected", () => true);
+
+    notifSocket.emit("setup", userId); // Change to the whole page
+    notifSocket.on("notificationConnected", () => true);
 
     // return () => socket.disconnect();
   }, [userId]);
@@ -120,6 +124,12 @@ const ChatPart = ({
           image: chatImage,
           createdAt: new Date(),
           updatedAt: new Date(),
+        });
+        notifSocket.emit("newUserMessage", {
+          sender: "user",
+          request: requestId,
+          chat: chat._id,
+          user: userId
         });
         setMessages([
           ...messages,

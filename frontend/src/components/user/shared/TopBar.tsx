@@ -62,16 +62,6 @@ const TopBar = () => {
         </li>
       </Link>
 
-      <Link to="/notifications">
-        <li
-          className={`${linkClass} ${
-            currentPage === "/notifications" ? activeClass : hoverClass
-          } md:hidden pb-2`}
-        >
-          <span className="text-[15px] font-medium">Notifications</span>
-        </li>
-      </Link>
-
       <Link to="/faq">
         <li
           className={`${linkClass} ${

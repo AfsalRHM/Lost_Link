@@ -36,7 +36,7 @@ import serverListening from "./src/config/serverConfig";
 const server = serverListening(app);
 
 // Initialize Socket.IO
-import { initializeSocket } from "./src/socket/scoket";
+import { initializeSocket } from "./src/socket/socket";
 initializeSocket(server);
 
 // Setting Up the Rabbit MQ

@@ -8,13 +8,29 @@ const notificationSchema = new Schema(
       type: String,
       required: true,
     },
-    content: {
+    request_id: {
       type: String,
-    }
+      required: true,
+    },
+    user_id: {
+      type: String,
+      required: true
+    },
+    chat_id: {
+      type: String,
+      required: true,
+    },
+    seen: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,
   }
 );
 
-export default mongoose.model<InotificationModel>("Notification", notificationSchema);
+export default mongoose.model<InotificationModel>(
+  "Notification",
+  notificationSchema
+);

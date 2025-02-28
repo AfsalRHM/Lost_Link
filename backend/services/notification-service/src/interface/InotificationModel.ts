@@ -1,13 +1,12 @@
 import { Document } from "mongoose";
 
 export default interface InotificationModel extends Document {
-  user_name: string;
-  request_name: string;
-  user_id: string;
+  _id: string;
+  sender: string;
   request_id: string;
-  request_status: string;
-  is_group_chat: boolean;
-  group_admin: string;
+  chat_id: string;
+  user_id: string;
+  seen: boolean;
   createdAt?: Date;
   updatedAt?: Date;
 }
