@@ -3,6 +3,7 @@ import IrequestService from "../interface/IrequestService";
 import sendToService from "../rabbitmq/producer";
 import requestRepository from "../repositories/requestRepository";
 import requestRedeemRepository from "../repositories/requestRedeemRepository";
+import reportRepository from "../repositories/reportRepository";
 import jwtFunctions from "../utils/jwt";
 
 import stripe from "stripe";
@@ -10,10 +11,12 @@ import stripe from "stripe";
 export default class requestService implements IrequestService {
   private _requestRepository: requestRepository;
   private _requestRedeemRepository: requestRedeemRepository;
+  private _reportRepository: reportRepository;
 
   constructor() {
     this._requestRepository = new requestRepository();
     this._requestRedeemRepository = new requestRedeemRepository();
+    this._reportRepository = new reportRepository();
   }
 
   async insertRequest({
@@ -159,16 +162,22 @@ export default class requestService implements IrequestService {
           request_id: requestId,
           user_id: userId,
         });
+
+        const reportData = await this._reportRepository.findOne({
+          request_id: requestId,
+          user_id: userId,
+        });
+
         if (redeemRequestData) {
           return {
             status: true,
-            data: { requestData, redeemRequestData },
+            data: { requestData, redeemRequestData, reportData },
             message: "Request Data Found",
           };
         } else {
           return {
             status: true,
-            data: { requestData },
+            data: { requestData, reportData },
             message: "Request Data Found",
           };
         }
