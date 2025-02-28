@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Calendar, Clock, Tag, MapPin } from "lucide-react";
+import { Calendar, Clock, Tag, MapPin, Eye } from "lucide-react";
 import {
   showConfirmToast,
   showErrorToast2,
@@ -15,6 +15,8 @@ import changeRequestStatus from "../../../api/admin-api/changeRequestStatus";
 import { showSuccessToast } from "../../../utils/toastUtils";
 import cancelRequest from "../../../api/user-api/cancelRequestAPI";
 import CommentSection from "../../shared/CommentSection";
+import IreportModel from "../../../interface/IreportModel";
+import ReportListModal from "./ReportListModal";
 
 const RequestDetailsPart = () => {
   const { id } = useParams<{ id: string }>();
@@ -29,6 +31,10 @@ const RequestDetailsPart = () => {
     []
   );
 
+  const [reportData, setReportData] = useState<IreportModel[] | []>();
+
+  const [isReportListModalOpen, setIsReportListModalOpen] = useState(false);
+
   useEffect(() => {
     const getRequestData = async () => {
       try {
@@ -38,10 +44,14 @@ const RequestDetailsPart = () => {
           return;
         }
         const response = await fetchRequestDetails({ requestId: id });
+        console.log(response, "this is teh data");
         if (response && response.data && response.data.status) {
           setRequestData(response.data.data.requestData);
           if (response.data.data.redeemRequestData) {
             setRedeemRequests(response.data.data.redeemRequestData);
+          }
+          if (response.data.data.reportData) {
+            setReportData(response.data.data.reportData);
           }
         } else if (response === false) {
           JwtErrors({ reason: "session expiration" });
@@ -344,6 +354,32 @@ const RequestDetailsPart = () => {
                       {requestData?.users_liked.length}
                     </p>
                   </div>
+                  <div className="flex gap-1">
+                    <p className="text-red-600 text-sm font-bold">
+                      Report Count:
+                    </p>
+                    <p className="text-red-500 font-bold mt-[-1px]">
+                      {reportData?.length}
+                    </p>
+                    {reportData?.length! > 0 && (
+                      <div className="text-black flex">
+                        (
+                        <button
+                          onClick={() => setIsReportListModalOpen(true)}
+                          className="text-blue-500 flex items-center gap-1 text-sm font-semibold hover:underline"
+                        >
+                          <Eye className="mt-1" size={16} /> Show All
+                        </button>
+                        )
+                      </div>
+                    )}
+                  </div>
+                  {isReportListModalOpen && (
+                    <ReportListModal
+                      setIsReportListModalOpen={setIsReportListModalOpen}
+                      reportData={reportData}
+                    />
+                  )}
                   <div>
                     <p className="text-violet-600 text-sm">Created:</p>
                     <p className="font-semibold text-violet-900">

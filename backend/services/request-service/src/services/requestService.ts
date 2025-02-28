@@ -214,16 +214,19 @@ export default class requestService implements IrequestService {
           await this._requestRedeemRepository.findAllRedeemRequest({
             request_id: requestId,
           });
+        const reportData = await this._reportRepository.findAll({
+          request_id: requestId,
+        });
         if (redeemRequestData) {
           return {
             status: true,
-            data: { requestData, redeemRequestData },
+            data: { requestData, redeemRequestData, reportData },
             message: "Request Data Found",
           };
         } else {
           return {
             status: true,
-            data: { requestData },
+            data: { requestData, reportData },
             message: "Request Data Found",
           };
         }
