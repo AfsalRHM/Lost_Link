@@ -129,7 +129,7 @@ const ChatPart = ({
           sender: "user",
           request: requestId,
           chat: chat._id,
-          user: userId
+          user: userId,
         });
         setMessages([
           ...messages,
@@ -207,7 +207,7 @@ const ChatPart = ({
             const isOwnMessage = msg.sender === userId;
 
             return (
-              <div>
+              <div key={index}>
                 {currentDate !== previousDate && (
                   <div className="text-center text-sm p-2 bg-gray-200 rounded-lg text-gray-500 my-4">
                     {currentDate === new Date().toLocaleDateString()

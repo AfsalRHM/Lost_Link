@@ -1,4 +1,4 @@
-import { DeleteResult } from "mongoose";
+import { DeleteResult, UpdateQuery, UpdateResult } from "mongoose";
 import { FilterQuery, Document } from "mongoose";
 
 export default interface IbaseRepository<T extends Document> {
@@ -7,4 +7,5 @@ export default interface IbaseRepository<T extends Document> {
   findAll(filter: Partial<T>): Promise<T[]>;
   findSome(filter: FilterQuery<T>): Promise<T[] | null>;
   findByIdAndUpdate(Id: string, update: Partial<T>): Promise<T | null>;
+  updateMany(filter: FilterQuery<T>, update: UpdateQuery<T>): Promise<UpdateResult>;
 }

@@ -56,7 +56,6 @@ const ChatPart = ({ chatDetails }: { chatDetails: IchatModel | undefined }) => {
 
   useEffect(() => {
     socket.on("userMessageRecieved", (newMessageRecieved) => {
-      console.log("new User message recieved", newMessageRecieved);
       setMessages([...messages, newMessageRecieved]);
     });
   });

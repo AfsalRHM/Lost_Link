@@ -57,7 +57,6 @@ const RequestDetails = ({}) => {
             requestId,
             from: "normalRequest",
           });
-          console.log(response);
           if (response.status === 200) {
             setRequestData(response.data.data.requestData);
             setLikeCount(response.data.data.requestData.users_liked.length);

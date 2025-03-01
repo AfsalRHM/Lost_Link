@@ -45,7 +45,6 @@ const TopBarIcons = () => {
 
   useEffect(() => {
     notifSocket.on("userNewNotification", (newNotificationRecieved: any) => {
-      console.log("new User Notification Recieved", newNotificationRecieved);
       setNotifications([...notifications, newNotificationRecieved]);
     });
   });
@@ -56,7 +55,6 @@ const TopBarIcons = () => {
         const response = await getNotifications({
           userId,
         });
-        console.log(response, "this is from the notification response");
         if (response.status === 200) {
           setNotifications(response.data.data);
         } else {
@@ -117,7 +115,7 @@ const TopBarIcons = () => {
 
         {/* Render NotificationSection when showNotifications is true */}
         {showNotifications && (
-          <NotificationSection Notifications={notifications} />
+          <NotificationSection from="user" Notifications={notifications} />
         )}
       </div>
 

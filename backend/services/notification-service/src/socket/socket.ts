@@ -17,7 +17,6 @@ let io: Server<
 >;
 
 export const initializeSocket = (server: any) => {
-
   const notificationService = new NotificationService();
 
   io = new Server(server, {
@@ -43,14 +42,16 @@ export const initializeSocket = (server: any) => {
     });
 
     socket.on("newUserMessage", async (newMessageRecieved) => {
-      console.log("reached here on the socket", newMessageRecieved)
-      const notificationData = await notificationService.createNotification(newMessageRecieved);
-      console.log(notificationData, "this is form the here")
+      const notificationData = await notificationService.createNotification(
+        newMessageRecieved
+      );
       socket.to("admin").emit("adminNewNotification", notificationData.data);
     });
 
     socket.on("newAdminMessage", async (newMessageRecieved) => {
-      const notificationData = await notificationService.createNotification(newMessageRecieved);
+      const notificationData = await notificationService.createNotification(
+        newMessageRecieved
+      );
       socket.to("admin").emit("userNewNotification", notificationData.data);
     });
 

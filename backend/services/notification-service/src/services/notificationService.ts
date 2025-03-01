@@ -15,7 +15,7 @@ export default class notificationService implements InotificationService {
         sender: notfication.sender,
         request_id: notfication.request,
         chat_id: notfication.chat,
-        user_id: notfication.user
+        user_id: notfication.user,
       });
 
       if (notificationData) {
@@ -82,7 +82,11 @@ export default class notificationService implements InotificationService {
   }
 
   // To Change the notification seen for user
-  async changeUserNotificationSeen({ userId }: { userId: string }): Promise<any> {
+  async changeUserNotificationSeen({
+    userId,
+  }: {
+    userId: string;
+  }): Promise<any> {
     try {
       if (!userId) {
         return {
@@ -92,10 +96,10 @@ export default class notificationService implements InotificationService {
             "User id not get in the changeUserNotificationSeen/notificaitonService",
         };
       }
-      const notificationData = await this._notificationRepository.updateAll(userId);
+      const notificationData = await this._notificationRepository.updateAll(
+        userId
+      );
 
-      console.log(notificationData, "This is the notificatio data")
-  
       if (notificationData) {
         return {
           status: true,
@@ -124,8 +128,6 @@ export default class notificationService implements InotificationService {
     try {
       const notificationData = await this._notificationRepository.updateAll();
 
-      console.log(notificationData, "This is the notificatio data")
-  
       if (notificationData) {
         return {
           status: true,
@@ -140,7 +142,10 @@ export default class notificationService implements InotificationService {
         };
       }
     } catch (error) {
-      console.log(error, "error on the changeAdminNotificationSeen/notificaitonService");
+      console.log(
+        error,
+        "error on the changeAdminNotificationSeen/notificaitonService"
+      );
       return {
         status: false,
         data: null,
@@ -171,7 +176,10 @@ export default class notificationService implements InotificationService {
         };
       }
     } catch (error) {
-      console.log(error, "error on the getAdminNotifications/notificaitonService");
+      console.log(
+        error,
+        "error on the getAdminNotifications/notificaitonService"
+      );
       return {
         status: false,
         data: null,
@@ -180,8 +188,3 @@ export default class notificationService implements InotificationService {
     }
   }
 }
-
-// to access the userDetails from the queue after comment creation
-// export function getUserDataByUserId(correlationId: string, params: any) {
-//   eventEmitter.emit(correlationId, params);
-// }
