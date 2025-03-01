@@ -86,6 +86,31 @@ export default class notificationController implements InotificationController {
     }
   };
 
+  // To change the notification seen or status on admin
+  public changeAdminOneNotificationSeen = async (
+    req: Request,
+    res: Response
+  ): Promise<void> => {
+    try {
+      const notificationId = req.body.notificationId;
+
+      const response =
+        await this._notificationService.changeAdminOneNotificationSeen({notificationId});
+
+      if (response.status) {
+        res.status(200).json(response);
+      } else {
+        res.status(400).json(response);
+      }
+    } catch (error) {
+      console.log(
+        "error in changeAdminOneNotificationSeen/notificationController",
+        error
+      );
+      return;
+    }
+  };
+
   // To get the admin notifications
   public getAdminNotifications = async (
     req: Request,

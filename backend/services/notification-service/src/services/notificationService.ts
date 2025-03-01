@@ -154,6 +154,44 @@ export default class notificationService implements InotificationService {
     }
   }
 
+  // To Change the notification seen for Admin
+  async changeAdminOneNotificationSeen({
+    notificationId,
+  }: {
+    notificationId: string;
+  }): Promise<any> {
+    try {
+      const notificationData =
+        await this._notificationRepository.findByIdAndUpdate(notificationId, {
+          seen: true,
+        });
+
+      if (notificationData) {
+        return {
+          status: true,
+          data: notificationData,
+          message: "Marked notifications as seen",
+        };
+      } else {
+        return {
+          status: true,
+          data: null,
+          message: "No notification found to update",
+        };
+      }
+    } catch (error) {
+      console.log(
+        error,
+        "error on the changeAdminNotificationSeen/notificaitonService"
+      );
+      return {
+        status: false,
+        data: null,
+        message: "Failed to get the Notifications",
+      };
+    }
+  }
+
   // To get all the notificaitons of a admin
   async getAdminNotifications(): Promise<any> {
     try {

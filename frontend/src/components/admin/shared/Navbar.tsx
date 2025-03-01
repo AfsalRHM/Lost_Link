@@ -4,6 +4,8 @@ import { showErrorToast2 } from "../../../utils/iziToastUtils";
 import getAdminNotifications from "../../../api/admin-api/getNotificationsAPI";
 import { getNotifSocket } from "../../../socket/socket";
 import NotificationSection from "../../shared/NotificationSection";
+import { useParams } from "react-router-dom";
+import chageNotificaitonSeen from "../../../api/admin-api/changeNotificaitonSeenAPI";
 
 interface navBarType {
   setSidebarOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -14,15 +16,25 @@ const NavBar = ({ setSidebarOpen }: navBarType) => {
   const [showNotifications, setShowNotifications] = useState(false);
   const notificationRef = useRef<HTMLDivElement>(null);
 
+  const { id } = useParams();
+
   const notifSocket = getNotifSocket();
 
   notifSocket.emit("joinRoom", "admin");
 
   useEffect(() => {
     notifSocket.on("adminNewNotification", (newNotificationRecieved: any) => {
-      setNotifications([...notifications, newNotificationRecieved]);
+      if (id !== newNotificationRecieved.chat_id) {
+        setNotifications([...notifications, newNotificationRecieved]);
+      } else {
+        makeNotificationSeen({notificationId: newNotificationRecieved._id});
+      }
     });
   });
+
+  async function makeNotificationSeen({notificationId}: {notificationId: string}) {
+    await chageNotificaitonSeen({notificationId})
+  }
 
   // Fetch notifications
   useEffect(() => {
