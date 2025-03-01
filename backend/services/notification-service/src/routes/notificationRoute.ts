@@ -22,5 +22,6 @@ notification_route.get("/get-admin-notifications", verifyAdminAccessToken, Notif
 
 // Patch Requests
 notification_route.patch("/change-admin-notification-seen", verifyAdminAccessToken, NotificationController.changeAdminNotificationSeen);
+notification_route.patch("/change-admin-one-notification-seen", verifyAdminAccessToken, NotificationController.changeAdminOneNotificationSeen);
 
 export default notification_route;

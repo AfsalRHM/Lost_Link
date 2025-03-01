@@ -3,5 +3,10 @@ export default interface InotificationService {
   getNotifications({ userId }: { userId: string }): Promise<any>;
   changeUserNotificationSeen({ userId }: { userId: string }): Promise<any>;
   changeAdminNotificationSeen(): Promise<any>;
+  changeAdminOneNotificationSeen({
+    notificationId,
+  }: {
+    notificationId: string;
+  }): Promise<any>;
   getAdminNotifications(): Promise<any>;
 }
