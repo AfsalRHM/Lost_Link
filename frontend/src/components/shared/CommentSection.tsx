@@ -74,7 +74,6 @@ const CommentSection = ({
       setCommentText("");
 
       const response = await createComment({ requestId, commentText, userId });
-      console.log("This is the response while creating comment", response);
       if (response.status == 200) {
         setComments((prev) => [response.data.data, ...prev]);
         setCommentCount((prev) => prev + 1);

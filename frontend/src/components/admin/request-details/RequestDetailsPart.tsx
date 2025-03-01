@@ -44,7 +44,6 @@ const RequestDetailsPart = () => {
           return;
         }
         const response = await fetchRequestDetails({ requestId: id });
-        console.log(response, "this is teh data");
         if (response && response.data && response.data.status) {
           setRequestData(response.data.data.requestData);
           if (response.data.data.redeemRequestData) {

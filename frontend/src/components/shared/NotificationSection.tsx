@@ -5,10 +5,13 @@ import { RootState } from "../../redux/store";
 import changeUserNotificationSeen from "../../api/user-api/changeUserNotificationSeenAPI";
 import changeAdminNotificationSeen from "../../api/admin-api/changeAdminNotificationSeenAPI";
 
-const NotificationSection = ({ Notifications }: { Notifications: any[] }) => {
-  const navigate = useNavigate();
+interface notificationSectionType {
+  Notifications: any,
+  from : string
+}
 
-  console.log("Notifications", Notifications);
+const NotificationSection = ({ Notifications , from }: notificationSectionType) => {
+  const navigate = useNavigate();
 
   const { userId } = useSelector((state: RootState) => state.userDetails);
 
@@ -20,7 +23,7 @@ const NotificationSection = ({ Notifications }: { Notifications: any[] }) => {
   }
 
   useEffect(() => {
-    if (userId) {
+    if (from == "user") {
       makeUserNotificationSeen();
     } else {
       makeAdminNotificationSeen();
@@ -32,7 +35,7 @@ const NotificationSection = ({ Notifications }: { Notifications: any[] }) => {
       <h3 className="text-sm font-semibold mb-2">Notifications</h3>
       <ul className="text-sm">
         {Notifications.length > 0 ? (
-          Notifications.slice(0, 4).map((notification, index) => (
+          Notifications.slice(0, 4).map((notification: any, index: number) => (
             <li
               key={index}
               className="p-2 border-b cursor-pointer hover:bg-gray-100 transition"

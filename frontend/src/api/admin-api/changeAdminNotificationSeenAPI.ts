@@ -1,8 +1,8 @@
-import axiosInstance from "../axios-api/axiosInterceptorAPI";
+import adminAxiosInstance from "../axios-api/adminAxiosInterceptorAPI";
 
 export default async function changeAdminNotificationSeen(): Promise<any> {
   try {
-    const result = await axiosInstance
+    const result = await adminAxiosInstance
       .patch(
         `${import.meta.env.VITE_API_ROUTE}/notif/change-admin-notification-seen`
       )

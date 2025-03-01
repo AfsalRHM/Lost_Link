@@ -37,7 +37,6 @@ export default class authController implements IadminController {
 
   public getAllUsers = async (req: Request, res: Response): Promise<void> => {
     try {
-      console.log('Here reaching on the getAllUsers/adminController')
       const response = await this._adminService.getAllUsers();
       res.status(200).json(response);
     } catch (error) {
@@ -120,7 +119,7 @@ export default class authController implements IadminController {
 
   public refreshToken = async (req: Request, res: Response): Promise<void> => {
     try {
-      console.log('Reaching here on the admin refreshTOken/adminController');
+      console.log("Reaching here on the admin refreshTOken/adminController");
       const refreshToken = req.cookies.adminRefreshToken;
       const result = await this._adminService.refreshToken(refreshToken);
       if (result?.status == true) {

@@ -116,13 +116,24 @@ const ChatListPart = ({ allChats = [] }: ChatListPartProps) => {
                         <div className="text-sm text-black">
                           {chat.latest_message ? (
                             <span className="font-medium">
-                              last message:{" "}
-                              {chat.latest_message.content.length > 20
-                                ? `${chat.latest_message.content.slice(
-                                    0,
-                                    20
-                                  )}...`
-                                : chat.latest_message.content}
+                              {chat.latest_message.content ? (
+                                <>
+                                  Last message:{" "}
+                                  <span className="italic">
+                                    {chat.latest_message.content.length > 20
+                                      ? `${chat.latest_message.content.slice(
+                                          0,
+                                          20
+                                        )}...`
+                                      : chat.latest_message.content}
+                                  </span>
+                                </>
+                              ) : (
+                                <>
+                                  Last message:{" "}
+                                  <span className="italic">Image</span>
+                                </>
+                              )}
                             </span>
                           ) : (
                             <span className="font-medium">

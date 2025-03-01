@@ -20,7 +20,6 @@ const NavBar = ({ setSidebarOpen }: navBarType) => {
 
   useEffect(() => {
     notifSocket.on("adminNewNotification", (newNotificationRecieved: any) => {
-      console.log("new Admin Notification Recieved", newNotificationRecieved);
       setNotifications([...notifications, newNotificationRecieved]);
     });
   });
@@ -30,7 +29,6 @@ const NavBar = ({ setSidebarOpen }: navBarType) => {
     const getAdminNotificationData = async () => {
       try {
         const response = await getAdminNotifications();
-        console.log(response, "Thi sis the admin resonponse notificaitons");
         if (response.status === 200) {
           setNotifications(response.data.data);
         } else {
@@ -98,7 +96,7 @@ const NavBar = ({ setSidebarOpen }: navBarType) => {
 
             {/* Notification Dropdown */}
             {showNotifications && (
-              <NotificationSection Notifications={notifications} />
+              <NotificationSection from="admin" Notifications={notifications} />
             )}
           </div>
 
