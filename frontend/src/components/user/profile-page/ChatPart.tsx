@@ -234,18 +234,17 @@ const ChatPart = ({
                     >
                       <div className="mb-2">{msg.content}</div>
 
-                      {msg.image !== "no image" ||
-                        (!msg.image && (
-                          <div className="rounded-lg overflow-hidden">
-                            <img
-                              src={msg.image}
-                              alt="Message attachment"
-                              className="w-full max-w-[160px] min-w-[120px] object-cover rounded-lg hover:scale-105 transition-transform duration-200"
-                              loading="lazy"
-                              onClick={() => setSelectedImage(msg.image!)}
-                            />
-                          </div>
-                        ))}
+                      {msg.image == "no image" ? null : !msg.image ? null : (
+                        <div className="rounded-lg overflow-hidden">
+                          <img
+                            src={msg.image}
+                            alt="Message attachment"
+                            className="w-full max-w-[160px] min-w-[120px] object-cover rounded-lg hover:scale-105 transition-transform duration-200"
+                            loading="lazy"
+                            onClick={() => setSelectedImage(msg.image!)}
+                          />
+                        </div>
+                      )}
 
                       <p
                         className={`text-xs flex mt-2 ${
