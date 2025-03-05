@@ -54,6 +54,7 @@ const ProfileSidebar = ({
     "My Requests",
     "Redeem Requests",
     "Payment History",
+    "My Reports",
     "Logout",
   ];
 

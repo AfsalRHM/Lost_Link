@@ -13,6 +13,7 @@ import { assignAccessToken } from "../../../redux/slice/accessTokenSlice.ts";
 import getProfile from "../../../api/user-api/getProfileAPI.ts";
 import UserDetailsLoading from "./loading/UserDetailsLoading.tsx";
 import TierSectionLoading from "./loading/TierSectionLoading.tsx";
+import ReportList from "./ReportList.tsx";
 
 const Hero = () => {
   const [loading, setLoading] = useState<boolean>(true);
@@ -101,6 +102,8 @@ const Hero = () => {
               <RedeemRequests userData={userData} />
             ) : selectedItem === "Tier Information" ? (
               <TierInfo userData={userData} />
+            ) : selectedItem === "My Reports" ? (
+              <ReportList userData={userData!} />
             ) : (
               <LocationInfo />
             )}

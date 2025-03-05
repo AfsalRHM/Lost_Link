@@ -8,4 +8,6 @@ export default interface IreportService {
     reportReason: string;
     userId: string;
   }): Promise<any>;
+
+  getMyReports({ userId }: { userId: string }): Promise<any>;
 }

@@ -11,6 +11,7 @@ const ReportController = new reportController();
 
 // Post Requests
 report_route.post("/report-request", verifyAccessToken, ReportController.createReport); // To Create a Report
+report_route.post("/get-my-reports", verifyAccessToken, ReportController.getMyReports); // To get a specific user's all reports
 
 // Patch Requests
 

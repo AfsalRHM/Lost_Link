@@ -33,36 +33,32 @@ export default class ReportController implements IreportController {
         res.status(400).json(response);
       }
     } catch (error) {
-      console.log("error in createComment/commentController", error);
+      console.log("error in createReport/reportController", error);
     }
   };
 
-  // To get comments of a request
-  public getRequestReports = async (
-    req: Request,
-    res: Response
-  ): Promise<void> => {
+  // To get reports of a specfic user
+  public getMyReports = async (req: Request, res: Response): Promise<void> => {
     try {
-      if (!req.body.requestId) {
+      if (!req.body.userId) {
         res.status(400).json({
           status: false,
-          message: "No Data found on the createComment Post Request",
+          message: "No Data found on the getMyReports Post Request",
         });
         return;
       }
 
-      //   const response = await this._reportService.getRequestReports({
-      //     requestId: req.body.requestId,
-      //     commentCount: req.body.count,
-      //   });
+      const response = await this._reportService.getMyReports({
+        userId: req.body.userId,
+      });
 
-      //   if (response.status) {
-      //     res.status(200).json(response);
-      //   } else {
-      //     res.status(400).json(response);
-      //   }
+      if (response.status) {
+        res.status(200).json(response);
+      } else {
+        res.status(400).json(response);
+      }
     } catch (error) {
-      console.log("error in getRequestComments/commentController", error);
+      console.log("error in getMyReports/reportController", error);
     }
   };
 }
