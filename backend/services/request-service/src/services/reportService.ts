@@ -3,14 +3,16 @@ import sendToService from "../rabbitmq/producer";
 import reportRepository from "../repositories/reportRepository";
 import { createCorrelationId } from "../utils/correlationId";
 import eventEmitter from "../utils/eventEmitter";
+import requestService from "./requestService";
 
 export default class reportService implements IreportService {
   private _reportRepository: reportRepository;
+  private _requestService: requestService;
 
   constructor() {
     this._reportRepository = new reportRepository();
+    this._requestService = new requestService();
   }
-
   async createReport({
     requestId,
     reportReason,
@@ -85,6 +87,55 @@ export default class reportService implements IreportService {
         status: false,
         data: null,
         message: "Error on createReport/reportService",
+      };
+    }
+  }
+
+  // To get all the reports of a specific user
+  async getMyReports({ userId }: { userId: string }): Promise<any> {
+    try {
+      if (!userId) {
+        return {
+          status: false,
+          data: null,
+          message: "Data not reached on getMyReports/reportService",
+        };
+      }
+
+      const reportData = await this._reportRepository.findAll({
+        user_id: userId,
+      });
+
+      if (reportData) {
+        const enrichedReports = await Promise.all(
+          reportData.map(async (report) => {
+            const requestData = await this._requestService.getRequestDataById({
+              requestId: report.request_id,
+            });
+            return {
+              ...report.toObject(),
+              title: requestData.data.product_name || "Unknown Product",
+            };
+          })
+        );
+
+        return {
+          status: true,
+          data: enrichedReports,
+          message: "Got the reports of the user",
+        };
+      } else {
+        return {
+          status: false,
+          data: null,
+          message: "There has no reports registered by the user",
+        };
+      }
+    } catch (error) {
+      return {
+        status: false,
+        data: null,
+        message: "Error on getMyReports/reportService",
       };
     }
   }

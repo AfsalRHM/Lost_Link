@@ -1,6 +1,7 @@
 export default interface IreportModel {
   _id: string;
   request_id: string;
+  title: string;
   user_id: string;
   user_name: string;
   reason: string;
