@@ -8,6 +8,7 @@ import {
 import { showErrorToast } from "./toastUtils";
 import { jwtErrorsType } from "../interface/IjwtErrors";
 import { removeUserDetails } from "../redux/slice/userDetailsSlice";
+import { showErrorToast2 } from "./iziToastUtils";
 
 export const useAdminJwtErrors = () => {
   const dispatch = useDispatch();
@@ -32,7 +33,7 @@ export const useUserJwtErrors = () => {
       dispatch(removeUserDetails());
       dispatch(removeAccessToken());
       navigate("/signin");
-      showErrorToast("Session Expired! Please Login...");
+      showErrorToast2("Session Expired! Please Login...");
     } else {
       dispatch(removeUserDetails());
       dispatch(removeAccessToken());

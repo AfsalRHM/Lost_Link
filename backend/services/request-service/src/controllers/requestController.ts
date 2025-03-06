@@ -152,7 +152,7 @@ export default class RequestController implements IrequestController {
       const response = await this._requestService.getRequestDetails({
         requestId: req.body.requestId,
         userId: decoded?.id!,
-        from: req.body.from
+        from: req.body.from,
       });
       if (response.status) {
         res.status(200).json(response);
@@ -235,7 +235,7 @@ export default class RequestController implements IrequestController {
 
         const response = await this._requestService.changeLikeStatus({
           requestId: req.body.requestId,
-          userId: decoded?.id
+          userId: decoded?.id,
         });
         res.status(200).json(response);
       }

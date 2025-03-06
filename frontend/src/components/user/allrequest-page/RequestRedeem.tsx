@@ -39,7 +39,10 @@ const RequestRedeem = () => {
           showErrorToast2("Invalid Access Detected");
           return;
         } else {
-          const response = await getRequestDetails(requestId);
+          const response = await getRequestDetails({
+            requestId,
+            from: "normalRequest",
+          });
           if (response.status === 200) {
             setRequestData(response.data.data.requestData);
           } else {

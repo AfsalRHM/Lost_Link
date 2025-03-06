@@ -37,7 +37,7 @@ const AdminRoutes = () => {
           path="/admin/redeem-requests/details/:id"
           element={<RedeemRequestDetails />}
         />
-        <Route path="/admin/chats/chat-details/:id" element={<ChatDetails />} />
+        <Route path="/admin/chats/:userId" element={<ChatDetails />} />
       </Route>
     </>
   );

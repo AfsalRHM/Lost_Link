@@ -23,6 +23,7 @@
     "axios": "^1.7.9",
     "date-fns": "^4.1.0",
     "dotenv": "^16.4.7",
+    "framer-motion": "^12.4.10",
     "ionicons": "^7.4.0",
     "izitoast": "^1.4.0",
     "jwt-decode": "^4.0.0",
