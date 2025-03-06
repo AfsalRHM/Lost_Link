@@ -1,9 +1,15 @@
 import adminAxiosInstance from "../axios-api/adminAxiosInterceptorAPI";
 
-export default async function fetchAllChats(): Promise<any> {
+interface fetchUserChatsType {
+  userId: string | undefined;
+}
+
+export default async function fetchUserChats(
+  props: fetchUserChatsType
+): Promise<any> {
   try {
     const result = await adminAxiosInstance
-      .get(`${import.meta.env.VITE_API_ROUTE}/chat/all-chats`)
+      .post(`${import.meta.env.VITE_API_ROUTE}/chat/get-user-chats`, props)
       .then((response) => {
         return response;
       });

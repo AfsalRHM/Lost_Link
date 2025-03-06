@@ -28,6 +28,7 @@ export default class chatService implements IchatService {
       let chatData = await this._chatRepository.findOne({
         is_group_chat: false,
         user_id: userId,
+        request_id: requestId
       });
 
       // For the User Data
@@ -175,6 +176,37 @@ export default class chatService implements IchatService {
         status: false,
         data: null,
         message: "Failed to get all the Chats",
+      };
+    }
+  }
+
+  // Fetch All the Chats
+  async getAllUserChats({ userId }: { userId: string }): Promise<any> {
+    try {
+      const chatData = await this._chatRepository.findSome({
+        user_id: userId,
+        latest_message: { $exists: true, $ne: null },
+      });
+
+      if (chatData) {
+        return {
+          status: true,
+          data: chatData,
+          message: "Fetched all the Chats of a user",
+        };
+      } else {
+        return {
+          status: true,
+          data: null,
+          message: "Chat Data is Empty",
+        };
+      }
+    } catch (error) {
+      console.log(error, "error on the getAllUserChats/chatService");
+      return {
+        status: false,
+        data: null,
+        message: "Failed to get all the Chats of a specific user",
       };
     }
   }

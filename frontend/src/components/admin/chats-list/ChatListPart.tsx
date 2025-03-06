@@ -1,49 +1,30 @@
 import { Search } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import IchatModel from "../../../interface/Ichat";
+import { userDataType } from "../../../interface/IuserModel";
 
 interface ChatListPartProps {
-  allChats: IchatModel[];
+  allUsers: userDataType[];
 }
 
-const ChatListPart = ({ allChats = [] }: ChatListPartProps) => {
+const ChatListPart = ({ allUsers = [] }: ChatListPartProps) => {
   const navigate = useNavigate();
 
   const [searchTerm, setSearchTerm] = useState("");
-  const [sortField, setSortField] = useState<keyof IchatModel>("request_name");
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  const handleSort = (field: keyof IchatModel) => {
-    if (sortField === field) {
-      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
-    } else {
-      setSortField(field);
-      setSortDirection("asc");
+  const handleUserClick = (userId: string) => {
+    if (userId) {
+      navigate(`/admin/chats/${userId}`); 
     }
   };
+  const filteredUsers = allUsers.filter((user) =>
+    user.full_name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
-  const handleDetailsPage = (id: string) => {
-    if (id) {
-      navigate(`/admin/chats/chat-details/${id}`);
-    }
-  };
-
-  const filteredChats = allChats
-    .filter((chat) =>
-      chat.user_name.toLowerCase().includes(searchTerm.toLowerCase())
-    )
-    .sort((a, b) => {
-      if (sortDirection === "asc") {
-        return a[sortField] > b[sortField] ? 1 : -1;
-      }
-      return a[sortField] < b[sortField] ? 1 : -1;
-    });
-
-  const totalPages = Math.ceil(filteredChats.length / itemsPerPage);
-  const currentChats = filteredChats.slice(
+  const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
+  const currentUsers = filteredUsers.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
@@ -76,10 +57,10 @@ const ChatListPart = ({ allChats = [] }: ChatListPartProps) => {
           </div>
         </div>
       </div>
-      {currentChats.length === 0 ? (
+      {currentUsers.length === 0 ? (
         <div className="text-center">
           <div className="text-center pt-8 pb-4 text-white">
-            No chats available
+            No Users available
           </div>
         </div>
       ) : (
@@ -89,17 +70,11 @@ const ChatListPart = ({ allChats = [] }: ChatListPartProps) => {
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-blue-700">
                   <tr>
-                    <th
-                      className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider cursor-pointer"
-                      onClick={() => handleSort("request_name")}
-                    >
-                      Request
-                    </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                       User
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
-                      Request Status
+                      User Status
                     </th>
                     <th className="px-6 py-3 text-center text-xs font-medium text-white uppercase tracking-wider">
                       Details
@@ -107,63 +82,30 @@ const ChatListPart = ({ allChats = [] }: ChatListPartProps) => {
                   </tr>
                 </thead>
                 <tbody className="bg-blue-400 divide-y divide-gray-200">
-                  {currentChats.map((chat) => (
-                    <tr key={chat._id} className="hover:bg-blue-500">
+                  {currentUsers.map((user) => (
+                    <tr key={user._id} className="hover:bg-blue-500">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-medium text-white">
-                          {chat.request_name}
+                          {user.full_name}
                         </div>
-                        <div className="text-sm text-black">
-                          {chat.latest_message ? (
-                            <span className="font-medium">
-                              {chat.latest_message.content ? (
-                                <>
-                                  Last message:{" "}
-                                  <span className="italic">
-                                    {chat.latest_message.content.length > 20
-                                      ? `${chat.latest_message.content.slice(
-                                          0,
-                                          20
-                                        )}...`
-                                      : chat.latest_message.content}
-                                  </span>
-                                </>
-                              ) : (
-                                <>
-                                  Last message:{" "}
-                                  <span className="italic">Image</span>
-                                </>
-                              )}
-                            </span>
-                          ) : (
-                            <span className="font-medium">
-                              No Messages Available
-                            </span>
-                          )}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="inline-flex text-sm font-medium">
-                          {chat.user_name}
-                        </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span
                           className={`inline-flex text-sm font-medium px-2 py-1 rounded ${
-                            chat.request_status === "active"
+                            user.status === "active"
                               ? "bg-green-100 text-green-800"
                               : "bg-gray-100 text-pink-800"
                           }`}
                         >
-                          {chat.request_status}
+                          {user.status}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-center">
                         <button
-                          onClick={() => handleDetailsPage(chat._id)}
+                          onClick={() => handleUserClick(user._id)}
                           className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                         >
-                          More...
+                          Chats...
                         </button>
                       </td>
                     </tr>

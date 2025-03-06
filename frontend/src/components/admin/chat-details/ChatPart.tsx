@@ -1,4 +1,4 @@
-import { ArrowLeft, Info, Send, Trash, X } from "lucide-react";
+import { Info, Send, Trash, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect, FormEvent, useRef } from "react";
 import IchatModel, { ImessageModel } from "../../../interface/Ichat";
@@ -42,7 +42,7 @@ const ChatPart = ({ chatDetails }: { chatDetails: IchatModel | undefined }) => {
       try {
         const response = await fetchUserMessages({ chatId: chatDetails?._id });
         if (response.status === 200) {
-          setMessages([...messages, ...response.data.data]);
+          setMessages(response.data.data);
         } else {
           showErrorToast2(response.data.message);
         }
@@ -51,8 +51,9 @@ const ChatPart = ({ chatDetails }: { chatDetails: IchatModel | undefined }) => {
       }
     };
 
+    setMessages([]);
     getMessages();
-  }, []);
+  }, [chatDetails]);
 
   useEffect(() => {
     socket.on("userMessageRecieved", (newMessageRecieved) => {
@@ -60,18 +61,12 @@ const ChatPart = ({ chatDetails }: { chatDetails: IchatModel | undefined }) => {
     });
   });
 
-  const handleBack = () => {
-    navigate(-1);
-  };
-
   const handleUserDetails = () => {
-    navigate("/users/details", { state: { userId: chatDetails?.user_id } });
+    navigate(`/admin/users/user-details/${chatDetails?.user_id}`);
   };
 
   const handleRequestDetails = () => {
-    navigate("/requests/details", {
-      state: { requestId: chatDetails?.request_id },
-    });
+    navigate(`/admin/requests/request-details/${chatDetails?.request_id}`);
   };
 
   const handleSendMessage = async (e: FormEvent<HTMLFormElement>) => {
@@ -135,34 +130,10 @@ const ChatPart = ({ chatDetails }: { chatDetails: IchatModel | undefined }) => {
 
   return (
     <div className="p-6 bg-blue-900 min-h-screen text-white flex flex-col">
-      <div className="mb-6 flex items-center">
-        <button
-          onClick={handleBack}
-          className="mr-4 p-2 rounded-full bg-blue-700 hover:bg-blue-600 transition-colors"
-          aria-label="Go back"
-        >
-          <ArrowLeft size={20} />
-        </button>
-        <h1 className="text-2xl font-semibold">
-          Chat with {chatDetails?.user_name}
-        </h1>
-      </div>
-
       <div className="bg-blue-800 rounded-lg shadow p-6 mb-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
           <div className="mb-4 sm:mb-0">
-            <h2 className="text-xl font-medium">Chat Information</h2>
-          </div>
-          <div className="flex gap-2">
-            <span
-              className={`inline-flex text-sm font-medium px-3 py-1 rounded-full ${
-                chatDetails?.request_status === "active"
-                  ? "bg-green-100 text-green-800"
-                  : "bg-gray-100 text-pink-800"
-              }`}
-            >
-              {chatDetails?.request_status}
-            </span>
+            <h2 className="text-xl font-medium underline">Chat Information</h2>
           </div>
         </div>
 
@@ -211,7 +182,6 @@ const ChatPart = ({ chatDetails }: { chatDetails: IchatModel | undefined }) => {
 
         <div className="flex-grow overflow-y-auto p-4 space-y-4 max-h-[400px]">
           {messages.map((message, index) => {
-            // Extract current and previous message dates (in YYYY-MM-DD format for comparison)
             const currentDate = new Date(
               message.createdAt
             ).toLocaleDateString();

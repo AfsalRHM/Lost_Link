@@ -6,11 +6,14 @@ import changeUserNotificationSeen from "../../api/user-api/changeUserNotificatio
 import changeAdminNotificationSeen from "../../api/admin-api/changeAdminNotificationSeenAPI";
 
 interface notificationSectionType {
-  Notifications: any,
-  from : string
+  Notifications: any;
+  from: string;
 }
 
-const NotificationSection = ({ Notifications , from }: notificationSectionType) => {
+const NotificationSection = ({
+  Notifications,
+  from,
+}: notificationSectionType) => {
   const navigate = useNavigate();
 
   const { userId } = useSelector((state: RootState) => state.userDetails);
@@ -41,7 +44,7 @@ const NotificationSection = ({ Notifications , from }: notificationSectionType) 
               className="p-2 border-b cursor-pointer hover:bg-gray-100 transition"
               onClick={() => {
                 if (notification.sender == "user") {
-                  navigate(`/admin/chats/chat-details/${notification.chat_id}`);
+                  navigate(`/admin/chats/${notification.user_id}`);
                 } else {
                   navigate(`/my_request_details`, {
                     state: { requestId: notification.request_id },

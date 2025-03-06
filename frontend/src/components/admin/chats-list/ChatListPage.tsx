@@ -3,20 +3,20 @@ import ChatListPart from "./ChatListPart";
 import { Sidebar } from "../shared/Sidebar";
 import { useAdminJwtErrors } from "../../../utils/JwtErrors";
 import adminLogout from "../../../api/admin-api/adminLogoutAPI";
-import fetchAllChats from "../../../api/admin-api/allChatsAPI";
 import NavBar from "../shared/Navbar";
+import fetchAllUsers from "../../../api/admin-api/allUsersAPI";
 
 const ChatListPage = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const JwtErrors = useAdminJwtErrors();
-  const [chatList, setchatList] = useState([]);
+  const [userList, setUserList] = useState([]);
 
   const getAllChats = async () => {
     try {
-      const response = await fetchAllChats();
+      const response = await fetchAllUsers();
 
       if (response && response.data && response.data.status) {
-        setchatList(response.data.data);
+        setUserList(response.data.data);
       } else if (response === false) {
         JwtErrors({ reason: "session expiration" });
         try {
@@ -50,7 +50,7 @@ const ChatListPage = () => {
         <NavBar setSidebarOpen={setSidebarOpen} />
 
         <main className="p-6">
-          <ChatListPart allChats={chatList} />
+          <ChatListPart allUsers={userList} />
         </main>
       </div>
     </div>

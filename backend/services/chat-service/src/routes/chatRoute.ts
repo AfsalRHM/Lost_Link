@@ -12,6 +12,7 @@ const ChatController = new chatController();
 // Post Requests
 chat_route.post("/getUserChat", verifyAccessToken, ChatController.getUserChat); // To get the chat of the user or create it
 
+
 // Patch Requests
 
 
@@ -20,6 +21,7 @@ chat_route.post("/getUserChat", verifyAccessToken, ChatController.getUserChat); 
 chat_route.get("/all-chats", verifyAdminAccessToken, ChatController.getAllChats); // To get all the chats to show in the chat part of admin
 
 // Post Requests
+chat_route.post("/get-user-chats", verifyAdminAccessToken, ChatController.getAllUserChats); // To get the chat of the user or create it
 chat_route.post("/get-user-chat-details", verifyAdminAccessToken, ChatController.getChatDetails); // To get all the chats to show in the chat part of admin
 
 export default chat_route;

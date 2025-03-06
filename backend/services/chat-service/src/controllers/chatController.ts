@@ -29,7 +29,10 @@ export default class chatController implements IchatController {
 
       const userId = decoded.id;
 
-      const response = await this._chatService.getUserChat({ userId, requestId });
+      const response = await this._chatService.getUserChat({
+        userId,
+        requestId,
+      });
 
       if (response.status) {
         res.status(200).json(response);
@@ -58,15 +61,44 @@ export default class chatController implements IchatController {
     }
   };
 
+  // To fetch all the chats of a specific user
+  public getAllUserChats = async (
+    req: Request,
+    res: Response
+  ): Promise<void> => {
+    try {
+      const userId = req.body.userId;
+      if (!userId) {
+        throw new Error("User Id not passed correctly");
+      }
+
+      const response = await this._chatService.getAllUserChats({ userId });
+
+      if (response.status) {
+        res.status(200).json(response);
+      } else {
+        res.status(400).json(response);
+      }
+    } catch (error) {
+      console.log("error in getAllUserChats/chatController", error);
+      return;
+    }
+  };
+
   // To fetch the user chat details to the admin
-  public getChatDetails = async (req: Request, res: Response): Promise<void> => {
+  public getChatDetails = async (
+    req: Request,
+    res: Response
+  ): Promise<void> => {
     try {
       const chatId = req.body.chatId;
       if (!chatId) {
         throw new Error("Request Id not passed correctly");
       }
 
-      const response = await this._chatService.getChatDetails({chatId: chatId});
+      const response = await this._chatService.getChatDetails({
+        chatId: chatId,
+      });
 
       if (response.status) {
         res.status(200).json(response);
