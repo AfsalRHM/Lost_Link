@@ -173,7 +173,7 @@ const DashboardPage = () => {
               <h2 className="text-xl font-semibold mb-4 text-blue-100">
                 Request Trend
               </h2>
-              <ProjectRequestChart />
+              <ProjectRequestChart requestData={requests} />
             </div>
           </div>
 
