@@ -15,6 +15,7 @@ const processUserData = (users: any[], period: string) => {
   const today = new Date();
   const currentYear = today.getFullYear();
   const currentMonth = today.getMonth();
+  const currentDay = today.getDate();
 
   let timeRange: string[] = [];
 
@@ -48,10 +49,17 @@ const processUserData = (users: any[], period: string) => {
         "0"
       )}-${String(i + 1).padStart(2, "0")}`;
     });
-  } else if (period === "Today" || period === "Yesterday") {
+  } else if (period === "This Month") {
+    timeRange = Array.from({ length: currentDay }, (_, i) => {
+      return `${currentYear}-${String(currentMonth + 1).padStart(
+        2,
+        "0"
+      )}-${String(i + 1).padStart(2, "0")}`;
+    });
+  } else if (period === "Today") {
     timeRange = Array.from(
       { length: 13 },
-      (_, i) => `${String(i * 2 + 2 - 2).padStart(2, "0")}:00`
+      (_, i) => `${String(i * 2).padStart(2, "0")}:00`
     );
   }
 
@@ -67,8 +75,6 @@ const processUserData = (users: any[], period: string) => {
     ).padStart(2, "0")}-${String(createdAt.getDate()).padStart(2, "0")}`;
     const hourSlot = `${String(
       Math.floor(createdAt.getHours() / 2) * 2
-    ).padStart(2, "0")}:00 - ${String(
-      Math.floor(createdAt.getHours() / 2) * 2 + 2
     ).padStart(2, "0")}:00`;
 
     if (period === "All Time") {
@@ -81,7 +87,7 @@ const processUserData = (users: any[], period: string) => {
         yearlyStats[year].activeUsers += 1;
       }
       yearlyStats[year].newUsers += 1;
-    } else if (period === "Last Month") {
+    } else if (period === "Last Month" || period === "This Month") {
       if (!timeRange.includes(day)) return;
 
       if (!dailyStats[day]) {
@@ -91,22 +97,8 @@ const processUserData = (users: any[], period: string) => {
         dailyStats[day].activeUsers += 1;
       }
       dailyStats[day].newUsers += 1;
-    } else if (
-      period === "Today" &&
-      createdAt.toDateString() === today.toDateString()
-    ) {
-      if (!twoHourlyStats[hourSlot]) {
-        twoHourlyStats[hourSlot] = { activeUsers: 0, newUsers: 0 };
-      }
-      if (user.status === "active") {
-        twoHourlyStats[hourSlot].activeUsers += 1;
-      }
-      twoHourlyStats[hourSlot].newUsers += 1;
-    } else if (period === "Yesterday") {
-      const yesterday = new Date();
-      yesterday.setDate(today.getDate() - 1);
-
-      if (createdAt.toDateString() !== yesterday.toDateString()) return;
+    } else if (period === "Today") {
+      if (createdAt.toDateString() !== today.toDateString()) return;
 
       if (!twoHourlyStats[hourSlot]) {
         twoHourlyStats[hourSlot] = { activeUsers: 0, newUsers: 0 };
@@ -134,13 +126,13 @@ const processUserData = (users: any[], period: string) => {
       activeUsers: yearlyStats[year]?.activeUsers || 0,
       newUsers: yearlyStats[year]?.newUsers || 0,
     }));
-  } else if (period === "Last Month") {
+  } else if (period === "Last Month" || period === "This Month") {
     return timeRange.map((day) => ({
       name: day,
       activeUsers: dailyStats[day]?.activeUsers || 0,
       newUsers: dailyStats[day]?.newUsers || 0,
     }));
-  } else if (period === "Today" || period === "Yesterday") {
+  } else if (period === "Today") {
     return timeRange.map((hourSlot) => ({
       name: hourSlot,
       activeUsers: twoHourlyStats[hourSlot]?.activeUsers || 0,

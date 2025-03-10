@@ -15,7 +15,6 @@ import { ProjectRequestChart } from "./RequestChart";
 import fetchAllRequests from "../../../api/admin-api/allRequestAPI";
 import fetchAllUsers from "../../../api/admin-api/allUsersAPI";
 import { showErrorToast2 } from "../../../utils/iziToastUtils";
-import IrequestModel from "../../../interface/IrequestModel";
 import { userDataType } from "../../../interface/IuserModel";
 
 const DashboardPage = () => {
@@ -25,18 +24,22 @@ const DashboardPage = () => {
   const [requests, setRequests] = useState([]);
 
   // Store counts by month
-  const [currentMonthRequests, setCurrentMonthRequests] = useState(0);
-  const [previousMonthRequests, setPreviousMonthRequests] = useState(0);
   const [currentMonthUsers, setCurrentMonthUsers] = useState(0);
   const [previousMonthUsers, setPreviousMonthUsers] = useState(0);
 
-  const [userGrowthRate, setUserGrowthRate] = useState("0%");
+  const calculateGrowthRate = ({
+    previousUsers,
+    currentUsers,
+  }: {
+    previousUsers: number;
+    currentUsers: number;
+  }): string => {
+    if (previousUsers === 0) {
+      return currentUsers > 0 ? "100%" : "0%";
+    }
 
-  // Function to calculate trend percentage
-  const calculateTrend = (current: number, previous: number) => {
-    if (previous === 0) return current === 0 ? "0%" : "+100%";
-    const trend = ((current - previous) / previous) * 100;
-    return trend.toFixed(1) + "%";
+    const growthRate = ((currentUsers - previousUsers) / previousUsers) * 100;
+    return `${growthRate.toFixed(2)}%`;
   };
 
   useEffect(() => {
@@ -73,16 +76,6 @@ const DashboardPage = () => {
           );
           setCurrentMonthUsers(usersThisMonth.length);
           setPreviousMonthUsers(usersLastMonth.length);
-
-          if (usersLastMonth.length === 0) {
-            setUserGrowthRate(usersThisMonth.length > 0 ? "+100%" : "0%");
-          } else {
-            const growthRate =
-              ((usersThisMonth.length - usersLastMonth.length) /
-                usersLastMonth.length) *
-              100;
-            setUserGrowthRate(growthRate.toFixed(1) + "%");
-          }
         } else {
           showErrorToast2(response.data.message);
         }
@@ -96,33 +89,6 @@ const DashboardPage = () => {
         console.log("This is the requests", response);
         if (response.status == 200) {
           setRequests(response.data.data);
-
-          // Get current and previous month
-          const currentMonth = new Date().getMonth();
-          const previousMonth = currentMonth === 0 ? 11 : currentMonth - 1;
-          const currentYear = new Date().getFullYear();
-
-          // Filter data for current and previous month
-          const requestsThisMonth = response.data.data.filter(
-            (req: IrequestModel) => {
-              const createdAt = new Date(req.createdAt);
-              return (
-                createdAt.getMonth() === currentMonth &&
-                createdAt.getFullYear() === currentYear
-              );
-            }
-          );
-          const requestsLastMonth = response.data.data.filter(
-            (req: IrequestModel) => {
-              const createdAt = new Date(req.createdAt);
-              return (
-                createdAt.getMonth() === previousMonth &&
-                createdAt.getFullYear() === currentYear
-              );
-            }
-          );
-          setCurrentMonthRequests(requestsThisMonth.length);
-          setPreviousMonthRequests(requestsLastMonth.length);
         } else {
           showErrorToast2(response.data.message);
         }
@@ -168,31 +134,27 @@ const DashboardPage = () => {
               title="Total Revenue (This Month)"
               value="$128,430"
               icon={<DollarSign size={24} className="text-blue-400" />}
-              trend="+12.5%"
               className="bg-blue-300/50 backdrop-blur-sm hover:shadow-lg transition-all hover:scale-105"
             />
             <StatCard
               title="Total Requests (This Month)"
               value={requests.length.toString()}
               icon={<ShoppingCart size={24} className="text-green-400" />}
-              trend={calculateTrend(
-                currentMonthRequests,
-                previousMonthRequests
-              )}
               className="bg-blue-300/50 backdrop-blur-sm hover:shadow-lg transition-all hover:scale-105"
             />
             <StatCard
               title="Total Users (This Month)"
               value={users.length.toString()}
               icon={<Users size={24} className="text-purple-400" />}
-              trend={calculateTrend(currentMonthUsers, previousMonthUsers)}
               className="bg-blue-300/50 backdrop-blur-sm hover:shadow-lg transition-all hover:scale-105"
             />
             <StatCard
               title="Growth Rate (This Month)"
-              value={currentMonthUsers.toString()}
+              value={calculateGrowthRate({
+                currentUsers: currentMonthUsers,
+                previousUsers: previousMonthUsers,
+              })}
               icon={<TrendingUp size={24} className="text-orange-400" />}
-              trend={userGrowthRate}
               className="bg-blue-300/50 backdrop-blur-sm hover:shadow-lg transition-all hover:scale-105"
             />
           </div>
