@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
 import {
   BarChart,
-  Activity,
   Users,
   X,
   Notebook,
   MessageSquare,
   LogOut,
+  CreditCard,
 } from "lucide-react";
 import { SidebarProps } from "../../../interface/IadminDashboard";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -52,11 +52,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggle }) => {
   if (adminRole == "Admin") {
     navItems = [
       { text: "Dashboard", icon: <BarChart size={20} />, path: "/admin" },
-      {
-        text: "Analytics",
-        icon: <Activity size={20} />,
-        path: "/admin/analytics",
-      },
       { text: "Users", icon: <Users size={20} />, path: "/admin/users" },
       { text: "Admins", icon: <Users size={20} />, path: "/admin/admins" },
       {
@@ -74,16 +69,16 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggle }) => {
         icon: <MessageSquare size={20} />,
         path: "/admin/chats",
       },
+      {
+        text: "Payments",
+        icon: <CreditCard size={20} />,
+        path: "/admin/payments",
+      },
       { text: "Logout", icon: <LogOut size={20} />, path: "/" },
     ];
   } else {
     navItems = [
       { text: "Dashboard", icon: <BarChart size={20} />, path: "/admin" },
-      {
-        text: "Analytics",
-        icon: <Activity size={20} />,
-        path: "/admin/analytics",
-      },
       { text: "Users", icon: <Users size={20} />, path: "/admin/users" },
       {
         text: "Requests",
@@ -99,6 +94,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggle }) => {
         text: "Chats",
         icon: <MessageSquare size={20} />,
         path: "/admin/chats",
+      },
+      {
+        text: "Payments",
+        icon: <CreditCard size={20} />,
+        path: "/admin/payments",
       },
       { text: "Logout", icon: <LogOut size={20} />, path: "/" },
     ];

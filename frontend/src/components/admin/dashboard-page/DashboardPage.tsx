@@ -4,69 +4,102 @@ import {
   DollarSign,
   ShoppingCart,
   TrendingUp,
+  FileDown,
 } from "lucide-react";
 import { Sidebar } from "../shared/Sidebar";
 import { StatCard } from "./StatCard";
 import { RevenueChart } from "./RevenueChart";
-import { SalesChart } from "./SalesChart";
-import { CategoryDistribution } from "./CategoryDistribution";
-import { RecentActivity } from "./RecentActivity";
+import { UserCountChart } from "./UserCountChart";
 import NavBar from "../shared/Navbar";
+import { ProjectRequestChart } from "./RequestChart";
 
 const DashboardPage = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="flex min-h-screen bg-blue-900 text-white">
+    <div className="flex min-h-screen bg-gradient-to-br from-blue-950 to-blue-900 text-white">
       <div
-        className={`lg:block fixed top-0 left-0 w-64 h-full bg-blue-800 shadow-md z-10 ${
+        className={`lg:block fixed top-0 left-0 w-64 h-full bg-blue-900/70 backdrop-blur-md shadow-lg z-10 transition-all duration-300 ${
           sidebarOpen ? "block" : "hidden"
         }`}
       >
         <Sidebar isOpen={sidebarOpen} toggle={() => setSidebarOpen(false)} />
       </div>
 
-      <div className="flex-1 ml-0 lg:ml-64">
-        {" "}
+      <div className="flex-1 ml-0 lg:ml-64 transition-all duration-300">
         <NavBar setSidebarOpen={setSidebarOpen} />
-        <main className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+        <main className="p-4 md:p-6 lg:p-8">
+          <div className="mb-8">
+            <h1 className="text-2xl md:text-3xl font-bold mb-2">
+              Dashboard Overview
+            </h1>
+            <div className="flex justify-between items-center">
+              <p className="text-blue-200 text-sm md:text-base">
+                Welcome back! Here's what's happening with your business today.
+              </p>
+              <button className="px-3 py-1.5 bg-blue-700/50 hover:bg-blue-700/70 text-blue-100 text-sm font-medium rounded-md border border-blue-600/30 flex items-center gap-1.5 transition-colors">
+                <FileDown size={20} />
+                Report
+              </button>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
             <StatCard
               title="Total Revenue"
               value="$128,430"
               icon={<DollarSign size={24} className="text-blue-400" />}
               trend="+12.5%"
+              className="bg-blue-300/50 backdrop-blur-sm hover:shadow-lg transition-all hover:scale-105"
             />
             <StatCard
               title="Total Requests"
               value="8,549"
               icon={<ShoppingCart size={24} className="text-green-400" />}
               trend="+8.2%"
+              className="bg-blue-300/50 backdrop-blur-sm hover:shadow-lg transition-all hover:scale-105"
             />
             <StatCard
               title="Active Users"
               value="2,544"
               icon={<Users size={24} className="text-purple-400" />}
               trend="+15.3%"
+              className="bg-blue-300/50 backdrop-blur-sm hover:shadow-lg transition-all hover:scale-105"
             />
             <StatCard
               title="Growth Rate"
               value="23.5%"
               icon={<TrendingUp size={24} className="text-orange-400" />}
               trend="+4.1%"
+              className="bg-blue-300/50 backdrop-blur-sm hover:shadow-lg transition-all hover:scale-105"
             />
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-            <RevenueChart />
-            <SalesChart />
+          <div className="mb-8">
+            <div className="bg-blue-800/50 rounded-xl p-4 backdrop-blur-sm shadow-md">
+              <h2 className="text-xl font-semibold mb-4 text-blue-100">
+                User Trend
+              </h2>
+              <UserCountChart />
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2">
-              <CategoryDistribution />
+          <div className="mb-8">
+            <div className="bg-blue-800/50 rounded-xl p-4 backdrop-blur-sm shadow-md">
+              <h2 className="text-xl font-semibold mb-4 text-blue-100">
+                Request Trend
+              </h2>
+              <ProjectRequestChart />
             </div>
-            <RecentActivity />
+          </div>
+
+          <div className="mb-8">
+            <div className="bg-blue-800/50 rounded-xl p-4 backdrop-blur-sm shadow-md">
+              <h2 className="text-xl font-semibold mb-4 text-blue-100">
+                Revenue Trend
+              </h2>
+              <RevenueChart />
+            </div>
           </div>
         </main>
       </div>
