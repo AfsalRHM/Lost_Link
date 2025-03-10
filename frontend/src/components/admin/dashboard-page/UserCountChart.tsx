@@ -19,7 +19,7 @@ import processUserData from "./helper/processUserData";
 
 const periods = [
   "Today",
-  "Yesterday",
+  "This Month",
   "Last Month",
   "Last 6 Months",
   "This Year",

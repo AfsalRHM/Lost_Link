@@ -2,7 +2,6 @@ export interface StatCardProps {
   title: string;
   value: string;
   icon: React.ReactNode;
-  trend: string;
   className?: string;
 }
 export type AnalyticsData = {

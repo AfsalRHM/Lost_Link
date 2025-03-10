@@ -49,14 +49,16 @@ const CustomTooltip = ({ active, payload, label }: any) => {
           {payload.find((p: any) => p.dataKey === "inProgress")?.value || 0}
         </p>
         <p className="text-orange-300 font-semibold text-sm">
-          Pending: {payload.find((p: any) => p.dataKey === "pending")?.value || 0}
+          Pending:{" "}
+          {payload.find((p: any) => p.dataKey === "pending")?.value || 0}
         </p>
         <div className="mt-1 pt-1 border-t border-blue-800">
           <p className="text-white font-semibold text-sm">
             Total: {totalRequests}
           </p>
           <p className="text-blue-300 text-xs">
-            Target: {payload.find((p: any) => p.dataKey === "target")?.value || 0}
+            Target:{" "}
+            {payload.find((p: any) => p.dataKey === "target")?.value || 0}
           </p>
         </div>
       </div>
