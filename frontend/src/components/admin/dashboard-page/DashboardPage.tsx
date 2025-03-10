@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Users,
   DollarSign,
@@ -12,9 +12,128 @@ import { RevenueChart } from "./RevenueChart";
 import { UserCountChart } from "./UserCountChart";
 import NavBar from "../shared/Navbar";
 import { ProjectRequestChart } from "./RequestChart";
+import fetchAllRequests from "../../../api/admin-api/allRequestAPI";
+import fetchAllUsers from "../../../api/admin-api/allUsersAPI";
+import { showErrorToast2 } from "../../../utils/iziToastUtils";
+import IrequestModel from "../../../interface/IrequestModel";
+import { userDataType } from "../../../interface/IuserModel";
 
 const DashboardPage = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const [users, setUsers] = useState([]);
+  const [requests, setRequests] = useState([]);
+
+  // Store counts by month
+  const [currentMonthRequests, setCurrentMonthRequests] = useState(0);
+  const [previousMonthRequests, setPreviousMonthRequests] = useState(0);
+  const [currentMonthUsers, setCurrentMonthUsers] = useState(0);
+  const [previousMonthUsers, setPreviousMonthUsers] = useState(0);
+
+  const [userGrowthRate, setUserGrowthRate] = useState("0%");
+
+  // Function to calculate trend percentage
+  const calculateTrend = (current: number, previous: number) => {
+    if (previous === 0) return current === 0 ? "0%" : "+100%";
+    const trend = ((current - previous) / previous) * 100;
+    return trend.toFixed(1) + "%";
+  };
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const response = await fetchAllUsers();
+        console.log("This is the users", response);
+        if (response.status == 200) {
+          setUsers(response.data.data);
+
+          // Get current and previous month
+          const currentMonth = new Date().getMonth();
+          const previousMonth = currentMonth === 0 ? 11 : currentMonth - 1;
+          const currentYear = new Date().getFullYear();
+
+          // Filter data for current and previous month
+          const usersThisMonth = response.data.data.filter(
+            (user: userDataType) => {
+              const createdAt = new Date(user.createdAt!);
+              return (
+                createdAt.getMonth() === currentMonth &&
+                createdAt.getFullYear() === currentYear
+              );
+            }
+          );
+          const usersLastMonth = response.data.data.filter(
+            (user: userDataType) => {
+              const createdAt = new Date(user.createdAt!);
+              return (
+                createdAt.getMonth() === previousMonth &&
+                createdAt.getFullYear() === currentYear
+              );
+            }
+          );
+          setCurrentMonthUsers(usersThisMonth.length);
+          setPreviousMonthUsers(usersLastMonth.length);
+
+          if (usersLastMonth.length === 0) {
+            setUserGrowthRate(usersThisMonth.length > 0 ? "+100%" : "0%");
+          } else {
+            const growthRate =
+              ((usersThisMonth.length - usersLastMonth.length) /
+                usersLastMonth.length) *
+              100;
+            setUserGrowthRate(growthRate.toFixed(1) + "%");
+          }
+        } else {
+          showErrorToast2(response.data.message);
+        }
+      } catch (error) {
+        console.error("Failed to fetch users", error);
+      }
+    };
+    const fetchRequests = async () => {
+      try {
+        const response = await fetchAllRequests();
+        console.log("This is the requests", response);
+        if (response.status == 200) {
+          setRequests(response.data.data);
+
+          // Get current and previous month
+          const currentMonth = new Date().getMonth();
+          const previousMonth = currentMonth === 0 ? 11 : currentMonth - 1;
+          const currentYear = new Date().getFullYear();
+
+          // Filter data for current and previous month
+          const requestsThisMonth = response.data.data.filter(
+            (req: IrequestModel) => {
+              const createdAt = new Date(req.createdAt);
+              return (
+                createdAt.getMonth() === currentMonth &&
+                createdAt.getFullYear() === currentYear
+              );
+            }
+          );
+          const requestsLastMonth = response.data.data.filter(
+            (req: IrequestModel) => {
+              const createdAt = new Date(req.createdAt);
+              return (
+                createdAt.getMonth() === previousMonth &&
+                createdAt.getFullYear() === currentYear
+              );
+            }
+          );
+          setCurrentMonthRequests(requestsThisMonth.length);
+          setPreviousMonthRequests(requestsLastMonth.length);
+        } else {
+          showErrorToast2(response.data.message);
+        }
+      } catch (error) {
+        console.error("Failed to fetch requests", error);
+      }
+    };
+
+    fetchUsers();
+    fetchRequests();
+  }, []);
 
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-blue-950 to-blue-900 text-white">
@@ -46,31 +165,34 @@ const DashboardPage = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
             <StatCard
-              title="Total Revenue"
+              title="Total Revenue (This Month)"
               value="$128,430"
               icon={<DollarSign size={24} className="text-blue-400" />}
               trend="+12.5%"
               className="bg-blue-300/50 backdrop-blur-sm hover:shadow-lg transition-all hover:scale-105"
             />
             <StatCard
-              title="Total Requests"
-              value="8,549"
+              title="Total Requests (This Month)"
+              value={requests.length.toString()}
               icon={<ShoppingCart size={24} className="text-green-400" />}
-              trend="+8.2%"
+              trend={calculateTrend(
+                currentMonthRequests,
+                previousMonthRequests
+              )}
               className="bg-blue-300/50 backdrop-blur-sm hover:shadow-lg transition-all hover:scale-105"
             />
             <StatCard
-              title="Active Users"
-              value="2,544"
+              title="Total Users (This Month)"
+              value={users.length.toString()}
               icon={<Users size={24} className="text-purple-400" />}
-              trend="+15.3%"
+              trend={calculateTrend(currentMonthUsers, previousMonthUsers)}
               className="bg-blue-300/50 backdrop-blur-sm hover:shadow-lg transition-all hover:scale-105"
             />
             <StatCard
-              title="Growth Rate"
-              value="23.5%"
+              title="Growth Rate (This Month)"
+              value={currentMonthUsers.toString()}
               icon={<TrendingUp size={24} className="text-orange-400" />}
-              trend="+4.1%"
+              trend={userGrowthRate}
               className="bg-blue-300/50 backdrop-blur-sm hover:shadow-lg transition-all hover:scale-105"
             />
           </div>
@@ -80,7 +202,7 @@ const DashboardPage = () => {
               <h2 className="text-xl font-semibold mb-4 text-blue-100">
                 User Trend
               </h2>
-              <UserCountChart />
+              <UserCountChart userData={users} />
             </div>
           </div>
 

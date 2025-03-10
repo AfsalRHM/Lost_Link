@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   XAxis,
   YAxis,
@@ -15,18 +15,17 @@ import {
   MoreHorizontal,
   Users,
 } from "lucide-react";
+import processUserData from "./helper/processUserData";
 
-// User count data
-const userData = [
-  { name: "Jan", activeUsers: 1840, newUsers: 420 },
-  { name: "Feb", activeUsers: 2100, newUsers: 380 },
-  { name: "Mar", activeUsers: 2290, newUsers: 310 },
-  { name: "Apr", activeUsers: 2400, newUsers: 280 },
-  { name: "May", activeUsers: 2550, newUsers: 350 },
-  { name: "Jun", activeUsers: 2700, newUsers: 390 },
+const periods = [
+  "Today",
+  "Yesterday",
+  "Last Month",
+  "Last 6 Months",
+  "This Year",
+  "Last Year",
+  "All Time",
 ];
-
-const periods = ["Last 6 Months", "This Year", "Last Year", "All Time"];
 
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
@@ -45,18 +44,19 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   return null;
 };
 
-export const UserCountChart: React.FC = () => {
-  const [activePeriod, setActivePeriod] = useState("Last 6 Months");
+interface UserCountChartProps {
+  userData: any[];
+}
+
+export const UserCountChart: React.FC<UserCountChartProps> = ({ userData }) => {
+  const [activePeriod, setActivePeriod] = useState("Today");
   const [showFilters, setShowFilters] = useState(false);
 
-  // Calculate statistics
-  const currentActiveUsers = userData[userData.length - 1].activeUsers;
-  const totalNewUsers = userData.reduce((sum, item) => sum + item.newUsers, 0);
-  const avgMonthlyGrowth = (
-    ((userData[userData.length - 1].activeUsers / userData[0].activeUsers - 1) *
-      100) /
-    (userData.length - 1)
-  ).toFixed(1);
+  let formattedUserData = processUserData(userData, activePeriod);
+
+  useEffect(() => {
+    formattedUserData = processUserData(userData, activePeriod);
+  }, [activePeriod]);
 
   return (
     <div>
@@ -119,45 +119,11 @@ export const UserCountChart: React.FC = () => {
         </div>
       </div>
 
-      {/* User metrics */}
-      <div className="grid grid-cols-3 gap-3 mb-4">
-        <div className="p-3 bg-blue-800/30 rounded-md">
-          <p className="text-blue-300 text-xs">Active Users</p>
-          <p className="text-white font-semibold text-lg">
-            {currentActiveUsers.toLocaleString()}
-          </p>
-          <div className="flex items-center text-green-400 text-xs mt-1">
-            <span>+4.7%</span>
-            <span className="text-blue-300 ml-1">vs last month</span>
-          </div>
-        </div>
-        <div className="p-3 bg-blue-800/30 rounded-md">
-          <p className="text-blue-300 text-xs">New Users</p>
-          <p className="text-white font-semibold text-lg">
-            {totalNewUsers.toLocaleString()}
-          </p>
-          <div className="flex items-center text-green-400 text-xs mt-1">
-            <span>+12.3%</span>
-            <span className="text-blue-300 ml-1">vs previous</span>
-          </div>
-        </div>
-        <div className="p-3 bg-blue-800/30 rounded-md">
-          <p className="text-blue-300 text-xs">Monthly Growth</p>
-          <p className="text-white font-semibold text-lg">
-            {avgMonthlyGrowth}%
-          </p>
-          <div className="flex items-center text-green-400 text-xs mt-1">
-            <span>+0.8%</span>
-            <span className="text-blue-300 ml-1">vs target</span>
-          </div>
-        </div>
-      </div>
-
       {/* Main chart */}
       <div className="h-72">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart
-            data={userData}
+            data={formattedUserData}
             margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
           >
             <defs>
