@@ -657,12 +657,22 @@ export default class requestService implements IrequestService {
               2.508 * Math.pow(requestData.reward_amount, 1.0003)
             );
 
+            const calulateCommission = Math.floor(
+              (requestData.reward_amount / 100) * 5
+            );
+
+            const calculatedUserReward =
+              requestData.reward_amount - calulateCommission;
+
+            console.log(calculatedUserReward, "this is the user reward amount");
+
             const sendingTo = process.env.USER_QUEUE;
             const source = "Add the completed request details to the user";
             const props = {
               userId: response?.user_id,
               requestId: requestData?._id.toString(),
               points: calculatedPoints,
+              rewardAmount: calculatedUserReward,
             };
 
             if (!sendingTo) {

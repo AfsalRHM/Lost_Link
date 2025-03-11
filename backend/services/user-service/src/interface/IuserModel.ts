@@ -6,6 +6,7 @@ export default interface IuserModel extends Document {
   user_name: string;
   location: string;
   email: string;
+  wallet: number;
   phone?: number | null;
   status: string;
   password: string;
@@ -16,7 +17,11 @@ export default interface IuserModel extends Document {
     points_earned: number;
   }[];
   points: number;
-  payment_history: string[];
+  payment_history: {
+    date: Date;
+    type: string;
+    amount: number;
+  }[];
   createdAt?: Date;
   updatedAt?: Date;
 }

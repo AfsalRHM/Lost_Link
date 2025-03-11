@@ -28,6 +28,17 @@ export default interface IuserService {
     requestId: string;
     userId: string;
   }): Promise<any>;
+  addCompletedRequestDetails({
+    requestId,
+    userId,
+    points,
+    rewardAmount,
+  }: {
+    requestId: string;
+    userId: string;
+    points: number;
+    rewardAmount: number;
+  }): Promise<void>;
 }
 
 export interface updateFormDataType {
