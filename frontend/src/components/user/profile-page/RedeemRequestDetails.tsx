@@ -63,10 +63,6 @@ const RedeemRequestDetails = () => {
     return expiryDate.toDateString();
   };
 
-  const goToRequestDetails = (id: string) => {
-    navigate(`/requests/request-details?id=${id}`);
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white p-6">
       <div className="max-w-6xl mx-auto">
@@ -247,16 +243,6 @@ const RedeemRequestDetails = () => {
                   </div>
                 </div>
               )}
-            </div>
-            <div className="flex justify-center">
-              <button
-                onClick={() =>
-                  goToRequestDetails(requestRedeemData.request_id._id)
-                }
-                className="mt-8 px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition"
-              >
-                View Full Request Details
-              </button>
             </div>
           </div>
         </div>

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { defineCustomElements } from "ionicons/dist/loader";
 import { Link } from "react-router-dom";
 
-const Header = () => {
+const Header = ({ scrollToContact }: { scrollToContact?: any }) => {
   useEffect(() => {
     defineCustomElements(window);
   }, []);
@@ -27,24 +27,33 @@ const Header = () => {
         <div className="nav-links duration-500 md:static absolute bg-header min-h-[6vh] left-0 top-[-100%] md:w-auto w-full flex items-center px-5 mt-3 md:mt-0 border-b md:border-b-0">
           <ul className="flex md:flex-row flex-col md:min-h-fit md:items-center md:gap-[2vw] gap-2 mt-4 md:mt-0">
             <li className="py-[2px] px-[4px] rounded-full hover:bg-[#8695ae] transition-all ease-in-out duration-300">
-              <a href="#" className="text-[15px] font-medium">
-                Home
-              </a>
+              <Link to="/">
+                <p className="text-[15px] font-medium">Home</p>
+              </Link>
             </li>
             <li className="py-[2px] px-[4px] rounded-full hover:bg-[#8695ae] transition-all ease-in-out duration-300">
-              <a href="#" className="text-[15px] font-medium">
-                About Us
-              </a>
+              <Link to="/about-us">
+                <p className="text-[15px] font-medium">About Us</p>
+              </Link>
             </li>
             <li className="py-[2px] px-[4px] rounded-full hover:bg-[#8695ae] transition-all ease-in-out duration-300">
-              <a href="#" className="text-[15px] font-medium">
-                Contact
-              </a>
+              {scrollToContact == undefined ? (
+                <Link to="/">
+                  <p className="text-[15px] font-medium">Contact</p>
+                </Link>
+              ) : (
+                <p
+                  onClick={scrollToContact}
+                  className="text-[15px] font-medium cursor-pointer"
+                >
+                  Contact
+                </p>
+              )}
             </li>
             <li className="py-[2px] px-[4px] rounded-full hover:bg-[#8695ae] transition-all ease-in-out duration-300">
-              <a href="#" className="text-[15px] font-medium">
-                FAQ's
-              </a>
+              <Link to="/faq">
+                <p className="text-[15px] font-medium">FAQ's</p>
+              </Link>
             </li>
           </ul>
         </div>
