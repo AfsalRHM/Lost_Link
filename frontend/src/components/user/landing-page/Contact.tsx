@@ -1,6 +1,9 @@
-const Contact = () => {
+const Contact = ({ contactRef }: any) => {
   return (
-    <div className="w-full bg-blue-400 flex flex-col md:flex-row justify-center gap-10 md:gap-20 py-14 px-4">
+    <div
+      ref={contactRef}
+      className="w-full bg-blue-400 flex flex-col md:flex-row justify-center gap-10 md:gap-20 py-14 px-4"
+    >
       <div className="flex flex-col gap-7 w-full md:w-1/2">
         <div className="font-bold text-3xl">Contact Us</div>
         <div className="text-lg">

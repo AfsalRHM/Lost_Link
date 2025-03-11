@@ -10,6 +10,7 @@ import RequestRedeemPage from "../pages/user/RequestRedeemPage";
 
 import { IsUserLogin } from "../utils/IsUserLogin";
 import RequestRedeemDetailsPage from "../pages/user/RequestRedeemDetailsPage";
+import FAQPage from "../pages/user/FAQPage";
 
 const UserRoutes = () => {
   return (
@@ -25,6 +26,7 @@ const UserRoutes = () => {
         <Route path="/requests/redeem-request" element={<RequestRedeemPage />} />
         <Route path="/payment-success" element={<PaymentSuccessPage />} />
       </Route>
+      <Route path="/faq" element={<FAQPage />} />
     </>
   );
 };
