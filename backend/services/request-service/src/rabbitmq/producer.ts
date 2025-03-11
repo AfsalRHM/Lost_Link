@@ -14,6 +14,7 @@ interface sendToServiceType {
     role?: string;
     requestId?: string;
     response?: any
+    rewardAmount?: number
   };
 }
 

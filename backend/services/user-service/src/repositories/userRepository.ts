@@ -72,7 +72,8 @@ export default class UserRepository
   async findByIdAndAddCompletedRequestIdAndPoints(
     userId: string,
     requestId: string,
-    points: number
+    points: number,
+    rewardAmount: number
   ): Promise<IuserModel | null> {
     try {
       const updatedUser = await this.model.findByIdAndUpdate(
@@ -83,9 +84,14 @@ export default class UserRepository
               request_id: requestId,
               points_earned: points,
             },
+            payment_history: {
+              type: "credit",
+              amount: rewardAmount,
+            },
           },
           $inc: {
             points: points,
+            wallet: rewardAmount
           },
         },
         { new: true }

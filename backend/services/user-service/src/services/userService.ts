@@ -224,10 +224,12 @@ export default class userService implements IuserService {
     requestId,
     userId,
     points,
+    rewardAmount,
   }: {
     requestId: string;
     userId: string;
     points: number;
+    rewardAmount: number;
   }): Promise<void> {
     try {
       console.log(
@@ -240,7 +242,8 @@ export default class userService implements IuserService {
         await this._userRepository.findByIdAndAddCompletedRequestIdAndPoints(
           userId,
           requestId,
-          points
+          points,
+          rewardAmount
         );
     } catch (error) {
       console.log(error, "error on the addCompletedRequestDetails/userService");

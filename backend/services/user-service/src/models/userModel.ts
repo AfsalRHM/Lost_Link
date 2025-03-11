@@ -27,6 +27,10 @@ const userSchema = new Schema(
       required: true,
       unique: true,
     },
+    wallet: {
+      type: Number,
+      default: 0,
+    },
     phone: {
       type: Number,
       default: null,
@@ -58,7 +62,13 @@ const userSchema = new Schema(
       default: 0,
     },
     payment_history: {
-      type: [String],
+      type: [
+        {
+          type: { type: String, required: true },
+          date: { type: Date, default: Date.now() },
+          amount: { type: Number, required: true },
+        },
+      ],
       default: [],
     },
   },

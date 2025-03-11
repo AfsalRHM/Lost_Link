@@ -4,6 +4,7 @@ export interface userDataType {
   full_name: string;
   user_name: string;
   location: string;
+  wallet: number;
   email: string;
   phone?: number | null;
   status: string;
@@ -15,7 +16,11 @@ export interface userDataType {
     points_earned: number;
   }[];
   points: number;
-  payment_history: string[];
+  payment_history: {
+    date: Date;
+    type: string;
+    amount: number;
+  }[];
   createdAt?: Date;
   updatedAt?: Date;
 }

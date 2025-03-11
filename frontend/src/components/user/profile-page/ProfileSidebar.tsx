@@ -50,10 +50,10 @@ const ProfileSidebar = ({
 
   const menuItems = [
     "Location Info",
+    "My Wallet",
     "Tier Information",
     "My Requests",
     "Redeem Requests",
-    "Payment History",
     "My Reports",
     "Logout",
   ];
