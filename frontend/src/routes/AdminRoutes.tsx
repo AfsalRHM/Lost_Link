@@ -13,6 +13,8 @@ import RedeemRequestList from "../pages/admin/RedeemRequestList";
 import UserDetails from "../pages/admin/UserDetails";
 import RequestDetails from "../pages/admin/RequestDetails";
 import RedeemRequestDetails from "../pages/admin/RedeemRequestDetails";
+import MeetList from "../pages/admin/MeetList";
+import MeetDetails from "../pages/admin/MeetDetails";
 
 const AdminRoutes = () => {
   return (
@@ -20,6 +22,7 @@ const AdminRoutes = () => {
       <Route element={<AdminPrivateRoute />}>
         <Route path="/admin/login" element={<Login />} />
       </Route>
+
       <Route element={<IsAdminLogin />}>
         <Route path="/admin" element={<Dashboard />} />
         <Route path="/admin/users" element={<UsersList />} />
@@ -27,17 +30,13 @@ const AdminRoutes = () => {
         <Route path="/admin/admins" element={<AdminList />} />
         <Route path="/admin/addadmin" element={<AddAdmin />} />
         <Route path="/admin/requests" element={<RequestList />} />
-        <Route
-          path="/admin/requests/request-details/:id"
-          element={<RequestDetails />}
-        />
+        <Route path="/admin/requests/request-details/:id" element={<RequestDetails />} />
         <Route path="/admin/chats" element={<ChatList />} />
         <Route path="/admin/redeem-requests" element={<RedeemRequestList />} />
-        <Route
-          path="/admin/redeem-requests/details/:id"
-          element={<RedeemRequestDetails />}
-        />
+        <Route path="/admin/redeem-requests/details/:id" element={<RedeemRequestDetails />} />
         <Route path="/admin/chats/:userId" element={<ChatDetails />} />
+        <Route path="/admin/meetings" element={<MeetList />} />
+        <Route path="/admin/meetings/:meetId" element={<MeetDetails />} />
       </Route>
     </>
   );

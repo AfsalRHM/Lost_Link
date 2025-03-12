@@ -30,8 +30,10 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 import chat_route from "./src/routes/chatRoute";
 import message_route from "./src/routes/messageRoute";
+import meet_route from "./src/routes/meetRoute";
 app.use("/", chat_route);
 app.use("/", message_route);
+app.use("/", meet_route);
 
 // Setting up the Server
 import serverListening from "./src/config/serverConfig";
