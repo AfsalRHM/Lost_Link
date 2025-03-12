@@ -99,4 +99,28 @@ export default class meetService implements ImeetService {
       return false;
     }
   }
+
+  // To get a single meet data
+  async getUserMeets({ userId }: { userId: string }): Promise<any> {
+    try {
+      const meetData = await this._meetRepository.findSome({ user_id: userId });
+
+      if (meetData) {
+        return {
+          status: true,
+          data: meetData,
+          message: "Meet Data Fetched",
+        };
+      } else {
+        return {
+          status: false,
+          data: null,
+          message: "Unable to find meet data",
+        };
+      }
+    } catch (error) {
+      console.log(error, "error on the getUserMeets/meetService");
+      return false;
+    }
+  }
 }

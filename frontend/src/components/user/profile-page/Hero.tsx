@@ -15,6 +15,7 @@ import UserDetailsLoading from "./loading/UserDetailsLoading.tsx";
 import TierSectionLoading from "./loading/TierSectionLoading.tsx";
 import ReportList from "./ReportList.tsx";
 import WalletSection from "./WalletSection.tsx";
+import MeetingSection from "./MeetingSection.tsx";
 
 const Hero = () => {
   const [loading, setLoading] = useState<boolean>(true);
@@ -107,6 +108,8 @@ const Hero = () => {
               <ReportList userData={userData!} />
             ) : selectedItem === "My Wallet" ? (
               <WalletSection userData={userData}/>
+            ) : selectedItem === "Meetings" ? (
+              <MeetingSection />
             ) : (
               <LocationInfo />
             )}

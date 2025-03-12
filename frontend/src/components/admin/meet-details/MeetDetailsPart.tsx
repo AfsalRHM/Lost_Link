@@ -1,4 +1,4 @@
-import { format, isFuture } from "date-fns";
+import { format, isFuture, differenceInMinutes } from "date-fns";
 import {
   Video,
   User,
@@ -8,8 +8,10 @@ import {
   ChevronLeft,
   ExternalLink,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
-const MeetDetailsPart = ({meetData}: {meetData: any}) => {
+const MeetDetailsPart = ({ meetData }: { meetData: any }) => {
+  const navigate = useNavigate();
   const meet = meetData;
 
   // Format date for display
@@ -33,34 +35,28 @@ const MeetDetailsPart = ({meetData}: {meetData: any}) => {
   };
 
   // Check if the meeting is in the future
-  const isUpcoming = isFuture(new Date(meet.meet_date));
+  const meetDate = new Date(meet.meet_date);
+  const isUpcoming = isFuture(meetDate);
 
-  // Handle navigation to user info
+  const isJoinable =
+    isUpcoming || differenceInMinutes(new Date(), meetDate) < 15;
+
   const handleUserInfoClick = () => {
-    // Implement navigation to user info page
-    console.log(`Navigate to user info for ID: ${meet.user_id}`);
-    // You would typically use router.push or similar here
+    navigate(`/admin/users/user-details/${meet.user_id}`);
   };
 
-  // Handle navigation to request info
   const handleRequestInfoClick = () => {
-    // Implement navigation to request info page
-    console.log(`Navigate to request info for ID: ${meet.request_id}`);
-    // You would typically use router.push or similar here
+    navigate(`/admin/redeem-requests/details/${meet.request_id}`);
   };
 
-  // Handle join meeting
   const handleJoinMeeting = () => {
-    // Implement join meeting logic
+    navigate(`/video-call?id=${meet._id}`);
     console.log(`Joining meeting with ID: ${meet._id}`);
-    // You would typically launch a meeting component or redirect to a meeting URL
   };
 
   // Handle back button
   const handleBackClick = () => {
-    // Implement back navigation
-    console.log("Navigate back to meetings list");
-    // You would typically use router.back() or similar here
+    navigate(-1);
   };
 
   return (
@@ -74,16 +70,6 @@ const MeetDetailsPart = ({meetData}: {meetData: any}) => {
           <ChevronLeft className="w-5 h-5 mr-1" />
           <span>Back to Meetings</span>
         </button>
-
-        <div
-          className={`px-3 py-1 rounded-full text-sm font-medium ${
-            isUpcoming
-              ? "bg-green-900 text-green-300"
-              : "bg-gray-700 text-gray-300"
-          }`}
-        >
-          {isUpcoming ? "Upcoming" : "Completed"}
-        </div>
       </div>
 
       {/* Meeting Details Card */}
@@ -139,15 +125,18 @@ const MeetDetailsPart = ({meetData}: {meetData: any}) => {
 
           {/* Right Column - Actions */}
           <div className="flex flex-col gap-4 md:w-72">
-            {isUpcoming && (
-              <button
-                onClick={handleJoinMeeting}
-                className="bg-green-600 hover:bg-green-500 text-white py-4 px-6 rounded-lg flex items-center justify-center shadow-lg transition duration-200"
-              >
-                <Video className="w-5 h-5 mr-2" />
-                Join Meeting
-              </button>
-            )}
+            <button
+              onClick={handleJoinMeeting}
+              className={`py-4 px-6 rounded-lg flex items-center justify-center shadow-lg transition duration-200 ${
+                isJoinable
+                  ? "bg-green-600 hover:bg-green-500 text-white"
+                  : "bg-gray-500 text-gray-300 cursor-not-allowed"
+              }`}
+              disabled={!isJoinable}
+            >
+              <Video className="w-5 h-5 mr-2" />
+              {isJoinable ? "Join Meeting" : "Meeting Expired"}
+            </button>
 
             <button
               onClick={handleUserInfoClick}

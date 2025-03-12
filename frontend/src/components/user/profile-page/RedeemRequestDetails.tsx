@@ -14,7 +14,7 @@ import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { showErrorToast2 } from "../../../utils/iziToastUtils";
 import getRequestRedeemDetails from "../../../api/user-api/getRedeemRequestDetails";
-import VideoCall from "./VideoCall";
+import VideoCall from "../../shared/VideoCall";
 import MeetScheduleModal from "./MeetScheduleModal";
 
 const RedeemRequestDetails = () => {

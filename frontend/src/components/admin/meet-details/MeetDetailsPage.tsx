@@ -9,18 +9,19 @@ import fetchMeetData from "../../../api/admin-api/getMeetDetailsAPI";
 
 const MeetDetailsPage = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [meetData, setMeetData] = useState();
+  const [meetData, setMeetData] = useState<any>(null);
+  const [loading, setLoading] = useState<boolean>(false);
   const JwtErrors = useAdminJwtErrors();
-
   const { meetId } = useParams<{ meetId: string }>();
 
   const getMeetData = async () => {
+    if (!meetId) return;
+
     try {
-      const response = await fetchMeetData({meetId});
+      setLoading(true);
+      const response = await fetchMeetData({ meetId });
 
-      console.log(response);
-
-      if (response && response.data && response.data.status) {
+      if (response?.data?.status) {
         setMeetData(response.data.data);
       } else if (response === false) {
         JwtErrors({ reason: "session expiration" });
@@ -30,16 +31,18 @@ const MeetDetailsPage = () => {
           console.error("Error during admin logout:", logoutError);
         }
       } else {
-        console.log("Unexpected response:", response);
+        console.error("Unexpected response:", response);
       }
     } catch (error) {
-      console.error("Error in getAllMeets:", error);
+      console.error("Error in getMeetData:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
     getMeetData();
-  }, []);
+  }, [meetId]);
 
   return (
     <div className="flex min-h-screen bg-blue-900 text-white">
@@ -55,7 +58,13 @@ const MeetDetailsPage = () => {
         <NavBar setSidebarOpen={setSidebarOpen} />
 
         <main className="p-6">
-          <MeetDetailsPart meetData={meetData} />
+          {loading ? (
+            <p className="text-center text-lg">Loading...</p>
+          ) : meetData ? (
+            <MeetDetailsPart meetData={meetData} />
+          ) : (
+            <p className="text-center text-lg">No meeting details found.</p>
+          )}
         </main>
       </div>
     </div>
