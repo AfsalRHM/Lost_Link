@@ -12,6 +12,8 @@ const MeetController = new meetController();
 // Post Requests
 meet_route.post("/create-meeting", verifyAccessToken, MeetController.createMeet); // To get schedule a meet
 
+meet_route.post("/fetch-user-meetings", verifyAccessToken, MeetController.getUserMeets); // To get list of meeting of a particular user
+
 // Patch Requests
 
 

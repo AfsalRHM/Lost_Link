@@ -51,10 +51,11 @@ const ProfileSidebar = ({
   const menuItems = [
     "Location Info",
     "My Wallet",
-    "Tier Information",
     "My Requests",
-    "Redeem Requests",
     "My Reports",
+    "Meetings",
+    "Tier Information",
+    "Redeem Requests",
     "Logout",
   ];
 

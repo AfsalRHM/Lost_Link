@@ -82,4 +82,29 @@ export default class meetController implements ImeetController {
       return;
     }
   };
+
+  // To get list of meetings of a particular user
+  public getUserMeets = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { userId } = req.body;
+
+      if (!userId) {
+        console.log(
+          "invalid data passed to the request getUserMeets/meetController"
+        );
+        res.status(404);
+        return;
+      }
+      const response = await this._meetService.getUserMeets({userId});
+
+      if (response.status) {
+        res.status(200).json(response);
+      } else {
+        res.status(402).json(response);
+      }
+    } catch (error) {
+      console.log("error in getUserMeets/meetController", error);
+      return;
+    }
+  };
 }

@@ -11,6 +11,7 @@ import RequestRedeemPage from "../pages/user/RequestRedeemPage";
 import { IsUserLogin } from "../utils/IsUserLogin";
 import RequestRedeemDetailsPage from "../pages/user/RequestRedeemDetailsPage";
 import FAQPage from "../pages/user/FAQPage";
+import VideoCall from "../components/shared/VideoCall";
 
 const UserRoutes = () => {
   return (
@@ -25,6 +26,9 @@ const UserRoutes = () => {
         <Route path="/requests/request-details" element={<ReqeustDetailsPage />} />
         <Route path="/requests/redeem-request" element={<RequestRedeemPage />} />
         <Route path="/payment-success" element={<PaymentSuccessPage />} />
+
+        <Route path="/video-call" element={<VideoCall />} />
+
       </Route>
       <Route path="/faq" element={<FAQPage />} />
     </>

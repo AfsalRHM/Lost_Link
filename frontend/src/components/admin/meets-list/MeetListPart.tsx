@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { format, isFuture } from "date-fns";
+import { format, addMinutes, isAfter } from "date-fns";
 import { Link } from "react-router-dom";
 
 interface MeetListPartType {
@@ -19,10 +19,16 @@ const MeetListPart = ({ allMeets }: MeetListPartType) => {
     }
   };
 
+  // Current time
+  const now = new Date();
+
   // Filter meetings based on active tab
   const filteredMeets = allMeets.filter((meet: any) => {
     const meetDate = new Date(meet.meet_date);
-    return activeTab === "upcoming" ? isFuture(meetDate) : !isFuture(meetDate);
+    const meetWithBuffer = addMinutes(meetDate, 15);
+    return activeTab === "upcoming"
+      ? isAfter(meetWithBuffer, now)
+      : !isAfter(meetWithBuffer, now);
   });
 
   return (
@@ -100,9 +106,7 @@ const MeetListPart = ({ allMeets }: MeetListPartType) => {
 
               <div className="bg-blue-800 p-3 flex justify-end">
                 <Link to={`/admin/meetings/${meet._id}`}>
-                  <button
-                    className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-1 rounded-md text-sm transition-colors duration-200"
-                  >
+                  <button className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-1 rounded-md text-sm transition-colors duration-200">
                     View Details
                   </button>
                 </Link>
