@@ -14,16 +14,21 @@ import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { showErrorToast2 } from "../../../utils/iziToastUtils";
 import getRequestRedeemDetails from "../../../api/user-api/getRedeemRequestDetails";
+import VideoCall from "./VideoCall";
+import MeetScheduleModal from "./MeetScheduleModal";
 
 const RedeemRequestDetails = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
+  const [videoCall, setVideoCall] = useState<boolean>(false);
   const [requestRedeemData, setRequestRedeemData] = useState<any>();
-
   const [loading, setLoading] = useState<boolean>(true);
 
   const redeemRequestId = location.state?.redeemRequestId;
+
+  const [meetScheduleModalOpen, setMeetScheduleModalOpen] =
+    useState<boolean>(false);
 
   useEffect(() => {
     const getRequestData = async () => {
@@ -67,52 +72,68 @@ const RedeemRequestDetails = () => {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white p-6">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="flex items-center mb-8">
-          <button
-            onClick={handleBack}
-            className="flex items-center text-blue-600 hover:text-blue-700 transition-colors"
-          >
-            <ArrowLeft className="w-5 h-5 mr-2" />
-            <span className="font-medium">Back</span>
-          </button>
+        <div className="flex justify-between">
+          <div className="flex items-center mb-8">
+            <button
+              onClick={handleBack}
+              className="flex items-center text-blue-600 hover:text-blue-700 transition-colors border border-black p-2 rounded-lg"
+            >
+              <ArrowLeft className="w-5 h-5 mr-2" />
+              <span className="font-medium">Back</span>
+            </button>
+          </div>
+          {requestRedeemData.status == "pending" ? (
+            <div>
+              <button
+                // onClick={() => setVideoCall(!videoCall)}
+                onClick={() => setMeetScheduleModalOpen(true)}
+                className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg flex items-center"
+              >
+                Schedule a Meet
+              </button>
+            </div>
+          ) : null}
         </div>
-
         {/* Main Content */}
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
           {/* Title Section */}
-          <div className="bg-gradient-to-r from-blue-600 to-blue-400 p-8">
-            <h2 className="text-4xl font-extrabold text-white mb-2">
-              {requestRedeemData.request_id.product_name}
-            </h2>
-            <div className="flex items-center text-blue-100 space-x-4">
-              <div className="flex items-center">
-                <MapPin className="w-5 h-5 mr-2" />
-                <span>{requestRedeemData.found_location}</span>
-              </div>
-              <div className="flex items-center">
-                <Clock className="w-5 h-5 mr-2" />
-                <span>
-                  Expires on:{" "}
-                  {calculateExpiryDate(
-                    requestRedeemData.found_date,
-                    parseInt(
-                      requestRedeemData.request_id.expiration_validity.split(
-                        " "
-                      )[0]
-                    )
-                  )}
-                </span>
-              </div>
-              <div className="md:flex items-center hidden">
-                <Info className="w-5 h-5 mr-2" />
-                <span>Status: {requestRedeemData.status}</span>
-              </div>
-              <div className="md:flex items-center hidden">
-                <Phone className="w-5 h-5 mr-2" />
-                <span>Contact: {requestRedeemData.mobile_number}</span>
+          <div className="bg-gradient-to-r flex justify-between from-blue-600 to-blue-400 p-8">
+            <div>
+              <h2 className="text-4xl font-extrabold text-white mb-2">
+                {requestRedeemData.request_id.product_name}
+              </h2>
+              <div className="flex items-center text-blue-100 space-x-4">
+                <div className="flex items-center">
+                  <MapPin className="w-5 h-5 mr-2" />
+                  <span>{requestRedeemData.found_location}</span>
+                </div>
+                <div className="flex items-center">
+                  <Clock className="w-5 h-5 mr-2" />
+                  <span>
+                    Expires on:{" "}
+                    {calculateExpiryDate(
+                      requestRedeemData.found_date,
+                      parseInt(
+                        requestRedeemData.request_id.expiration_validity.split(
+                          " "
+                        )[0]
+                      )
+                    )}
+                  </span>
+                </div>
+                <div className="md:flex items-center hidden">
+                  <Info className="w-5 h-5 mr-2" />
+                  <span>Status: {requestRedeemData.status}</span>
+                </div>
+                <div className="md:flex items-center hidden">
+                  <Phone className="w-5 h-5 mr-2" />
+                  <span>Contact: {requestRedeemData.mobile_number}</span>
+                </div>
               </div>
             </div>
           </div>
+
+          {videoCall ? <VideoCall channelName={requestRedeemData._id} /> : null}
 
           {/* Content Grid */}
           <div className="p-8">
@@ -247,6 +268,9 @@ const RedeemRequestDetails = () => {
           </div>
         </div>
       </div>
+      {meetScheduleModalOpen ? (
+        <MeetScheduleModal onClose={() => setMeetScheduleModalOpen(false)} requestId={redeemRequestId} />
+      ) : null}
     </div>
   );
 };

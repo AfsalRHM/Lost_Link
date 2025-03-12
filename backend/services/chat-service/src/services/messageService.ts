@@ -1,9 +1,6 @@
 import ImessageService from "../interface/ImessageService";
 import messageRepository from "../repositories/messageRepository";
 
-import { createCorrelationId } from "../utils/correlationId";
-import eventEmitter from "../utils/eventEmitter";
-import sendToService from "../rabbitmq/producer";
 import chatRepository from "../repositories/chatRepository";
 
 export default class messageService implements ImessageService {

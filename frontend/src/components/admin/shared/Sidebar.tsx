@@ -6,7 +6,7 @@ import {
   Notebook,
   MessageSquare,
   LogOut,
-  CreditCard,
+  Video,
 } from "lucide-react";
 import { SidebarProps } from "../../../interface/IadminDashboard";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -70,9 +70,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggle }) => {
         path: "/admin/chats",
       },
       {
-        text: "Payments",
-        icon: <CreditCard size={20} />,
-        path: "/admin/payments",
+        text: "Meetings",
+        icon: <Video size={20} />,
+        path: "/admin/meetings",
       },
       { text: "Logout", icon: <LogOut size={20} />, path: "/" },
     ];
@@ -96,9 +96,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggle }) => {
         path: "/admin/chats",
       },
       {
-        text: "Payments",
-        icon: <CreditCard size={20} />,
-        path: "/admin/payments",
+        text: "Meetings",
+        icon: <Video size={20} />,
+        path: "/admin/meetings",
       },
       { text: "Logout", icon: <LogOut size={20} />, path: "/" },
     ];
