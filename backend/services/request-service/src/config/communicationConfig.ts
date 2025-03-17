@@ -1,6 +1,6 @@
 import amqp, { Channel, Connection } from "amqplib";
 
-let channel: Channel, connection: Connection;
+let channel: Channel, connection: any
 
 export default async function configCommunication() {
   try {
