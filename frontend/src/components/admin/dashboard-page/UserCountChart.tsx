@@ -49,7 +49,7 @@ interface UserCountChartProps {
 }
 
 export const UserCountChart: React.FC<UserCountChartProps> = ({ userData }) => {
-  const [activePeriod, setActivePeriod] = useState("Today");
+  const [activePeriod, setActivePeriod] = useState("Last 6 Months");
   const [showFilters, setShowFilters] = useState(false);
 
   let formattedUserData = processUserData(userData, activePeriod);

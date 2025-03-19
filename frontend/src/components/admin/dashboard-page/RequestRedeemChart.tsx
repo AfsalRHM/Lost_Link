@@ -14,9 +14,9 @@ import {
   Filter,
   Download,
   MoreHorizontal,
-  Briefcase,
+  SquareCheckBig,
 } from "lucide-react";
-import processRequestData from "./helper/processRequestData";
+import processRedeemRequestData from "./helper/processRedeemRequestData"; // You process data based on the selected period
 
 const periods = [
   "Today",
@@ -33,8 +33,8 @@ const CustomTooltip = ({ active, payload, label }: any) => {
     return (
       <div className="bg-blue-900 p-3 rounded-md shadow-md border border-blue-800">
         <p className="text-blue-100 font-medium text-sm">{label}</p>
-        <p className="text-yellow-300 font-semibold text-sm">
-          New: {payload.find((p: any) => p.dataKey === "new")?.value || 0}
+        <p className="text-green-300 font-semibold text-sm">
+          new: {payload[0].value || 0}
         </p>
       </div>
     );
@@ -42,26 +42,27 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   return null;
 };
 
-interface ProjectRequestChartProps {
-  requestData: any[];
+interface RedeemRequestChartProps {
+  redeemRequestData: any[];
 }
 
-export const ProjectRequestChart: React.FC<ProjectRequestChartProps> = ({
-  requestData,
+export const RedeemRequestChart: React.FC<RedeemRequestChartProps> = ({
+  redeemRequestData,
 }) => {
   const [activePeriod, setActivePeriod] = useState("Last 6 Months");
   const [showFilters, setShowFilters] = useState(false);
 
-  // Process data dynamically based on the selected period
-  const chartData = processRequestData(requestData, activePeriod);
+  const chartData = processRedeemRequestData(redeemRequestData, activePeriod);
 
   return (
     <div>
-      {/* Header with controls */}
+      {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3">
         <div className="flex items-center gap-2">
-          <Briefcase size={18} className="text-green-300" />
-          <h3 className="text-blue-100 font-semibold text-lg">Request Statistics</h3>
+          <SquareCheckBig size={18} className="text-yellow-300" />
+          <h3 className="text-blue-100 font-semibold text-lg">
+            Redeem Request Statistics
+          </h3>
           <div className="flex items-center px-2 py-1 bg-blue-800/30 rounded-md text-blue-300 text-xs">
             <CalendarRange size={14} className="mr-1" />
             {activePeriod}
@@ -112,7 +113,7 @@ export const ProjectRequestChart: React.FC<ProjectRequestChartProps> = ({
         </div>
       </div>
 
-      {/* Main chart */}
+      {/* Chart */}
       <div className="h-72">
         <ResponsiveContainer width="100%" height="100%">
           <ComposedChart
@@ -128,7 +129,7 @@ export const ProjectRequestChart: React.FC<ProjectRequestChartProps> = ({
             <YAxis stroke="#94A3B8" />
             <Tooltip content={<CustomTooltip />} />
             <Legend verticalAlign="top" height={36} />
-            <Bar dataKey="new" fill="#f6e05e" />
+            <Bar dataKey="new" fill="#2cb87b" radius={[4, 4, 0, 0]} />
           </ComposedChart>
         </ResponsiveContainer>
       </div>

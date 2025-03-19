@@ -6,8 +6,7 @@ export default async function fetchAllRedeemRequests(): Promise<any> {
       `${import.meta.env.VITE_API_ROUTE}/request/get-all-redeem-requests`
     );
     return result;
-  } catch (error) {
-    console.log(error, "error on the allRedeemRequestsAPI");
-    return false;
+  } catch (error: any) {
+    return error.response;
   }
 }
