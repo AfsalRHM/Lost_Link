@@ -27,8 +27,6 @@ async function getAdminById(call: any, callback: any) {
       status: admin.status,
     };
 
-    console.log(adminData, "This is the admin data")
-
     callback(null, adminData);
   } catch (err) {
     callback(err, null);
