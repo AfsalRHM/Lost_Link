@@ -11,12 +11,11 @@ export default async function sendResetPasswordMail(
   try {
     const result = await axios
       .post(
-        `${import.meta.env.VITE_API_ROUTE}/auth/sendResetPasswordOTP`,
+        `${import.meta.env.VITE_API_ROUTE}/auth/send-reset-password-otp`,
         props
       )
       .then((response) => {
-        console.log(response.status, response.data);
-        return response.data;
+        return response;
       });
     return result;
   } catch (error) {

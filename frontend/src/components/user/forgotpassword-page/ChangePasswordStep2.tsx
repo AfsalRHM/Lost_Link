@@ -7,8 +7,9 @@ import { useState } from "react";
 
 import { validateStep3Details } from "../../../validations/registerStep3";
 import ValidationError from "../shared/ValidationError";
-import { showErrorToast, showSuccessToast } from "../../../utils/toastUtils";
+import { showSuccessToast } from "../../../utils/toastUtils";
 import changePassword from "../../../api/auth-api/changePasswordAPI";
+import UserErrorHandling from "../../../middlewares/UserErrorHandling";
 
 type inputPropsType = {
   display: boolean;
@@ -39,7 +40,6 @@ const ChangePasswordStep2 = (Props: {
 
   async function handleValidation(): Promise<void> {
     try {
-        console.log("here working on frontend")
       const errors = validateStep3Details({
         password: userPasswordInput,
         reEnterPassword: userReEnterPasswordInput,
@@ -61,16 +61,17 @@ const ChangePasswordStep2 = (Props: {
       }
 
       if (!errors.reEnterPassword && !errors.password) {
-        const result = await changePassword({
+        const response = await changePassword({
           userEmail: Props.userMailValue,
           newPassword: userPasswordInput,
         });
 
-        if (result.status == true) {
+        if (response.status === 200) {
           showSuccessToast("Password Changed Successfully!");
           navigate("/signin");
         } else {
-          showErrorToast("Password didn't Changed..!");
+          console.log(response, "this is the error response on changePassword");
+          UserErrorHandling(response, dispatch, navigate);
         }
       }
     } catch (error) {

@@ -6,8 +6,6 @@ import {
   showErrorToast2,
   showSuccessToast2,
 } from "../../../utils/iziToastUtils";
-import { useAdminJwtErrors } from "../../../utils/JwtErrors";
-import adminLogout from "../../../api/admin-api/adminLogoutAPI";
 import fetchRequestDetails from "../../../api/admin-api/getRequestDetails";
 import IrequestModel from "../../../interface/IrequestModel";
 import requestRedeemType from "../../../interface/IrequestRedeem";
@@ -17,11 +15,14 @@ import cancelRequest from "../../../api/user-api/cancelRequestAPI";
 import CommentSection from "../../shared/CommentSection";
 import IreportModel from "../../../interface/IreportModel";
 import ReportListModal from "./ReportListModal";
+import AdminErrorHandling from "../../../middlewares/AdminErrorHandling";
+import { useDispatch } from "react-redux";
 
 const RequestDetailsPart = () => {
-  const { id } = useParams<{ id: string }>();
+  const dispatch = useDispatch();
   const navigate = useNavigate();
-  const JwtErrors = useAdminJwtErrors();
+
+  const { id } = useParams<{ id: string }>();
 
   const [loading, setLoading] = useState(true);
   const [requestData, setRequestData] = useState<IrequestModel | undefined>(
@@ -43,8 +44,10 @@ const RequestDetailsPart = () => {
           navigate(-1);
           return;
         }
+
         const response = await fetchRequestDetails({ requestId: id });
-        if (response && response.data && response.data.status) {
+
+        if (response.status == 200) {
           setRequestData(response.data.data.requestData);
           if (response.data.data.redeemRequestData) {
             setRedeemRequests(response.data.data.redeemRequestData);
@@ -52,13 +55,12 @@ const RequestDetailsPart = () => {
           if (response.data.data.reportData) {
             setReportData(response.data.data.reportData);
           }
-        } else if (response === false) {
-          JwtErrors({ reason: "session expiration" });
-          try {
-            await adminLogout();
-          } catch (logoutError) {
-            console.error("Error during admin logout:", logoutError);
-          }
+        } else {
+          console.log(
+            response,
+            "this is the error response on fetchRequestDetails"
+          );
+          AdminErrorHandling(response, dispatch, navigate);
         }
       } catch (error) {
         console.error("Failed to fetch Request Data:", error);
@@ -82,13 +84,20 @@ const RequestDetailsPart = () => {
 
   async function handleStatusChange() {
     const response = await changeRequestStatus({ requestId: id });
-    if (response.status) {
+
+    if (response.status == 200) {
       if (requestData) {
         const newStatus =
           requestData?.status === "active" ? "inactive" : "active";
         setRequestData({ ...requestData, status: newStatus });
         showSuccessToast("Request Status Changed");
       }
+    } else {
+      console.log(
+        response,
+        "this is the error response on changeRequestStatus"
+      );
+      AdminErrorHandling(response, dispatch, navigate);
     }
   }
 
@@ -98,8 +107,8 @@ const RequestDetailsPart = () => {
       async () => {
         if (id) {
           const response = await cancelRequest({ requestId: id });
-          console.log(response);
-          if (response.status) {
+
+          if (response.status == 200) {
             setRequestData((prev) => {
               if (prev) {
                 return {
@@ -111,7 +120,11 @@ const RequestDetailsPart = () => {
             });
             showSuccessToast2(response.data.message);
           } else {
-            showErrorToast2(response.data.message);
+            console.log(
+              response,
+              "this is the error response on cancelRequest"
+            );
+            AdminErrorHandling(response, dispatch, navigate);
           }
         }
       }

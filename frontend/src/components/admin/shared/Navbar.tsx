@@ -1,17 +1,21 @@
 import { Bell, Menu, Search } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
-import { showErrorToast2 } from "../../../utils/iziToastUtils";
 import getAdminNotifications from "../../../api/admin-api/getNotificationsAPI";
 import { getNotifSocket } from "../../../socket/socket";
 import NotificationSection from "../../shared/NotificationSection";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import chageNotificaitonSeen from "../../../api/admin-api/changeNotificaitonSeenAPI";
+import AdminErrorHandling from "../../../middlewares/AdminErrorHandling";
+import { useDispatch } from "react-redux";
 
 interface navBarType {
   setSidebarOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const NavBar = ({ setSidebarOpen }: navBarType) => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
   const [notifications, setNotifications] = useState<any[]>([]);
   const [showNotifications, setShowNotifications] = useState(false);
   const notificationRef = useRef<HTMLDivElement>(null);
@@ -41,10 +45,12 @@ const NavBar = ({ setSidebarOpen }: navBarType) => {
     const getAdminNotificationData = async () => {
       try {
         const response = await getAdminNotifications();
+
         if (response.status === 200) {
           setNotifications(response.data.data);
         } else {
-          showErrorToast2(response.data.message);
+          console.log(response, "this is the error response on getAdminNotifications");
+          AdminErrorHandling(response, dispatch, navigate);
         }
       } catch (error) {
         console.error("Failed to fetch Admin Notifications:", error);

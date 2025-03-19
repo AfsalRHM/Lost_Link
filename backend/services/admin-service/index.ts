@@ -36,3 +36,6 @@ app.use("/", adminRoute);
 
 import serverListening from "./src/config/serverConfig";
 serverListening(app);
+
+import { startGrpcServer } from "./src/grpc/grpcServer";
+startGrpcServer();

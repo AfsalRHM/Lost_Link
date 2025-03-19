@@ -1,13 +1,11 @@
 import { useEffect, useState } from "react";
 import FilterSideBar from "./FilterSideBar";
 import getAllRequests from "../../../api/user-api/getAllRequestsAPI";
-import { useDispatch } from "react-redux";
-import { removeAccessToken } from "../../../redux/slice/accessTokenSlice";
-import { removeUserDetails } from "../../../redux/slice/userDetailsSlice";
-import { useNavigate } from "react-router-dom";
-import { showErrorToast } from "../../../utils/toastUtils";
 import RequestLoading from "./loading/AllRequestLoading";
 import RequestPart from "./RequestPart";
+import UserErrorHandling from "../../../middlewares/UserErrorHandling";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 const AllRequests = () => {
   const dispatch = useDispatch();
@@ -27,15 +25,12 @@ const AllRequests = () => {
     const fetchRequests = async () => {
       try {
         const response = await getAllRequests();
-        if (response.status === 401) {
-          dispatch(removeUserDetails());
-          dispatch(removeAccessToken());
-          navigate("/login");
-          showErrorToast(response.data.message);
-        } else if (response.data.status) {
+
+        if (response.status == 200) {
           setallRequests(response.data.data);
         } else {
-          showErrorToast("Failed to Fetch requests from browser...!");
+          console.log(response, "this is the error response on getAllRequests");
+          UserErrorHandling(response, dispatch, navigate);
         }
       } catch (error) {
         console.error("Failed to fetch requests:", error);

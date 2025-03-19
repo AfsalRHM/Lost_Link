@@ -36,3 +36,6 @@ serverListening(app);
 
 import { manageQueue } from "./src/rabbitmq/consumer";
 manageQueue();
+
+import { startGrpcServer } from "./src/grpc/grpcServer";
+startGrpcServer();

@@ -1,31 +1,28 @@
 import { Sidebar } from "../shared/Sidebar";
 import { useEffect, useState } from "react";
-import adminLogout from "../../../api/admin-api/adminLogoutAPI";
-import { useAdminJwtErrors } from "../../../utils/JwtErrors";
 import fetchAllRequests from "../../../api/admin-api/allRequestAPI";
 import RequestListPart from "./RequestListPart";
 import NavBar from "../shared/Navbar";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import AdminErrorHandling from "../../../middlewares/AdminErrorHandling";
 
 const RequestListPage = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const JwtErrors = useAdminJwtErrors();
   const [requestList, setRequestList] = useState([]);
 
   const getAllRequest = async () => {
     try {
       const response = await fetchAllRequests();
 
-      if (response && response.data && response.data.status) {
+      if (response.status == 200) {
         setRequestList(response.data.data);
-      } else if (response === false) {
-        JwtErrors({ reason: "session expiration" });
-        try {
-          await adminLogout();
-        } catch (logoutError) {
-          console.error("Error during admin logout:", logoutError);
-        }
       } else {
-        console.log("Unexpected response:", response);
+        console.log(response, "this is the error response");
+        AdminErrorHandling(response, dispatch, navigate);
       }
     } catch (error) {
       console.error("Error in getAllRequests:", error);

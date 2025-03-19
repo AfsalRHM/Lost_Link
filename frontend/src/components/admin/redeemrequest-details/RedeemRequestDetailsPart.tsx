@@ -6,15 +6,16 @@ import {
   showErrorToast2,
   showSuccessToast2,
 } from "../../../utils/iziToastUtils";
-import { useAdminJwtErrors } from "../../../utils/JwtErrors";
-import adminLogout from "../../../api/admin-api/adminLogoutAPI";
 import fetchRedeemRequestDetails from "../../../api/admin-api/getRedeemRequestDetailsAPI";
 import changeRedeemRequestStatus from "../../../api/admin-api/changeRedeemRequestStatusAPi";
+import AdminErrorHandling from "../../../middlewares/AdminErrorHandling";
+import { useDispatch } from "react-redux";
 
 const RedeemRequestDetailsPart = () => {
-  const { id } = useParams<{ id: string }>();
+  const dispatch = useDispatch();
   const navigate = useNavigate();
-  const JwtErrors = useAdminJwtErrors();
+
+  const { id } = useParams<{ id: string }>();
   const [loading, setLoading] = useState<boolean>(true);
   const [redeemRequestData, setRedeemRequestData] = useState<
     requestRedeemType | undefined
@@ -28,19 +29,18 @@ const RedeemRequestDetailsPart = () => {
           navigate(-1);
           return;
         }
-        console.log(id, "this is the id ");
         const response = await fetchRedeemRequestDetails({
           redeemRequestId: id,
         });
-        if (response && response.data && response.data.status) {
+
+        if (response.status == 200) {
           setRedeemRequestData(response.data.data);
-        } else if (response === false) {
-          JwtErrors({ reason: "session expiration" });
-          try {
-            await adminLogout();
-          } catch (logoutError) {
-            console.error("Error during admin logout:", logoutError);
-          }
+        } else {
+          console.log(
+            response,
+            "this is the error response on fetchRedeemRequestDetails"
+          );
+          AdminErrorHandling(response, dispatch, navigate);
         }
       } catch (error) {
         console.error("Failed to fetch Redeem Request Data:", error);
@@ -69,7 +69,11 @@ const RedeemRequestDetailsPart = () => {
           status: clickEvent,
         }));
       } else {
-        showErrorToast2(response.data.message);
+        console.log(
+          response,
+          "this is the error response on changeRedeemRequestStatus"
+        );
+        AdminErrorHandling(response, dispatch, navigate);
       }
     } catch (error) {
       console.log(error, "Error in the Handle Reject Click");

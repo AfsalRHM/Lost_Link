@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../../redux/store";
 import fetchUserMeetings from "../../../api/user-api/getUserMeetingsAPI";
 import { useNavigate } from "react-router-dom";
+import UserErrorHandling from "../../../middlewares/UserErrorHandling";
 
 // Meeting data type definition
 type MeetingType = {
@@ -14,10 +15,11 @@ type MeetingType = {
 };
 
 const MeetingSection = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
   const [currentTab, setCurrentTab] = useState<string>("upcoming");
   const [meetings, setMeetings] = useState<MeetingType[]>([]);
-
-  const navigate = useNavigate();
 
   const { userId } = useSelector((state: RootState) => state.userDetails);
 
@@ -26,27 +28,35 @@ const MeetingSection = () => {
       try {
         const response = await fetchUserMeetings({ userId });
 
-        const fetchedMeetings: MeetingType[] = response.data.data;
+        if (response.status == 200) {
+          const fetchedMeetings: MeetingType[] = response.data.data;
 
-        const updatedMeetings: MeetingType[] = fetchedMeetings.map(
-          (meeting) => {
-            const meetDate = new Date(meeting.meet_date)
-              .toISOString()
-              .split("T")[0];
-            const meetTime = convertTo24Hour(`${meeting.meet_time}:00`);
+          const updatedMeetings: MeetingType[] = fetchedMeetings.map(
+            (meeting) => {
+              const meetDate = new Date(meeting.meet_date)
+                .toISOString()
+                .split("T")[0];
+              const meetTime = convertTo24Hour(`${meeting.meet_time}:00`);
 
-            const meetingStart = new Date(`${meetDate}T${meetTime}`);
-            const meetingEnd = new Date(meetingStart); // Clone the date
-            meetingEnd.setMinutes(meetingEnd.getMinutes() + 15);
+              const meetingStart = new Date(`${meetDate}T${meetTime}`);
+              const meetingEnd = new Date(meetingStart); // Clone the date
+              meetingEnd.setMinutes(meetingEnd.getMinutes() + 15);
 
-            const status: "upcoming" | "finished" =
-              new Date() > meetingEnd ? "finished" : "upcoming";
+              const status: "upcoming" | "finished" =
+                new Date() > meetingEnd ? "finished" : "upcoming";
 
-            return { ...meeting, status, meet_end: meetingEnd.toString() };
-          }
-        );
+              return { ...meeting, status, meet_end: meetingEnd.toString() };
+            }
+          );
 
-        setMeetings(updatedMeetings);
+          setMeetings(updatedMeetings);
+        } else {
+          console.log(
+            response,
+            "this is the error response on fetchUserMeetings"
+          );
+          UserErrorHandling(response, dispatch, navigate);
+        }
       } catch (error) {
         console.error("Error fetching meetings:", error);
       }

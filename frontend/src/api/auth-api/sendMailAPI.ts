@@ -8,12 +8,13 @@ type propsType = {
 export default async function sendMail(props: propsType) {
   try {
     const result = await axios
-      .post(`${import.meta.env.VITE_API_ROUTE}/auth/sendMail`, props)
+      .post(`${import.meta.env.VITE_API_ROUTE}/auth/send-mail`, props)
       .then((response) => {
-        return response.data;
+        return response;
       });
     return result;
-  } catch (error) {
-    console.log(error);
+  } catch (error: any) {
+    console.log(error, "Error on the sendMailAPi");
+    return error.response;
   }
 }

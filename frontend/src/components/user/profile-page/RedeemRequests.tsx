@@ -1,15 +1,17 @@
 import { useEffect, useState } from "react";
 import { userDataType } from "../../../interface/IuserModel";
 import getRedeemRequests from "../../../api/user-api/getRedeemRequests";
-import { showErrorToast2 } from "../../../utils/iziToastUtils";
 import { useNavigate } from "react-router-dom";
 import RedeemRequestLoading from "./loading/RedeemRequestsLoading";
+import UserErrorHandling from "../../../middlewares/UserErrorHandling";
+import { useDispatch } from "react-redux";
 
 const RedeemRequests = ({
   userData,
 }: {
   userData: userDataType | undefined;
 }) => {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState<boolean>(true);
@@ -23,10 +25,15 @@ const RedeemRequests = ({
           return;
         } else {
           const response = await getRedeemRequests(userData?._id);
+
           if (response.status === 200) {
             setRedeemRequests(response.data.data);
           } else {
-            showErrorToast2(response.data.message);
+            console.log(
+              response,
+              "this is the error response on getRedeemRequests"
+            );
+            UserErrorHandling(response, dispatch, navigate);
           }
         }
       } catch (error) {

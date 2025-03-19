@@ -61,7 +61,6 @@ const RegisterStep2 = () => {
   }, []);
 
   // Countdown Timer Effect
-
   useEffect(() => {
     if (resendOtpTimer > 0) {
       const timerInterval = setInterval(() => {
@@ -73,7 +72,6 @@ const RegisterStep2 = () => {
   }, [resendOtpTimer]);
 
   // Validate the Email and Sending the OTP to Mail
-
   async function handleOtpTracker() {
     const errors = validateStep2Email({ email: userEmailInput });
 
@@ -84,16 +82,11 @@ const RegisterStep2 = () => {
     }
 
     if (!errors.userEmail) {
-      const result = await sendMail({
+      const response = await sendMail({
         recieverName: userFullName,
         recieverEmail: userEmailInput,
       });
-      if (result.status == false) {
-        setuserEmailValidationErrorData({
-          display: !result.status,
-          content: result.message,
-        });
-      } else {
+      if (response.status === 200) {
         const expirationTime = new Date(new Date().getTime() + 47 * 1000);
         localStorage.setItem(
           "resendOtpExpirationTime",
@@ -101,12 +94,17 @@ const RegisterStep2 = () => {
         );
         setResendOtpTimer(47);
         setOtpTracker(true);
+      } else {
+        console.log(response, "this is the error response on sendMail");
+        setuserEmailValidationErrorData({
+          display: !response.data.status,
+          content: response.data.message,
+        });
       }
     }
   }
 
   // Verifying the OTP and Proceed to the Register Step 3
-
   async function handleVerify(): Promise<void> {
     const errors = validateStep2OTP({ otp: userOTPInput });
     if (errors.userOTP) {
@@ -115,15 +113,19 @@ const RegisterStep2 = () => {
       setuserOTPValidationErrorData({ display: false, content: "" });
     }
     if (!errors.userOTP) {
-      const result = await verifyOTP({
+      const response = await verifyOTP({
         userEmail: userEmailInput,
         userEnteredOTP: userOTPInput,
       });
-      if (result.status == true) {
+      if (response.status === 200) {
         dispatch(emailVerfiedTrue());
         dispatch(assignUserEmail(userEmailInput));
         dispatch(nextStep());
       } else {
+        console.log(
+          response,
+          "this is the error response on getRedeemRequests"
+        );
         setuserOTPValidationErrorData({
           display: true,
           content: "Enter the correct OTP",
@@ -133,7 +135,6 @@ const RegisterStep2 = () => {
   }
 
   // Logic for the Back Button
-
   function handleBack(): void {
     dispatch(resetStep());
   }
@@ -172,9 +173,6 @@ const RegisterStep2 = () => {
                   stateFunc={setUserOTPInput}
                 />
               </div>
-              {/* <div className="text-center mt-3 font-light text-black text-sm hover:underline cursor-pointer transition ease-in-out duration-300">
-                Resend OTP!
-              </div> */}
               <div className="text-center">
                 {resendOtpTimer > 0 ? (
                   <span className="text-gray-500">

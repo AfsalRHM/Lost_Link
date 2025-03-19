@@ -5,8 +5,10 @@ import {
   showSuccessToast2,
 } from "../../../utils/iziToastUtils";
 import createMeeting from "../../../api/user-api/createMeetingAPI";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../../redux/store";
+import UserErrorHandling from "../../../middlewares/UserErrorHandling";
+import { useNavigate } from "react-router-dom";
 
 interface MeetScheduleModalProps {
   onClose: () => void;
@@ -17,6 +19,9 @@ const MeetScheduleModal: React.FC<MeetScheduleModalProps> = ({
   onClose,
   requestId,
 }) => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
   const [showInfo, setShowInfo] = useState(false);
@@ -67,8 +72,8 @@ const MeetScheduleModal: React.FC<MeetScheduleModalProps> = ({
       showSuccessToast2(`Meet scheduled for ${time} on the day of ${date}`);
       onClose();
     } else {
-      console.log(response);
-      showErrorToast2("Unable to schedule the Meeting. Pls Comeback later.");
+      console.log(response, "this is the error response on createMeeting");
+      UserErrorHandling(response, dispatch, navigate);
     }
   };
 

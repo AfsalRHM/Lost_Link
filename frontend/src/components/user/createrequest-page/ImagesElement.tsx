@@ -38,10 +38,7 @@ const ImagesElement = ({ onChange, errorData }: ImagesElementProps) => {
         }
       }
 
-      console.log(uploadedImageUrls);
-
       setImages((prev) => [...prev, ...uploadedImageUrls]);
-
       onChange(uploadedImageUrls);
     }
   };

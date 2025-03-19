@@ -6,8 +6,14 @@ import {
   showErrorToast2,
   showSuccessToast2,
 } from "../../../utils/iziToastUtils";
+import UserErrorHandling from "../../../middlewares/UserErrorHandling";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 const UserDetails = ({ userData }: { userData: userDataType | undefined }) => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
   const [editDetails, setEditDetails] = useState<boolean>(false);
 
   const CLOUDINARY_UPLOAD_PRESET = "profile_preset";
@@ -88,12 +94,17 @@ const UserDetails = ({ userData }: { userData: userDataType | undefined }) => {
         formData.phone = userData?.phone;
       } else {
         const response = await saveUpdatedData({ formData });
+
         if (response.errors) {
           showErrorToast2(response.errors.msg);
-        } else if (response.data.status) {
+        } else if (response.status === 200) {
           showSuccessToast2("user details updated successfully");
         } else {
-          showErrorToast2("error while user details edit");
+          console.log(
+            response,
+            "this is the error response on saveUpdatedData"
+          );
+          UserErrorHandling(response, dispatch, navigate);
         }
       }
     } catch (error) {

@@ -13,8 +13,6 @@ export async function uploadToCloudinary({ currentImage, uploadPreset }: { curre
 
     const data = await response.json();
 
-    console.log(data)
-
     return data.secure_url;
   } catch (error) {
     console.error("Error uploading image to Cloudinary From the Utils:", error);

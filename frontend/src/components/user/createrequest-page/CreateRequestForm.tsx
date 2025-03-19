@@ -11,11 +11,10 @@ import { RootState } from "../../../redux/store";
 import createRequest from "../../../api/user-api/createRequestAPI";
 import { showErrorToast, showSuccessToast } from "../../../utils/toastUtils";
 import { useNavigate } from "react-router-dom";
-import { removeUserDetails } from "../../../redux/slice/userDetailsSlice";
-import { removeAccessToken } from "../../../redux/slice/accessTokenSlice";
 
 import { loadStripe, Stripe } from "@stripe/stripe-js";
 import makePayment from "../../../api/user-api/makePaymentAPI";
+import UserErrorHandling from "../../../middlewares/UserErrorHandling";
 
 const STRIPE_KEY = import.meta.env.VITE_STRIPE_KEY;
 
@@ -75,14 +74,7 @@ const CreateRequestForm = () => {
       missingWhileValidationErrorData: { display: false, content: "" },
     });
 
-    console.log(
-      "this is the from data going for frontend validation",
-      formData
-    );
-
     const errors = validateCreateRequestEntries(formData);
-
-    console.log(errors);
 
     if (errors) {
       let hasErrors = false;
@@ -151,18 +143,12 @@ const CreateRequestForm = () => {
         return;
       }
 
-      if (response === false) {
-        dispatch(removeUserDetails());
-        dispatch(removeAccessToken());
-        navigate("/login");
-        showErrorToast("Session Expired! Please Login...");
+      if (response.status === 200) {
+        showSuccessToast("Request Created Successfully.");
+        navigate("/home");
       } else {
-        if (response.data.status) {
-          showSuccessToast("Request Created Successfully.");
-          navigate("/home");
-        } else {
-          showErrorToast("Request Failed to Create...!");
-        }
+        console.log(response, "this is the error response on createRequest");
+        UserErrorHandling(response, dispatch, navigate);
       }
     } catch (error) {
       console.error(error);
@@ -199,7 +185,7 @@ const CreateRequestForm = () => {
                 "Furniture",
                 "Books",
                 "Cosmetics",
-                "Accessories"
+                "Accessories",
               ]}
               onChange={(value) => handleChange("productCategory", value)}
               errorData={errorData.productCategoryValidationErrorData}

@@ -5,6 +5,8 @@ import { createCorrelationId } from "../utils/correlationId";
 import sendToService from "../rabbitmq/producer";
 import eventEmitter from "../utils/eventEmitter";
 import jwtPayload from "../interface/IjwtPayload";
+import { getUserById } from "../grpc/userClient";
+import { getAdminById } from "../grpc/adminClient";
 
 interface decodedType {
   status: boolean;
@@ -29,7 +31,15 @@ const verifyAccessToken = async (
     const decoded: jwtPayload | null = jwtFunctions.verifyAccessToken(token);
 
     if (decoded) {
-      next();
+      const liveUserData = await getUserById(decoded.id);
+      if (liveUserData.status !== "active") {
+        res.status(403).json({
+          status: false,
+          message: "Your account has been blocked. Please contact support.",
+        });
+      } else {
+        next();
+      }
     } else {
       throw new Error("invalid User Access Token");
     }
@@ -58,7 +68,15 @@ export const verifyAdminAccessToken = async (
       jwtFunctions.verifyAdminAccessToken(token);
 
     if (decoded) {
-      next();
+      const liveAdminData = await getAdminById(decoded.id);
+      if (liveAdminData.status !== "active") {
+        res.status(403).json({
+          status: false,
+          message: "Your have been Blocked",
+        });
+      } else {
+        next();
+      }
     } else {
       throw new Error("invalid Admin Access Token");
     }

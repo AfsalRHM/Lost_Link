@@ -14,10 +14,15 @@ import NavBar from "../shared/Navbar";
 import { ProjectRequestChart } from "./RequestChart";
 import fetchAllRequests from "../../../api/admin-api/allRequestAPI";
 import fetchAllUsers from "../../../api/admin-api/allUsersAPI";
-import { showErrorToast2 } from "../../../utils/iziToastUtils";
 import { userDataType } from "../../../interface/IuserModel";
+import AdminErrorHandling from "../../../middlewares/AdminErrorHandling";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 const DashboardPage = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const [users, setUsers] = useState([]);
@@ -43,10 +48,10 @@ const DashboardPage = () => {
   };
 
   useEffect(() => {
+    // To get User Details
     const fetchUsers = async () => {
       try {
         const response = await fetchAllUsers();
-        console.log("This is the users", response);
         if (response.status == 200) {
           setUsers(response.data.data);
 
@@ -77,20 +82,23 @@ const DashboardPage = () => {
           setCurrentMonthUsers(usersThisMonth.length);
           setPreviousMonthUsers(usersLastMonth.length);
         } else {
-          showErrorToast2(response.data.message);
+          console.log(response, "this is the error response on fetchUsers");
+          AdminErrorHandling(response, dispatch, navigate);
         }
       } catch (error) {
         console.error("Failed to fetch users", error);
       }
     };
+
+    // To get Request Details
     const fetchRequests = async () => {
       try {
         const response = await fetchAllRequests();
-        console.log("This is the requests", response);
         if (response.status == 200) {
           setRequests(response.data.data);
         } else {
-          showErrorToast2(response.data.message);
+          console.log(response, "this is the error response on fetchRequests");
+          AdminErrorHandling(response, dispatch, navigate);
         }
       } catch (error) {
         console.error("Failed to fetch requests", error);

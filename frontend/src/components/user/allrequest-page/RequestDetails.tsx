@@ -8,7 +8,7 @@ import {
   showSuccessToast2,
 } from "../../../utils/iziToastUtils";
 import changeLikeStatus from "../../../api/user-api/changeLikeStatusAPI";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../../redux/store";
 
 import {
@@ -23,10 +23,13 @@ import {
 } from "lucide-react";
 import CommentSection from "../../shared/CommentSection";
 import ReportModal from "./ReportModal";
+import UserErrorHandling from "../../../middlewares/UserErrorHandling";
 
 const RequestDetails = ({}) => {
-  const [searchParams] = useSearchParams();
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
+  const [searchParams] = useSearchParams();
   const requestId = searchParams.get("id");
 
   const [loading, setLoading] = useState(true);
@@ -43,8 +46,6 @@ const RequestDetails = ({}) => {
 
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [reportAlreadySend, setReportAlreadySend] = useState(false);
-
-  const navigate = useNavigate();
 
   useEffect(() => {
     const getRequestData = async () => {
@@ -70,7 +71,11 @@ const RequestDetails = ({}) => {
               setReportAlreadySend(true);
             }
           } else {
-            showErrorToast2(response.data.message);
+            console.log(
+              response,
+              "this is the error response on getRequestDetails"
+            );
+            UserErrorHandling(response, dispatch, navigate);
             navigate("/requests");
           }
         }
@@ -99,10 +104,12 @@ const RequestDetails = ({}) => {
     if (!requestId) return;
     try {
       const response = await changeLikeStatus({ requestId });
+
       if (response.status !== 200) {
         setHasLiked(!hasLiked);
         setLikeCount((prev) => (hasLiked ? prev - 1 : prev + 1));
-        showErrorToast2(response.message);
+        console.log(response, "this is the error response on changeLikeStatus");
+        UserErrorHandling(response, dispatch, navigate);
       }
     } catch (error) {
       console.error("Failed to Like Request:", error);

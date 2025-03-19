@@ -6,12 +6,14 @@ import ChatPartLoading from "./loading/ChatPartLoading";
 import saveMessage from "../../../api/user-api/sendMessage";
 import IchatModel, { ImessageModel } from "../../../interface/Ichat";
 import getAllMessagesOfChat from "../../../api/user-api/getAllMessages";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../../redux/store";
 import { getNotifSocket, getSocket } from "../../../socket/socket";
 import { Trash, X } from "lucide-react";
 import ImageUpload from "../../shared/ImageUpload";
 import ImageModal from "../../shared/ImageModal";
+import UserErrorHandling from "../../../middlewares/UserErrorHandling";
+import { useNavigate } from "react-router-dom";
 
 const ChatPart = ({
   onClose,
@@ -20,6 +22,9 @@ const ChatPart = ({
   onClose: any;
   requestId: string | undefined;
 }) => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
   const userId = useSelector((state: RootState) => state.userDetails.userId);
 
   const socket = getSocket();
@@ -64,7 +69,8 @@ const ChatPart = ({
           setChat(response.data.data.chatData);
           getMessages(response.data.data.chatData._id);
         } else {
-          showErrorToast2(response.data.message);
+          console.log(response, "this is the error response on getMyChat");
+          UserErrorHandling(response, dispatch, navigate);
         }
       } catch (error) {
         console.error("Failed to fetch Chat:", error);
@@ -85,7 +91,11 @@ const ChatPart = ({
 
       socket.emit("joinRoom", chatIdProp);
     } else {
-      showErrorToast2(messagesResponse.data.message);
+      console.log(
+        messagesResponse,
+        "this is the error response on getAllMessagesOfChat"
+      );
+      UserErrorHandling(messagesResponse, dispatch, navigate);
     }
   }
 
@@ -145,7 +155,8 @@ const ChatPart = ({
         setChatImage("no image");
         setPreviewImages([]);
       } else {
-        showErrorToast2(response.data.message);
+        console.log(response, "this is the error response on saveMessage");
+        UserErrorHandling(response, dispatch, navigate);
       }
     }
   };

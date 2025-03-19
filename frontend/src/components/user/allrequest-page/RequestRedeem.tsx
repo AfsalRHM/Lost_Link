@@ -9,8 +9,11 @@ import getRequestDetails from "../../../api/user-api/getRequestDetails";
 import validateRequestRedeemFormEntries from "../../../validations/requestRedeemValidations";
 import ValidationError from "../shared/ValidationError";
 import saveRedeemRequest from "../../../api/user-api/saveRedeemRequestAPI";
+import UserErrorHandling from "../../../middlewares/UserErrorHandling";
+import { useDispatch } from "react-redux";
 
 const RequestRedeem = () => {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
   const requestId = location.state?.requestId;
@@ -43,10 +46,15 @@ const RequestRedeem = () => {
             requestId,
             from: "normalRequest",
           });
+
           if (response.status === 200) {
             setRequestData(response.data.data.requestData);
           } else {
-            showErrorToast2(response.data.message);
+            console.log(
+              response,
+              "this is the error response on getRequestDetails"
+            );
+            UserErrorHandling(response, dispatch, navigate);
           }
         }
       } catch (error) {
@@ -113,8 +121,6 @@ const RequestRedeem = () => {
         }
       }
 
-      console.log(uploadedImageUrls);
-
       setPreviewImages((prev) => [...prev, ...uploadedImageUrls]);
 
       setFormData((prev) => ({
@@ -177,11 +183,15 @@ const RequestRedeem = () => {
           requestId: requestData ? requestData._id : "noRequestedIdGot",
         });
 
-        if (response.status) {
+        if (response.status === 200) {
           showSuccessToast2(response.data.message);
           navigate("/requests");
         } else {
-          showErrorToast2(response.data.message);
+          console.log(
+            response,
+            "this is the error response on saveRedeemRequest"
+          );
+          UserErrorHandling(response, dispatch, navigate);
         }
       } catch (error) {
         console.error("Failed to Insert the Request Redeem Details:", error);

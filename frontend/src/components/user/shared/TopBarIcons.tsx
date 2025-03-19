@@ -1,16 +1,19 @@
-import { Link } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { Link, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
 import { useState, useRef, useEffect } from "react";
 import { RootState } from "../../../redux/store";
 import NotificationSection from "../../shared/NotificationSection";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faQuestion, faComment } from "@fortawesome/free-solid-svg-icons";
-import { showErrorToast2 } from "../../../utils/iziToastUtils";
 import getNotifications from "../../../api/user-api/getNotificationsAPI";
 import { getNotifSocket } from "../../../socket/socket";
+import UserErrorHandling from "../../../middlewares/UserErrorHandling";
 
 const TopBarIcons = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
   const { currentPage } = useSelector((state: RootState) => state.currentPage);
   const [showNotifications, setShowNotifications] = useState(false);
   const notificationRef = useRef<HTMLDivElement>(null);
@@ -55,10 +58,15 @@ const TopBarIcons = () => {
         const response = await getNotifications({
           userId,
         });
+
         if (response.status === 200) {
           setNotifications(response.data.data);
         } else {
-          showErrorToast2(response.data.message);
+          console.log(
+            response,
+            "this is the error response on getNotifications"
+          );
+          UserErrorHandling(response, dispatch, navigate);
         }
       } catch (error) {
         console.error("Failed to fetch Notifications:", error);

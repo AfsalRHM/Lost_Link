@@ -88,8 +88,12 @@ export default class UserController implements IuserController {
         res.status(400).json(response);
       }
     } catch (error) {
-      console.log("error in getUserData/chatController", error);
-      return;
+      console.log("error in getUserData/userController", error);
+      res.status(500).json({
+        status: false,
+        data: null,
+        message: "Erorr on the getUserData/userController",
+      });
     }
   };
 
@@ -137,7 +141,7 @@ export default class UserController implements IuserController {
       }
     } catch (error) {
       console.log("Erorr on the updateUser/userController", error);
-      res.status(400).json({
+      res.status(500).json({
         status: false,
         data: null,
         message: "Erorr on the updateUser/userController",

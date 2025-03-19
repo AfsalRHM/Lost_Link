@@ -12,8 +12,7 @@ export default async function cancelRequest(Props: propsType): Promise<any> {
         return response;
       });
     return result;
-  } catch (error) {
-    console.log(error, "error on the cancelRequestAPI");
-    return false;
+  } catch (error: any) {
+    return error.response;
   }
 }

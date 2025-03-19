@@ -8,7 +8,6 @@ export default async function getAllRequests(): Promise<any> {
 
     return response;
   } catch (error: any) {
-    console.error("Error fetching All Requests:", error);
     return error.response;
   }
 }

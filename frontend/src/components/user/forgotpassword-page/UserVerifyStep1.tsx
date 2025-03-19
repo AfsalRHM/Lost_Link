@@ -16,7 +16,10 @@ type inputPropsType = {
   content: string;
 };
 
-const UserVerifyStep1 = (Props: { funcUserMail: any, funcCurrentStep: any }) => {
+const UserVerifyStep1 = (Props: {
+  funcUserMail: any;
+  funcCurrentStep: any;
+}) => {
   const [otpTracker, setOtpTracker] = useState<boolean>(false);
 
   const [userEmailValidationErrorData, setuserEmailValidationErrorData] =
@@ -72,17 +75,11 @@ const UserVerifyStep1 = (Props: { funcUserMail: any, funcCurrentStep: any }) => 
     }
 
     if (!errors.userEmail) {
-      const result = await sendResetPasswordMail({
+      const response = await sendResetPasswordMail({
         recieverName: "Reset Password",
         recieverEmail: userEmailInput,
       });
-      console.log(result, "from the fontend");
-      if (result.status == false) {
-        setuserEmailValidationErrorData({
-          display: !result.status,
-          content: result.message,
-        });
-      } else {
+      if (response.status === 200) {
         const expirationTime = new Date(new Date().getTime() + 47 * 1000);
         localStorage.setItem(
           "resendOtpExpirationTime",
@@ -90,6 +87,15 @@ const UserVerifyStep1 = (Props: { funcUserMail: any, funcCurrentStep: any }) => 
         );
         setResendOtpTimer(47);
         setOtpTracker(true);
+      } else {
+        setuserEmailValidationErrorData({
+          display: !response.data.status,
+          content: response.data.message,
+        });
+        console.log(
+          response,
+          "this is the error response on sendResetPasswordMail"
+        );
       }
     }
   }
@@ -104,20 +110,22 @@ const UserVerifyStep1 = (Props: { funcUserMail: any, funcCurrentStep: any }) => 
       setuserOTPValidationErrorData({ display: false, content: "" });
     }
     if (!errors.userOTP) {
-      const result = await verifyOTP({
+      const response = await verifyOTP({
         userEmail: userEmailInput,
         userEnteredOTP: userOTPInput,
       });
-      if (result.status == true) {
+      if (response.status === 200) {
         Props.funcUserMail(userEmailInput);
-        // dispatch(emailVerfiedTrue());
-        // dispatch(assignUserEmail(userEmailInput));
         Props.funcCurrentStep(2);
       } else {
         setuserOTPValidationErrorData({
           display: true,
           content: "Enter the correct OTP",
         });
+        console.log(
+          response,
+          "this is the error response on verifyOTP"
+        );
       }
     }
   }

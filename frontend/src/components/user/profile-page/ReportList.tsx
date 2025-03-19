@@ -1,12 +1,17 @@
 import { useEffect, useState } from "react";
 import getMyReports from "../../../api/user-api/getMyReports";
 import ReportsLoading from "./loading/ReportListLoading";
-import { showErrorToast2 } from "../../../utils/iziToastUtils";
 import { userDataType } from "../../../interface/IuserModel";
 import ReportDetailsModal from "./ReportDetailsModal";
 import IreportModel from "../../../interface/IreportModel";
+import UserErrorHandling from "../../../middlewares/UserErrorHandling";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 const ReportList = ({ userData }: { userData: userDataType }) => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
   const [loading, setLoading] = useState<boolean>(true);
   const [reports, setReports] = useState<any>([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -19,10 +24,15 @@ const ReportList = ({ userData }: { userData: userDataType }) => {
     const fetchReports = async () => {
       try {
         const response = await getMyReports({ userId: userData._id });
+
         if (response.status === 200) {
           setReports(response.data.data);
         } else {
-          showErrorToast2(response.data.message);
+          console.log(
+            response,
+            "this is the error response on getRedeemRequests"
+          );
+          UserErrorHandling(response, dispatch, navigate);
         }
       } catch (error) {
         console.error("Failed to fetch reports:", error);
@@ -58,11 +68,10 @@ const ReportList = ({ userData }: { userData: userDataType }) => {
         onClose={() => setIsModalOpen(false)}
         report={reportData}
       />
-      ;
       {filteredReports.length === 0 ? (
         <div className="text-center text-gray-500 py-16">
           <p className="text-lg font-semibold">No Reports</p>
-          <p className="text-sm">You have no raised 0 reports.</p>
+          <p className="text-sm">You have raised 0 reports.</p>
         </div>
       ) : (
         <>

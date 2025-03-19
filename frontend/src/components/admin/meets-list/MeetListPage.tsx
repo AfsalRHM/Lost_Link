@@ -1,33 +1,28 @@
 import { useEffect, useState } from "react";
 import { Sidebar } from "../shared/Sidebar";
-import { useAdminJwtErrors } from "../../../utils/JwtErrors";
-import adminLogout from "../../../api/admin-api/adminLogoutAPI";
 import NavBar from "../shared/Navbar";
 import MeetListPart from "./MeetListPart";
 import fetchAllMeets from "../../../api/admin-api/allMeetsAPI";
+import AdminErrorHandling from "../../../middlewares/AdminErrorHandling";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 const MeetListPage = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const JwtErrors = useAdminJwtErrors();
   const [meetList, setMeetList] = useState([]);
 
   const getAllMeets = async () => {
     try {
       const response = await fetchAllMeets();
 
-      console.log(response);
-
-      if (response && response.data && response.data.status) {
+      if (response.status == 200) {
         setMeetList(response.data.data);
-      } else if (response === false) {
-        JwtErrors({ reason: "session expiration" });
-        try {
-          await adminLogout();
-        } catch (logoutError) {
-          console.error("Error during admin logout:", logoutError);
-        }
       } else {
-        console.log("Unexpected response:", response);
+        console.log(response, "this is the error response on fetchAllMeets");
+        AdminErrorHandling(response, dispatch, navigate);
       }
     } catch (error) {
       console.error("Error in getAllMeets:", error);

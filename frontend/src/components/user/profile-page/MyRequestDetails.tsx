@@ -11,8 +11,11 @@ import MyRequestDetailsLoading from "./loading/MyRequestDetailsLoadin";
 import cancelRequest from "../../../api/user-api/cancelRequestAPI";
 import ChatPart from "./ChatPart";
 import CommentSection from "../../shared/CommentSection";
+import UserErrorHandling from "../../../middlewares/UserErrorHandling";
+import { useDispatch } from "react-redux";
 
 const MyRequestDetails = () => {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -36,12 +39,19 @@ const MyRequestDetails = () => {
           showErrorToast2("Invalid Access Detected");
           return;
         } else {
-          const response = await getRequestDetails({requestId, from:"profile"});
-          console.log(response)
-          if (response.status === 200) {
+          const response = await getRequestDetails({
+            requestId,
+            from: "profile",
+          });
+
+          if (response.status == 200) {
             setRequestData(response.data.data.requestData);
           } else {
-            showErrorToast2(response.data.message);
+            console.log(
+              response,
+              "this is the error response on getRequestDetails"
+            );
+            UserErrorHandling(response, dispatch, navigate);
           }
         }
       } catch (error) {
@@ -61,8 +71,7 @@ const MyRequestDetails = () => {
         const requestId = requestData?._id;
         if (requestId) {
           const response = await cancelRequest({ requestId });
-          console.log(response);
-          if (response.status) {
+          if (response.status == 200) {
             setRequestData((prev) => {
               if (prev) {
                 return {
@@ -74,7 +83,11 @@ const MyRequestDetails = () => {
             });
             showSuccessToast2(response.data.message);
           } else {
-            showErrorToast2(response.data.message);
+            console.log(
+              response,
+              "this is the error response on cancelRequest"
+            );
+            UserErrorHandling(response, dispatch, navigate);
           }
         }
       }
@@ -117,7 +130,7 @@ const MyRequestDetails = () => {
                 ₹{requestData?.reward_amount.toLocaleString()}.00 Reward
               </span>
             </div>
-            <div className="flex flex-wrap items-center gap-4">
+            <div className="flex flex-wrap items-center justify-between">
               <span className="text-gray-500 font-medium">
                 {" "}
                 Posted On :{" "}
@@ -125,6 +138,25 @@ const MyRequestDetails = () => {
                   ? new Date(requestData.createdAt).toLocaleDateString()
                   : "N/A"}
               </span>
+              <div className="flex items-center mt-2 md:mt-0">
+                <div className="flex items-center gap-2 bg-red-200 px-4 py-2 rounded-full">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 text-red-500"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  <span className="font-medium">
+                    {requestData?.users_liked?.length || 0} Likes
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -257,8 +289,6 @@ const MyRequestDetails = () => {
                   ))}
                 </div>
               </div>
-
-              <div className="bg-gray-50 rounded-xl p-6"></div>
             </div>
           </div>
           <div className="md:flex justify-center md:gap-5 md:my-8">
