@@ -32,15 +32,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggle }) => {
 
   const handleLogout = async () => {
     try {
-      const result = await adminLogout();
-      if (result.data.status == "true") {
-        dispatch(removeAdminDetails());
-        dispatch(removeAdminAccessToken());
-        showSuccessToast("Logout successful!");
-        navigate("/admin/login");
-      } else {
-        showErrorToast("Logout Failed..!");
-      }
+      await adminLogout();
+
+      dispatch(removeAdminDetails());
+      dispatch(removeAdminAccessToken());
+      showSuccessToast("Logout successful!");
+      navigate("/admin/login");
     } catch (error) {
       console.log("Error on the logoutFunction :", error);
       showErrorToast("Error while loggin out...!");

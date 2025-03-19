@@ -8,10 +8,9 @@ type propsType = {
 export default async function changePassword(props: propsType): Promise<any> {
   try {
     const result = await axios
-      .post(`${import.meta.env.VITE_API_ROUTE}/auth/resetPassword`, props)
+      .post(`${import.meta.env.VITE_API_ROUTE}/auth/reset-password`, props)
       .then((response) => {
-        console.log(response.status, response.data);
-        return response.data;
+        return response;
       });
     return result;
   } catch (error) {

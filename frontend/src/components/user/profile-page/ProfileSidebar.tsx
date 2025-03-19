@@ -1,4 +1,4 @@
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { removeUserDetails } from "../../../redux/slice/userDetailsSlice";
 import { removeAccessToken } from "../../../redux/slice/accessTokenSlice";
@@ -8,7 +8,6 @@ import {
   showSuccessToast,
 } from "../../../utils/toastUtils";
 import userLogout from "../../../api/auth-api/userLogoutAPI";
-import { RootState } from "../../../redux/store";
 
 const ProfileSidebar = ({
   selectFunction,
@@ -17,22 +16,17 @@ const ProfileSidebar = ({
   selectFunction: React.Dispatch<React.SetStateAction<string>>;
   selectedItem: string;
 }) => {
-  const { accessToken } = useSelector((state: RootState) => state.accessToken);
-
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
   async function logoutFunction() {
     try {
-      const result = await userLogout({ accessToken });
-      if (result.data.status === "true") {
-        dispatch(removeUserDetails());
-        dispatch(removeAccessToken());
-        showSuccessToast("Logout successful!");
-        navigate("/signin");
-      } else {
-        showErrorToast("Logout Failed..!");
-      }
+      await userLogout();
+
+      dispatch(removeUserDetails());
+      dispatch(removeAccessToken());
+      showSuccessToast("Logout successful!");
+      navigate("/signin");
     } catch (error) {
       console.log("Error on the logoutFunction:", error);
       showErrorToast("Error while logging out...!");

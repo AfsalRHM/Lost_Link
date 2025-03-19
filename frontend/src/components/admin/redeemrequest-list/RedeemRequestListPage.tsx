@@ -1,27 +1,32 @@
 import { useEffect, useState } from "react";
 import RedeemRequestListPart from "./RedeemRequestListPart";
-import { useAdminJwtErrors } from "../../../utils/JwtErrors";
-import adminLogout from "../../../api/admin-api/adminLogoutAPI";
 import { showErrorToast } from "../../../utils/toastUtils";
 import { Sidebar } from "../shared/Sidebar";
 import fetchAllRedeemRequests from "../../../api/admin-api/allRedeemRequestsAPI";
 import NavBar from "../shared/Navbar";
+import AdminErrorHandling from "../../../middlewares/AdminErrorHandling";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 const RedeemRequestListPage = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [redeemRequestList, setRedeemRequestList] = useState([]);
-  const JwtErrors = useAdminJwtErrors();
 
   const getAllRedeemRequests = async () => {
     try {
       const response = await fetchAllRedeemRequests();
-      if (response && response.data && response.data.status) {
+
+      if (response.status == 200) {
         setRedeemRequestList(response.data.data);
-      } else if (response === false) {
-        JwtErrors({ reason: "session expiration" });
-        await adminLogout();
       } else {
-        console.log("Unexpected response:", response);
+        console.log(
+          response,
+          "this is the error response on fetchAllRedeemRequests"
+        );
+        AdminErrorHandling(response, dispatch, navigate);
       }
     } catch (error) {
       console.error("Error in getAllRedeemRequests:", error);

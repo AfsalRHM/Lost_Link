@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package user;
+
+service UserService {
+  rpc GetUserById (UserRequest) returns (UserResponse);
+}
+
+message UserRequest {
+  string userId = 1;
+}
+
+message UserResponse {
+  string userId = 1;
+  string full_name = 2;
+  string user_name = 3;
+  string email = 4;
+  int32 points = 5;
+  string status = 6;
+  int32 phone = 7;
+  string current_tier = 8;
+  int32 wallet = 9;
+}

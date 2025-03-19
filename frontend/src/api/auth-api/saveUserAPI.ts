@@ -11,13 +11,13 @@ type propsType = {
 export default async function insertUser(props: propsType): Promise<any> {
   try {
     const result = await axios
-      .post(`${import.meta.env.VITE_API_ROUTE}/auth/insertUser`, props)
+      .post(`${import.meta.env.VITE_API_ROUTE}/auth/insert-user`, props)
       .then((response) => {
-        console.log(response.status, response.data);
-        return response.data;
+        return response;
       });
     return result;
-  } catch (error) {
-    console.log(error);
+  } catch (error: any) {
+    console.log(error, "Error on the saveUserAPI");
+    return error.response;
   }
 }

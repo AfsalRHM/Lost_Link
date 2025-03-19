@@ -251,37 +251,39 @@ export default class authService implements IauthService {
       props,
     });
 
-    const userData: UserDataType | null = await new Promise(
-      (resolve, reject) => {
-        const timeout = setTimeout(() => {
-          reject(new Error("Response timeout"));
-        }, 10000);
+    const userData: any = await new Promise((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        reject(new Error("Response timeout"));
+      }, 10000);
 
-        eventEmitter.once(correlationId, (data) => {
-          clearTimeout(timeout);
-          resolve(data);
-        });
-      }
-    );
+      eventEmitter.once(correlationId, (data) => {
+        clearTimeout(timeout);
+        resolve(data);
+      });
+    });
 
-    if (userData?.password) {
+    if (userData.data.password) {
       const isMatch = await passwordUtils.comparePassword(
         userPassword,
-        userData.password
+        userData.data.password
       );
 
       const plainUserData = userData;
       const { password, ...rest } = plainUserData;
 
       if (isMatch) {
-        if (userData.status == "inactive") {
+        if (userData.data.status == "inactive") {
           return {
             status: false,
             data: null,
             message: "Your Account has been Blocked",
           };
         } else {
-          return { status: true, data: rest };
+          return {
+            status: true,
+            data: rest,
+            message: "Manual Login Successfull",
+          };
         }
       } else {
         return {
@@ -536,7 +538,7 @@ export default class authService implements IauthService {
 
   async googleLoginVerify(
     email: string
-  ): Promise<{ status: boolean; data: UserDataType | null; message: string }> {
+  ): Promise<{ status: boolean; data: any; message: string }> {
     if (email) {
       const replyQueue = process.env.USER_QUEUE;
       const correlationId = createCorrelationId(email);
@@ -556,24 +558,38 @@ export default class authService implements IauthService {
         props,
       });
 
-      const userData: UserDataType | null = await new Promise(
-        (resolve, reject) => {
-          const timeout = setTimeout(() => {
-            reject(new Error("Response timeout"));
-          }, 10000);
+      const userData: any = await new Promise((resolve, reject) => {
+        const timeout = setTimeout(() => {
+          reject(new Error("Response timeout"));
+        }, 10000);
 
-          eventEmitter.once(correlationId, (data) => {
-            clearTimeout(timeout);
-            resolve(data);
-          });
+        eventEmitter.once(correlationId, (data) => {
+          clearTimeout(timeout);
+          resolve(data);
+        });
+      });
+
+      if (userData.data == null) {
+        return {
+          status: false,
+          data: null,
+          message: "User Not Exists",
+        };
+      } else {
+        if (userData?.data.status == "active") {
+          return {
+            status: true,
+            data: userData,
+            message: "Email Verification Success",
+          };
+        } else {
+          return {
+            status: false,
+            data: null,
+            message: "Your Account has been Blocked",
+          };
         }
-      );
-
-      return {
-        status: true,
-        data: userData,
-        message: "Email Verification Success",
-      };
+      }
     } else {
       return {
         status: false,

@@ -5,8 +5,10 @@ import {
   showSuccessToast2,
 } from "../../../utils/iziToastUtils";
 import reportRequest from "../../../api/user-api/reportRequestAPI";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../../redux/store";
+import UserErrorHandling from "../../../middlewares/UserErrorHandling";
+import { useNavigate } from "react-router-dom";
 
 interface reportModalType {
   setIsReportModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -19,25 +21,26 @@ const ReportModal = ({
   requestId,
   setReportAlreadySend,
 }: reportModalType) => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
   const [reportReason, setReportReason] = useState<string>("");
 
-  const { userId } = useSelector(
-    (state: RootState) => state.userDetails
-  );
+  const { userId } = useSelector((state: RootState) => state.userDetails);
 
   async function handleSubmitReport() {
     try {
       const response = await reportRequest({ requestId, reportReason, userId });
-      if (response?.status === 200) {
+
+      if (response.status == 200) {
         setIsReportModalOpen(false);
         showSuccessToast2(
           response.data?.data?.message || "Report submitted successfully!"
         );
         setReportAlreadySend(true);
       } else {
-        showErrorToast2(
-          response.data?.data?.message || "Something went wrong!"
-        );
+        console.log(response, "this is the error response on reportRequest");
+        UserErrorHandling(response, dispatch, navigate);
       }
     } catch (error) {
       console.error("Failed to Report Request:", error);

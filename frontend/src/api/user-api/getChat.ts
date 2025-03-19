@@ -13,8 +13,8 @@ export default async function getMyChat(
       props
     );
     return response;
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error fetching My Chat Data:", error);
-    return false;
+    return error.response;
   }
 }

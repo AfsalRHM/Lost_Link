@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 
 import jwtFunctions from "../utils/jwt";
 import jwtPayload from "../interface/IjwtPayload";
+import { getUserById } from "../grpc/grpcClient";
 
 interface decodedType {
   status: boolean;
@@ -26,7 +27,15 @@ const verifyAccessToken = async (
     const decoded: jwtPayload | null = jwtFunctions.verifyAccessToken(token);
 
     if (decoded) {
-      next();
+      const liveUserData = await getUserById(decoded.id);
+      if (liveUserData.status !== "active") {
+        res.status(403).json({
+          status: false,
+          message: "Your account has been blocked. Please contact support.",
+        });
+      } else {
+        next();
+      }
     } else {
       throw new Error("invalid User Access Token");
     }

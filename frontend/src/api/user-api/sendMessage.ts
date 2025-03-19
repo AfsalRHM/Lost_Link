@@ -14,8 +14,8 @@ export default async function saveMessage(props: Props): Promise<any> {
     );
 
     return response;
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error Creating Request:", error);
-    return false;
+    return error.response;
   }
 }

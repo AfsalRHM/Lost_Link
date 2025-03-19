@@ -8,7 +8,7 @@ type propsType = {
 export default async function userLogin(props: propsType): Promise<any> {
   try {
     const result = await axios.post(
-      `${import.meta.env.VITE_API_ROUTE}/auth/loginVerify`,
+      `${import.meta.env.VITE_API_ROUTE}/auth/login-verify`,
       props,
       {
         withCredentials: true,
@@ -16,10 +16,11 @@ export default async function userLogin(props: propsType): Promise<any> {
     );
 
     const authorizationHeader = result.headers["authorization"];
-    const data = result.data;
+    const data = result;
 
     return { data, authorizationHeader };
-  } catch (error) {
+  } catch (error: any) {
     console.error("Login Error:", error);
+    return {data: error.response};
   }
 }

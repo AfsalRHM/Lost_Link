@@ -61,7 +61,11 @@ export default class userService implements IuserService {
   async loginUser(userMail: string): Promise<any> {
     const userData = await this._userRepository.findUser(userMail);
     if (userData) {
-      return userData;
+      return {
+        status: true,
+        data: userData,
+        message: "Login Successfull",
+      };
     } else {
       return {
         status: false,

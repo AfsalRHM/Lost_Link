@@ -24,9 +24,9 @@ export default class authController implements IauthController {
         req.body.recieverEmail
       );
       if (userExists == true) {
-        res.status(200).json({
+        res.status(400).json({
           status: false,
-          message: "User already exits with this Email",
+          message: "User already exists with this Email",
         });
       } else {
         const response = await this._authService.sendMail(
@@ -37,7 +37,7 @@ export default class authController implements IauthController {
         res.status(200).json({ status: true, message: "User is New" });
       }
     } catch (error) {
-      console.log("error in authController", error);
+      console.log("error in authController/sendMail", error);
     }
   };
 
@@ -55,7 +55,7 @@ export default class authController implements IauthController {
           req.body.recieverName
         );
         if (response.message == "No user found") {
-          res.status(200).json({ status: false, message: "User not Found" });
+          res.status(400).json({ status: false, message: "User not Found" });
         } else {
           res.status(200).json({ status: true, message: "User is New" });
         }
@@ -102,7 +102,7 @@ export default class authController implements IauthController {
         req.body.userEmail,
         req.body.userEnteredOTP
       );
-      res.status(200).json({ status: result });
+      res.status(200).json({ status: result, message: "OTP Verified" });
     } catch (error) {
       console.log("error in authController/verfiyOTP", error);
       res.status(200).json({ status: false, message: "Internal Server Error" });
@@ -120,7 +120,7 @@ export default class authController implements IauthController {
       const userExists = await this._authService.checkMail(req.body.userEmail);
       if (userExists) {
         res
-          .status(200)
+          .status(400)
           .json({ status: false, message: "User with Email already Exixts." });
       } else {
         const userData = await this._authService.insertuser(
@@ -150,22 +150,22 @@ export default class authController implements IauthController {
         return res.status(400).json({ errors: errors.array() });
       }
 
-      const result: { status: boolean; data: any; message?: string } =
+      const response: { status: boolean; data: any; message?: string } =
         await this._authService.loginVerify(
           req.body.userEmail,
           req.body.userPassword
         );
 
-      if (result.status == true) {
+      if (response.status == true) {
         const accessToken = jwtFunctions.generateAccessToken({
-          id: result.data._id.toString(),
-          email: result.data.email,
-          role: result.data.role,
+          id: response.data.data._id.toString(),
+          email: response.data.data.email,
+          role: response.data.data.role,
         });
         const refreshToken = jwtFunctions.generateRefreshToken({
-          id: result.data._id.toString(),
-          email: result.data.email,
-          role: result.data.role,
+          id: response.data.data._id.toString(),
+          email: response.data.data.email,
+          role: response.data.data.role,
         });
 
         res
@@ -179,10 +179,10 @@ export default class authController implements IauthController {
           .json({
             status: true,
             message: "Login Successfull",
-            data: result.data,
+            data: response.data.data,
           });
       } else {
-        res.status(200).json({ status: false, message: result.message });
+        res.status(400).json(response);
       }
     } catch (error) {
       console.log("Error on authController/loginVerify", error);
@@ -247,45 +247,34 @@ export default class authController implements IauthController {
         const response = await this._authService.googleLoginVerify(
           req.body.email
         );
-        if (response.data?.status == "inactive") {
-          res.status(401).json({
-            status: false,
-            message: "Your Account has been Blocked",
-          });
-        } else {
-          if (response.data?.status == "active") {
-            if (response.status && response.data) {
-              const accessToken = jwtFunctions.generateAccessToken({
-                id: response.data._id.toString(),
-                email: response.data.email,
-                role: response.data.role,
-              });
-              const refreshToken = jwtFunctions.generateRefreshToken({
-                id: response.data._id.toString(),
-                email: response.data.email,
-                role: response.data.role,
-              });
 
-              res
-                .status(200)
-                .cookie("refreshToken", refreshToken, {
-                  httpOnly: true,
-                  sameSite: "strict",
-                  path: "/",
-                })
-                .setHeader("Authorization", `Bearer ${accessToken}`)
-                .json({
-                  status: true,
-                  data: response.data,
-                  message: "Login Successfull...!",
-                });
-            }
-          } else {
-            res.status(401).json({
-              status: false,
-              message: "Error on GoogleLoginVerify/authController 2",
+        if (response.status && response.data.data) {
+          const accessToken = jwtFunctions.generateAccessToken({
+            id: response.data.data._id.toString(),
+            email: response.data.data.email,
+            role: response.data.data.role,
+          });
+          const refreshToken = jwtFunctions.generateRefreshToken({
+            id: response.data.data._id.toString(),
+            email: response.data.data.email,
+            role: response.data.data.role,
+          });
+
+          res
+            .status(200)
+            .cookie("refreshToken", refreshToken, {
+              httpOnly: true,
+              sameSite: "strict",
+              path: "/",
+            })
+            .setHeader("Authorization", `Bearer ${accessToken}`)
+            .json({
+              status: true,
+              data: response.data.data,
+              message: "Login Successfull...!",
             });
-          }
+        } else {
+          res.status(400).json(response);
         }
       }
     } catch (error) {

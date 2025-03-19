@@ -14,19 +14,19 @@ import {
   showErrorToast2,
   showSuccessToast2,
 } from "../../../utils/iziToastUtils";
-import adminLogout from "../../../api/admin-api/adminLogoutAPI";
-import { useAdminJwtErrors } from "../../../utils/JwtErrors";
 import changeStatus from "../../../api/admin-api/changeUserStatus";
 import UserDetailsPartLoading from "./loading/UserDetailsPartLoading";
+import AdminErrorHandling from "../../../middlewares/AdminErrorHandling";
+import { useDispatch } from "react-redux";
 
 const UserDetailsPart = () => {
-  const { id } = useParams<{ id: string }>();
+  const dispatch = useDispatch();
   const navigate = useNavigate();
+
+  const { id } = useParams<{ id: string }>();
 
   const [loading, setLoading] = useState(true);
   const [userData, setUserData] = useState<any>(undefined);
-
-  const JwtErrors = useAdminJwtErrors();
 
   useEffect(() => {
     const getUserData = async () => {
@@ -36,19 +36,18 @@ const UserDetailsPart = () => {
           console.log("user id didn't passed through the url");
           navigate(-1);
         }
+
         const response = await fetchUserDetails({ userId: id });
-        if (response && response.data && response.data.status) {
+
+        if (response.status == 200) {
           setUserData(response.data.data);
           setLoading(false);
-        } else if (response === false) {
-          JwtErrors({ reason: "session expiration" });
-          try {
-            await adminLogout();
-          } catch (logoutError) {
-            console.error("Error during admin logout:", logoutError);
-          }
         } else {
-          console.log("Unexpected response:", response);
+          console.log(
+            response,
+            "this is the error response on fetchUserDetails"
+          );
+          AdminErrorHandling(response, dispatch, navigate);
         }
       } catch (error) {
         console.error("Failed to fetch User Data:", error);
@@ -65,10 +64,14 @@ const UserDetailsPart = () => {
 
   async function handleStatusChange() {
     const response = await changeStatus({ userId: id });
-    if (response.status) {
+
+    if (response.status == 200) {
       const newStatus = userData.status === "active" ? "inactive" : "active";
       setUserData({ ...userData, status: newStatus });
       showSuccessToast2("User Status Changed");
+    } else {
+      console.log(response, "this is the error response on changeStatus");
+      AdminErrorHandling(response, dispatch, navigate);
     }
   }
 

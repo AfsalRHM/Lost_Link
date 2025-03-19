@@ -2,10 +2,12 @@ import { useEffect, useState } from "react";
 import { userDataType } from "../../../interface/IuserModel";
 import getMyRequests from "../../../api/user-api/getMyRequests";
 import MyRequestsLoading from "./loading/MyRequestsLoading";
-import { showErrorToast2 } from "../../../utils/iziToastUtils";
 import { useNavigate } from "react-router-dom";
+import UserErrorHandling from "../../../middlewares/UserErrorHandling";
+import { useDispatch } from "react-redux";
 
 const MyRequests = ({ userData }: { userData: userDataType | undefined }) => {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState<boolean>(true);
@@ -23,7 +25,11 @@ const MyRequests = ({ userData }: { userData: userDataType | undefined }) => {
           if (response.status === 200) {
             setRequests(response.data.data);
           } else {
-            showErrorToast2(response.data.message);
+            console.log(
+              response,
+              "this is the error response on getMyRequests"
+            );
+            UserErrorHandling(response, dispatch, navigate);
           }
         }
       } catch (error) {

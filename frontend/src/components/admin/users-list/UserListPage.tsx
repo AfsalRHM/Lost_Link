@@ -3,25 +3,27 @@ import UserListPart from "./UserListPart";
 import { Sidebar } from "../shared/Sidebar";
 import fetchAllUsers from "../../../api/admin-api/allUsersAPI";
 import { showErrorToast } from "../../../utils/toastUtils";
-import adminLogout from "../../../api/admin-api/adminLogoutAPI";
-import { useAdminJwtErrors } from "../../../utils/JwtErrors";
 import NavBar from "../shared/Navbar";
+import AdminErrorHandling from "../../../middlewares/AdminErrorHandling";
+import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
 
 const UserListPage = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [userList, setUserList] = useState([]);
-  const JwtErrors = useAdminJwtErrors();
 
   const getAllUsers = async () => {
     try {
       const response = await fetchAllUsers();
-      if (response && response.data && response.data.status) {
+
+      if (response.status == 200) {
         setUserList(response.data.data);
-      } else if (response === false) {
-        JwtErrors({ reason: "session expiration" });
-        await adminLogout();
       } else {
-        console.log("Unexpected response:", response);
+        console.log(response, "this is the error response on fetchAllUsers");
+        AdminErrorHandling(response, dispatch, navigate);
       }
     } catch (error) {
       console.error("Error in getAllUsers:", error);

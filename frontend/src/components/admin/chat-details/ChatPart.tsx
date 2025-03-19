@@ -4,15 +4,17 @@ import { useState, useEffect, FormEvent, useRef } from "react";
 import IchatModel, { ImessageModel } from "../../../interface/Ichat";
 import fetchUserMessages from "../../../api/admin-api/getMessagesAPI";
 import { showErrorToast2 } from "../../../utils/iziToastUtils";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../../redux/store";
 import saveAdminMessage from "../../../api/admin-api/sendAdminMessage";
 import { getNotifSocket, getSocket } from "../../../socket/socket";
 import ImageModal from "../../shared/ImageModal";
 import ImageUpload from "../../shared/ImageUpload";
+import AdminErrorHandling from "../../../middlewares/AdminErrorHandling";
 
 const ChatPart = ({ chatDetails }: { chatDetails: IchatModel | undefined }) => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const { adminId } = useSelector((state: RootState) => state.adminDetails);
 
@@ -41,10 +43,11 @@ const ChatPart = ({ chatDetails }: { chatDetails: IchatModel | undefined }) => {
     const getMessages = async () => {
       try {
         const response = await fetchUserMessages({ chatId: chatDetails?._id });
-        if (response.status === 200) {
+        if (response.status == 200) {
           setMessages(response.data.data);
         } else {
-          showErrorToast2(response.data.message);
+          console.log(response, "this is the error response on getMessages");
+          AdminErrorHandling(response, dispatch, navigate);
         }
       } catch (error) {
         console.error("Failed to fetch Chat:", error);
@@ -113,7 +116,8 @@ const ChatPart = ({ chatDetails }: { chatDetails: IchatModel | undefined }) => {
         setChatImage("no image");
         setPreviewImages([]);
       } else {
-        showErrorToast2(response.data.message);
+        console.log(response, "this is the error response on saveAdminMessage");
+        AdminErrorHandling(response, dispatch, navigate);
       }
     }
   };

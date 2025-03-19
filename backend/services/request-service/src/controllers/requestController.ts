@@ -222,9 +222,7 @@ export default class RequestController implements IrequestController {
   ): Promise<void> => {
     try {
       if (!req.body.requestId) {
-        res.status(400).json({
-          message: "Request Id Not Reached here on the changeLikeStatus",
-        });
+        console.log("Request Id Not Reached here on the changeLikeStatus");
         return;
       }
       const accessToken = req.headers["authorization"]?.split(" ")[1];
@@ -240,9 +238,7 @@ export default class RequestController implements IrequestController {
         res.status(200).json(response);
       }
     } catch (error) {
-      res
-        .status(300)
-        .json({ message: "error on the changeLikeStatus/requestController" });
+      console.log("error on the changeLikeStatus/requestController");
     }
   };
 

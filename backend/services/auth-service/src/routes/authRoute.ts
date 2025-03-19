@@ -11,13 +11,13 @@ import isUserLogin from "../utils/isUserLogin";
 const AuthController = new authController();
 /*************************      User Side       *******************************/
 // Post Requests
-auth_route.post("/sendMail", sendmailValidator, AuthController.sendMail);
-auth_route.post("/verifyOTP", verifyotpValidator, AuthController.verifyOTP);
-auth_route.post("/insertUser", signinValidator, AuthController.insertUser);
-auth_route.post("/loginVerify", loginValidator, AuthController.loginVerify);
-auth_route.post("/googleLogin", AuthController.googleLoginVerify);
-auth_route.post("/sendResetPasswordOTP", AuthController.sendResetPasswordMail); // Password Routes - For sending mail to the user
-auth_route.post("/resetPassword", AuthController.resetPassword); // Password Routes - For updating the password on the user side
+auth_route.post("/send-mail", sendmailValidator, AuthController.sendMail);
+auth_route.post("/verify-otp", verifyotpValidator, AuthController.verifyOTP);
+auth_route.post("/insert-user", signinValidator, AuthController.insertUser);
+auth_route.post("/login-verify", loginValidator, AuthController.loginVerify);
+auth_route.post("/google-login", AuthController.googleLoginVerify);
+auth_route.post("/send-reset-password-otp", AuthController.sendResetPasswordMail); // Password Routes - For sending mail to the user
+auth_route.post("/reset-password", AuthController.resetPassword); // Password Routes - For updating the password on the user side
 auth_route.post("/refreshToken", AuthController.refreshToken); // Route to check the Refresh Token and Create New Access Token
 auth_route.post("/isUserLogin", isUserLogin); // User Login Verify Route
 auth_route.post("/logout", AuthController.userLogout); // User Logout

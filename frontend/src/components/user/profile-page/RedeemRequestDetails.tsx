@@ -16,8 +16,11 @@ import { showErrorToast2 } from "../../../utils/iziToastUtils";
 import getRequestRedeemDetails from "../../../api/user-api/getRedeemRequestDetails";
 import VideoCall from "../../shared/VideoCall";
 import MeetScheduleModal from "./MeetScheduleModal";
+import UserErrorHandling from "../../../middlewares/UserErrorHandling";
+import { useDispatch } from "react-redux";
 
 const RedeemRequestDetails = () => {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -41,7 +44,11 @@ const RedeemRequestDetails = () => {
           if (response.status === 200) {
             setRequestRedeemData(response.data.data);
           } else {
-            showErrorToast2(response.data.message);
+            console.log(
+              response,
+              "this is the error response on getRequestRedeemDetails"
+            );
+            UserErrorHandling(response, dispatch, navigate);
           }
         }
       } catch (error) {
@@ -133,7 +140,7 @@ const RedeemRequestDetails = () => {
             </div>
           </div>
 
-          {videoCall ? <VideoCall channelName={requestRedeemData._id} /> : null}
+          {videoCall ? <VideoCall /> : null}
 
           {/* Content Grid */}
           <div className="p-8">
@@ -269,7 +276,10 @@ const RedeemRequestDetails = () => {
         </div>
       </div>
       {meetScheduleModalOpen ? (
-        <MeetScheduleModal onClose={() => setMeetScheduleModalOpen(false)} requestId={redeemRequestId} />
+        <MeetScheduleModal
+          onClose={() => setMeetScheduleModalOpen(false)}
+          requestId={redeemRequestId}
+        />
       ) : null}
     </div>
   );

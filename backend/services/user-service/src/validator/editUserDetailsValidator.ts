@@ -22,6 +22,7 @@ const updateUserDataValidator = [
     .withMessage("User Name can only contain letters, numbers, and underscores."),
 
   check("formData.phone")
+    .optional({ checkFalsy: true })
     .isNumeric()
     .withMessage("Phone Number must contain only numbers.")
     .isLength({ min: 10, max: 10 })

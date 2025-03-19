@@ -14,6 +14,7 @@ import {
 import insertUser from "../../../api/auth-api/saveUserAPI";
 import { RootState } from "../../../redux/store";
 import { showSuccessToast } from "../../../utils/toastUtils";
+import UserErrorHandling from "../../../middlewares/UserErrorHandling";
 
 type inputPropsType = {
   display: boolean;
@@ -67,7 +68,7 @@ const RegisterStep3 = () => {
 
       if (!errors.reEnterPassword && !errors.password) {
         dispatch(assignUserPassword(userPasswordInput));
-        const result = await insertUser({
+        const response = await insertUser({
           userFullName,
           userName,
           userLocation,
@@ -75,11 +76,14 @@ const RegisterStep3 = () => {
           userPassword: userPasswordInput,
         });
 
-        if (result.status == true) {
+        if (response.status === 200) {
           dispatch(resetStep());
           dispatch(makeEmptyUserDetails());
           showSuccessToast("Registration Successfull!");
           navigate("/signin");
+        } else {
+          console.log(response, "this is the error response on insertUser");
+          UserErrorHandling(response, dispatch, navigate);
         }
       }
     } catch (error) {

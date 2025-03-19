@@ -6,8 +6,8 @@ export default async function fetchAllRequests(): Promise<any> {
       `${import.meta.env.VITE_API_ROUTE}/request/getAllRequestsAdmin`
     );
     return result;
-  } catch (error) {
+  } catch (error: any) {
     console.log(error, "error on the allUsersAPI");
-    return false;
+    return error.response;
   }
 }

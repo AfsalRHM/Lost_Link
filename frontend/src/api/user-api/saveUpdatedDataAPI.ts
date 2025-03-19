@@ -8,13 +8,13 @@ interface Props {
 export default async function saveUpdatedData(props: Props): Promise<any> {
   try {
     const response = await axiosInstance.patch(
-      `${import.meta.env.VITE_API_ROUTE}/user/update_user`,
+      `${import.meta.env.VITE_API_ROUTE}/user/update-user`,
       props
     );
 
     return response;
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error Creating Request:", error);
-    return false;
+    return error.response;
   }
 }

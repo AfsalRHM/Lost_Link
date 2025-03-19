@@ -2,6 +2,9 @@ import { Request, Response, NextFunction } from "express";
 
 import jwtFunctions from "../utils/jwt";
 import jwtPayload from "../interface/IjwtPayload";
+import UserService from "../services/userService";
+
+const userService = new UserService();
 
 const verifyAccessToken = async (
   req: Request,
@@ -17,14 +20,26 @@ const verifyAccessToken = async (
         .json({ status: false, message: "Access Denied No Token" });
     }
 
-    const decoded = jwtFunctions.verifyAccessToken(token);
-    if (!decoded) {
-      return res
-        .status(401)
-        .json({ status: false, message: "Access Denied Access Token expired" });
+    const decoded: jwtPayload | null = jwtFunctions.verifyAccessToken(token);
+
+    if (decoded) {
+      const liveUserData = await userService.getUserDataById({
+        userId: decoded.id,
+      });
+
+      if (!liveUserData.status) {
+        throw new Error("Unable to Access user data");
+      } else if (liveUserData.data._doc.status !== "active") {
+        res.status(403).json({
+          status: false,
+          message: "Your account has been blocked. Please contact support.",
+        });
+      } else {
+        next();
+      }
+    } else {
+      throw new Error("invalid User Access Token");
     }
-    (req as any).userData = decoded;
-    next();
   } catch (error) {
     res.status(401).json({ status: false, message: "Invalid Token" });
   }
@@ -58,4 +73,3 @@ export const verifyAdminAccessToken = async (
     res.status(401).json({ status: false, message: "Invalid Token" });
   }
 };
-

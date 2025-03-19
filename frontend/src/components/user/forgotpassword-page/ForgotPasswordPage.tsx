@@ -1,6 +1,6 @@
 import { useState } from "react";
-import UserVerifyStep1 from "./userVerifyStep1";
-import ChangePasswordStep2 from "./changePasswordStep2";
+import UserVerifyStep1 from "./UserVerifyStep1";
+import ChangePasswordStep2 from "./ChangePasswordStep2";
 
 const ForgotPasswordPage = () => {
   const [userMail, setUserMail] = useState<string>("");

@@ -9,12 +9,13 @@ import ValidationError from "../shared/ValidationError";
 import { assignAccessToken } from "../../../redux/slice/accessTokenSlice";
 import { useDispatch } from "react-redux";
 import { assignUserDetails } from "../../../redux/slice/userDetailsSlice";
-import { showErrorToast, showSuccessToast } from "../../../utils/toastUtils";
+import { showSuccessToast } from "../../../utils/toastUtils";
 import { validateLoginDetails } from "../../../validations/loginDetails";
 
 import { GoogleLogin, CredentialResponse } from "@react-oauth/google";
 import { jwtDecode } from "jwt-decode";
 import googleLogin from "../../../api/auth-api/googleLoginAPI";
+import { showErrorToast2 } from "../../../utils/iziToastUtils";
 
 type inputPropsType = {
   display: boolean;
@@ -61,26 +62,27 @@ const LoginPage = () => {
     }
 
     if (!errors.userMail && !errors.userPassword) {
-      const result = await userLogin({
+      const response = await userLogin({
         userEmail: userMailInput,
         userPassword: userPasswordInput,
       });
-      if (!result.data.status) {
-        setUserLoginValidationError({
-          display: !result.data.status,
-          content: result.data.message,
-        });
-      } else {
+
+      if (response.data.status === 200) {
         const userData = {
-          userId: result.data.data._id,
-          userName: result.data.data.user_name,
-          userProfile: result.data.data.profile_pic,
+          userId: response.data.data.data._id,
+          userName: response.data.data.data.user_name,
+          userProfile: response.data.data.data.profile_pic,
         };
-        const accessToken = result.authorizationHeader.split(" ")[1];
+        const accessToken = response.authorizationHeader.split(" ")[1];
         dispatch(assignUserDetails(userData));
         dispatch(assignAccessToken(accessToken));
         showSuccessToast("Login successful!");
         navigate("/home");
+      } else {
+        setUserLoginValidationError({
+          display: !response.data.data.status,
+          content: response.data.data.message,
+        });
       }
     }
   }
@@ -93,24 +95,30 @@ const LoginPage = () => {
         const userData: GoogleJwtPayload = jwtDecode(
           credentialResponse.credential
         );
-        const result = await googleLogin(userData.email);
-        if (result && result.data.status == true) {
+        const response = await googleLogin(userData.email);
+
+        if (response.status === 200) {
           const userData = {
-            userId: result.data.data._id,
-            userName: result.data.data.user_name,
-            userProfile: result.data.data.profile_pic,
+            userId: response.data.data._id,
+            userName: response.data.data.user_name,
+            userProfile: response.data.data.profile_pic,
           };
-          const accessToken = result.headers.authorization.split(" ")[1];
+          const accessToken = response.headers.authorization.split(" ")[1];
           dispatch(assignUserDetails(userData));
           dispatch(assignAccessToken(accessToken));
           showSuccessToast("Login successful...!");
           navigate("/home");
         } else {
-          if (result.data.message == "Your Account has been Blocked") {
+          if (response.data.message == "Your Account has been Blocked") {
             setUserLoginValidationError({
               display: true,
               content:
-                "Your Account has been Blocked..! Pls contact customer service for further details",
+                "Your Account has been Blocked..! Please contact customer service for further details",
+            });
+          } else if (response.data.message == "User Not Exists") {
+            setUserLoginValidationError({
+              display: true,
+              content: "User not Exists...! Please Sign in",
             });
           }
         }
@@ -122,7 +130,7 @@ const LoginPage = () => {
   }
 
   function handleGoogleLoginFailure() {
-    showErrorToast("Google Login Failed...!");
+    showErrorToast2("Google Login Failed...!");
   }
 
   return (

@@ -1,12 +1,11 @@
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { useAdminJwtErrors } from "../../../utils/JwtErrors";
 import { showSuccessToast } from "../../../utils/toastUtils";
-import adminLogout from "../../../api/admin-api/adminLogoutAPI";
 import { Search } from "lucide-react";
 import changeRequestStatus from "../../../api/admin-api/changeRequestStatus";
 import { assignAdminAccessToken } from "../../../redux/slice/accessTokenSlice";
+import AdminErrorHandling from "../../../middlewares/AdminErrorHandling";
 
 interface Request {
   _id: string;
@@ -59,21 +58,16 @@ const RequestListPart = ({
     }
   };
 
-  const JwtErrors = useAdminJwtErrors();
-
   const handleStatusChange = async (id: string) => {
     const response = await changeRequestStatus({ requestId: id });
     await allRequestsFunc();
-    if (response.status) {
-      console.log(response);
+    if (response.status == 200) {
       const token = response.headers["authorization"]?.split(" ")[1];
       dispatch(assignAdminAccessToken(token));
       showSuccessToast("Request Status Changed");
-    } else if (response === false) {
-      JwtErrors({ reason: "session expiration" });
-      await adminLogout();
     } else {
-      console.log("Unexpected response:", response);
+      console.log(response, "this is the error response on handleStatusChange");
+      AdminErrorHandling(response, dispatch, navigate);
     }
   };
 

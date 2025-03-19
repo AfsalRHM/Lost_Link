@@ -1,7 +1,5 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useAdminJwtErrors } from "../../../utils/JwtErrors";
-import adminLogout from "../../../api/admin-api/adminLogoutAPI";
 import fetchUserChats from "../../../api/admin-api/getUserChats";
 import ChatListSkeleton from "./loading/ChatDetailsPageLoadin";
 import ChatPart from "./ChatPart";
@@ -9,9 +7,12 @@ import NavBar from "../shared/Navbar";
 import IchatModel from "../../../interface/Ichat";
 import { Sidebar } from "../shared/Sidebar";
 import { ArrowLeft } from "lucide-react";
+import AdminErrorHandling from "../../../middlewares/AdminErrorHandling";
+import { useDispatch } from "react-redux";
 
 const ChatListPage = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const [loading, setLoading] = useState<boolean>(true);
   const [chats, setChats] = useState<IchatModel[]>([]);
@@ -19,20 +20,19 @@ const ChatListPage = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const { userId } = useParams<{ userId: string }>();
-  const JwtErrors = useAdminJwtErrors();
 
   const getUserChats = async () => {
     try {
       const response = await fetchUserChats({ userId });
-      if (response && response.data && response.data.status) {
+      if (response.status == 200) {
         setChats(response.data.data);
         setLoading(false);
         if (response.data.data.length !== 0) {
           setSelectedChat(response.data.data[0]);
         }
-      } else if (response === false) {
-        JwtErrors({ reason: "session expiration" });
-        await adminLogout();
+      } else {
+        console.log(response, "this is the error response on getUserChats");
+        AdminErrorHandling(response, dispatch, navigate);
       }
     } catch (error) {
       console.error("Error fetching user chats:", error);

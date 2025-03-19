@@ -2,10 +2,12 @@ import { format } from "date-fns";
 import { MessageCircle, Send } from "lucide-react";
 import { showErrorToast2 } from "../../utils/iziToastUtils";
 import { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../redux/store";
 import createComment from "../../api/user-api/createCommentAPI";
 import getRequestComments from "../../api/user-api/getRequestCommentsAPI";
+import UserErrorHandling from "../../middlewares/UserErrorHandling";
+import { useNavigate } from "react-router-dom";
 
 interface ICommentModel {
   _id?: string;
@@ -26,6 +28,9 @@ const CommentSection = ({
   requestId: string | null | undefined;
   noField: boolean;
 }) => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
   const [comments, setComments] = useState<ICommentModel[]>([]);
   const [commentText, setCommentText] = useState<string>("");
   const [loadingComments, setLoadingComments] = useState<boolean>(false);
@@ -78,8 +83,9 @@ const CommentSection = ({
         setComments((prev) => [response.data.data, ...prev]);
         setCommentCount((prev) => prev + 1);
       } else {
-        showErrorToast2("Failed to post comment");
         setCommentText(commentText);
+        console.log(response, "this is the error response on createComment");
+        UserErrorHandling(response, dispatch, navigate);
       }
     } catch (error) {
       console.error("Failed to post comment:", error);

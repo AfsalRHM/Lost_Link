@@ -2,16 +2,18 @@ import { useEffect, useState } from "react";
 import { Sidebar } from "../shared/Sidebar";
 import MeetDetailsPart from "./MeetDetailsPart";
 import NavBar from "../shared/Navbar";
-import adminLogout from "../../../api/admin-api/adminLogoutAPI";
-import { useAdminJwtErrors } from "../../../utils/JwtErrors";
 import { useParams } from "react-router-dom";
 import fetchMeetData from "../../../api/admin-api/getMeetDetailsAPI";
+import AdminErrorHandling from "../../../middlewares/AdminErrorHandling";
+import { useDispatch } from "react-redux";
 
 const MeetDetailsPage = () => {
+  const dispatch = useDispatch();
+  const navigate = useDispatch();
+
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [meetData, setMeetData] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(false);
-  const JwtErrors = useAdminJwtErrors();
   const { meetId } = useParams<{ meetId: string }>();
 
   const getMeetData = async () => {
@@ -21,17 +23,11 @@ const MeetDetailsPage = () => {
       setLoading(true);
       const response = await fetchMeetData({ meetId });
 
-      if (response?.data?.status) {
+      if (response.status == 200) {
         setMeetData(response.data.data);
-      } else if (response === false) {
-        JwtErrors({ reason: "session expiration" });
-        try {
-          await adminLogout();
-        } catch (logoutError) {
-          console.error("Error during admin logout:", logoutError);
-        }
       } else {
-        console.error("Unexpected response:", response);
+        console.log(response, "this is the error response on fetchMeetData");
+        AdminErrorHandling(response, dispatch, navigate);
       }
     } catch (error) {
       console.error("Error in getMeetData:", error);

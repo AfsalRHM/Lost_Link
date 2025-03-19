@@ -8,7 +8,6 @@ import MyRequests from "./MyRequests.tsx";
 import RedeemRequests from "./RedeemRequests.tsx";
 import TierInfo from "./TierInfo.tsx";
 import { useDispatch } from "react-redux";
-import { showErrorToast } from "../../../utils/toastUtils.ts";
 import { assignAccessToken } from "../../../redux/slice/accessTokenSlice.ts";
 import getProfile from "../../../api/user-api/getProfileAPI.ts";
 import UserDetailsLoading from "./loading/UserDetailsLoading.tsx";
@@ -16,29 +15,29 @@ import TierSectionLoading from "./loading/TierSectionLoading.tsx";
 import ReportList from "./ReportList.tsx";
 import WalletSection from "./WalletSection.tsx";
 import MeetingSection from "./MeetingSection.tsx";
+import UserErrorHandling from "../../../middlewares/UserErrorHandling.tsx";
+import { useNavigate } from "react-router-dom";
 
 const Hero = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
   const [loading, setLoading] = useState<boolean>(true);
   const [userData, setUserData] = useState();
   const [selectedItem, setSelectedItem] = useState<string>("Location Info");
-  const dispatch = useDispatch();
 
   useEffect(() => {
     const getUserDetails = async () => {
       try {
         const response = await getProfile();
-        console.log(response);
-        if (response.status !== 200) {
-          console.log(
-            "Error Occured in while fetching the User profile Details"
-          );
-        } else if (response.data.status) {
+        if (response.status == 200) {
           const newAccessToken =
             response.headers["authorization"].split(" ")[1];
           dispatch(assignAccessToken(newAccessToken));
           setUserData(response.data.data);
         } else {
-          showErrorToast("Failed to Fetch User Profile Data from browser...!");
+          console.log(response, "this is the error response on getProfile");
+          UserErrorHandling(response, dispatch, navigate);
         }
       } catch (error) {
         console.error("Failed to fetch requests:", error);
@@ -107,7 +106,7 @@ const Hero = () => {
             ) : selectedItem === "My Reports" ? (
               <ReportList userData={userData!} />
             ) : selectedItem === "My Wallet" ? (
-              <WalletSection userData={userData}/>
+              <WalletSection userData={userData} />
             ) : selectedItem === "Meetings" ? (
               <MeetingSection />
             ) : (

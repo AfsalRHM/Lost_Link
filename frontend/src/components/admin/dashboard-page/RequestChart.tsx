@@ -77,8 +77,6 @@ export const ProjectRequestChart: React.FC<ProjectRequestChartProps> = ({
   // Process data dynamically based on the selected period
   const chartData = processRequestData(requestData, activePeriod);
 
-  console.log(chartData, "this is the char data");
-
   return (
     <div>
       {/* Header with controls */}
