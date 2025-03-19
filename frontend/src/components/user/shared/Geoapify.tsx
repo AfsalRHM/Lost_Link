@@ -87,28 +87,9 @@ const Geoapify = (props: geoapifyProps) => {
     }
   }
 
-  return (
-    <GeoapifyContext
-      apiKey={geoapifyKey}
-      className="bg-red-200 mt-36"
-      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-        handleInputChange(e)
-      }
-    >
-      {props.forThe !== "onUserRegister" ? (
-        <div className="w-96 bg-blue-200 p-4 rounded-lg shadow-lg">
-          <GeoapifyGeocoderAutocomplete
-            placeholder="Enter city name in India"
-            type={type}
-            lang={language}
-            countryCodes={countryCodes}
-            limit={limit}
-            value={displayValue}
-            placeSelect={onPlaceSelect}
-            suggestionsChange={onSuggestionChange}
-          />
-        </div>
-      ) : (
+  const renderContent = () => {
+    if (props.forThe === "onUserRegister") {
+      return (
         <div className="py-1">
           <span className="mb-2 text-md">
             Enter Location
@@ -120,7 +101,7 @@ const Geoapify = (props: geoapifyProps) => {
             <GeoapifyGeocoderAutocomplete
               placeholder="Enter city name"
               type="city"
-              lang="en"
+              lang={language}
               countryCodes={countryCodes}
               limit={limit}
               value={displayValue}
@@ -135,7 +116,48 @@ const Geoapify = (props: geoapifyProps) => {
             get current location
           </span>
         </div>
-      )}
+      );
+    } else if (props.forThe === "filters") {
+      return (
+        <div className="w-full rounded-md">
+          <GeoapifyGeocoderAutocomplete
+            placeholder="Enter city name in India"
+            type={type}
+            lang={language}
+            countryCodes={countryCodes}
+            limit={limit}
+            value={displayValue}
+            placeSelect={onPlaceSelect}
+            suggestionsChange={onSuggestionChange}
+          />
+        </div>
+      );
+    } else {
+      return (
+        <div className="w-full bg-white rounded-lg">
+          <GeoapifyGeocoderAutocomplete
+            placeholder="Enter city name in India"
+            type={type}
+            lang={language}
+            countryCodes={countryCodes}
+            limit={limit}
+            value={displayValue}
+            placeSelect={onPlaceSelect}
+            suggestionsChange={onSuggestionChange}
+          />
+        </div>
+      );
+    }
+  };
+
+  return (
+    <GeoapifyContext
+      apiKey={geoapifyKey}
+      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+        handleInputChange(e)
+      }
+    >
+      {renderContent()}
     </GeoapifyContext>
   );
 };

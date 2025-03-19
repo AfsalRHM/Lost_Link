@@ -48,10 +48,17 @@ const RequestPart = ({ filteredRequests }: { filteredRequests: any }) => {
                   <h2 className="text-lg font-semibold mb-2 text-violet-700">
                     {request.product_name}
                   </h2>
-                  <p className="text-sm text-gray-600 mb-1">
-                    <span className="font-medium">Category:</span>{" "}
-                    {request.product_category}
-                  </p>
+                  {request.missing_place !== "" ? (
+                    <p className="text-sm text-gray-600 mb-1">
+                      <span className="font-medium">location:</span>{" "}
+                      {request.missing_place}
+                    </p>
+                  ) : (
+                    <p className="text-sm text-gray-600 mb-1">
+                      <span className="font-medium">location:</span>{" "}
+                      {request.missing_route[0]}
+                    </p>
+                  )}
                   <p className="text-sm text-gray-600 mb-3">
                     <span className="font-medium">Reward:</span>{" "}
                     {` ₹${request.reward_amount}`}

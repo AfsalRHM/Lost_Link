@@ -1,3 +1,5 @@
+import Geoapify from "../shared/Geoapify";
+
 const FilterSideBar = ({
   setFilters,
   allRequests,
@@ -13,14 +15,26 @@ const FilterSideBar = ({
     setFilters((prev: any) => {
       const updatedFilters = { ...prev, [key]: value };
       const filtered = allRequests.filter((request: any) => {
-        const matchesCategory =
-          updatedFilters.category === "" ||
-          request.product_category === updatedFilters.category;
+        const rawLocations = request.missing_place || request.missing_route;
+        const locationsArray = Array.isArray(rawLocations)
+          ? rawLocations
+          : rawLocations
+          ? [rawLocations]
+          : [];
+
+        const locationFilter = updatedFilters.location.trim().toLowerCase();
+
+        const matchesLocation =
+          locationFilter === "" ||
+          locationsArray.some((loc: string) =>
+            loc.toLowerCase().includes(locationFilter)
+          );
+
         const matchesReward =
           request.reward_amount >= updatedFilters.minReward &&
           request.reward_amount <= updatedFilters.maxReward;
 
-        return matchesCategory && matchesReward;
+        return matchesLocation && matchesReward;
       });
 
       setFilteredRequests(filtered);
@@ -28,21 +42,16 @@ const FilterSideBar = ({
     });
   };
 
+  const handleLocationChange = (value: string) => {
+    handleFilterChange("location", value);
+  };
+
   return (
     <div className="lg:w-1/5 w-full bg-contact p-4 lg:min-h-screen shadow-md">
       <h2 className="text-xl font-bold mb-4 text-violet-600">Filters</h2>
       <div className="mb-4">
-        <label className="block font-medium mb-2 text-gray-700">Category</label>
-        <select
-          className="w-full border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-violet-500"
-          value={filters.category}
-          onChange={(e) => handleFilterChange("category", e.target.value)}
-        >
-          <option value="">All Categories</option>
-          <option value="Electronics">Electronics</option>
-          <option value="Clothing">Clothing</option>
-          <option value="Books">Books</option>
-        </select>
+        <label className="block font-medium mb-2 text-gray-700">Location</label>
+        <Geoapify forThe="filters" stateFunc={handleLocationChange} />
       </div>
       <div className="mb-4">
         <label className="block font-medium mb-2 text-gray-700">
