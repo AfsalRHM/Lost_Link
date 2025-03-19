@@ -15,10 +15,13 @@ import RequestDetails from "../pages/admin/RequestDetails";
 import RedeemRequestDetails from "../pages/admin/RedeemRequestDetails";
 import MeetList from "../pages/admin/MeetList";
 import MeetDetails from "../pages/admin/MeetDetails";
+import NotFound from "../pages/admin/NotFound";
 
 const AdminRoutes = () => {
   return (
     <>
+      <Route path="*" element={<NotFound />} />
+
       <Route element={<AdminPrivateRoute />}>
         <Route path="/admin/login" element={<Login />} />
       </Route>
@@ -38,6 +41,8 @@ const AdminRoutes = () => {
         <Route path="/admin/meetings" element={<MeetList />} />
         <Route path="/admin/meetings/:meetId" element={<MeetDetails />} />
       </Route>
+
+      <Route path="/admin/404" element={<NotFound />} />
     </>
   );
 };

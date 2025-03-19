@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import IuserModel from "../interface/IuserModel";
 import IuserService, { updateFormDataType } from "../interface/IuserService";
 import userRepository from "../repositories/userRepository";
@@ -279,6 +280,13 @@ export default class userService implements IuserService {
   // To get the user details to the admin side
   async getUserData({ userId }: { userId: string }): Promise<any> {
     try {
+      if (!mongoose.Types.ObjectId.isValid(userId)) {
+        return {
+          status: false,
+          data: null,
+          message: "Invalid Request ID format",
+        };
+      }
       const userData = await this._userRepository.findOne({ _id: userId });
       if (userData) {
         return {

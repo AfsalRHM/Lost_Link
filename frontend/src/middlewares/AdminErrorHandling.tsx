@@ -11,6 +11,8 @@ const AdminErrorHandling = async (error: any, dispatch: any, navigate: any) => {
       navigate("/admin/login");
       await adminLogout();
       showErrorToast2(error.data.message);
+    } else if (error.status == 404) {
+      navigate("/admin/404");
     } else {
       console.log(error.status, "Error not defined on the AdminErrorHandling");
     }

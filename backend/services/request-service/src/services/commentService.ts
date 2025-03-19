@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import IcommentService from "../interface/IcommentService";
 import sendToService from "../rabbitmq/producer";
 import commentRepository from "../repositories/commentRepository";
@@ -111,6 +112,14 @@ export default class commentService implements IcommentService {
           status: false,
           data: null,
           message: "Data not reached on getRequestComments/commentService",
+        };
+      }
+
+      if (!mongoose.Types.ObjectId.isValid(requestId)) {
+        return {
+          status: false,
+          data: null,
+          message: "Invalid Request ID format",
         };
       }
 

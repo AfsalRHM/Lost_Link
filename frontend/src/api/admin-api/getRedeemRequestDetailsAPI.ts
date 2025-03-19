@@ -4,7 +4,9 @@ interface Props {
   redeemRequestId: string | undefined;
 }
 
-export default async function fetchRedeemRequestDetails(props: Props): Promise<any> {
+export default async function fetchRedeemRequestDetails(
+  props: Props
+): Promise<any> {
   try {
     const response = await adminAxiosInstance.get(
       `${import.meta.env.VITE_API_ROUTE}/request/get-redeem-request-details/${
@@ -13,8 +15,7 @@ export default async function fetchRedeemRequestDetails(props: Props): Promise<a
     );
 
     return response;
-  } catch (error) {
-    console.error("Error in fetchUserMessagesAPI:", error);
-    return false;
+  } catch (error: any) {
+    return error.response;
   }
 }

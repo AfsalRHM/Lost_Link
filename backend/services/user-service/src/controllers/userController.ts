@@ -85,7 +85,11 @@ export default class UserController implements IuserController {
       if (response.status) {
         res.status(200).json(response);
       } else {
-        res.status(400).json(response);
+        if (response.message == "Invalid Request ID format") {
+          res.status(404).json(response);
+        } else {
+          res.status(400).json(response);
+        }
       }
     } catch (error) {
       console.log("error in getUserData/userController", error);
