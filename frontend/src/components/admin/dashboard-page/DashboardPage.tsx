@@ -1,14 +1,7 @@
 import { useEffect, useState } from "react";
-import {
-  Users,
-  DollarSign,
-  ShoppingCart,
-  TrendingUp,
-  FileDown,
-} from "lucide-react";
+import { Users, ShoppingCart, TrendingUp, IndianRupee } from "lucide-react";
 import { Sidebar } from "../shared/Sidebar";
 import { StatCard } from "./StatCard";
-import { RevenueChart } from "./RevenueChart";
 import { UserCountChart } from "./UserCountChart";
 import NavBar from "../shared/Navbar";
 import { ProjectRequestChart } from "./RequestChart";
@@ -18,6 +11,9 @@ import { userDataType } from "../../../interface/IuserModel";
 import AdminErrorHandling from "../../../middlewares/AdminErrorHandling";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import fetchAllRedeemRequests from "../../../api/admin-api/allRedeemRequestsAPI";
+import { RedeemRequestChart } from "./RequestRedeemChart";
+import IrequestModel from "../../../interface/IrequestModel";
 
 const DashboardPage = () => {
   const dispatch = useDispatch();
@@ -27,6 +23,9 @@ const DashboardPage = () => {
 
   const [users, setUsers] = useState([]);
   const [requests, setRequests] = useState([]);
+  const [redeemRequests, setRedeemRequests] = useState([]);
+
+  const [totalProfit, setTotalProfit] = useState<string | number>(0);
 
   // Store counts by month
   const [currentMonthUsers, setCurrentMonthUsers] = useState(0);
@@ -96,6 +95,14 @@ const DashboardPage = () => {
         const response = await fetchAllRequests();
         if (response.status == 200) {
           setRequests(response.data.data);
+          const profit = response.data.data.reduce(
+            (acc: number, request: IrequestModel) => {
+              return (acc += Math.floor((request.reward_amount / 100) * 5));
+            },
+            0
+          );
+          const formattedProfit = profit.toLocaleString("en-IN");
+          setTotalProfit(formattedProfit);
         } else {
           console.log(response, "this is the error response on fetchRequests");
           AdminErrorHandling(response, dispatch, navigate);
@@ -105,8 +112,27 @@ const DashboardPage = () => {
       }
     };
 
+    // To get Request Details
+    const fetchRedeemRequests = async () => {
+      try {
+        const response = await fetchAllRedeemRequests();
+        if (response.status == 200) {
+          setRedeemRequests(response.data.data);
+        } else {
+          console.log(
+            response,
+            "this is the error response on fetchRedeemRequests"
+          );
+          AdminErrorHandling(response, dispatch, navigate);
+        }
+      } catch (error) {
+        console.error("Failed to fetch redeem requests", error);
+      }
+    };
+
     fetchUsers();
     fetchRequests();
+    fetchRedeemRequests();
   }, []);
 
   return (
@@ -130,28 +156,28 @@ const DashboardPage = () => {
               <p className="text-blue-200 text-sm md:text-base">
                 Welcome back! Here's what's happening with your business today.
               </p>
-              <button className="px-3 py-1.5 bg-blue-700/50 hover:bg-blue-700/70 text-blue-100 text-sm font-medium rounded-md border border-blue-600/30 flex items-center gap-1.5 transition-colors">
+              {/* <button className="px-3 py-1.5 bg-blue-700/50 hover:bg-blue-700/70 text-blue-100 text-sm font-medium rounded-md border border-blue-600/30 flex items-center gap-1.5 transition-colors">
                 <FileDown size={20} />
                 Report
-              </button>
+              </button> */}
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
             <StatCard
-              title="Total Revenue (This Month)"
-              value="$128,430"
-              icon={<DollarSign size={24} className="text-blue-400" />}
+              title="Total Revenue (All Time)"
+              value={`₹${totalProfit}`}
+              icon={<IndianRupee size={24} className="text-blue-400" />}
               className="bg-blue-300/50 backdrop-blur-sm hover:shadow-lg transition-all hover:scale-105"
             />
             <StatCard
-              title="Total Requests (This Month)"
+              title="Total Requests (All Time)"
               value={requests.length.toString()}
               icon={<ShoppingCart size={24} className="text-green-400" />}
               className="bg-blue-300/50 backdrop-blur-sm hover:shadow-lg transition-all hover:scale-105"
             />
             <StatCard
-              title="Total Users (This Month)"
+              title="Total Users (All Time)"
               value={users.length.toString()}
               icon={<Users size={24} className="text-purple-400" />}
               className="bg-blue-300/50 backdrop-blur-sm hover:shadow-lg transition-all hover:scale-105"
@@ -188,9 +214,9 @@ const DashboardPage = () => {
           <div className="mb-8">
             <div className="bg-blue-800/50 rounded-xl p-4 backdrop-blur-sm shadow-md">
               <h2 className="text-xl font-semibold mb-4 text-blue-100">
-                Revenue Trend
+                Redeem Request Trend
               </h2>
-              <RevenueChart />
+              <RedeemRequestChart redeemRequestData={redeemRequests} />
             </div>
           </div>
         </main>
