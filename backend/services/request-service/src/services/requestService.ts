@@ -7,6 +7,7 @@ import reportRepository from "../repositories/reportRepository";
 import jwtFunctions from "../utils/jwt";
 
 import stripe from "stripe";
+import mongoose from "mongoose";
 
 export default class requestService implements IrequestService {
   private _requestRepository: requestRepository;
@@ -132,6 +133,14 @@ export default class requestService implements IrequestService {
     from: string;
   }): Promise<any> {
     try {
+      if (!mongoose.Types.ObjectId.isValid(requestId)) {
+        return {
+          status: false,
+          data: null,
+          message: "Invalid Request ID format",
+        };
+      }
+
       const requestData = await this._requestRepository.findOne({
         _id: requestId,
       });
@@ -205,6 +214,14 @@ export default class requestService implements IrequestService {
     requestId: string;
   }): Promise<any> {
     try {
+      if (!mongoose.Types.ObjectId.isValid(requestId)) {
+        return {
+          status: false,
+          data: null,
+          message: "Invalid Request ID format",
+        };
+      }
+
       const requestData = await this._requestRepository.findOne({
         _id: requestId,
       });
@@ -473,10 +490,19 @@ export default class requestService implements IrequestService {
     requestRedeemId: string;
   }): Promise<any> {
     try {
+      if (!mongoose.Types.ObjectId.isValid(requestRedeemId)) {
+        return {
+          status: false,
+          data: null,
+          message: "Invalid Request ID format",
+        };
+      }
+
       const redeemRequestData =
         await this._requestRedeemRepository.findOneRedeemRequest({
           _id: requestRedeemId,
         });
+
       if (redeemRequestData) {
         return {
           status: true,

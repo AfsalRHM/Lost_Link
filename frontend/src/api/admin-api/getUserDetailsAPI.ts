@@ -11,8 +11,7 @@ export default async function fetchUserDetails(props: Props): Promise<any> {
     );
 
     return response;
-  } catch (error) {
-    console.error("Error in fetchUserMessagesAPI:", error);
-    return false;
+  } catch (error: any) {
+    return error.response;
   }
 }

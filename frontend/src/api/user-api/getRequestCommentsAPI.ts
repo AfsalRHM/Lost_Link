@@ -13,8 +13,7 @@ export default async function getRequestComments(props: Props): Promise<any> {
     );
 
     return response;
-  } catch (error) {
-    console.error("Error Getting the Request Comments:", error);
-    return false;
+  } catch (error: any) {
+    return error.response;
   }
 }

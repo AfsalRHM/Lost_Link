@@ -14,8 +14,7 @@ export default async function fetchUserChats(
         return response;
       });
     return result;
-  } catch (error) {
-    console.log(error, "error on the allChatsAPI");
-    return false;
+  } catch (error: any) {
+    return error.response;
   }
 }

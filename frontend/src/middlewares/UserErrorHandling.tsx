@@ -13,6 +13,8 @@ const UserErrorHandling = async (error: any, dispatch: any, navigate: any) => {
       showErrorToast2(error.data.message);
     } else if (error.status == 400) {
       showErrorToast2(error.data.message);
+    } else if (error.status == 404) {
+      navigate("/404");
     } else {
       console.log(error.status, "Error not defined on the UserErrorHandling");
     }

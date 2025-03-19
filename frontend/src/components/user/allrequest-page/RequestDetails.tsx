@@ -76,7 +76,9 @@ const RequestDetails = ({}) => {
               "this is the error response on getRequestDetails"
             );
             UserErrorHandling(response, dispatch, navigate);
-            navigate("/requests");
+            if (response.status !== 404) {
+              navigate("/requests");
+            }
           }
         }
       } catch (error) {

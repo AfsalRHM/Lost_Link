@@ -6,6 +6,7 @@ import { createCorrelationId } from "../utils/correlationId";
 import eventEmitter from "../utils/eventEmitter";
 import sendToService from "../rabbitmq/producer";
 import IchatModel from "../interface/IchatModel";
+import mongoose from "mongoose";
 
 export default class chatService implements IchatService {
   private _chatRepository: chatRepository;
@@ -28,7 +29,7 @@ export default class chatService implements IchatService {
       let chatData = await this._chatRepository.findOne({
         is_group_chat: false,
         user_id: userId,
-        request_id: requestId
+        request_id: requestId,
       });
 
       // For the User Data
@@ -183,6 +184,14 @@ export default class chatService implements IchatService {
   // Fetch All the Chats
   async getAllUserChats({ userId }: { userId: string }): Promise<any> {
     try {
+      if (!mongoose.Types.ObjectId.isValid(userId)) {
+        return {
+          status: false,
+          data: null,
+          message: "Invalid Request ID format",
+        };
+      }
+      
       const chatData = await this._chatRepository.findSome({
         user_id: userId,
         latest_message: { $exists: true, $ne: null },

@@ -7,6 +7,7 @@ import PaymentSuccessPage from "../pages/user/PaymentSuccessPage";
 import MyReqeustDetailsPage from "../pages/user/MyReqeustDetailsPage";
 import ReqeustDetailsPage from "../pages/user/RequestDetailsPage";
 import RequestRedeemPage from "../pages/user/RequestRedeemPage";
+import NotFoundPage from "../pages/user/NotFoundPage";
 
 import { IsUserLogin } from "../utils/IsUserLogin";
 import RequestRedeemDetailsPage from "../pages/user/RequestRedeemDetailsPage";
@@ -16,6 +17,7 @@ import VideoCall from "../components/shared/VideoCall";
 const UserRoutes = () => {
   return (
     <>
+      <Route path="*" element={<NotFoundPage />} />
       <Route element={<IsUserLogin />}>
         <Route path="/home" element={<HomePage />} />
         <Route path="/profile" element={<Profile />} />
@@ -31,6 +33,7 @@ const UserRoutes = () => {
 
       </Route>
       <Route path="/faq" element={<FAQPage />} />
+      <Route path="/404" element={<NotFoundPage />} />
     </>
   );
 };

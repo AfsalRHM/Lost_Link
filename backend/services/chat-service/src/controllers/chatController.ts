@@ -68,6 +68,7 @@ export default class chatController implements IchatController {
   ): Promise<void> => {
     try {
       const userId = req.body.userId;
+
       if (!userId) {
         throw new Error("User Id not passed correctly");
       }
@@ -77,7 +78,11 @@ export default class chatController implements IchatController {
       if (response.status) {
         res.status(200).json(response);
       } else {
-        res.status(400).json(response);
+        if (response.message == "Invalid Request ID format") {
+          res.status(404).json(response);
+        } else {
+          res.status(400).json(response);
+        }
       }
     } catch (error) {
       console.log("error in getAllUserChats/chatController", error);
