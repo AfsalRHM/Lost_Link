@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: auth-service
-          image: afsalm/lostlink-auth-service:v3
+          image: afsalm/lostlink-auth-service:v4
           ports:
             - containerPort: 7001
           envFrom:

@@ -73,11 +73,9 @@ const LoginPage = () => {
           userName: response.data.data.data.user_name,
           userProfile: response.data.data.data.profile_pic,
         };
-        console.log(response, "response ------------**************************")
-        console.log(response.headers, "response------------")
-        const authHeader = response.headers['authorization'] || response.headers['Authorization'];
-        console.log(authHeader, "this is the accessToken ------------------=======================----------")
-        const accessToken = response.headers['authorization'].split(" ")[1];
+        
+        console.log(response, "this is the response--------------------")
+        const accessToken = response.authorizationHeader.split(" ")[1] || response.data.accessToken;
         dispatch(assignUserDetails(userData));
         dispatch(assignAccessToken(accessToken));
         showSuccessToast("Login successful!");
