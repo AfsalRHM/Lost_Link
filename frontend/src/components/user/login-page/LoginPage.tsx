@@ -73,6 +73,7 @@ const LoginPage = () => {
           userName: response.data.data.data.user_name,
           userProfile: response.data.data.data.profile_pic,
         };
+        console.log(response.authorizationHeader, "response.authorizationHeader ------------")
         const accessToken = response.authorizationHeader.split(" ")[1];
         dispatch(assignUserDetails(userData));
         dispatch(assignAccessToken(accessToken));
