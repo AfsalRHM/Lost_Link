@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: auth-service-env
+data:
+  MAIN_ROUTE: "http://localhost:"
+  FRONTEND_PORT: "5173"
+  PORT: "7001"
+  MAIL_USER: "afsalrahmanm25@gmail.com"
+  MAIL_PASS: "isbq nloo rult dxxt"
+  JWT_ACCESS_SECRETKEY: "USER_ACCESS_SECRET_KEY"
+  JWT_REFRESH_SECRETKEY: "USER_REFRESH_SECRET_KEY"
+  ADMIN_JWT_ACCESS_SECRETKEY: "ADMIN_ACCESS_SECRET_KEY"
+  ADMIN_JWT_REFRESH_SECRETKEY: "ADMIN_REFRESH_SECRET_KEY"
+  MONGO_URI: "mongodb+srv://afsalrahmanm25:hKg8ZVDO4S18BNUB@cluster0.zmpcm.mongodb.net/Auth_LostLink?retryWrites=true&w=majority&appName=Cluster0"
+  AMQP_URL: "amqp://rabbitmq:5672"
+  AUTH_QUEUE: "AUTH"
+  USER_QUEUE: "USER"
+  ADMIN_QUEUE: "ADMIN"
+  REQUEST_QUEUE: "REQUEST"

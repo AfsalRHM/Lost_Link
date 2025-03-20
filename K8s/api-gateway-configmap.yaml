@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: api-gateway-env
+data:
+  MAIN_ROUTE: "http://localhost:"
+  AUTH_ROUTE: "http://auth-service:"
+  USER_ROUTE: "http://user-service:"
+  REQUEST_ROUTE: "http://request-service:"
+  CHAT_ROUTE: "http://chat-service:"
+  NOTIF_ROUTE: "http://notification-service:"
+  ADMIN_ROUTE: "http://admin-service:"
+  MAIN_PORT: "7000"
+  FRONTEND_PORT: "5173"
+  AUTH_PORT: "7001"
+  USER_PORT: "7002"
+  REQUEST_PORT: "7003"
+  CHAT_PORT: "7005"
+  NOTIF_PORT: "7006"
+  ADMIN_PORT: "7007"

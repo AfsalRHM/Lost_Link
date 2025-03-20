@@ -20,7 +20,7 @@ if (!MAIN_ROUTE || !PORT || !FRONTEND_PORT) {
 
 app.use(
   cors({
-    origin: `${MAIN_ROUTE}${FRONTEND_PORT}`,
+    origin: `http://lostlink.live`,
     credentials: true,
     exposedHeaders: ["Authorization"],
   })

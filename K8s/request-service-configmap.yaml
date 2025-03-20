@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: request-service-env
+data:
+  MAIN_ROUTE: "http://localhost:"
+  PORT: "7003"
+  FRONTEND_PORT: "5173"
+  JWT_ACCESS_SECRETKEY: "USER_ACCESS_SECRET_KEY"
+  JWT_REFRESH_SECRETKEY: "USER_REFRESH_SECRET_KEY"
+  ADMIN_JWT_ACCESS_SECRETKEY: "ADMIN_ACCESS_SECRET_KEY"
+  ADMIN_JWT_REFRESH_SECRETKEY: "ADMIN_REFRESH_SECRET_KEY"
+  MONGO_URI: "mongodb+srv://afsalrahmanm25:hKg8ZVDO4S18BNUB@cluster0.zmpcm.mongodb.net/Request_LostLink?retryWrites=true&w=majority&appName=Cluster0"
+  STRIPE_SECRET_KEY: "sk_test_51QhltwCDpZqwIXpmpEfxtiyikgKZ5gpkT9eI9eisIZQD8WFAFebHaBgWDhM8tXZQ0fitRXNw5QYoU8TkyvQPdydm00Ua2gMwdy"
+  AMQP_URL: "amqp://rabbitmq:5672"
+  USER_QUEUE: "USER"
+  AUTH_QUEUE: "AUTH"
+  ADMIN_QUEUE: "ADMIN"
+  REQUEST_QUEUE: "REQUEST"
