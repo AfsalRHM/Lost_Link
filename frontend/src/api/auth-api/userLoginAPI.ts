@@ -5,6 +5,8 @@ type propsType = {
   userPassword: string;
 };
 
+console.log(import.meta.env.VITE_API_ROUTE, "import.meta.env.VITE_API_ROUTE")
+
 export default async function userLogin(props: propsType): Promise<any> {
   try {
     const result = await axios.post(
