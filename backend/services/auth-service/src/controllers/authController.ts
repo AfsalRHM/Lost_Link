@@ -186,7 +186,9 @@ export default class authController implements IauthController {
             status: true,
             message: "Login Successfull",
             data: response.data.data,
+            accessToken
           });
+          console.log('Authorization header set:', `Bearer ${accessToken}`);
       } else {
         res.status(400).json(response);
       }
