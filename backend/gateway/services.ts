@@ -3,6 +3,12 @@ import proxy from "express-http-proxy";
 
 export default function serviceProxies(app: Express) {
   const MAIN_ROUTE = process.env.MAIN_ROUTE;
+  const AUTH_ROUTE = process.env.AUTH_ROUTE;
+  const USER_ROUTE = process.env.USER_ROUTE;
+  const REQUEST_ROUTE = process.env.REQUEST_ROUTE;
+  const CHAT_ROUTE = process.env.CHAT_ROUTE;
+  const NOTIF_ROUTE = process.env.NOTIF_ROUTE;
+  const ADMIN_ROUTE = process.env.ADMIN_ROUTE;
   const AUTH_PORT = process.env.AUTH_PORT;
   const USER_PORT = process.env.USER_PORT;
   const ADMIN_PORT = process.env.ADMIN_PORT;
@@ -24,10 +30,14 @@ export default function serviceProxies(app: Express) {
     );
   }
 
-  app.use("/auth", proxy(`${MAIN_ROUTE}${AUTH_PORT}`));
-  app.use("/user", proxy(`${MAIN_ROUTE}${USER_PORT}`));
-  app.use("/admin", proxy(`${MAIN_ROUTE}${ADMIN_PORT}`));
-  app.use("/chat", proxy(`${MAIN_ROUTE}${CHAT_PORT}`));
-  app.use("/request", proxy(`${MAIN_ROUTE}${REQUEST_PORT}`));
-  app.use("/notif", proxy(`${MAIN_ROUTE}${NOTIF_PORT}`));
+  console.log("AUTH_ROUTE:", AUTH_ROUTE);
+  console.log("AUTH_PORT:", AUTH_PORT);
+  console.log("Proxying /auth to:", `${AUTH_ROUTE}${AUTH_PORT}`);
+
+  app.use("/auth", proxy(`http://auth-service:7001`));
+  app.use("/user", proxy(`http://auth-service:7001`));
+  app.use("/admin", proxy(`http://auth-service:7001`));
+  app.use("/chat", proxy(`http://auth-service:7001`));
+  app.use("/request", proxy(`http://auth-service:7001`));
+  app.use("/notif", proxy(`http://auth-service:7001`));
 }

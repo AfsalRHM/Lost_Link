@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: admin-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: admin-service
+  template:
+    metadata:
+      labels:
+        app: admin-service
+    spec:
+      containers:
+        - name: admin-service
+          image: afsalm/lostlink-admin-service:v1
+          ports:
+            - containerPort: 7007 
+            - containerPort: 50052
+          envFrom:
+            - configMapRef:
+                name: admin-service-env
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: admin-service
+spec:
+  selector:
+    app: admin-service
+  ports:
+    - name: http
+      port: 7007
+      targetPort: 7007
+    - name: grpc
+      port: 50052
+      targetPort: 50052
+  type: ClusterIP

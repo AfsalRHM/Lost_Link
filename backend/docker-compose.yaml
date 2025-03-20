@@ -1,0 +1,137 @@
+networks:
+  lostlink-network:
+    driver: bridge
+
+services:
+  # API Gateway
+  api-gateway:
+    build:
+      context: ./gateway
+    image: afsalm/lostlink-api-gateway:latest
+    ports:
+      - "7000:7000"
+    depends_on:
+      - lostlink-rabbitmq
+      - admin-service
+      - user-service
+      - auth-service
+      - chat-service
+      - notification-service
+      - request-service
+    env_file:
+      - ./gateway/.env
+    networks:
+      - lostlink-network
+
+  # User Service
+  user-service:
+    build:
+      context: ./services/user-service
+    image: afsalm/lostlink-user-service:latest
+    container_name: user-service
+    ports:
+      - "7002:7002"
+      - "50051:50051"
+      - "50052:50052"
+    depends_on:
+      lostlink-rabbitmq:
+        condition: service_healthy
+    env_file:
+      - ./services/user-service/.env
+    networks:
+      - lostlink-network
+
+  # Auth Service
+  auth-service:
+    build:
+      context: ./services/auth-service
+    image: afsalm/lostlink-auth-service:latest
+    container_name: auth-service
+    ports:
+      - "7001:7001"
+    depends_on:
+      lostlink-rabbitmq:
+        condition: service_healthy
+    env_file:
+      - ./services/auth-service/.env
+    networks:
+      - lostlink-network
+
+  # Admin Service
+  admin-service:
+    build:
+      context: ./services/admin-service
+    image: afsalm/lostlink-admin-service:latest
+    container_name: admin-service
+    ports:
+      - "7007:7007"
+    depends_on:
+      lostlink-rabbitmq:
+        condition: service_healthy
+    env_file:
+      - ./services/admin-service/.env
+    networks:
+      - lostlink-network
+
+  # Chat Service
+  chat-service:
+    build:
+      context: ./services/chat-service
+    image: afsalm/lostlink-chat-service:latest
+    container_name: chat-service
+    ports:
+      - "7005:7005"
+    depends_on:
+      lostlink-rabbitmq:
+        condition: service_healthy
+    env_file:
+      - ./services/chat-service/.env
+    networks:
+      - lostlink-network
+
+  # Notification Service
+  notification-service:
+    build:
+      context: ./services/notification-service
+    image: afsalm/lostlink-notification-service:latest
+    container_name: notification-service
+    ports:
+      - "7006:7006"
+    depends_on:
+      lostlink-rabbitmq:
+        condition: service_healthy
+    env_file:
+      - ./services/notification-service/.env
+    networks:
+      - lostlink-network
+
+  # Request Service
+  request-service:
+    build:
+      context: ./services/request-service
+    image: afsalm/lostlink-request-service:latest
+    container_name: request-service
+    ports:
+      - "7003:7003"
+    depends_on:
+      lostlink-rabbitmq:
+        condition: service_healthy
+    env_file:
+      - ./services/request-service/.env
+    networks:
+      - lostlink-network
+
+  # RabbitMQ
+  lostlink-rabbitmq:
+    image: rabbitmq:management
+    container_name: rabbitmq
+    ports:
+      - "5673:5672"
+      - "15673:15672"  # Management UI (http://localhost:15672)
+    networks:
+      - lostlink-network
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 10s
+      retries: 5
+      start_period: 10s
