@@ -150,11 +150,14 @@ export default class authController implements IauthController {
         return res.status(400).json({ errors: errors.array() });
       }
 
+      console.log('this email and password----------', req.body.userEmail, req.body.userPassword)
+      
       const response: { status: boolean; data: any; message?: string } =
-        await this._authService.loginVerify(
-          req.body.userEmail,
-          req.body.userPassword
-        );
+      await this._authService.loginVerify(
+        req.body.userEmail,
+        req.body.userPassword
+      );
+      console.log('this is the response----------', response)
 
       if (response.status == true) {
         const accessToken = jwtFunctions.generateAccessToken({
@@ -162,12 +165,15 @@ export default class authController implements IauthController {
           email: response.data.data.email,
           role: response.data.data.role,
         });
+        console.log('this is the accessToken----------', accessToken)
+        
         const refreshToken = jwtFunctions.generateRefreshToken({
           id: response.data.data._id.toString(),
           email: response.data.data.email,
           role: response.data.data.role,
         });
-
+        
+        console.log('this is the refreshToken----------', refreshToken)
         res
           .status(200)
           .cookie("refreshToken", refreshToken, {
