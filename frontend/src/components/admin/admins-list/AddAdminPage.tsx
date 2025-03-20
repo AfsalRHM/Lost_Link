@@ -1,27 +1,10 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Sidebar } from "../shared/Sidebar";
-import fetchAllAdmins from "../../../api/admin-api/allAdminsAPI";
-import { showErrorToast } from "../../../utils/toastUtils";
 import AddAdminForm from "./AddAdminForm";
 import NavBar from "../shared/Navbar";
 
 const UserListPage = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-
-  const [adminList, setAdminList] = useState([]);
-
-  const getAllAdmins = async () => {
-    const response = await fetchAllAdmins();
-    if (response.data.status) {
-      setAdminList(response.data.data);
-    } else {
-      showErrorToast("Didn't get the Admin List");
-    }
-  };
-
-  useEffect(() => {
-    getAllAdmins();
-  }, []);
 
   return (
     <div className="flex min-h-screen bg-blue-900 text-white">

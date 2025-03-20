@@ -14,7 +14,6 @@ import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { showErrorToast2 } from "../../../utils/iziToastUtils";
 import getRequestRedeemDetails from "../../../api/user-api/getRedeemRequestDetails";
-import VideoCall from "../../shared/VideoCall";
 import MeetScheduleModal from "./MeetScheduleModal";
 import UserErrorHandling from "../../../middlewares/UserErrorHandling";
 import { useDispatch } from "react-redux";
@@ -24,7 +23,6 @@ const RedeemRequestDetails = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const [videoCall, setVideoCall] = useState<boolean>(false);
   const [requestRedeemData, setRequestRedeemData] = useState<any>();
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -139,8 +137,6 @@ const RedeemRequestDetails = () => {
               </div>
             </div>
           </div>
-
-          {videoCall ? <VideoCall /> : null}
 
           {/* Content Grid */}
           <div className="p-8">
