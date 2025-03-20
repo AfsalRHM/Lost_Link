@@ -74,8 +74,8 @@ const LoginPage = () => {
           userProfile: response.data.data.data.profile_pic,
         };
         
-        console.log(response, "this is the response--------------------")
-        const accessToken = response.authorizationHeader.split(" ")[1] || response.data.data.accessToken;
+        console.log(response, "this is the response--------------------", response.data.data.accessToken)
+        const accessToken = response.data.data.accessToken;
         dispatch(assignUserDetails(userData));
         dispatch(assignAccessToken(accessToken));
         showSuccessToast("Login successful!");
