@@ -15,7 +15,7 @@ const FRONTEND_PORT = process.env.FRONTEND_PORT;
 
 app.use(
   cors({
-    origin: `http://lostlink.live`,
+    origin: `https://www.lostlink.live`,
     credentials: true,
     exposedHeaders: ["Authorization"],
   })
