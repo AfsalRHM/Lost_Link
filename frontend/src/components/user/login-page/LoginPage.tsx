@@ -73,8 +73,8 @@ const LoginPage = () => {
           userName: response.data.data.data.user_name,
           userProfile: response.data.data.data.profile_pic,
         };
-        
-        console.log(response, "this is the response--------------------", response.data.data.accessToken)
+
+        console.log(response, "this is the response--------------------");
         const accessToken = response.data.data.accessToken;
         dispatch(assignUserDetails(userData));
         dispatch(assignAccessToken(accessToken));
