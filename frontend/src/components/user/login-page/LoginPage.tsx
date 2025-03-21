@@ -75,7 +75,7 @@ const LoginPage = () => {
         };
 
         console.log(response, "this is the response--------------------");
-        const accessToken = response.data.data.accessToken;
+        const accessToken = response.authorizationHeader.split(" ")[1];
         dispatch(assignUserDetails(userData));
         dispatch(assignAccessToken(accessToken));
         showSuccessToast("Login successful!");
