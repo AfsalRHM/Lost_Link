@@ -17,7 +17,7 @@ export default async function userLogin(props: propsType): Promise<any> {
       }
     );
 
-    const authorizationHeader = result.headers["authorization"];
+    const authorizationHeader = result.headers["Authorization"];
     const data = result;
 
     return { data, authorizationHeader };
