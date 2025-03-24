@@ -43,9 +43,9 @@ adminAxiosInstance.interceptors.response.use(
           }
         );
 
-        const newAccessToken = response.headers["authorization"].split(" ")[1];
+        const newAccessToken = response.data.accessToken;
 
-        assignAdminAccessToken(newAccessToken);
+        store.dispatch(assignAdminAccessToken(newAccessToken));
 
         originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
 

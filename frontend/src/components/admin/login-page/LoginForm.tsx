@@ -54,7 +54,7 @@ const LoginForm: React.FC = () => {
       } else if (result.data.data.data.status !== "active") {
         setAdminLoginValidationError({display: true, content: "You are Blocked from this Site"})
       } else {
-        dispatch(assignAdminAccessToken(result.authorizationHeader.split(' ')[1]));
+        dispatch(assignAdminAccessToken(result.data.data.accessToken));
         dispatch(assignAdminDetails(result.data.data.data))
         showSuccessToast("Admin Login Success...!");
         navigate("/admin");
