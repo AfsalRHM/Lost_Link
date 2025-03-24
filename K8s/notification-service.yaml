@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: notification-service
-          image: afsalm/lostlink-notification-service:v9
+          image: afsalm/lostlink-notification-service:v10
           ports:
             - containerPort: 7006
           envFrom:
