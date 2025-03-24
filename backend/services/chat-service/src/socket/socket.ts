@@ -20,6 +20,7 @@ export const initializeSocket = (server: any) => {
       origin: "https://lostlink.live",
       credentials: true,
     },
+    path: "/chat/socket.io/",
   });
 
   console.log("Socket.IO initialized");
