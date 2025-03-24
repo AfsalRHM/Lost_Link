@@ -24,9 +24,10 @@ export const initializeSocket = (server: any) => {
       origin: "https://lostlink.live",
       credentials: true,
     },
+    path: "/notif/socket.io/",
   });
 
-  console.log("Socket.IO initialized");
+  console.log("Socket.IO initialized", "path: /notif/socket.io/");
 
   io.on("connection", (socket: TypedSocket) => {
     // Setting Up the Socket
