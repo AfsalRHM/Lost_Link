@@ -28,6 +28,8 @@ const verifyAccessToken = async (
 
     const decoded: jwtPayload | null = jwtFunctions.verifyAccessToken(token);
 
+    console.log(decoded, "this is the decoded data");
+
     if (decoded) {
       const liveUserData = await getUserById(decoded.id);
       if (liveUserData.status !== "active") {

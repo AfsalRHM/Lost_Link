@@ -7,7 +7,7 @@ const packageDef = protoLoader.loadSync(protoPath);
 const proto = grpc.loadPackageDefinition(packageDef) as any;
 
 const adminClient = new proto.admin.AdminService(
-  "localhost:50052",
+  "admin-service:50052",
   grpc.credentials.createInsecure()
 );
 
