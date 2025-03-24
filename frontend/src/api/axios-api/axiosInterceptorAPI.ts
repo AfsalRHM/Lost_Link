@@ -42,7 +42,9 @@ axiosInstance.interceptors.response.use(
             withCredentials: true,
           }
         );
-        const newAccessToken = response.headers["authorization"].split(" ")[1];
+        // const newAccessToken = response.headers["authorization"].split(" ")[1];
+        console.log(response, "response of new access token request response");
+        const newAccessToken = response.data.accessToken;
 
         assignAccessToken(newAccessToken);
 
