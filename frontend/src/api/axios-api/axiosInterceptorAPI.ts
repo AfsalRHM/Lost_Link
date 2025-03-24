@@ -44,13 +44,13 @@ axiosInstance.interceptors.response.use(
         );
         // const newAccessToken = response.headers["authorization"].split(" ")[1];
         const state = store.getState();
-      const accessToken = state.accessToken.accessToken;
+        const accessToken = state.accessToken.accessToken;
         console.log(response, "response of new access token request response");
-        console.log("old access token", accessToken)
+        console.log("old access token", accessToken);
         const newAccessToken = response.data.accessToken;
-        console.log("new access token", newAccessToken)
+        console.log("new access token", newAccessToken);
 
-        assignAccessToken(newAccessToken);
+        store.dispatch(assignAccessToken(newAccessToken));
 
         originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
 
