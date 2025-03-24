@@ -8,14 +8,12 @@ metadata:
     nginx.ingress.kubernetes.io/proxy-request-buffering: "off" # Ensures raw body is sent
     nginx.ingress.kubernetes.io/cors-allow-origin: "https://lostlink.live"
     nginx.ingress.kubernetes.io/cors-allow-methods: "GET, PUT, POST, DELETE, PATCH, OPTIONS"
-    nginx.ingress.kubernetes.io/cors-allow-headers: "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range"
+    nginx.ingress.kubernetes.io/cors-allow-headers: "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,authorization"
     nginx.ingress.kubernetes.io/cors-expose-headers: "Content-Length,Content-Range"
     cert-manager.io/cluster-issuer: letsencrypt-prod
-    # ✅ WebSocket-specific settings without configuration-snippet
     nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
     nginx.ingress.kubernetes.io/proxy-buffering: "off"
-    nginx.ingress.kubernetes.io/websocket-services: "chat-service"
 spec:
   ingressClassName: nginx
   tls:
@@ -26,13 +24,20 @@ spec:
     - host: api.lostlink.live
       http:
         paths:
-          - path: /socket.io/
+          - path: /chat/socket.io/
             pathType: ImplementationSpecific
             backend:
               service:
                 name: chat-service
                 port:
                   number: 7005
+          - path: /notif/socket.io/
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: notification-service
+                port:
+                  number: 7006
           - path: /
             pathType: Prefix
             backend:
