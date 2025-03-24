@@ -8,7 +8,6 @@ import MyRequests from "./MyRequests.tsx";
 import RedeemRequests from "./RedeemRequests.tsx";
 import TierInfo from "./TierInfo.tsx";
 import { useDispatch } from "react-redux";
-import { assignAccessToken } from "../../../redux/slice/accessTokenSlice.ts";
 import getProfile from "../../../api/user-api/getProfileAPI.ts";
 import UserDetailsLoading from "./loading/UserDetailsLoading.tsx";
 import TierSectionLoading from "./loading/TierSectionLoading.tsx";
@@ -31,9 +30,6 @@ const Hero = () => {
       try {
         const response = await getProfile();
         if (response.status == 200) {
-          const newAccessToken =
-            response.headers["authorization"].split(" ")[1];
-          dispatch(assignAccessToken(newAccessToken));
           setUserData(response.data.data);
         } else {
           console.log(response, "this is the error response on getProfile");
