@@ -12,6 +12,7 @@ export const getSocket = () => {
       withCredentials: true,
       secure: true,
       transports: ["websocket"],
+      path: "/chat/socket.io/",
     });
   }
   return chatSocket;
