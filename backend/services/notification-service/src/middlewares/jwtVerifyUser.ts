@@ -18,6 +18,7 @@ const verifyAccessToken = async (
   try {
     console.log(req, "this is the request data for the verify access token");
     const token = req.header("Authorization")?.split(" ")[1];
+    console.log(token, "this is the token for the verify access token");
 
     if (!token) {
       return res
