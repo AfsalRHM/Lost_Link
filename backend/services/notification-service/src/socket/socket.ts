@@ -21,7 +21,7 @@ export const initializeSocket = (server: any) => {
 
   io = new Server(server, {
     cors: {
-      origin: `${process.env.MAIN_ROUTE}${process.env.FRONTEND_PORT}`,
+      origin: "https://lostlink.live",
       credentials: true,
     },
   });

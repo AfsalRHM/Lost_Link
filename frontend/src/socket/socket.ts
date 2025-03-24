@@ -10,6 +10,8 @@ export const getSocket = () => {
   if (!chatSocket) {
     chatSocket = io(SOCKET_URL, {
       withCredentials: true,
+      secure: true,                  
+      transports: ["websocket"],     
     });
   }
   return chatSocket;
@@ -19,6 +21,8 @@ export const getNotifSocket = () => {
   if (!notifSocket) {
     notifSocket = io(SOCKET_NOTIF_URL, {
       withCredentials: true,
+      secure: true,
+      transports: ["websocket"],
     });
   }
   return notifSocket;
