@@ -27,6 +27,7 @@ export default class authController implements IadminController {
           status: true,
           message: "Login Successfull",
           data: response.data,
+          accessToken,
         });
     } else {
       res
@@ -126,7 +127,11 @@ export default class authController implements IadminController {
         res
           .setHeader("Authorization", `Bearer ${result.message}`)
           .status(200)
-          .json({ status: true, message: "New Access Token Created" });
+          .json({
+            status: true,
+            message: "New Access Token Created",
+            accessToken: result.message,
+          });
       } else if (result?.message === "Token expired") {
         res
           .status(401)
