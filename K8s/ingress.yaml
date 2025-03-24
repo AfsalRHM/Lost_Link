@@ -5,7 +5,7 @@ metadata:
   annotations:
     nginx.ingress.kubernetes.io/proxy-body-size: "10m"
     nginx.ingress.kubernetes.io/enable-cors: "true"
-    nginx.ingress.kubernetes.io/proxy-request-buffering: "off" # Ensures raw body is sent
+    nginx.ingress.kubernetes.io/proxy-request-buffering: "off"
     nginx.ingress.kubernetes.io/cors-allow-origin: "https://lostlink.live"
     nginx.ingress.kubernetes.io/cors-allow-methods: "GET, PUT, POST, DELETE, PATCH, OPTIONS"
     nginx.ingress.kubernetes.io/cors-allow-headers: "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,authorization"
@@ -14,6 +14,7 @@ metadata:
     nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
     nginx.ingress.kubernetes.io/proxy-buffering: "off"
+    nginx.ingress.kubernetes.io/use-regex: "true"
 spec:
   ingressClassName: nginx
   tls:
@@ -24,14 +25,14 @@ spec:
     - host: api.lostlink.live
       http:
         paths:
-          - path: /chat/socket.io/
+          - path: /chat/socket.io/?(.*)
             pathType: ImplementationSpecific
             backend:
               service:
                 name: chat-service
                 port:
                   number: 7005
-          - path: /notif/socket.io/
+          - path: /notif/socket.io/?(.*)
             pathType: ImplementationSpecific
             backend:
               service:
