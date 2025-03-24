@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: chat-service
-          image: afsalm/lostlink-chat-service:v5
+          image: afsalm/lostlink-chat-service:v9
           ports:
             - containerPort: 7005
           envFrom:

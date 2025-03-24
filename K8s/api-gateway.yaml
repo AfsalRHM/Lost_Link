@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: api-gateway
-          image: afsalm/lostlink-api-gateway:v5
+          image: afsalm/lostlink-api-gateway:v8
           ports:
             - containerPort: 7000
           envFrom:

@@ -16,6 +16,7 @@ const verifyAccessToken = async (
   next: NextFunction
 ): Promise<any> => {
   try {
+    console.log(req, "this is the request data for the verify access token");
     const token = req.header("Authorization")?.split(" ")[1];
 
     if (!token) {
