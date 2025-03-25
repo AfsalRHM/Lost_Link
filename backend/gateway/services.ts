@@ -1,5 +1,5 @@
 import { Express } from "express";
-import { createProxyMiddleware } from "http-proxy-middleware";
+import proxy from "express-http-proxy";
 
 export default function serviceProxies(app: Express) {
   const MAIN_ROUTE = process.env.MAIN_ROUTE;
@@ -36,62 +36,19 @@ export default function serviceProxies(app: Express) {
     );
   }
 
-  // Proxy Configuration
-  app.use(
-    "/auth",
-    createProxyMiddleware({
-      target: `${AUTH_ROUTE}${AUTH_PORT}`,
-      changeOrigin: true,
-    })
-  );
+  console.log("AUTH_ROUTE:", AUTH_ROUTE);
+  console.log("AUTH_PORT:", AUTH_PORT);
+  console.log("Proxying /auth to:", `${AUTH_ROUTE}${AUTH_PORT}`);
+  console.log("Proxying /user to:", `${USER_ROUTE}${USER_PORT}`);
+  console.log("Proxying /admin to:", `${ADMIN_ROUTE}${ADMIN_PORT}`);
+  console.log("Proxying /chat to:", `${CHAT_ROUTE}${CHAT_PORT}`);
+  console.log("Proxying /request to:", `$${REQUEST_ROUTE}${REQUEST_PORT}`);
+  console.log("Proxying /notif to:", `${NOTIF_ROUTE}${NOTIF_PORT}`);
 
-  app.use(
-    "/user",
-    createProxyMiddleware({
-      target: `${USER_ROUTE}${USER_PORT}`,
-      changeOrigin: true,
-    })
-  );
-
-  app.use(
-    "/admin",
-    createProxyMiddleware({
-      target: `${ADMIN_ROUTE}${ADMIN_PORT}`,
-      changeOrigin: true,
-    })
-  );
-
-  app.use(
-    "/chat",
-    createProxyMiddleware({
-      target: `${CHAT_ROUTE}${CHAT_PORT}`,
-      changeOrigin: true,
-      ws: true, // enable WebSocket proxy
-      pathRewrite: {
-        "^/chat": "/", // remove /chat prefix
-      },
-    })
-  );
-
-  app.use(
-    "/notif",
-    createProxyMiddleware({
-      target: `${NOTIF_ROUTE}${NOTIF_PORT}`,
-      changeOrigin: true,
-      ws: true, // enable WebSocket proxy
-      pathRewrite: {
-        "^/notif": "/", // remove /notif prefix
-      },
-    })
-  );
-
-  app.use(
-    "/request",
-    createProxyMiddleware({
-      target: `${REQUEST_ROUTE}${REQUEST_PORT}`,
-      changeOrigin: true,
-    })
-  );
-
-  console.log("Proxy routes initialized.");
+  app.use("/auth", proxy(`${AUTH_ROUTE}${AUTH_PORT}`));
+  app.use("/user", proxy(`${USER_ROUTE}${USER_PORT}`));
+  app.use("/admin", proxy(`${ADMIN_ROUTE}${ADMIN_PORT}`));
+  app.use("/chat", proxy(`${CHAT_ROUTE}${CHAT_PORT}`));
+  app.use("/request", proxy(`${REQUEST_ROUTE}${REQUEST_PORT}`));
+  app.use("/notif", proxy(`${NOTIF_ROUTE}${NOTIF_PORT}`));
 }
