@@ -21,15 +21,16 @@ export const initializeSocket = (server: any) => {
 
   io = new Server(server, {
     cors: {
-      origin: "https://lostlink.live",
+      origin: ["https://lostlink.live", "https://www.lostlink.live"],
       credentials: true,
     },
-    path: "/notif/socket.io/",
+    path: "/socket.io/",
   });
 
   console.log("Socket.IO initialized", "path: /notif/socket.io/");
 
   io.on("connection", (socket: TypedSocket) => {
+    console.log("User connected:", socket.id); // temperory
     // Setting Up the Socket
     socket.on("setup", (userId: string) => {
       socket.join(userId);
