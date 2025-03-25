@@ -1,4 +1,4 @@
-import { format, isFuture, differenceInMinutes } from "date-fns";
+import { format, isAfter, addMinutes, setHours, setMinutes } from "date-fns";
 import {
   Video,
   User,
@@ -34,12 +34,16 @@ const MeetDetailsPart = ({ meetData }: { meetData: any }) => {
     }
   };
 
-  // Check if the meeting is in the future
+  // Construct the full meeting start time
   const meetDate = new Date(meet.meet_date);
-  const isUpcoming = isFuture(meetDate);
+  const [meetHours, meetMinutes] = meet.meet_time.split(":").map(Number);
+  const meetStartTime = setMinutes(setHours(meetDate, meetHours), meetMinutes);
 
-  const isJoinable =
-    isUpcoming || differenceInMinutes(new Date(), meetDate) < 15;
+  // Calculate the expiry time (start time + 15 minutes)
+  const meetExpiryTime = addMinutes(meetStartTime, 15);
+
+  // Determine if the meeting is joinable
+  const isJoinable = isAfter(meetExpiryTime, new Date());
 
   const handleUserInfoClick = () => {
     navigate(`/admin/users/user-details/${meet.user_id}`);
@@ -50,8 +54,10 @@ const MeetDetailsPart = ({ meetData }: { meetData: any }) => {
   };
 
   const handleJoinMeeting = () => {
-    navigate(`/video-call?id=${meet._id}`);
-    console.log(`Joining meeting with ID: ${meet._id}`);
+    if (isJoinable) {
+      navigate(`/video-call?id=${meet._id}`);
+      console.log(`Joining meeting with ID: ${meet._id}`);
+    }
   };
 
   // Handle back button
