@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { format, addMinutes, isAfter } from "date-fns";
+import { format, addMinutes, isAfter, setMinutes, setHours } from "date-fns";
 import { Link } from "react-router-dom";
 
 interface MeetListPartType {
@@ -19,16 +19,23 @@ const MeetListPart = ({ allMeets }: MeetListPartType) => {
     }
   };
 
-  // Current time
-  const now = new Date();
-
   // Filter meetings based on active tab
   const filteredMeets = allMeets.filter((meet: any) => {
-    const meetDate = new Date(meet.meet_date + "Z");
-    const meetWithBuffer = addMinutes(meetDate, 15);
+    const meetDate = new Date(meet.meet_date); // Extract date part
+    const [meetHours, meetMinutes] = meet.meet_time.split(":").map(Number); // Extract hours & minutes
+
+    // Create full meeting start datetime
+    const meetStartTime = setMinutes(
+      setHours(meetDate, meetHours),
+      meetMinutes
+    );
+
+    const meetExpiryTime = addMinutes(meetStartTime, 15);
+
+    // Add 15 minutes to get expiry time
     return activeTab === "upcoming"
-      ? isAfter(meetWithBuffer, now)
-      : !isAfter(meetWithBuffer, now);
+      ? isAfter(meetExpiryTime, new Date()) // If meeting is still valid
+      : !isAfter(meetExpiryTime, new Date());
   });
 
   return (
