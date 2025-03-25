@@ -16,9 +16,7 @@ const verifyAccessToken = async (
   next: NextFunction
 ): Promise<any> => {
   try {
-    console.log(req, "this is the request data for the verify access token");
     const token = req.header("Authorization")?.split(" ")[1];
-    console.log(token, "this is the token for the verify access token");
 
     if (!token) {
       return res
@@ -27,8 +25,6 @@ const verifyAccessToken = async (
     }
 
     const decoded: jwtPayload | null = jwtFunctions.verifyAccessToken(token);
-
-    console.log(decoded, "this is the decoded data");
 
     if (decoded) {
       const liveUserData = await getUserById(decoded.id);
