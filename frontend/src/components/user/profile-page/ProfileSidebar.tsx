@@ -43,7 +43,7 @@ const ProfileSidebar = ({
   }
 
   const menuItems = [
-    "Location Info",
+    // "Location Info",
     "My Wallet",
     "My Requests",
     "My Reports",
