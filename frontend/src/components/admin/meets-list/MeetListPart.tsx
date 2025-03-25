@@ -24,7 +24,7 @@ const MeetListPart = ({ allMeets }: MeetListPartType) => {
 
   // Filter meetings based on active tab
   const filteredMeets = allMeets.filter((meet: any) => {
-    const meetDate = new Date(meet.meet_date);
+    const meetDate = new Date(meet.meet_date + "Z");
     const meetWithBuffer = addMinutes(meetDate, 15);
     return activeTab === "upcoming"
       ? isAfter(meetWithBuffer, now)
