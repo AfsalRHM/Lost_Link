@@ -52,7 +52,7 @@ const TopBar = () => {
         </li>
       </Link>
 
-      <Link to="/contact">
+      {/* <Link to="/contact">
         <li
           className={`${linkClass} ${
             currentPage === "/contact" ? activeClass : hoverClass
@@ -60,7 +60,7 @@ const TopBar = () => {
         >
           <span className="text-[15px] font-medium">Contact</span>
         </li>
-      </Link>
+      </Link> */}
 
       <Link to="/faq">
         <li
