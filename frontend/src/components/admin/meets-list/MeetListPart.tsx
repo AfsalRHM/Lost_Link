@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { format, addMinutes, isAfter, setMinutes, setHours } from "date-fns";
+import { toZonedTime } from "date-fns-tz";
 import { Link } from "react-router-dom";
 
 interface MeetListPartType {
@@ -12,8 +13,8 @@ const MeetListPart = ({ allMeets }: MeetListPartType) => {
   // Format date for display
   const formatDate = (dateString: string) => {
     try {
-      const date = new Date(dateString);
-      return format(date, "MMM dd, yyyy • h:mm a");
+      const utcDate = toZonedTime(dateString, "UTC"); // Convert to UTC
+      return format(utcDate, "MMM dd, yyyy • h:mm a");
     } catch (error) {
       return dateString;
     }
