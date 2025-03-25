@@ -25,6 +25,7 @@
     "agora-rtc-sdk-ng": "^4.23.2",
     "axios": "^1.7.9",
     "date-fns": "^4.1.0",
+    "date-fns-tz": "^3.2.0",
     "dayjs": "^1.11.13",
     "dotenv": "^16.4.7",
     "framer-motion": "^12.4.10",
