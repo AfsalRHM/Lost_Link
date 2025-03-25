@@ -5,7 +5,7 @@ import { RootState } from "../../../redux/store";
 import NotificationSection from "../../shared/NotificationSection";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faQuestion, faComment } from "@fortawesome/free-solid-svg-icons";
+import { faQuestion } from "@fortawesome/free-solid-svg-icons";
 import getNotifications from "../../../api/user-api/getNotificationsAPI";
 import { getNotifSocket } from "../../../socket/socket";
 import UserErrorHandling from "../../../middlewares/UserErrorHandling";
@@ -78,7 +78,7 @@ const TopBarIcons = () => {
 
   return (
     <>
-      <Link to="/contact">
+      {/* <Link to="/contact">
         <div
           className={`${linkClass} ${
             currentPage === "/contact" ? activeClass : hoverClass
@@ -87,7 +87,7 @@ const TopBarIcons = () => {
         >
           <FontAwesomeIcon icon={faComment} style={{ fontSize: "20px" }} />
         </div>
-      </Link>
+      </Link> */}
 
       <Link to="/faq">
         <div
