@@ -23,7 +23,7 @@ const Hero = () => {
 
   const [loading, setLoading] = useState<boolean>(true);
   const [userData, setUserData] = useState();
-  const [selectedItem, setSelectedItem] = useState<string>("Location Info");
+  const [selectedItem, setSelectedItem] = useState<string>("My Wallet");
 
   useEffect(() => {
     const getUserDetails = async () => {
