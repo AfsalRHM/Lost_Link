@@ -13,9 +13,11 @@ const MeetListPart = ({ allMeets }: MeetListPartType) => {
   // Format date for display
   const formatDate = (dateString: string) => {
     try {
-      const utcDate = toZonedTime(dateString, "UTC"); // Convert to UTC
+      const date = new Date(dateString);
+      const utcDate = toZonedTime(date, "UTC");
       return format(utcDate, "MMM dd, yyyy • h:mm a");
     } catch (error) {
+      console.error("Date formatting error:", error);
       return dateString;
     }
   };
