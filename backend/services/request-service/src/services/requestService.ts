@@ -614,8 +614,8 @@ export default class requestService implements IrequestService {
           },
         ],
         mode: "payment",
-        success_url: `${process.env.MAIN_ROUTE}${process.env.FRONTEND_PORT}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${process.env.MAIN_ROUTE}${process.env.FRONTEND_PORT}/payment-cancel`,
+        success_url: `${process.env.HOSTED_ROUTE}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${process.env.HOSTED_ROUTE}/payment-cancel`,
       });
 
       return {
