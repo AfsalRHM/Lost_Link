@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import ImeetController from "../interface/ImeetController";
 import meetService from "../services/meetService";
+import { StatusCode } from "../constants/statusCodes";
 
 export default class meetController implements ImeetController {
   private _meetService: meetService;
@@ -17,7 +18,7 @@ export default class meetController implements ImeetController {
         console.log(
           "invalid data passed to the request createMeet/meetController"
         );
-        res.status(404);
+        res.status(StatusCode.NOT_FOUND);
         return;
       }
 
@@ -30,9 +31,9 @@ export default class meetController implements ImeetController {
       });
 
       if (response.status) {
-        res.status(200).json(response);
+        res.status(StatusCode.OK).json(response);
       } else {
-        res.status(402).json(response);
+        res.status(StatusCode.BAD_REQUEST).json(response);
       }
     } catch (error) {
       console.log("error in createMeet/meetController", error);
@@ -46,9 +47,9 @@ export default class meetController implements ImeetController {
       const response = await this._meetService.getAllMeets();
 
       if (response.status) {
-        res.status(200).json(response);
+        res.status(StatusCode.OK).json(response);
       } else {
-        res.status(402).json(response);
+        res.status(StatusCode.BAD_REQUEST).json(response);
       }
     } catch (error) {
       console.log("error in getAllMeets/meetController", error);
@@ -67,15 +68,15 @@ export default class meetController implements ImeetController {
         console.log(
           "invalid data passed to the request getMeetDataAdmin/meetController"
         );
-        res.status(404);
+        res.status(StatusCode.NOT_FOUND);
         return;
       }
       const response = await this._meetService.getMeetDataAdmin({ meetId });
 
       if (response.status) {
-        res.status(200).json(response);
+        res.status(StatusCode.OK).json(response);
       } else {
-        res.status(402).json(response);
+        res.status(StatusCode.BAD_REQUEST).json(response);
       }
     } catch (error) {
       console.log("error in getMeetDataAdmin/meetController", error);
@@ -92,15 +93,15 @@ export default class meetController implements ImeetController {
         console.log(
           "invalid data passed to the request getUserMeets/meetController"
         );
-        res.status(404);
+        res.status(StatusCode.NOT_FOUND);
         return;
       }
-      const response = await this._meetService.getUserMeets({userId});
+      const response = await this._meetService.getUserMeets({ userId });
 
       if (response.status) {
-        res.status(200).json(response);
+        res.status(StatusCode.OK).json(response);
       } else {
-        res.status(402).json(response);
+        res.status(StatusCode.BAD_REQUEST).json(response);
       }
     } catch (error) {
       console.log("error in getUserMeets/meetController", error);

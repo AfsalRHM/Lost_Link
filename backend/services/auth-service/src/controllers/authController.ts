@@ -4,6 +4,7 @@ import authService from "../services/authService";
 import { validationResult } from "express-validator";
 
 import jwtFunctions from "../utils/jwt";
+import { StatusCode } from "../constants/statusCodes";
 
 export default class authController implements IauthController {
   private _authService: authService;
@@ -17,14 +18,16 @@ export default class authController implements IauthController {
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
+        return res
+          .status(StatusCode.BAD_REQUEST)
+          .json({ errors: errors.array() });
       }
 
       const userExists = await this._authService.checkMail(
         req.body.recieverEmail
       );
       if (userExists == true) {
-        res.status(400).json({
+        res.status(StatusCode.BAD_REQUEST).json({
           status: false,
           message: "User already exists with this Email",
         });
@@ -34,7 +37,9 @@ export default class authController implements IauthController {
           req.body.recieverName
         );
 
-        res.status(200).json({ status: true, message: "User is New" });
+        res
+          .status(StatusCode.OK)
+          .json({ status: true, message: "User is New" });
       }
     } catch (error) {
       console.log("error in authController/sendMail", error);
@@ -48,16 +53,20 @@ export default class authController implements IauthController {
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        res.status(400).json({ errors: errors.array() });
+        res.status(StatusCode.BAD_REQUEST).json({ errors: errors.array() });
       } else {
         const response = await this._authService.sendMail(
           req.body.recieverEmail,
           req.body.recieverName
         );
         if (response.message == "No user found") {
-          res.status(400).json({ status: false, message: "User not Found" });
+          res
+            .status(StatusCode.BAD_REQUEST)
+            .json({ status: false, message: "User not Found" });
         } else {
-          res.status(200).json({ status: true, message: "User is New" });
+          res
+            .status(StatusCode.OK)
+            .json({ status: true, message: "User is New" });
         }
       }
     } catch (error) {
@@ -69,7 +78,7 @@ export default class authController implements IauthController {
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        res.status(400).json({ errors: errors.array() });
+        res.status(StatusCode.BAD_REQUEST).json({ errors: errors.array() });
       } else {
         const response = await this._authService.resetPassword(
           req.body.userEmail,
@@ -77,11 +86,11 @@ export default class authController implements IauthController {
         );
         if (response.message == "Password changed") {
           res
-            .status(200)
+            .status(StatusCode.OK)
             .json({ status: true, message: "Password Changed Successfully" });
         } else {
           res
-            .status(200)
+            .status(StatusCode.OK)
             .json({ status: false, message: "Password didn't changed" });
         }
       }
@@ -95,17 +104,23 @@ export default class authController implements IauthController {
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
+        return res
+          .status(StatusCode.BAD_REQUEST)
+          .json({ errors: errors.array() });
       }
 
       const result: boolean = await this._authService.verifyotp(
         req.body.userEmail,
         req.body.userEnteredOTP
       );
-      res.status(200).json({ status: result, message: "OTP Verified" });
+      res
+        .status(StatusCode.OK)
+        .json({ status: result, message: "OTP Verified" });
     } catch (error) {
       console.log("error in authController/verfiyOTP", error);
-      res.status(200).json({ status: false, message: "Internal Server Error" });
+      res
+        .status(StatusCode.OK)
+        .json({ status: false, message: "Internal Server Error" });
     }
   };
 
@@ -114,13 +129,15 @@ export default class authController implements IauthController {
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
+        return res
+          .status(StatusCode.BAD_REQUEST)
+          .json({ errors: errors.array() });
       }
 
       const userExists = await this._authService.checkMail(req.body.userEmail);
       if (userExists) {
         res
-          .status(400)
+          .status(StatusCode.BAD_REQUEST)
           .json({ status: false, message: "User with Email already Exixts." });
       } else {
         const userData = await this._authService.insertuser(
@@ -130,7 +147,7 @@ export default class authController implements IauthController {
           req.body.userEmail,
           req.body.userPassword
         );
-        res.status(200).json({
+        res.status(StatusCode.OK).json({
           status: true,
           message: "Registered Successfully",
           data: userData,
@@ -138,7 +155,9 @@ export default class authController implements IauthController {
       }
     } catch (error) {
       console.log("error in authController/insertUser", error);
-      res.status(200).json({ status: false, message: "Internal Server Error" });
+      res
+        .status(StatusCode.OK)
+        .json({ status: false, message: "Internal Server Error" });
     }
   };
 
@@ -147,7 +166,9 @@ export default class authController implements IauthController {
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
+        return res
+          .status(StatusCode.BAD_REQUEST)
+          .json({ errors: errors.array() });
       }
 
       console.log(
@@ -179,7 +200,7 @@ export default class authController implements IauthController {
 
         console.log("this is the refreshToken----------", refreshToken);
         res
-          .status(200)
+          .status(StatusCode.OK)
           .cookie("refreshToken", refreshToken, {
             httpOnly: true,
             sameSite: "strict",
@@ -196,7 +217,7 @@ export default class authController implements IauthController {
           });
         console.log("Authorization header set:", `Bearer ${accessToken}`);
       } else {
-        res.status(400).json(response);
+        res.status(StatusCode.BAD_REQUEST).json(response);
       }
     } catch (error) {
       console.log("Error on authController/loginVerify", error);
@@ -211,15 +232,15 @@ export default class authController implements IauthController {
       if (result?.status == true) {
         res
           .setHeader("Authorization", `Bearer ${result.data}`)
-          .status(200)
+          .status(StatusCode.OK)
           // Changed access token to send through body
           .json({ result, accessToken: result.data });
       } else {
-        res.status(401).json(result);
+        res.status(StatusCode.UNAUTHORIZED).json(result);
       }
     } catch (error) {
       res
-        .status(401)
+        .status(StatusCode.UNAUTHORIZED)
         .json({ status: false, message: "New Access Token not Generated" });
     }
   };
@@ -235,20 +256,20 @@ export default class authController implements IauthController {
       if (result?.status == true) {
         res
           .setHeader("Authorization", `Bearer ${result.message}`)
-          .status(200)
+          .status(StatusCode.OK)
           .json({ status: true, message: "New Access Token Created" });
       } else if (result?.message === "Token expired") {
         res
-          .status(401)
+          .status(StatusCode.UNAUTHORIZED)
           .json({ status: false, message: "Refresh token expired" });
       } else {
         res
-          .status(401)
+          .status(StatusCode.UNAUTHORIZED)
           .json({ status: false, message: "Failed to refresh token" });
       }
     } catch (error) {
       res
-        .status(401)
+        .status(StatusCode.UNAUTHORIZED)
         .json({ status: false, message: "New Access Token not Generated" });
     }
   };
@@ -276,7 +297,7 @@ export default class authController implements IauthController {
           });
 
           res
-            .status(200)
+            .status(StatusCode.OK)
             .cookie("refreshToken", refreshToken, {
               httpOnly: true,
               sameSite: "strict",
@@ -289,11 +310,11 @@ export default class authController implements IauthController {
               message: "Login Successfull...!",
             });
         } else {
-          res.status(400).json(response);
+          res.status(StatusCode.BAD_REQUEST).json(response);
         }
       }
     } catch (error) {
-      res.status(401).json({
+      res.status(StatusCode.UNAUTHORIZED).json({
         status: false,
         message: "Error on GoogleLoginVerify/authController 1",
       });
@@ -303,7 +324,7 @@ export default class authController implements IauthController {
   public userLogout = async (req: Request, res: Response): Promise<void> => {
     try {
       res
-        .status(200)
+        .status(StatusCode.OK)
         .clearCookie("refreshToken", {
           httpOnly: true,
           sameSite: "strict",
@@ -311,7 +332,7 @@ export default class authController implements IauthController {
         })
         .json({ status: "true", message: "Logged out successfully" });
     } catch (error) {
-      res.status(401).json({
+      res.status(StatusCode.UNAUTHORIZED).json({
         status: false,
         message: "Error on userLogout/authController",
       });

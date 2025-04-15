@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import IadminController from "../interface/IadminController";
 import adminService from "../services/adminService";
+import { StatusCode } from "../constants/statusCodes";
 
 export default class authController implements IadminController {
   private _adminService: adminService;
@@ -16,7 +17,7 @@ export default class authController implements IadminController {
       const refreshToken = response.tokenData.refreshToken;
 
       res
-        .status(200)
+        .status(StatusCode.OK)
         .cookie("adminRefreshToken", refreshToken, {
           httpOnly: true,
           sameSite: "strict",
@@ -31,7 +32,7 @@ export default class authController implements IadminController {
         });
     } else {
       res
-        .status(200)
+        .status(StatusCode.OK)
         .json({ status: false, message: "Login Failed", data: null });
     }
   };
@@ -39,10 +40,10 @@ export default class authController implements IadminController {
   public getAllUsers = async (req: Request, res: Response): Promise<void> => {
     try {
       const response = await this._adminService.getAllUsers();
-      res.status(200).json(response);
+      res.status(StatusCode.OK).json(response);
     } catch (error) {
       res
-        .status(300)
+        .status(StatusCode.BAD_REQUEST)
         .json({ message: "error on the getAllUsers/adminController" });
     }
   };
@@ -50,10 +51,10 @@ export default class authController implements IadminController {
   public getAllAdmins = async (req: Request, res: Response): Promise<void> => {
     try {
       const response = await this._adminService.getAllAdmins();
-      res.status(200).json(response);
+      res.status(StatusCode.OK).json(response);
     } catch (error) {
       res
-        .status(300)
+        .status(StatusCode.BAD_REQUEST)
         .json({ message: "error on the getAllAdmins/adminController" });
     }
   };
@@ -66,10 +67,10 @@ export default class authController implements IadminController {
       const response = await this._adminService.changeUserStatus(
         req.body.Props
       );
-      res.status(200).json(response);
+      res.status(StatusCode.OK).json(response);
     } catch (error) {
       res
-        .status(300)
+        .status(StatusCode.BAD_REQUEST)
         .json({ message: "error on the changeUserStatus/adminController" });
     }
   };
@@ -82,10 +83,10 @@ export default class authController implements IadminController {
       const response = await this._adminService.changeAdminStatus(
         req.body.Props
       );
-      res.status(200).json(response);
+      res.status(StatusCode.OK).json(response);
     } catch (error) {
       res
-        .status(300)
+        .status(StatusCode.BAD_REQUEST)
         .json({ message: "error on the changeAdminStatus/adminController" });
     }
   };
@@ -93,10 +94,10 @@ export default class authController implements IadminController {
   public insertAdmin = async (req: Request, res: Response): Promise<void> => {
     try {
       const response = await this._adminService.insertAdmin(req.body.Props);
-      res.status(200).json(response);
+      res.status(StatusCode.OK).json(response);
     } catch (error) {
       res
-        .status(300)
+        .status(StatusCode.BAD_REQUEST)
         .json({ message: "error on the insertAdmin/adminController" });
     }
   };
@@ -104,7 +105,7 @@ export default class authController implements IadminController {
   public adminLogout = async (req: Request, res: Response): Promise<void> => {
     try {
       res
-        .status(200)
+        .status(StatusCode.OK)
         .clearCookie("adminRefreshToken", {
           httpOnly: true,
           sameSite: "strict",
@@ -113,7 +114,7 @@ export default class authController implements IadminController {
         .json({ status: "true", message: "Logged out successfully" });
     } catch (error) {
       res
-        .status(300)
+        .status(StatusCode.BAD_REQUEST)
         .json({ message: "error on the adminLogout/adminController" });
     }
   };
@@ -126,7 +127,7 @@ export default class authController implements IadminController {
       if (result?.status == true) {
         res
           .setHeader("Authorization", `Bearer ${result.message}`)
-          .status(200)
+          .status(StatusCode.OK)
           .json({
             status: true,
             message: "New Access Token Created",
@@ -134,16 +135,16 @@ export default class authController implements IadminController {
           });
       } else if (result?.message === "Token expired") {
         res
-          .status(401)
+          .status(StatusCode.UNAUTHORIZED)
           .json({ status: false, message: "Refresh token expired" });
       } else {
         res
-          .status(401)
+          .status(StatusCode.UNAUTHORIZED)
           .json({ status: false, message: "Failed to refresh token" });
       }
     } catch (error) {
       res
-        .status(401)
+        .status(StatusCode.UNAUTHORIZED)
         .json({ status: false, message: "New Access Token not Generated" });
     }
   };
