@@ -3,6 +3,7 @@ import IchatController from "../interface/IchatController";
 import chatService from "../services/chatService";
 
 import jwtFunctions from "../utils/jwt";
+import { StatusCode } from "../constants/statusCodes";
 
 export default class chatController implements IchatController {
   private _chatService: chatService;
@@ -35,9 +36,9 @@ export default class chatController implements IchatController {
       });
 
       if (response.status) {
-        res.status(200).json(response);
+        res.status(StatusCode.OK).json(response);
       } else {
-        res.status(400).json(response);
+        res.status(StatusCode.BAD_REQUEST).json(response);
       }
     } catch (error) {
       console.log("error in getUserChat/chatController", error);
@@ -51,9 +52,9 @@ export default class chatController implements IchatController {
       const response = await this._chatService.getAllChats();
 
       if (response.status) {
-        res.status(200).json(response);
+        res.status(StatusCode.OK).json(response);
       } else {
-        res.status(400).json(response);
+        res.status(StatusCode.BAD_REQUEST).json(response);
       }
     } catch (error) {
       console.log("error in getUserChat/chatController", error);
@@ -76,12 +77,12 @@ export default class chatController implements IchatController {
       const response = await this._chatService.getAllUserChats({ userId });
 
       if (response.status) {
-        res.status(200).json(response);
+        res.status(StatusCode.OK).json(response);
       } else {
         if (response.message == "Invalid Request ID format") {
-          res.status(404).json(response);
+          res.status(StatusCode.NOT_FOUND).json(response);
         } else {
-          res.status(400).json(response);
+          res.status(StatusCode.BAD_REQUEST).json(response);
         }
       }
     } catch (error) {
@@ -106,9 +107,9 @@ export default class chatController implements IchatController {
       });
 
       if (response.status) {
-        res.status(200).json(response);
+        res.status(StatusCode.OK).json(response);
       } else {
-        res.status(400).json(response);
+        res.status(StatusCode.BAD_REQUEST).json(response);
       }
     } catch (error) {
       console.log("error in getChatDetails/chatController", error);

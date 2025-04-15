@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import InotificationController from "../interface/InotificationController";
 import notificationService from "../services/notificationService";
+import { StatusCode } from "../constants/statusCodes";
 
 export default class notificationController implements InotificationController {
   private _notificationService: notificationService;
@@ -25,9 +26,9 @@ export default class notificationController implements InotificationController {
       });
 
       if (response.status) {
-        res.status(200).json(response);
+        res.status(StatusCode.OK).json(response);
       } else {
-        res.status(400).json(response);
+        res.status(StatusCode.BAD_REQUEST).json(response);
       }
     } catch (error) {
       console.log("error in getNotifications/notificationController", error);
@@ -50,9 +51,9 @@ export default class notificationController implements InotificationController {
         await this._notificationService.changeUserNotificationSeen({ userId });
 
       if (response.status) {
-        res.status(200).json(response);
+        res.status(StatusCode.OK).json(response);
       } else {
-        res.status(400).json(response);
+        res.status(StatusCode.BAD_REQUEST).json(response);
       }
     } catch (error) {
       console.log(
@@ -73,9 +74,9 @@ export default class notificationController implements InotificationController {
         await this._notificationService.changeAdminNotificationSeen();
 
       if (response.status) {
-        res.status(200).json(response);
+        res.status(StatusCode.OK).json(response);
       } else {
-        res.status(400).json(response);
+        res.status(StatusCode.BAD_REQUEST).json(response);
       }
     } catch (error) {
       console.log(
@@ -95,12 +96,14 @@ export default class notificationController implements InotificationController {
       const notificationId = req.body.notificationId;
 
       const response =
-        await this._notificationService.changeAdminOneNotificationSeen({notificationId});
+        await this._notificationService.changeAdminOneNotificationSeen({
+          notificationId,
+        });
 
       if (response.status) {
-        res.status(200).json(response);
+        res.status(StatusCode.OK).json(response);
       } else {
-        res.status(400).json(response);
+        res.status(StatusCode.BAD_REQUEST).json(response);
       }
     } catch (error) {
       console.log(
@@ -120,9 +123,9 @@ export default class notificationController implements InotificationController {
       const response = await this._notificationService.getAdminNotifications();
 
       if (response.status) {
-        res.status(200).json(response);
+        res.status(StatusCode.OK).json(response);
       } else {
-        res.status(400).json(response);
+        res.status(StatusCode.BAD_REQUEST).json(response);
       }
     } catch (error) {
       console.log("error in getNotifications/notificationController", error);

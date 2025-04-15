@@ -5,6 +5,7 @@ import jwtFunctions from "../utils/jwt";
 import userService from "../services/userService";
 import jwtPayload from "../interface/IjwtPayload";
 import { validationResult } from "express-validator";
+import { StatusCode } from "../constants/statusCodes";
 
 export default class UserController implements IuserController {
   private _userService: userService;
@@ -16,12 +17,16 @@ export default class UserController implements IuserController {
   public getProfile = async (req: Request, res: Response): Promise<void> => {
     const accessToken = req.headers["authorization"]?.split(" ")[1];
     if (!accessToken) {
-      res.status(400).json({ message: "No authorization token provided" });
+      res
+        .status(StatusCode.BAD_REQUEST)
+        .json({ message: "No authorization token provided" });
     } else {
       const decoded: jwtPayload | null =
         jwtFunctions.verifyAccessToken(accessToken);
       if (!decoded) {
-        res.status(400).json({ message: "No authorization token provided" });
+        res
+          .status(StatusCode.BAD_REQUEST)
+          .json({ message: "No authorization token provided" });
       } else {
         const response = await this._userService.getProfile({
           userId: decoded.id,
@@ -29,7 +34,7 @@ export default class UserController implements IuserController {
         if (response.status) {
           res
             .setHeader("Authorization", `Bearer ${accessToken}`)
-            .status(200)
+            .status(StatusCode.OK)
             .json({
               status: true,
               data: response.data,
@@ -38,7 +43,7 @@ export default class UserController implements IuserController {
         } else {
           res
             .setHeader("Authorization", `Bearer ${accessToken}`)
-            .status(200)
+            .status(StatusCode.OK)
             .json({ status: false, data: null, message: response.message });
         }
       }
@@ -48,13 +53,15 @@ export default class UserController implements IuserController {
   public getAllUsers = async (req: Request, res: Response): Promise<void> => {
     const accessToken = req.headers["authorization"]?.split(" ")[1];
     if (!accessToken) {
-      res.status(400).json({ message: "No authorization token provided" });
+      res
+        .status(StatusCode.BAD_REQUEST)
+        .json({ message: "No authorization token provided" });
     } else {
       const response = await this._userService.getAllUsers();
       if (response.status) {
         res
           .setHeader("Authorization", `Bearer ${accessToken}`)
-          .status(200)
+          .status(StatusCode.OK)
           .json({
             status: true,
             data: response.data,
@@ -63,7 +70,7 @@ export default class UserController implements IuserController {
       } else {
         res
           .setHeader("Authorization", `Bearer ${accessToken}`)
-          .status(200)
+          .status(StatusCode.OK)
           .json({
             status: false,
             data: response.data,
@@ -83,17 +90,17 @@ export default class UserController implements IuserController {
       const response = await this._userService.getUserData({ userId });
 
       if (response.status) {
-        res.status(200).json(response);
+        res.status(StatusCode.OK).json(response);
       } else {
         if (response.message == "Invalid Request ID format") {
-          res.status(404).json(response);
+          res.status(StatusCode.NOT_FOUND).json(response);
         } else {
-          res.status(400).json(response);
+          res.status(StatusCode.BAD_REQUEST).json(response);
         }
       }
     } catch (error) {
       console.log("error in getUserData/userController", error);
-      res.status(500).json({
+      res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
         status: false,
         data: null,
         message: "Erorr on the getUserData/userController",
@@ -105,13 +112,15 @@ export default class UserController implements IuserController {
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        res.status(400).json({ errors: errors.array()[0] });
+        res.status(StatusCode.BAD_REQUEST).json({ errors: errors.array()[0] });
       } else {
         const accessToken = req.headers["authorization"]?.split(" ")[1];
         if (!accessToken) {
-          res.status(400).json({ message: "No authorization token provided" });
+          res
+            .status(StatusCode.BAD_REQUEST)
+            .json({ message: "No authorization token provided" });
         } else if (!req.body.formData) {
-          res.status(404).json({
+          res.status(StatusCode.NOT_FOUND).json({
             status: false,
             data: null,
             message: "The form data not found on the updateUser/userController",
@@ -128,13 +137,13 @@ export default class UserController implements IuserController {
               userId: decoded.id,
             });
             if (response.status) {
-              res.status(200).json({
+              res.status(StatusCode.OK).json({
                 status: response.status,
                 data: response.data,
                 message: response.message,
               });
             } else {
-              res.status(500).json({
+              res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
                 status: false,
                 data: null,
                 message: response.message,
@@ -145,7 +154,7 @@ export default class UserController implements IuserController {
       }
     } catch (error) {
       console.log("Erorr on the updateUser/userController", error);
-      res.status(500).json({
+      res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
         status: false,
         data: null,
         message: "Erorr on the updateUser/userController",

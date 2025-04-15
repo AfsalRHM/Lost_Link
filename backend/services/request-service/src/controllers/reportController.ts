@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 
 import reportService from "../services/reportService";
 import IreportController from "../interface/IreportController";
+import { StatusCode } from "../constants/statusCodes";
 
 export default class ReportController implements IreportController {
   private _reportService: reportService;
@@ -14,7 +15,7 @@ export default class ReportController implements IreportController {
   public createReport = async (req: Request, res: Response): Promise<void> => {
     try {
       if (!req.body.requestId || !req.body.reportReason || !req.body.userId) {
-        res.status(400).json({
+        res.status(StatusCode.BAD_REQUEST).json({
           status: false,
           message: "No Data found on the create Report Post Request",
         });
@@ -28,9 +29,9 @@ export default class ReportController implements IreportController {
       });
 
       if (response.status) {
-        res.status(200).json(response);
+        res.status(StatusCode.OK).json(response);
       } else {
-        res.status(400).json(response);
+        res.status(StatusCode.BAD_REQUEST).json(response);
       }
     } catch (error) {
       console.log("error in createReport/reportController", error);
@@ -41,7 +42,7 @@ export default class ReportController implements IreportController {
   public getMyReports = async (req: Request, res: Response): Promise<void> => {
     try {
       if (!req.body.userId) {
-        res.status(400).json({
+        res.status(StatusCode.BAD_REQUEST).json({
           status: false,
           message: "No Data found on the getMyReports Post Request",
         });
@@ -53,9 +54,9 @@ export default class ReportController implements IreportController {
       });
 
       if (response.status) {
-        res.status(200).json(response);
+        res.status(StatusCode.OK).json(response);
       } else {
-        res.status(400).json(response);
+        res.status(StatusCode.BAD_REQUEST).json(response);
       }
     } catch (error) {
       console.log("error in getMyReports/reportController", error);
