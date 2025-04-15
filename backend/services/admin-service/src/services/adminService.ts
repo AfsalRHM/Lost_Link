@@ -9,6 +9,7 @@ import eventEmitter from "../utils/eventEmitter";
 import { Types } from "mongoose";
 import { decodedType } from "../interface/IjwtTypes";
 import jwtFunctions from "../utils/jwt";
+import { IserviceResponseType } from "../interface/IresponseTypes";
 
 export default class adminService implements IadminService {
   private _adminRepository: adminRepository;
@@ -20,7 +21,7 @@ export default class adminService implements IadminService {
   async adminLogin(loginDetails: {
     email: string;
     password: string;
-  }): Promise<any> {
+  }): Promise<IserviceResponseType> {
     try {
       const adminData = await this._adminRepository.findAdmin(
         loginDetails.email
@@ -79,7 +80,7 @@ export default class adminService implements IadminService {
     }
   }
 
-  async getAllUsers(): Promise<any> {
+  async getAllUsers(): Promise<IserviceResponseType> {
     try {
       const correlationIdString = "toGetAllUsers";
       const correlationId = createCorrelationId(correlationIdString);
@@ -125,7 +126,7 @@ export default class adminService implements IadminService {
     }
   }
 
-  async getAllAdmins(): Promise<any> {
+  async getAllAdmins(): Promise<IserviceResponseType> {
     try {
       const adminData = await this._adminRepository.findAll();
 
@@ -150,7 +151,9 @@ export default class adminService implements IadminService {
     }
   }
 
-  async changeUserStatus(props: { userId: string }): Promise<any> {
+  async changeUserStatus(props: {
+    userId: string;
+  }): Promise<IserviceResponseType> {
     try {
       const correlationIdString = "toChangeTheUserStatus";
       const correlationId = createCorrelationId(correlationIdString);
@@ -197,7 +200,9 @@ export default class adminService implements IadminService {
     }
   }
 
-  async changeAdminStatus(props: { adminId: string }): Promise<any> {
+  async changeAdminStatus(props: {
+    adminId: string;
+  }): Promise<IserviceResponseType> {
     try {
       if (!props.adminId) {
         throw new Error("Admin Id is empty...");
@@ -208,7 +213,7 @@ export default class adminService implements IadminService {
       );
 
       if (responseData) {
-        return responseData;
+        return { data: responseData };
       } else {
         return {
           status: false,
@@ -224,11 +229,11 @@ export default class adminService implements IadminService {
     }
   }
 
-  async insertAdmin(props: adminProps): Promise<any> {
+  async insertAdmin(props: adminProps): Promise<IserviceResponseType> {
     try {
       const response = await this._adminRepository.insert(props);
       if (response) {
-        return response;
+        return { data: response };
       } else {
         return {
           status: false,
