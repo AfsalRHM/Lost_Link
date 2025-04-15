@@ -1,9 +1,14 @@
+import { IserviceResponseType } from "./IresponseTypes";
+
 export default interface IadminService {
-  adminLogin(loginDetails: { email: string; password: string }): Promise<any>;
-  getAllUsers(): Promise<any>;
-  getAllAdmins(): Promise<any>;
-  changeUserStatus(props: { userId: string }): Promise<any>;
-  insertAdmin(props: adminProps): Promise<any>;
+  adminLogin(loginDetails: {
+    email: string;
+    password: string;
+  }): Promise<IserviceResponseType>;
+  getAllUsers(): Promise<IserviceResponseType>;
+  getAllAdmins(): Promise<IserviceResponseType>;
+  changeUserStatus(props: { userId: string }): Promise<IserviceResponseType>;
+  insertAdmin(props: adminProps): Promise<IserviceResponseType>;
 }
 
 export interface adminProps {

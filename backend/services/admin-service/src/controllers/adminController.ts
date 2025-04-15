@@ -13,8 +13,8 @@ export default class authController implements IadminController {
   public adminLogin = async (req: Request, res: Response): Promise<void> => {
     const response = await this._adminService.adminLogin(req.body);
     if (response.status) {
-      const accessToken = response.tokenData.accessToken;
-      const refreshToken = response.tokenData.refreshToken;
+      const accessToken = response.tokenData?.accessToken;
+      const refreshToken = response.tokenData?.refreshToken;
 
       res
         .status(StatusCode.OK)
@@ -83,7 +83,7 @@ export default class authController implements IadminController {
       const response = await this._adminService.changeAdminStatus(
         req.body.Props
       );
-      res.status(StatusCode.OK).json(response);
+      res.status(StatusCode.OK).json(response.data);
     } catch (error) {
       res
         .status(StatusCode.BAD_REQUEST)
@@ -94,7 +94,7 @@ export default class authController implements IadminController {
   public insertAdmin = async (req: Request, res: Response): Promise<void> => {
     try {
       const response = await this._adminService.insertAdmin(req.body.Props);
-      res.status(StatusCode.OK).json(response);
+      res.status(StatusCode.OK).json(response.data);
     } catch (error) {
       res
         .status(StatusCode.BAD_REQUEST)
