@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 
 import commentService from "../services/commentService";
 import IcommentController from "../interface/IcommentController";
+import { StatusCode } from "../constants/statusCodes";
 
 export default class CommentController implements IcommentController {
   private _commentService: commentService;
@@ -14,7 +15,7 @@ export default class CommentController implements IcommentController {
   public createComment = async (req: Request, res: Response): Promise<void> => {
     try {
       if (!req.body.requestId || !req.body.commentText || !req.body.userId) {
-        res.status(400).json({
+        res.status(StatusCode.BAD_REQUEST).json({
           status: false,
           message: "No Data found on the createComment Post Request",
         });
@@ -28,9 +29,9 @@ export default class CommentController implements IcommentController {
       });
 
       if (response.status) {
-        res.status(200).json(response);
+        res.status(StatusCode.OK).json(response);
       } else {
-        res.status(400).json(response);
+        res.status(StatusCode.BAD_REQUEST).json(response);
       }
     } catch (error) {
       console.log("error in createComment/commentController", error);
@@ -44,7 +45,7 @@ export default class CommentController implements IcommentController {
   ): Promise<void> => {
     try {
       if (!req.body.requestId) {
-        res.status(400).json({
+        res.status(StatusCode.BAD_REQUEST).json({
           status: false,
           message: "No Data found on the createComment Post Request",
         });
@@ -57,12 +58,12 @@ export default class CommentController implements IcommentController {
       });
 
       if (response.status) {
-        res.status(200).json(response);
+        res.status(StatusCode.OK).json(response);
       } else {
         if (response.message == "Invalid Request ID format") {
-          res.status(404).json(response);
+          res.status(StatusCode.NOT_FOUND).json(response);
         } else {
-          res.status(400).json(response);
+          res.status(StatusCode.BAD_REQUEST).json(response);
         }
       }
     } catch (error) {
