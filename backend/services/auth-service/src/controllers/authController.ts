@@ -171,18 +171,11 @@ export default class authController implements IauthController {
           .json({ errors: errors.array() });
       }
 
-      console.log(
-        "this email and password----------",
-        req.body.userEmail,
-        req.body.userPassword
-      );
-
       const response: { status: boolean; data: any; message?: string } =
         await this._authService.loginVerify(
           req.body.userEmail,
           req.body.userPassword
         );
-      console.log("this is the response----------", response);
 
       if (response.status == true) {
         const accessToken = jwtFunctions.generateAccessToken({
@@ -190,7 +183,6 @@ export default class authController implements IauthController {
           email: response.data.data.email,
           role: response.data.data.role,
         });
-        console.log("this is the accessToken----------", accessToken);
 
         const refreshToken = jwtFunctions.generateRefreshToken({
           id: response.data.data._id.toString(),
@@ -198,7 +190,6 @@ export default class authController implements IauthController {
           role: response.data.data.role,
         });
 
-        console.log("this is the refreshToken----------", refreshToken);
         res
           .status(StatusCode.OK)
           .cookie("refreshToken", refreshToken, {
@@ -215,7 +206,6 @@ export default class authController implements IauthController {
             data: response.data.data,
             accessToken,
           });
-        console.log("Authorization header set:", `Bearer ${accessToken}`);
       } else {
         res.status(StatusCode.BAD_REQUEST).json(response);
       }
