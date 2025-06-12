@@ -24,3 +24,11 @@ dist-ssr
 *.sw?
 
 .env
+
+../K8s/admin-service-configmap.yaml
+../K8s/api-service-configmap.yaml
+../K8s/auth-service-configmap.yaml
+../K8s/chat-service-configmap.yaml
+../K8s/notification-service-configmap.yaml
+../K8s/request-service-configmap.yaml
+../K8s/user-service-configmap.yaml
