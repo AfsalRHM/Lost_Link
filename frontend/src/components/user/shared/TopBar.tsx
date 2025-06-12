@@ -42,10 +42,10 @@ const TopBar = () => {
         </li>
       </Link>
 
-      <Link to="/about_us">
+      <Link to="/about-us">
         <li
           className={`${linkClass} ${
-            currentPage === "/about_us" ? activeClass : hoverClass
+            currentPage === "/about-us" ? activeClass : hoverClass
           }`}
         >
           <span className="text-[15px] font-medium">About Us</span>
