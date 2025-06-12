@@ -6,7 +6,7 @@ import FooterL from "../../components/user/landing-page/FooterL";
 import { RootState } from "../../redux/store";
 import Main from "../../components/user/about-page/Main";
 
-const FAQPage = () => {
+const AboutPage = () => {
   const { userName } = useSelector((state: RootState) => state.userDetails);
 
   return (
@@ -18,4 +18,4 @@ const FAQPage = () => {
   );
 };
 
-export default FAQPage;
+export default AboutPage;

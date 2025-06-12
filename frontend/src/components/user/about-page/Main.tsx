@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 
 const Main = () => {
   return (
-    <div className="bg-banner text-white min-h-screen px-6 md:px-20 py-16 flex flex-col gap-16">
+    <div className="bg-banner text-black min-h-screen px-6 md:px-20 py-16 flex flex-col gap-16">
       {/* Heading */}
       <motion.div
         initial={{ opacity: 0, y: -30 }}
@@ -13,7 +13,7 @@ const Main = () => {
         <h1 className="text-4xl md:text-5xl font-extrabold mb-3">
           About LostLink
         </h1>
-        <p className="text-lg md:text-xl text-gray-300">
+        <p className="text-lg md:text-xl text-gray-700">
           A platform that brings people and their belongings back together.
         </p>
       </motion.div>
@@ -29,7 +29,7 @@ const Main = () => {
         <h2 className="text-2xl md:text-3xl font-bold mb-4 text-activityHeading">
           Our Mission
         </h2>
-        <p className="text-base md:text-lg leading-relaxed text-gray-200">
+        <p className="text-base md:text-lg leading-relaxed text-gray-800">
           LostLink is committed to simplifying the process of finding and
           returning lost items. Whether you're searching for something important
           or helping others, we provide a secure, efficient, and rewarding
@@ -75,29 +75,10 @@ const Main = () => {
             <h3 className="text-xl font-semibold mb-2 text-activityHeading">
               {title}
             </h3>
-            <p className="text-gray-300 text-base">{desc}</p>
+            <p className="text-gray-900 text-base">{desc}</p>
           </motion.div>
         ))}
       </motion.section>
-
-      {/* Call to Action */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.6 }}
-        className="text-center mt-10"
-      >
-        <p className="text-xl md:text-2xl font-medium mb-6">
-          Be part of something meaningful.
-        </p>
-        <a
-          href="/contact"
-          className="inline-block px-8 py-3 rounded-full bg-blue-400 text-black font-semibold hover:bg-blue-500 transition duration-300 shadow-lg"
-        >
-          Contact Us
-        </a>
-      </motion.div>
     </div>
   );
 };

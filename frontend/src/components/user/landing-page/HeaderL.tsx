@@ -52,6 +52,10 @@ const Header = ({ scrollToContact }: { scrollToContact?: any }) => {
                   >
                     Contact
                   </p>
+                ) : item === "About Us" ? (
+                  <Link to="/about-us">
+                    <p className="text-[15px] font-medium">{item}</p>
+                  </Link>
                 ) : (
                   <Link
                     to={
