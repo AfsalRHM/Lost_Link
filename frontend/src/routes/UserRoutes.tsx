@@ -13,6 +13,7 @@ import { IsUserLogin } from "../utils/IsUserLogin";
 import RequestRedeemDetailsPage from "../pages/user/RequestRedeemDetailsPage";
 import FAQPage from "../pages/user/FAQPage";
 import VideoCall from "../components/shared/VideoCall";
+import AboutPage from "../pages/user/AboutPage";
 
 const UserRoutes = () => {
   return (
@@ -33,6 +34,7 @@ const UserRoutes = () => {
 
       </Route>
       <Route path="/faq" element={<FAQPage />} />
+      <Route path="/about-us" element={<AboutPage />} />
       <Route path="/404" element={<NotFoundPage />} />
     </>
   );
