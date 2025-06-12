@@ -39,7 +39,7 @@ const Header = ({ scrollToContact }: { scrollToContact?: any }) => {
         {/* Navigation Links */}
         <div className="nav-links duration-500 md:static absolute bg-header md:w-auto w-full left-0 top-[-100%] md:min-h-fit min-h-[6vh] flex items-center px-5 mt-3 md:mt-0 border-b md:border-none z-10">
           <ul className="flex md:flex-row flex-col items-start md:items-center gap-4 md:gap-[2vw] w-full">
-            {["Home", "About Us", "Contact", "FAQ's"].map((item, idx) => (
+            {["Home", "About Us", "FAQ's"].map((item, idx) => (
               <motion.li
                 key={idx}
                 whileHover={{ scale: 1.05 }}
@@ -54,6 +54,10 @@ const Header = ({ scrollToContact }: { scrollToContact?: any }) => {
                   </p>
                 ) : item === "About Us" ? (
                   <Link to="/about-us">
+                    <p className="text-[15px] font-medium">{item}</p>
+                  </Link>
+                ) : item === "FAQ's" ? (
+                  <Link to="/faq">
                     <p className="text-[15px] font-medium">{item}</p>
                   </Link>
                 ) : (
