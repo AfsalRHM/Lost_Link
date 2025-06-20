@@ -1,26 +1,46 @@
 import amqp, { Channel, Connection } from "amqplib";
 
-let channel: Channel, connection: Connection;
+let channel: Channel;
+let connection: Connection;
 
-export default async function configCommunication() {
-  try {
-    const AMQP_URL = process.env.AMQP_URL;
-    const USER_QUEUE = process.env.USER_QUEUE;
+export default async function configCommunication(retries = 5, delayMs = 5000) {
+  const USER_QUEUE = process.env.USER_QUEUE;
 
-    if (!AMQP_URL || !USER_QUEUE) {
-      throw new Error("Env variables not available");
-    }
+  if (!USER_QUEUE) {
+    throw new Error("❌ USER_QUEUE is not defined in environment variables.");
+  }
 
-    async function connect() {
-      const amqpServer = AMQP_URL;
-      connection = await amqp.connect(amqpServer!);
+  while (retries > 0) {
+    try {
+      console.log(
+        `🔁 Attempting to connect to RabbitMQ (User Queue - ${retries} retries left)...`
+      );
+
+      connection = await amqp.connect({
+        protocol: "amqp",
+        hostname: "rabbitmq",
+        port: 5672,
+        username: "guest",
+        password: "guest",
+        frameMax: 8192,
+      });
+
       channel = await connection.createChannel();
-      await channel.assertQueue(USER_QUEUE!);
-      console.log("User Communction Queue is Up....");
+      await channel.assertQueue(USER_QUEUE, { durable: true });
+
+      console.log("✅ User Communication Queue is up and running.");
+      break;
+    } catch (error) {
+      console.error("❌ RabbitMQ connection (User Queue) failed:", error);
+      retries--;
+      if (retries === 0) {
+        console.error("❌ All retry attempts failed for User Queue.");
+        throw new Error(
+          "Could not connect to RabbitMQ after multiple attempts."
+        );
+      }
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
     }
-    await connect();
-  } catch (error) {
-    console.log("User Communication Queue is not working", error);
   }
 }
 
