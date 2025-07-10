@@ -3,13 +3,20 @@ import sendToService from "../rabbitmq/producer";
 import { createCorrelationId } from "../utils/correlationId";
 
 import adminRepository from "../repositories/adminRepository";
-import IadminService, { adminProps } from "../interface/IadminService";
+import IadminService from "../interface/IadminService";
 
 import eventEmitter from "../utils/eventEmitter";
 import { Types } from "mongoose";
 import { decodedType } from "../interface/IjwtTypes";
 import jwtFunctions from "../utils/jwt";
 import { IserviceResponseType } from "../interface/IresponseTypes";
+
+// DTO's
+import { AdminLoginDTO } from "../dtos/AdminLoginDTO";
+import { InsertAdminDTO } from "../dtos/InsertAdminDTO";
+import { ChangeAdminStatusDTO } from "../dtos/ChangeAdminStatusDTO";
+import { ChangeUserStatusDTO } from "../dtos/ChangeUserStatusDTO";
+import { RefreshTokenDTO } from "../dtos/RefreshTokenDTO";
 
 export default class adminService implements IadminService {
   private _adminRepository: adminRepository;
@@ -18,10 +25,7 @@ export default class adminService implements IadminService {
     this._adminRepository = new adminRepository();
   }
 
-  async adminLogin(loginDetails: {
-    email: string;
-    password: string;
-  }): Promise<IserviceResponseType> {
+  async adminLogin(loginDetails: AdminLoginDTO): Promise<IserviceResponseType> {
     try {
       const adminData = await this._adminRepository.findAdmin(
         loginDetails.email
@@ -151,9 +155,9 @@ export default class adminService implements IadminService {
     }
   }
 
-  async changeUserStatus(props: {
-    userId: string;
-  }): Promise<IserviceResponseType> {
+  async changeUserStatus(
+    props: ChangeUserStatusDTO
+  ): Promise<IserviceResponseType> {
     try {
       const correlationIdString = "toChangeTheUserStatus";
       const correlationId = createCorrelationId(correlationIdString);
@@ -200,9 +204,9 @@ export default class adminService implements IadminService {
     }
   }
 
-  async changeAdminStatus(props: {
-    adminId: string;
-  }): Promise<IserviceResponseType> {
+  async changeAdminStatus(
+    props: ChangeAdminStatusDTO
+  ): Promise<IserviceResponseType> {
     try {
       if (!props.adminId) {
         throw new Error("Admin Id is empty...");
@@ -229,7 +233,7 @@ export default class adminService implements IadminService {
     }
   }
 
-  async insertAdmin(props: adminProps): Promise<IserviceResponseType> {
+  async insertAdmin(props: InsertAdminDTO): Promise<IserviceResponseType> {
     try {
       const response = await this._adminRepository.insert(props);
       if (response) {
@@ -250,17 +254,13 @@ export default class adminService implements IadminService {
   }
 
   // To create a new access token with the existing refresh token
-  async refreshToken(
-    token: string
-  ): Promise<{ status: boolean; message: string } | undefined> {
+  async refreshToken(props: RefreshTokenDTO): Promise<IserviceResponseType> {
     try {
-      if (!token) {
+      if (!props.token) {
         return { status: false, message: "No Token Provided" };
       }
 
-      const decoded = jwtFunctions.verifyAdminRefreshToken(token);
-
-      console.log("Decode Refresh token is here", decoded);
+      const decoded = jwtFunctions.verifyAdminRefreshToken(props.token);
 
       if (!decoded) {
         return { status: false, message: "Token expired" };
@@ -276,8 +276,6 @@ export default class adminService implements IadminService {
         return { status: false, message: "Admin is Blocked" };
       }
 
-      console.log(adminData._id, "this is the admin Data");
-
       const newAccessToken = jwtFunctions.generateAdminAccessToken({
         id: adminData._id.toString(),
         email: adminData.email,
@@ -290,6 +288,11 @@ export default class adminService implements IadminService {
       return { status: true, message: newAccessToken };
     } catch (error) {
       console.log(error);
+      return {
+        status: false,
+        message: "Error in refreshToken/adminService",
+        error: error,
+      };
     }
   }
 }
