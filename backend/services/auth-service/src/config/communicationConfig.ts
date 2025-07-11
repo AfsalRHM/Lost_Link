@@ -4,11 +4,12 @@ let channel: Channel;
 let connection: Connection;
 
 export default async function configCommunication(retries = 5, delayMs = 5000) {
-  const AMQP_URL = process.env.AMQP_URL;
+  const AMQP_DEVELOPMENT_HOSTNAME = process.env.AMQP_DEVELOPMENT_HOSTNAME;
+  const AMQP_PRODUCTION_HOSTNAME = process.env.AMQP_PRODUCTION_HOSTNAME;
   const AUTH_QUEUE = process.env.AUTH_QUEUE;
 
-  if (!AMQP_URL || !AUTH_QUEUE) {
-    throw new Error("AMQP_URL or AUTH_QUEUE env variable is missing.");
+  if (!AMQP_PRODUCTION_HOSTNAME || !AMQP_DEVELOPMENT_HOSTNAME || !AUTH_QUEUE) {
+    throw new Error("AMQP URL or AUTH_QUEUE env variable is missing.");
   }
 
   while (retries > 0) {
@@ -18,7 +19,10 @@ export default async function configCommunication(retries = 5, delayMs = 5000) {
       );
       connection = await amqp.connect({
         protocol: "amqp",
-        hostname: "rabbitmq",
+        hostname:
+          process.env.PROJECT_STATUS == "Development"
+            ? process.env.AMQP_DEVELOPMENT_HOSTNAME
+            : process.env.AMQP_PRODUCTION_HOSTNAME,
         port: 5672,
         username: "guest",
         password: "guest",

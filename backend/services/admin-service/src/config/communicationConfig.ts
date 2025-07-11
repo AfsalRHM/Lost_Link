@@ -4,12 +4,13 @@ let channel: Channel;
 let connection: Connection;
 
 export default async function configCommunication(retries = 5, delayMs = 5000) {
-  const AMQP_URL = process.env.AMQP_URL;
+  const AMQP_DEVELOPMENT_HOSTNAME = process.env.AMQP_DEVELOPMENT_HOSTNAME;
+  const AMQP_PRODUCTION_HOSTNAME = process.env.AMQP_PRODUCTION_HOSTNAME;
   const ADMIN_QUEUE = process.env.ADMIN_QUEUE;
 
-  if (!AMQP_URL || !ADMIN_QUEUE) {
+  if (!AMQP_PRODUCTION_HOSTNAME || !AMQP_DEVELOPMENT_HOSTNAME || !ADMIN_QUEUE) {
     throw new Error(
-      "❌ AMQP_URL or ADMIN_QUEUE is not defined in environment variables."
+      "❌ AMQP URL or ADMIN_QUEUE is not defined in environment variables."
     );
   }
 
@@ -21,7 +22,10 @@ export default async function configCommunication(retries = 5, delayMs = 5000) {
 
       connection = await amqp.connect({
         protocol: "amqp",
-        hostname: "rabbitmq",
+        hostname:
+          process.env.PROJECT_STATUS == "Development"
+            ? process.env.AMQP_DEVELOPMENT_HOSTNAME
+            : process.env.AMQP_PRODUCTION_HOSTNAME,
         port: 5672,
         username: "guest",
         password: "guest",

@@ -4,10 +4,14 @@ let channel: Channel;
 let connection: Connection;
 
 export default async function configCommunication(retries = 5, delayMs = 5000) {
+  const AMQP_DEVELOPMENT_HOSTNAME = process.env.AMQP_DEVELOPMENT_HOSTNAME;
+  const AMQP_PRODUCTION_HOSTNAME = process.env.AMQP_PRODUCTION_HOSTNAME;
   const NOTIF_QUEUE = process.env.NOTIF_QUEUE;
 
-  if (!NOTIF_QUEUE) {
-    throw new Error("❌ NOTIF_QUEUE is not defined in environment variables.");
+  if (!AMQP_PRODUCTION_HOSTNAME || !AMQP_DEVELOPMENT_HOSTNAME || !NOTIF_QUEUE) {
+    throw new Error(
+      "❌ AMQP URL or NOTIF_QUEUE is not defined in environment variables."
+    );
   }
 
   while (retries > 0) {
@@ -18,7 +22,10 @@ export default async function configCommunication(retries = 5, delayMs = 5000) {
 
       connection = await amqp.connect({
         protocol: "amqp",
-        hostname: "rabbitmq",
+        hostname:
+          process.env.PROJECT_STATUS == "Development"
+            ? process.env.AMQP_DEVELOPMENT_HOSTNAME
+            : process.env.AMQP_PRODUCTION_HOSTNAME,
         port: 5672,
         username: "guest",
         password: "guest",

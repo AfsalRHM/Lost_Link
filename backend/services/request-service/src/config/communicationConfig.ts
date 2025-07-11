@@ -4,11 +4,17 @@ let channel: Channel;
 let connection: Connection;
 
 export default async function configCommunication(retries = 5, delayMs = 5000) {
+  const AMQP_DEVELOPMENT_HOSTNAME = process.env.AMQP_DEVELOPMENT_HOSTNAME;
+  const AMQP_PRODUCTION_HOSTNAME = process.env.AMQP_PRODUCTION_HOSTNAME;
   const REQUEST_QUEUE = process.env.REQUEST_QUEUE;
 
-  if (!REQUEST_QUEUE) {
+  if (
+    !AMQP_PRODUCTION_HOSTNAME ||
+    !AMQP_DEVELOPMENT_HOSTNAME ||
+    !REQUEST_QUEUE
+  ) {
     throw new Error(
-      "❌ REQUEST_QUEUE is not defined in environment variables."
+      "❌ AMQP URL or REQUEST_QUEUE is not defined in environment variables."
     );
   }
 
@@ -21,11 +27,14 @@ export default async function configCommunication(retries = 5, delayMs = 5000) {
       // ✅ connection gets the output of amqp.connect (type: Connection)
       connection = await amqp.connect({
         protocol: "amqp",
-        hostname: "rabbitmq",
+        hostname:
+          process.env.PROJECT_STATUS == "Development"
+            ? process.env.AMQP_DEVELOPMENT_HOSTNAME
+            : process.env.AMQP_PRODUCTION_HOSTNAME,
         port: 5672,
         username: "guest",
         password: "guest",
-        frameMax: 8192
+        frameMax: 8192,
       });
 
       // ✅ channel is created from connection
