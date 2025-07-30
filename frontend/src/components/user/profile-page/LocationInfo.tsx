@@ -5,7 +5,8 @@ const LocationInfo = () => (
     <h3 className="font-bold text-gray-700 text-lg mb-4">Location Info</h3>
     <div className="text-sm mb-4">
       <p>
-        <span className="font-semibold text-gray-700">Current Location:</span> Kondotty, Malappuram, Kerala
+        <span className="font-semibold text-gray-700">Current Location:</span>{" "}
+        Kondotty, Malappuram, Kerala
       </p>
       <p>
         <span className="font-semibold text-gray-700">Users Count:</span>{" "}

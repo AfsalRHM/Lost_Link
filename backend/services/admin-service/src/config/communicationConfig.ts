@@ -4,11 +4,11 @@ let channel: Channel;
 let connection: Connection;
 
 export default async function configCommunication(retries = 5, delayMs = 5000) {
-  const AMQP_DEVELOPMENT_HOSTNAME = process.env.AMQP_DEVELOPMENT_HOSTNAME;
-  const AMQP_PRODUCTION_HOSTNAME = process.env.AMQP_PRODUCTION_HOSTNAME;
+  const AMQP_HOSTNAME_DEV = process.env.AMQP_HOSTNAME_DEV;
+  const AMQP_HOSTNAME = process.env.AMQP_HOSTNAME;
   const ADMIN_QUEUE = process.env.ADMIN_QUEUE;
 
-  if (!AMQP_PRODUCTION_HOSTNAME || !AMQP_DEVELOPMENT_HOSTNAME || !ADMIN_QUEUE) {
+  if (!AMQP_HOSTNAME || !AMQP_HOSTNAME_DEV || !ADMIN_QUEUE) {
     throw new Error(
       "❌ AMQP URL or ADMIN_QUEUE is not defined in environment variables."
     );
@@ -24,8 +24,8 @@ export default async function configCommunication(retries = 5, delayMs = 5000) {
         protocol: "amqp",
         hostname:
           process.env.PROJECT_STATUS == "Development"
-            ? process.env.AMQP_DEVELOPMENT_HOSTNAME
-            : process.env.AMQP_PRODUCTION_HOSTNAME,
+            ? AMQP_HOSTNAME_DEV
+            : AMQP_HOSTNAME,
         port: 5672,
         username: "guest",
         password: "guest",

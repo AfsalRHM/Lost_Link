@@ -44,17 +44,22 @@ export default class CommentController implements IcommentController {
     res: Response
   ): Promise<void> => {
     try {
-      if (!req.body.requestId) {
+      const requestId = req.params.id;
+      const commentCount = req.query.count
+        ? parseInt(req.query.count as string, 10)
+        : 3;
+
+      if (!requestId) {
         res.status(StatusCode.BAD_REQUEST).json({
           status: false,
-          message: "No Data found on the createComment Post Request",
+          message: "Request Id not found on the Params",
         });
         return;
       }
 
       const response = await this._commentService.getRequestComments({
-        requestId: req.body.requestId,
-        commentCount: req.body.count,
+        requestId,
+        commentCount,
       });
 
       if (response.status) {

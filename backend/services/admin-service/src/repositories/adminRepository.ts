@@ -28,8 +28,6 @@ export default class AdminRepository
 
       const newStatus = admin.status === "active" ? "inactive" : "active";
 
-      console.log("Reaching here...dkjf");
-
       const updatedUser = await this.model.findByIdAndUpdate(
         adminId,
         { status: newStatus },
@@ -38,7 +36,7 @@ export default class AdminRepository
 
       return updatedUser;
     } catch (error) {
-      console.error("Error updating status:", error);
+      console.error("Error updating status 1:", error);
       return null;
     }
   }

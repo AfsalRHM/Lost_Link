@@ -8,10 +8,10 @@ const CommentController = new commentController();
 
 /*************************      User Side       *******************************/
 // Get Requests
+comment_route.get("/:id/comments", verifyAccessToken, CommentController.getRequestComments); // To get all the comments of a specific request
 
 // Post Requests
-comment_route.post("/create-comment", verifyAccessToken, CommentController.createComment); // To Create a Comment
-comment_route.post("/get-request-comments", verifyAccessToken, CommentController.getRequestComments); // To get all the comments of a specific request
+comment_route.post("/comments", verifyAccessToken, CommentController.createComment); // To Create a Comment
 
 // Patch Requests
 

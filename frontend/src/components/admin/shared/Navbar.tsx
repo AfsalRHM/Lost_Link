@@ -1,12 +1,13 @@
-import { Bell, Menu, Search } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
-import getAdminNotifications from "../../../api/admin-api/getNotificationsAPI";
+import { useNavigate, useParams } from "react-router-dom";
+import { useDispatch } from "react-redux";
+
+import { adminService } from "../../../services/adminService";
+
+import { Bell, Menu, Search } from "lucide-react";
 import { getNotifSocket } from "../../../socket/socket";
 import NotificationSection from "../../shared/NotificationSection";
-import { useNavigate, useParams } from "react-router-dom";
-import chageNotificaitonSeen from "../../../api/admin-api/changeNotificaitonSeenAPI";
 import AdminErrorHandling from "../../../middlewares/AdminErrorHandling";
-import { useDispatch } from "react-redux";
 
 interface navBarType {
   setSidebarOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -31,25 +32,32 @@ const NavBar = ({ setSidebarOpen }: navBarType) => {
       if (id !== newNotificationRecieved.chat_id) {
         setNotifications([...notifications, newNotificationRecieved]);
       } else {
-        makeNotificationSeen({notificationId: newNotificationRecieved._id});
+        makeNotificationSeen({ notificationId: newNotificationRecieved._id });
       }
     });
   });
 
-  async function makeNotificationSeen({notificationId}: {notificationId: string}) {
-    await chageNotificaitonSeen({notificationId})
+  async function makeNotificationSeen({
+    notificationId,
+  }: {
+    notificationId: string;
+  }) {
+    await adminService.updateNotification({ notificationId });
   }
 
   // Fetch notifications
   useEffect(() => {
     const getAdminNotificationData = async () => {
       try {
-        const response = await getAdminNotifications();
+        const response = await adminService.getNotifications();
 
         if (response.status === 200) {
           setNotifications(response.data.data);
         } else {
-          console.log(response, "this is the error response on getAdminNotifications");
+          console.log(
+            response,
+            "this is the error response on getAdminNotifications"
+          );
           AdminErrorHandling(response, dispatch, navigate);
         }
       } catch (error) {

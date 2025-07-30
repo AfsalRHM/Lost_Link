@@ -41,7 +41,7 @@ export default class RequestRedeemRepository
 
       return updatedRequest;
     } catch (error) {
-      console.error("Error updating status:", error);
+      console.error("Error updating status 5:", error);
       return null;
     }
   }

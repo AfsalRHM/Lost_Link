@@ -1,16 +1,17 @@
 import React, { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
+import { useLocation, useNavigate } from "react-router-dom";
+
+import { userService } from "../../../services/userService";
+
 import {
   showErrorToast2,
   showSuccessToast2,
 } from "../../../utils/iziToastUtils";
 import IrequestModel from "../../../interface/IrequestModel";
-import { useLocation, useNavigate } from "react-router-dom";
-import getRequestDetails from "../../../api/user-api/getRequestDetails";
 import validateRequestRedeemFormEntries from "../../../validations/requestRedeemValidations";
 import ValidationError from "../shared/ValidationError";
-import saveRedeemRequest from "../../../api/user-api/saveRedeemRequestAPI";
 import UserErrorHandling from "../../../middlewares/UserErrorHandling";
-import { useDispatch } from "react-redux";
 
 const RequestRedeem = () => {
   const dispatch = useDispatch();
@@ -42,7 +43,7 @@ const RequestRedeem = () => {
           showErrorToast2("Invalid Access Detected");
           return;
         } else {
-          const response = await getRequestDetails({
+          const response = await userService.getRequestDetails({
             requestId,
             from: "normalRequest",
           });
@@ -178,7 +179,7 @@ const RequestRedeem = () => {
       });
     } else {
       try {
-        const response = await saveRedeemRequest({
+        const response = await userService.createRedeemRequest({
           formData,
           requestId: requestData ? requestData._id : "noRequestedIdGot",
         });

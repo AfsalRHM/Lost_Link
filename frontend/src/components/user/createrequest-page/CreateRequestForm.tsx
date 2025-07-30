@@ -1,4 +1,9 @@
 import { useState } from "react";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+
+import { userService } from "../../../services/userService";
+
 import DescriptionElement from "./DescriptionElement";
 import DropdownElement from "./DropdownElement";
 import ImagesElement from "./ImagesElement";
@@ -6,21 +11,14 @@ import InputElement from "./InputElement";
 import LocationElement from "./LocationElement";
 import validateCreateRequestEntries from "../../../validations/createRequestValidation";
 import { Errors } from "../../../interface/IrequestProps";
-import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "../../../redux/store";
-import createRequest from "../../../api/user-api/createRequestAPI";
 import { showErrorToast, showSuccessToast } from "../../../utils/toastUtils";
-import { useNavigate } from "react-router-dom";
 
 import { loadStripe, Stripe } from "@stripe/stripe-js";
-import makePayment from "../../../api/user-api/makePaymentAPI";
 import UserErrorHandling from "../../../middlewares/UserErrorHandling";
 
 const STRIPE_KEY = import.meta.env.VITE_STRIPE_KEY;
 
 const CreateRequestForm = () => {
-  const { accessToken } = useSelector((state: RootState) => state.accessToken);
-
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -123,16 +121,14 @@ const CreateRequestForm = () => {
     }
 
     try {
-      const paymentResponse = await makePayment({
+      const paymentResponse = await userService.createPaymentSession({
         formData,
-        accessToken,
       });
 
       const { sessionId } = paymentResponse.data.data;
 
-      const response = await createRequest({
+      const response = await userService.createRequest({
         formData,
-        accessToken,
       });
 
       const result = await stripe.redirectToCheckout({ sessionId });

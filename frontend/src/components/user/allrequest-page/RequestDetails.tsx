@@ -1,15 +1,8 @@
 import React, { useEffect, useState } from "react";
-import IrequestModel from "../../../interface/IrequestModel";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import RequestDetailsLoading from "./loading/RequestDetailsLoading";
-import getRequestDetails from "../../../api/user-api/getRequestDetails";
-import {
-  showErrorToast2,
-  showSuccessToast2,
-} from "../../../utils/iziToastUtils";
-import changeLikeStatus from "../../../api/user-api/changeLikeStatusAPI";
 import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "../../../redux/store";
+import { useNavigate, useSearchParams } from "react-router-dom";
+
+import { userService } from "../../../services/userService";
 
 import {
   Heart,
@@ -21,6 +14,14 @@ import {
   Share2,
   Flag,
 } from "lucide-react";
+import IrequestModel from "../../../interface/IrequestModel";
+import RequestDetailsLoading from "./loading/RequestDetailsLoading";
+import {
+  showErrorToast2,
+  showSuccessToast2,
+} from "../../../utils/iziToastUtils";
+import { RootState } from "../../../redux/store";
+
 import CommentSection from "../../shared/CommentSection";
 import ReportModal from "./ReportModal";
 import UserErrorHandling from "../../../middlewares/UserErrorHandling";
@@ -54,7 +55,7 @@ const RequestDetails = ({}) => {
           showErrorToast2("Invalid Access Detected");
           return;
         } else {
-          const response = await getRequestDetails({
+          const response = await userService.getRequestDetails({
             requestId,
             from: "normalRequest",
           });
@@ -105,7 +106,7 @@ const RequestDetails = ({}) => {
     setLikeCount((prev) => (hasLiked ? prev - 1 : prev + 1));
     if (!requestId) return;
     try {
-      const response = await changeLikeStatus({ requestId });
+      const response = await userService.updateLikeStatus(requestId);
 
       if (response.status !== 200) {
         setHasLiked(!hasLiked);

@@ -1,4 +1,9 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+
+import { userService } from "../../../services/userService.ts";
+
 import LocationInfo from "./LocationInfo";
 import ProfileSidebar from "./ProfileSidebar.tsx";
 import TierSection from "./TierSection";
@@ -7,15 +12,14 @@ import VerifyButton from "./VerifyButton";
 import MyRequests from "./MyRequests.tsx";
 import RedeemRequests from "./RedeemRequests.tsx";
 import TierInfo from "./TierInfo.tsx";
-import { useDispatch } from "react-redux";
-import getProfile from "../../../api/user-api/getProfileAPI.ts";
-import UserDetailsLoading from "./loading/UserDetailsLoading.tsx";
-import TierSectionLoading from "./loading/TierSectionLoading.tsx";
 import ReportList from "./ReportList.tsx";
 import WalletSection from "./WalletSection.tsx";
 import MeetingSection from "./MeetingSection.tsx";
+
+import UserDetailsLoading from "./loading/UserDetailsLoading.tsx";
+import TierSectionLoading from "./loading/TierSectionLoading.tsx";
+
 import UserErrorHandling from "../../../middlewares/UserErrorHandling.tsx";
-import { useNavigate } from "react-router-dom";
 
 const Hero = () => {
   const dispatch = useDispatch();
@@ -28,7 +32,8 @@ const Hero = () => {
   useEffect(() => {
     const getUserDetails = async () => {
       try {
-        const response = await getProfile();
+        const response = await userService.getProfile();
+
         if (response.status == 200) {
           setUserData(response.data.data);
         } else {
@@ -96,7 +101,7 @@ const Hero = () => {
             ) : selectedItem === "My Requests" ? (
               <MyRequests userData={userData} />
             ) : selectedItem === "Redeem Requests" ? (
-              <RedeemRequests userData={userData} />
+              <RedeemRequests />
             ) : selectedItem === "Tier Information" ? (
               <TierInfo userData={userData} />
             ) : selectedItem === "My Reports" ? (

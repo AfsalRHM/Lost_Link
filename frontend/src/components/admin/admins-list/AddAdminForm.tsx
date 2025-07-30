@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+
+import { adminService } from "../../../services/adminService";
+
 import { showSuccessToast, showErrorToast } from "../../../utils/toastUtils";
-import insertAdmin from "../../../api/admin-api/insertAdminAPI";
-import { useAdminJwtErrors } from "../../../utils/JwtErrors";
-import adminLogout from "../../../api/admin-api/adminLogoutAPI";
 
 const AddAdminForm = () => {
   const navigate = useNavigate();
@@ -39,20 +39,16 @@ const AddAdminForm = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const JwtErrors = useAdminJwtErrors();
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateForm()) return;
 
     try {
-      const response = await insertAdmin(formData);
+      const response = await adminService.insertAdmin(formData);
+
       if (response.status) {
         showSuccessToast("Admin created successfully.");
         navigate("/admin/admins");
-      } else if (response === false) {
-        JwtErrors({ reason: "session expiration" });
-        await adminLogout();
       } else {
         console.log("Unexpected response:", response);
       }

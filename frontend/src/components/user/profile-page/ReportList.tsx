@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
-import getMyReports from "../../../api/user-api/getMyReports";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+
+import { userService } from "../../../services/userService";
+
 import ReportsLoading from "./loading/ReportListLoading";
 import { userDataType } from "../../../interface/IuserModel";
 import ReportDetailsModal from "./ReportDetailsModal";
 import IreportModel from "../../../interface/IreportModel";
 import UserErrorHandling from "../../../middlewares/UserErrorHandling";
-import { useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
 
 const ReportList = ({ userData }: { userData: userDataType }) => {
   const dispatch = useDispatch();
@@ -23,7 +25,9 @@ const ReportList = ({ userData }: { userData: userDataType }) => {
   useEffect(() => {
     const fetchReports = async () => {
       try {
-        const response = await getMyReports({ userId: userData._id });
+        const response = await userService.getUserReports({
+          userId: userData._id,
+        });
 
         if (response.status === 200) {
           setReports(response.data.data);

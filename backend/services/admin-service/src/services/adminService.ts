@@ -30,6 +30,7 @@ export default class adminService implements IadminService {
       const adminData = await this._adminRepository.findAdmin(
         loginDetails.email
       );
+      
       if (!adminData || adminData.password !== loginDetails.password) {
         return { status: false, message: "Invalid Credentials" };
       }

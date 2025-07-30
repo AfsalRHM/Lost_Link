@@ -1,20 +1,19 @@
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+
+import { userService } from "../../../services/userService";
+
 import LoginButton from "./LoginButton";
 import LoginInput from "./LoginInput";
-
 import sidePic from "/LostItem.webp";
-import { useState } from "react";
-import userLogin from "../../../api/auth-api/userLoginAPI";
 import ValidationError from "../shared/ValidationError";
 import { assignAccessToken } from "../../../redux/slice/accessTokenSlice";
-import { useDispatch } from "react-redux";
 import { assignUserDetails } from "../../../redux/slice/userDetailsSlice";
 import { showSuccessToast } from "../../../utils/toastUtils";
 import { validateLoginDetails } from "../../../validations/loginDetails";
-
 import { GoogleLogin, CredentialResponse } from "@react-oauth/google";
 import { jwtDecode } from "jwt-decode";
-import googleLogin from "../../../api/auth-api/googleLoginAPI";
 import { showErrorToast2 } from "../../../utils/iziToastUtils";
 
 type inputPropsType = {
@@ -62,29 +61,28 @@ const LoginPage = () => {
     }
 
     if (!errors.userMail && !errors.userPassword) {
-      const response = await userLogin({
+      const response = await userService.login({
         userEmail: userMailInput,
         userPassword: userPasswordInput,
       });
 
-      if (response.data.status === 200) {
+      if (response.status === 200) {
         const userData = {
-          userId: response.data.data.data._id,
-          userName: response.data.data.data.user_name,
-          userProfile: response.data.data.data.profile_pic,
+          userId: response.data.data._id,
+          userName: response.data.data.user_name,
+          userProfile: response.data.data.profile_pic,
         };
 
-        console.log(response, "this is the response--------------------");
-          // Changed the access token to body
-        const accessToken = response.data.data.accessToken;
+        // Changed the access token to body
+        const accessToken = response.data.accessToken;
         dispatch(assignUserDetails(userData));
         dispatch(assignAccessToken(accessToken));
         showSuccessToast("Login successful!");
         navigate("/home");
       } else {
         setUserLoginValidationError({
-          display: !response.data.data.status,
-          content: response.data.data.message,
+          display: !response.data.status,
+          content: response.data.message,
         });
       }
     }
@@ -98,16 +96,18 @@ const LoginPage = () => {
         const userData: GoogleJwtPayload = jwtDecode(
           credentialResponse.credential
         );
-        const response = await googleLogin(userData.email);
+        const response = await userService.googleLogin({
+          userMail: userData.email,
+        });
 
         if (response.status === 200) {
           const userData = {
-            userId: response.data.data._id,
-            userName: response.data.data.user_name,
-            userProfile: response.data.data.profile_pic,
+            userId: response.data._id,
+            userName: response.data.user_name,
+            userProfile: response.data.profile_pic,
           };
           // Changed the access token to body
-          const accessToken = response.data.data.accessToken;
+          const accessToken = response.data.accessToken;
           dispatch(assignUserDetails(userData));
           dispatch(assignAccessToken(accessToken));
           showSuccessToast("Login successful...!");

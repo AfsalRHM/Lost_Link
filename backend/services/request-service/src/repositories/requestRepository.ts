@@ -63,11 +63,9 @@ export default class RequestRepository
     }
   }
 
-  async findUserRequests(
-    requestIds: string[]
-  ): Promise<IrequestModel[] | null> {
+  async findUserRequests(userId: string): Promise<IrequestModel[] | null> {
     try {
-      const userRequests = await this.model.find({ _id: { $in: requestIds } });
+      const userRequests = await this.model.find({ user_id: userId });
       return userRequests.length > 0 ? userRequests : null;
     } catch (error) {
       console.error("Error getting User Requests:", error);

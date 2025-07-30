@@ -1,4 +1,5 @@
 import { useDispatch } from "react-redux";
+
 import { prevStep } from "../../../redux/slice/registerStepSlice";
 
 type propsType = { text: string; item: string };

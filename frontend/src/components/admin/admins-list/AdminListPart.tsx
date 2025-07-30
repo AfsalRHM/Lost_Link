@@ -1,10 +1,10 @@
-import { Search, UserPlus } from "lucide-react";
-import { Link } from "react-router-dom";
-import adminLogout from "../../../api/admin-api/adminLogoutAPI";
-import { showSuccessToast } from "../../../utils/toastUtils";
-import { useAdminJwtErrors } from "../../../utils/JwtErrors";
 import { useState } from "react";
-import changeAdminStatus from "../../../api/admin-api/changeAdminStatus";
+import { Link } from "react-router-dom";
+
+import { adminService } from "../../../services/adminService";
+
+import { showSuccessToast } from "../../../utils/toastUtils";
+import { Search, UserPlus } from "lucide-react";
 
 interface Admin {
   _id: string;
@@ -25,7 +25,6 @@ const AdminListPart = ({
   allAdmins = [],
   allAdminsFunc,
 }: AdminListPartProps) => {
-
   const [searchTerm, setSearchTerm] = useState("");
   const [sortField, setSortField] = useState<keyof Admin>("name");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
@@ -43,16 +42,12 @@ const AdminListPart = ({
     }
   };
 
-  const JwtErrors = useAdminJwtErrors();
-
   const handleStatusChange = async (id: string) => {
-    const response = await changeAdminStatus({ adminId: id });
+    const response = await adminService.updateAdmin({ adminId: id });
+
     await allAdminsFunc();
     if (response.status) {
       showSuccessToast("Admin Status Changed");
-    } else if (response === false) {
-      JwtErrors({ reason: "session expiration" });
-      await adminLogout();
     } else {
       console.log("Unexpected response:", response);
     }

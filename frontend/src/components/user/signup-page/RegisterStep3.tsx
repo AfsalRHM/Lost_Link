@@ -1,17 +1,18 @@
-import SigninInput from "./SigninInput";
-import ContinueButton from "./ContinueButton";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { resetStep } from "../../../redux/slice/registerStepSlice";
 import { useState } from "react";
 
+import { userService } from "../../../services/userService";
+
+import SigninInput from "./SigninInput";
+import ContinueButton from "./ContinueButton";
+import { resetStep } from "../../../redux/slice/registerStepSlice";
 import { validateStep3Details } from "../../../validations/registerStep3";
 import ValidationError from "../shared/ValidationError";
 import {
   assignUserPassword,
   makeEmptyUserDetails,
 } from "../../../redux/slice/registerDetails";
-import insertUser from "../../../api/auth-api/saveUserAPI";
 import { RootState } from "../../../redux/store";
 import { showSuccessToast } from "../../../utils/toastUtils";
 import UserErrorHandling from "../../../middlewares/UserErrorHandling";
@@ -68,7 +69,7 @@ const RegisterStep3 = () => {
 
       if (!errors.reEnterPassword && !errors.password) {
         dispatch(assignUserPassword(userPasswordInput));
-        const response = await insertUser({
+        const response = await userService.insertUser({
           userFullName,
           userName,
           userLocation,

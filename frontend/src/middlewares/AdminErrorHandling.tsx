@@ -1,7 +1,8 @@
+import { adminService } from "../services/adminService";
+
 import { showErrorToast2 } from "../utils/iziToastUtils";
 import { removeAdminAccessToken } from "../redux/slice/accessTokenSlice";
 import { removeAdminDetails } from "../redux/slice/adminDetailsSlice";
-import adminLogout from "../api/admin-api/adminLogoutAPI";
 
 const AdminErrorHandling = async (error: any, dispatch: any, navigate: any) => {
   try {
@@ -9,7 +10,7 @@ const AdminErrorHandling = async (error: any, dispatch: any, navigate: any) => {
       dispatch(removeAdminDetails());
       dispatch(removeAdminAccessToken());
       navigate("/admin/login");
-      await adminLogout();
+      await adminService.logout();
       showErrorToast2(error.data.message);
     } else if (error.status == 404) {
       navigate("/admin/404");

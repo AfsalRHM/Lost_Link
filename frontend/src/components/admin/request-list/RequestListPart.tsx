@@ -1,9 +1,11 @@
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+
+import { adminService } from "../../../services/adminService";
+
 import { showSuccessToast } from "../../../utils/toastUtils";
 import { Search } from "lucide-react";
-import changeRequestStatus from "../../../api/admin-api/changeRequestStatus";
 import { assignAdminAccessToken } from "../../../redux/slice/accessTokenSlice";
 import AdminErrorHandling from "../../../middlewares/AdminErrorHandling";
 
@@ -59,7 +61,7 @@ const RequestListPart = ({
   };
 
   const handleStatusChange = async (id: string) => {
-    const response = await changeRequestStatus({ requestId: id });
+    const response = await adminService.updateRequest({ requestId: id });
     await allRequestsFunc();
     if (response.status == 200) {
       const token = response.headers["authorization"]?.split(" ")[1];

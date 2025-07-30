@@ -1,11 +1,11 @@
+import { useSelector } from "react-redux";
+
 import StepperPart from "./StepperPart";
 import RegisterStep1 from "./RegisterStep1";
 import RegisterStep2 from "./RegisterStep2";
-
-import { useSelector } from "react-redux";
+import RegisterStep3 from "./RegisterStep3";
 
 import { RootState } from "../../../redux/store";
-import RegisterStep3 from "./RegisterStep3";
 
 const SignUpPage = () => {
   const { step } = useSelector((state: RootState) => state.registerStep);

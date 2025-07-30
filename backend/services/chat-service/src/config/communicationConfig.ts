@@ -4,11 +4,11 @@ let channel: Channel;
 let connection: Connection;
 
 export default async function configCommunication(retries = 5, delayMs = 5000) {
-  const AMQP_DEVELOPMENT_HOSTNAME = process.env.AMQP_DEVELOPMENT_HOSTNAME;
-  const AMQP_PRODUCTION_HOSTNAME = process.env.AMQP_PRODUCTION_HOSTNAME;
+  const AMQP_HOSTNAME_DEV = process.env.AMQP_HOSTNAME_DEV;
+  const AMQP_HOSTNAME = process.env.AMQP_HOSTNAME;
   const CHAT_QUEUE = process.env.CHAT_QUEUE;
 
-  if (!AMQP_PRODUCTION_HOSTNAME || !AMQP_DEVELOPMENT_HOSTNAME || !CHAT_QUEUE) {
+  if (!AMQP_HOSTNAME_DEV || !AMQP_HOSTNAME || !CHAT_QUEUE) {
     throw new Error(
       "❌ AMQP URL or CHAT_QUEUE is not defined in environment variables."
     );
@@ -23,9 +23,9 @@ export default async function configCommunication(retries = 5, delayMs = 5000) {
       connection = await amqp.connect({
         protocol: "amqp",
         hostname:
-          process.env.PROJECT_STATUS == "Development"
-            ? process.env.AMQP_DEVELOPMENT_HOSTNAME
-            : process.env.AMQP_PRODUCTION_HOSTNAME,
+          process.env.NODE_ENV == "Development"
+            ? AMQP_HOSTNAME_DEV
+            : AMQP_HOSTNAME,
         port: 5672,
         username: "guest",
         password: "guest",

@@ -1,5 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+
 import { Home, AlertCircle } from "lucide-react";
 import { Sidebar } from "../shared/Sidebar";
 import NavBar from "../shared/Navbar";

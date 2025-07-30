@@ -1,4 +1,5 @@
 import React from 'react';
+
 import { Shield } from 'lucide-react';
 
 const LoginHeader: React.FC = () => {

@@ -1,20 +1,21 @@
-import SigninInput from "./SigninInput";
-import ContinueButton from "./ContinueButton";
-import PreviousButton from "./PreviousButton";
 import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect, useState } from "react";
 
+import { userService } from "../../../services/userService";
+
+import SigninInput from "./SigninInput";
+import ContinueButton from "./ContinueButton";
+import PreviousButton from "./PreviousButton";
 import { nextStep, resetStep } from "../../../redux/slice/registerStepSlice";
 import { emailVerfiedTrue } from "../../../redux/slice/emailVerficationSlice";
-import sendMail from "../../../api/auth-api/sendMailAPI";
+
 import { RootState } from "../../../redux/store";
 import {
   validateStep2Email,
   validateStep2OTP,
 } from "../../../validations/registerStep2";
 import ValidationError from "../shared/ValidationError";
-import verifyOTP from "../../../api/auth-api/verifyOTPAPI";
 import { assignUserEmail } from "../../../redux/slice/registerDetails";
 
 type inputPropsType = {
@@ -82,7 +83,7 @@ const RegisterStep2 = () => {
     }
 
     if (!errors.userEmail) {
-      const response = await sendMail({
+      const response = await userService.sendMail({
         recieverName: userFullName,
         recieverEmail: userEmailInput,
       });
@@ -113,7 +114,7 @@ const RegisterStep2 = () => {
       setuserOTPValidationErrorData({ display: false, content: "" });
     }
     if (!errors.userOTP) {
-      const response = await verifyOTP({
+      const response = await userService.verifyOTP({
         userEmail: userEmailInput,
         userEnteredOTP: userOTPInput,
       });

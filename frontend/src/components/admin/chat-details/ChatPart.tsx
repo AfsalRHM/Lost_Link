@@ -1,12 +1,13 @@
-import { Info, Send, Trash, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect, FormEvent, useRef } from "react";
-import IchatModel, { ImessageModel } from "../../../interface/Ichat";
-import fetchUserMessages from "../../../api/admin-api/getMessagesAPI";
-import { showErrorToast2 } from "../../../utils/iziToastUtils";
 import { useDispatch, useSelector } from "react-redux";
+
+import { adminService } from "../../../services/adminService";
+
+import IchatModel, { ImessageModel } from "../../../interface/Ichat";
+import { Info, Send, Trash, X } from "lucide-react";
+import { showErrorToast2 } from "../../../utils/iziToastUtils";
 import { RootState } from "../../../redux/store";
-import saveAdminMessage from "../../../api/admin-api/sendAdminMessage";
 import { getNotifSocket, getSocket } from "../../../socket/socket";
 import ImageModal from "../../shared/ImageModal";
 import ImageUpload from "../../shared/ImageUpload";
@@ -42,7 +43,10 @@ const ChatPart = ({ chatDetails }: { chatDetails: IchatModel | undefined }) => {
 
     const getMessages = async () => {
       try {
-        const response = await fetchUserMessages({ chatId: chatDetails?._id });
+        const response = await adminService.getMessages({
+          chatId: chatDetails?._id!,
+        });
+
         if (response.status == 200) {
           setMessages(response.data.data);
         } else {
@@ -81,11 +85,12 @@ const ChatPart = ({ chatDetails }: { chatDetails: IchatModel | undefined }) => {
     }
 
     if (chatDetails) {
-      const response = await saveAdminMessage({
+      const response = await adminService.sendMessage({
         chatId: chatDetails._id,
         content: newMessage,
         image: chatImage,
       });
+
       if (response.status === 200) {
         socket.emit("newAdminMessage", {
           sender: adminId,

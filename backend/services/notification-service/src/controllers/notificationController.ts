@@ -16,7 +16,7 @@ export default class notificationController implements InotificationController {
     res: Response
   ): Promise<void> => {
     try {
-      const userId = req.body.userId;
+      const userId = req.params.id;
       if (!userId) {
         throw new Error("User Id not passed correctly");
       }

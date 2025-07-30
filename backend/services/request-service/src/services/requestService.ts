@@ -94,10 +94,10 @@ export default class requestService implements IrequestService {
     }
   }
 
-  async getUserRequests(requestIds: [string]): Promise<any> {
+  async getUserRequests(userId: string): Promise<any> {
     try {
       const userRequests = await this._requestRepository.findUserRequests(
-        requestIds
+        userId
       );
       if (userRequests) {
         return {
@@ -281,7 +281,7 @@ export default class requestService implements IrequestService {
           message: "Request not found",
         };
       }
-      if (requestData.user_id == userId) {
+      if (requestData.user_id == userId || userId == "admin") {
         const request = await this._requestRepository.findByIdAndUpdate(
           requestId,
           { status: "cancelled" }
@@ -689,8 +689,6 @@ export default class requestService implements IrequestService {
 
             const calculatedUserReward =
               requestData.reward_amount - calulateCommission;
-
-            console.log(calculatedUserReward, "this is the user reward amount");
 
             const sendingTo = process.env.USER_QUEUE;
             const source = "Add the completed request details to the user";

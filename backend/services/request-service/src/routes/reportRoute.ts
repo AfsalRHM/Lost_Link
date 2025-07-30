@@ -8,10 +8,10 @@ const ReportController = new reportController();
 
 /*************************      User Side       *******************************/
 // Get Requests
+report_route.get("/:id/reports", verifyAccessToken, ReportController.getMyReports); // To get a specific user's all reports
 
 // Post Requests
 report_route.post("/report-request", verifyAccessToken, ReportController.createReport); // To Create a Report
-report_route.post("/get-my-reports", verifyAccessToken, ReportController.getMyReports); // To get a specific user's all reports
 
 // Patch Requests
 

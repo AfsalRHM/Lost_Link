@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import fetchUserChats from "../../../api/admin-api/getUserChats";
+import { useDispatch } from "react-redux";
+
+import { adminService } from "../../../services/adminService";
+
 import ChatListSkeleton from "./loading/ChatDetailsPageLoadin";
 import ChatPart from "./ChatPart";
 import NavBar from "../shared/Navbar";
@@ -8,7 +11,6 @@ import IchatModel from "../../../interface/Ichat";
 import { Sidebar } from "../shared/Sidebar";
 import { ArrowLeft } from "lucide-react";
 import AdminErrorHandling from "../../../middlewares/AdminErrorHandling";
-import { useDispatch } from "react-redux";
 
 const ChatListPage = () => {
   const navigate = useNavigate();
@@ -23,7 +25,8 @@ const ChatListPage = () => {
 
   const getUserChats = async () => {
     try {
-      const response = await fetchUserChats({ userId });
+      const response = await adminService.getUserChats({ userId: userId! });
+
       if (response.status == 200) {
         setChats(response.data.data);
         setLoading(false);

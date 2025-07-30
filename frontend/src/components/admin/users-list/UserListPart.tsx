@@ -1,7 +1,9 @@
 import { useState } from "react";
-import { Search, ChevronDown, ChevronUp } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import changeStatus from "../../../api/admin-api/changeUserStatus";
+
+import { adminService } from "../../../services/adminService";
+
+import { Search, ChevronDown, ChevronUp } from "lucide-react";
 import { showSuccessToast } from "../../../utils/toastUtils";
 
 interface User {
@@ -44,7 +46,7 @@ const UserListPart = ({ allUsers, allUsersFunc }: UserListPartProps) => {
   };
 
   const handleStatusChange = async (id: string) => {
-    const response = await changeStatus({ userId: id });
+    const response = await adminService.updateUser({ userId: id });
     await allUsersFunc();
     if (response.status) {
       showSuccessToast("User Status Changed");

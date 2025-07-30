@@ -1,13 +1,14 @@
-import { format } from "date-fns";
-import { MessageCircle, Send } from "lucide-react";
-import { showErrorToast2 } from "../../utils/iziToastUtils";
+import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+
+import { userService } from "../../services/userService";
+
+import { format } from "date-fns";
+import { showErrorToast2 } from "../../utils/iziToastUtils";
+import { MessageCircle, Send } from "lucide-react";
 import { RootState } from "../../redux/store";
-import createComment from "../../api/user-api/createCommentAPI";
-import getRequestComments from "../../api/user-api/getRequestCommentsAPI";
 import UserErrorHandling from "../../middlewares/UserErrorHandling";
-import { useNavigate } from "react-router-dom";
 
 interface ICommentModel {
   _id?: string;
@@ -50,7 +51,7 @@ const CommentSection = ({
     setLoadingComments(true);
     try {
       if (requestId) {
-        const response = await getRequestComments({ requestId, count });
+        const response = await userService.getComments({ requestId, count });
         if (response.status === 200) {
           setComments(response.data.data.newCommentDatas);
           setCommentCount(response.data.data.totalCommentLength);
@@ -78,7 +79,11 @@ const CommentSection = ({
     try {
       setCommentText("");
 
-      const response = await createComment({ requestId, commentText, userId });
+      const response = await userService.createComment({
+        requestId,
+        commentText,
+        userId,
+      });
       if (response.status == 200) {
         setComments((prev) => [response.data.data, ...prev]);
         setCommentCount((prev) => prev + 1);

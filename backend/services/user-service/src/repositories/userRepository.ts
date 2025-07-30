@@ -45,7 +45,7 @@ export default class UserRepository
 
       return updatedUser;
     } catch (error) {
-      console.error("Error updating status:", error);
+      console.error("Error updating status 100:", error);
       return null;
     }
   }

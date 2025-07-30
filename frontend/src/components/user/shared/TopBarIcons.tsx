@@ -1,14 +1,16 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { useState, useRef, useEffect } from "react";
+
+import { userService } from "../../../services/userService";
+
 import { RootState } from "../../../redux/store";
 import NotificationSection from "../../shared/NotificationSection";
-
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faQuestion } from "@fortawesome/free-solid-svg-icons";
-import getNotifications from "../../../api/user-api/getNotificationsAPI";
-import { getNotifSocket } from "../../../socket/socket";
 import UserErrorHandling from "../../../middlewares/UserErrorHandling";
+
+import { getNotifSocket } from "../../../socket/socket";
 
 const TopBarIcons = () => {
   const dispatch = useDispatch();
@@ -55,7 +57,7 @@ const TopBarIcons = () => {
   useEffect(() => {
     const getNotificationData = async () => {
       try {
-        const response = await getNotifications({
+        const response = await userService.getNofications({
           userId,
         });
 

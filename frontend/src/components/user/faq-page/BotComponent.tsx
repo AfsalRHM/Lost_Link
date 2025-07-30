@@ -1,8 +1,9 @@
-import { MessageCircle, Send, User, Bot } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
+import { useSelector } from "react-redux";
+
+import { MessageCircle, Send, User, Bot } from "lucide-react";
 import { chatWithBot } from "../../../utils/chatBot";
 import ReactMarkdown from "react-markdown";
-import { useSelector } from "react-redux";
 import { RootState } from "../../../redux/store";
 
 const BotComponent = () => {

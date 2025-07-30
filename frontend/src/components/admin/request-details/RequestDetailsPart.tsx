@@ -1,22 +1,22 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useDispatch } from "react-redux";
+
+import { adminService } from "../../../services/adminService";
+
 import { Calendar, Clock, Tag, MapPin, Eye } from "lucide-react";
 import {
   showConfirmToast,
   showErrorToast2,
   showSuccessToast2,
 } from "../../../utils/iziToastUtils";
-import fetchRequestDetails from "../../../api/admin-api/getRequestDetails";
 import IrequestModel from "../../../interface/IrequestModel";
 import requestRedeemType from "../../../interface/IrequestRedeem";
-import changeRequestStatus from "../../../api/admin-api/changeRequestStatus";
 import { showSuccessToast } from "../../../utils/toastUtils";
-import cancelRequest from "../../../api/user-api/cancelRequestAPI";
 import CommentSection from "../../shared/CommentSection";
 import IreportModel from "../../../interface/IreportModel";
 import ReportListModal from "./ReportListModal";
 import AdminErrorHandling from "../../../middlewares/AdminErrorHandling";
-import { useDispatch } from "react-redux";
 
 const RequestDetailsPart = () => {
   const dispatch = useDispatch();
@@ -45,7 +45,9 @@ const RequestDetailsPart = () => {
           return;
         }
 
-        const response = await fetchRequestDetails({ requestId: id });
+        const response = await adminService.getRequestDetails({
+          requestId: id,
+        });
 
         if (response.status == 200) {
           setRequestData(response.data.data.requestData);
@@ -83,7 +85,7 @@ const RequestDetailsPart = () => {
   }
 
   async function handleStatusChange() {
-    const response = await changeRequestStatus({ requestId: id });
+    const response = await adminService.updateRequest({ requestId: id! });
 
     if (response.status == 200) {
       if (requestData) {
@@ -106,7 +108,7 @@ const RequestDetailsPart = () => {
       "Are you sure you want to cancel this request?",
       async () => {
         if (id) {
-          const response = await cancelRequest({ requestId: id });
+          const response = await adminService.cancelRequest({ requestId: id, from: "admin" });
 
           if (response.status == 200) {
             setRequestData((prev) => {

@@ -1,14 +1,16 @@
 import { useRef, useState } from "react";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+
+import { userService } from "../../../services/userService";
+
 import { formDataType, userDataType } from "../../../interface/IuserModel";
-import saveUpdatedData from "../../../api/user-api/saveUpdatedDataAPI";
 import { validateUserEditDetails } from "../../../validations/editUserDetails";
 import {
   showErrorToast2,
   showSuccessToast2,
 } from "../../../utils/iziToastUtils";
 import UserErrorHandling from "../../../middlewares/UserErrorHandling";
-import { useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
 
 const UserDetails = ({ userData }: { userData: userDataType | undefined }) => {
   const dispatch = useDispatch();
@@ -93,11 +95,9 @@ const UserDetails = ({ userData }: { userData: userDataType | undefined }) => {
         formData.email = userData?.email;
         formData.phone = userData?.phone;
       } else {
-        const response = await saveUpdatedData({ formData });
+        const response = await userService.updateUser({ formData });
 
-        if (response.errors) {
-          showErrorToast2(response.errors.msg);
-        } else if (response.status === 200) {
+        if (response.status === 200) {
           showSuccessToast2("user details updated successfully");
         } else {
           console.log(

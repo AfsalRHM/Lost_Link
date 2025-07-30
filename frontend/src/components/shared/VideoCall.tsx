@@ -1,6 +1,7 @@
-import { ZegoUIKitPrebuilt } from "@zegocloud/zego-uikit-prebuilt";
 import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
+
+import { ZegoUIKitPrebuilt } from "@zegocloud/zego-uikit-prebuilt";
 
 const VideoCall = () => {
   const [searchParams] = useSearchParams();

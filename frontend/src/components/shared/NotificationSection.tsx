@@ -1,9 +1,11 @@
 import { useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+
+import { userService } from "../../services/userService";
+import { adminService } from "../../services/adminService";
+
 import { RootState } from "../../redux/store";
-import changeUserNotificationSeen from "../../api/user-api/changeUserNotificationSeenAPI";
-import changeAdminNotificationSeen from "../../api/admin-api/changeAdminNotificationSeenAPI";
 
 interface notificationSectionType {
   Notifications: any;
@@ -19,10 +21,10 @@ const NotificationSection = ({
   const { userId } = useSelector((state: RootState) => state.userDetails);
 
   async function makeUserNotificationSeen() {
-    await changeUserNotificationSeen({ userId });
+    await userService.updateNotificaitonStatus({ userId });
   }
   async function makeAdminNotificationSeen() {
-    await changeAdminNotificationSeen();
+    await adminService.updateNotifications();
   }
 
   useEffect(() => {

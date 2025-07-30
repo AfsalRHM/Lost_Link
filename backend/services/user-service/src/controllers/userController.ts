@@ -111,6 +111,7 @@ export default class UserController implements IuserController {
   public updateUser = async (req: Request, res: Response): Promise<void> => {
     try {
       const errors = validationResult(req);
+      
       if (!errors.isEmpty()) {
         res.status(StatusCode.BAD_REQUEST).json({ errors: errors.array()[0] });
       } else {

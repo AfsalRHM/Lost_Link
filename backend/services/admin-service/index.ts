@@ -10,12 +10,11 @@ const app = express();
 
 dotenv.config();
 
-const MAIN_ROUTE = process.env.MAIN_ROUTE;
-const FRONTEND_PORT = process.env.FRONTEND_PORT;
+const CORS_ORIGINS = process.env.CORS_ORIGINS;
 
 app.use(
   cors({
-    origin: ["https://lostlink.live", "https://www.lostlink.live"],
+    origin: CORS_ORIGINS?.split(","),
     credentials: true,
     exposedHeaders: ["Authorization"],
   })

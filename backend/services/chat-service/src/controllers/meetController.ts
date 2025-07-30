@@ -63,7 +63,7 @@ export default class meetController implements ImeetController {
     res: Response
   ): Promise<void> => {
     try {
-      const { meetId } = req.body;
+      const meetId = req.params.id;
       if (!meetId) {
         console.log(
           "invalid data passed to the request getMeetDataAdmin/meetController"
@@ -87,7 +87,7 @@ export default class meetController implements ImeetController {
   // To get list of meetings of a particular user
   public getUserMeets = async (req: Request, res: Response): Promise<void> => {
     try {
-      const { userId } = req.body;
+      const userId = req.params.id;
 
       if (!userId) {
         console.log(

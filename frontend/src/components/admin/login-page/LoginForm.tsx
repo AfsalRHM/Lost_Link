@@ -1,13 +1,15 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+
+import { adminService } from "../../../services/adminService";
+
 import { Mail, Lock } from "lucide-react";
 import LoginInput from "./LoginInput";
 import { inputPropsType, LoginFormData } from "../../../interface/IloginForm";
 import ValidationError from "../shared/ValidationError";
 import validateAdminLoginDetails from "../../../validations/adminLoginValidation";
-import adminLogin from "../../../api/admin-api/adminLogin";
 import { showErrorToast, showSuccessToast } from "../../../utils/toastUtils";
-import { useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
 import { assignAdminAccessToken } from "../../../redux/slice/accessTokenSlice";
 import { assignAdminDetails } from "../../../redux/slice/adminDetailsSlice";
 
@@ -45,17 +47,25 @@ const LoginForm: React.FC = () => {
     }
 
     if (!errors.password && !errors.email) {
-      const result = await adminLogin(formData);
+      const result = await adminService.loginVerify(formData);
+
       console.log(result);
-      if (result.data == null) {
+
+      if (result == null) {
         showErrorToast("Admin Login Failed...!");
-      } else if (result.data.data.status == false) {
-        setAdminLoginValidationError({display: true, content: "Invalid Credentials"})
-      } else if (result.data.data.data.status !== "active") {
-        setAdminLoginValidationError({display: true, content: "You are Blocked from this Site"})
+      } else if (result.data.status == false) {
+        setAdminLoginValidationError({
+          display: true,
+          content: "Invalid Credentials",
+        });
+      } else if (result.data.data.status !== "active") {
+        setAdminLoginValidationError({
+          display: true,
+          content: "You are Blocked from this Site",
+        });
       } else {
-        dispatch(assignAdminAccessToken(result.data.data.accessToken));
-        dispatch(assignAdminDetails(result.data.data.data))
+        dispatch(assignAdminAccessToken(result.data.accessToken));
+        dispatch(assignAdminDetails(result.data.data));
         showSuccessToast("Admin Login Success...!");
         navigate("/admin");
       }

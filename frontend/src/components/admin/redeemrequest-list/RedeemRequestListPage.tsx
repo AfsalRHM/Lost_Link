@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+
+import { adminService } from "../../../services/adminService";
+
 import RedeemRequestListPart from "./RedeemRequestListPart";
 import { showErrorToast } from "../../../utils/toastUtils";
 import { Sidebar } from "../shared/Sidebar";
-import fetchAllRedeemRequests from "../../../api/admin-api/allRedeemRequestsAPI";
 import NavBar from "../shared/Navbar";
 import AdminErrorHandling from "../../../middlewares/AdminErrorHandling";
-import { useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
 
 const RedeemRequestListPage = () => {
   const dispatch = useDispatch();
@@ -17,7 +19,7 @@ const RedeemRequestListPage = () => {
 
   const getAllRedeemRequests = async () => {
     try {
-      const response = await fetchAllRedeemRequests();
+      const response = await adminService.getRedeemRequests();
 
       if (response.status == 200) {
         setRedeemRequestList(response.data.data);

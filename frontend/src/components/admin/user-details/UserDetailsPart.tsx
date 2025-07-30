@@ -1,5 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useDispatch } from "react-redux";
+
+import { adminService } from "../../../services/adminService";
+
 import {
   MapPin,
   Mail,
@@ -9,15 +13,12 @@ import {
   CheckCircle,
   CreditCard,
 } from "lucide-react";
-import fetchUserDetails from "../../../api/admin-api/getUserDetailsAPI";
 import {
   showErrorToast2,
   showSuccessToast2,
 } from "../../../utils/iziToastUtils";
-import changeStatus from "../../../api/admin-api/changeUserStatus";
 import UserDetailsPartLoading from "./loading/UserDetailsPartLoading";
 import AdminErrorHandling from "../../../middlewares/AdminErrorHandling";
-import { useDispatch } from "react-redux";
 
 const UserDetailsPart = () => {
   const dispatch = useDispatch();
@@ -37,7 +38,7 @@ const UserDetailsPart = () => {
           navigate(-1);
         }
 
-        const response = await fetchUserDetails({ userId: id });
+        const response = await adminService.getUser({ userId: id! });
 
         if (response.status == 200) {
           setUserData(response.data.data);
@@ -63,7 +64,7 @@ const UserDetailsPart = () => {
   }
 
   async function handleStatusChange() {
-    const response = await changeStatus({ userId: id });
+    const response = await adminService.updateUser({ userId: id! });
 
     if (response.status == 200) {
       const newStatus = userData.status === "active" ? "inactive" : "active";

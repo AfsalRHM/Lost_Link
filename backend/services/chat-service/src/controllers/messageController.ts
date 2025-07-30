@@ -104,7 +104,7 @@ export default class messageController implements ImessageController {
   // To get all the messages of a particular chat
   public getMessages = async (req: Request, res: Response): Promise<void> => {
     try {
-      const { chatId } = req.params;
+      const chatId = req.params.id;
       if (!chatId) {
         console.log("invalid data passed to the request get-messages");
         res.status(StatusCode.NOT_FOUND);

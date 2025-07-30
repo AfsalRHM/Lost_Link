@@ -1,9 +1,9 @@
-import { defineCustomElements } from "ionicons/dist/loader";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
+import { defineCustomElements } from "ionicons/dist/loader";
 import TopBar from "./TopBar";
 import TopBarIcons from "./TopBarIcons";
-import { useNavigate } from "react-router-dom";
 
 const Header = () => {
   useEffect(() => {

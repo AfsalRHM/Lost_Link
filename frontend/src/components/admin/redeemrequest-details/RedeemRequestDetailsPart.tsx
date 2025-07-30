@@ -1,15 +1,16 @@
-import { useNavigate, useParams } from "react-router-dom";
-import { MapPin, Landmark, Package, CreditCard } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { useDispatch } from "react-redux";
+
+import { adminService } from "../../../services/adminService";
+
+import { MapPin, Landmark, Package, CreditCard } from "lucide-react";
 import requestRedeemType from "../../../interface/IrequestRedeem";
 import {
   showErrorToast2,
   showSuccessToast2,
 } from "../../../utils/iziToastUtils";
-import fetchRedeemRequestDetails from "../../../api/admin-api/getRedeemRequestDetailsAPI";
-import changeRedeemRequestStatus from "../../../api/admin-api/changeRedeemRequestStatusAPi";
 import AdminErrorHandling from "../../../middlewares/AdminErrorHandling";
-import { useDispatch } from "react-redux";
 
 const RedeemRequestDetailsPart = () => {
   const dispatch = useDispatch();
@@ -29,7 +30,7 @@ const RedeemRequestDetailsPart = () => {
           navigate(-1);
           return;
         }
-        const response = await fetchRedeemRequestDetails({
+        const response = await adminService.getRedeemRequestDetails({
           redeemRequestId: id,
         });
 
@@ -58,9 +59,9 @@ const RedeemRequestDetailsPart = () => {
 
   async function handleStatusClick(clickEvent: string) {
     try {
-      const response = await changeRedeemRequestStatus({
+      const response = await adminService.updateRedeemRequestStatus({
         changeTo: clickEvent,
-        redeemRequestId: id,
+        redeemRequestId: id!,
       });
       if (response.status == 200) {
         showSuccessToast2("Status Changed Successfully");

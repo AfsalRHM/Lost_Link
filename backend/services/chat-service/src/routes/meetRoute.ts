@@ -8,20 +8,21 @@ const MeetController = new meetController();
 
 /*************************      User Side       *******************************/
 // Get Requests
+meet_route.get("/:id/meetings", verifyAccessToken, MeetController.getUserMeets); // To get list of meeting of a particular user
 
 // Post Requests
-meet_route.post("/create-meeting", verifyAccessToken, MeetController.createMeet); // To get schedule a meet
+meet_route.post("/", verifyAccessToken, MeetController.createMeet); // To get schedule a meet
 
-meet_route.post("/fetch-user-meetings", verifyAccessToken, MeetController.getUserMeets); // To get list of meeting of a particular user
+// meet_route.post("/fetch-user-meetings", verifyAccessToken, MeetController.getUserMeets); // To get list of meeting of a particular user
 
 // Patch Requests
 
 
 /*************************      Admin Side       *******************************/
 // Get Requests
-meet_route.get("/fetch-all-meets", verifyAdminAccessToken, MeetController.getAllMeets); // To get all the meets
+meet_route.get("/admin/meet/all", verifyAdminAccessToken, MeetController.getAllMeets); // To get all the meets
+meet_route.get("/admin/meet/:id", verifyAdminAccessToken, MeetController.getMeetDataAdmin); // To get details of one meet
 
 // Post Requests
-meet_route.post("/fetch-admin-meet-data", verifyAdminAccessToken, MeetController.getMeetDataAdmin); // To get details of one meet
 
 export default meet_route;

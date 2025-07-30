@@ -6,7 +6,7 @@ export default interface IrequestService {
     accessToken: string;
     formData: FormData;
   }): Promise<any>;
-  getUserRequests(requestIds: [string]): Promise<any>;
+  getUserRequests(userId: string): Promise<any>;
   getRequestDetails({
     requestId,
     userId,

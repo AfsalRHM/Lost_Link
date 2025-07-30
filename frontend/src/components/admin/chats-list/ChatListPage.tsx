@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
-import ChatListPart from "./ChatListPart";
-import { Sidebar } from "../shared/Sidebar";
-import NavBar from "../shared/Navbar";
-import fetchAllUsers from "../../../api/admin-api/allUsersAPI";
-import AdminErrorHandling from "../../../middlewares/AdminErrorHandling";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
+
+import { adminService } from "../../../services/adminService";
+
+import { Sidebar } from "../shared/Sidebar";
+import ChatListPart from "./ChatListPart";
+import NavBar from "../shared/Navbar";
+import AdminErrorHandling from "../../../middlewares/AdminErrorHandling";
 
 const ChatListPage = () => {
   const dispatch = useDispatch();
@@ -16,7 +18,8 @@ const ChatListPage = () => {
 
   const getAllChats = async () => {
     try {
-      const response = await fetchAllUsers();
+      const response = await adminService.getUsers();
+
       if (response.status == 200) {
         setUserList(response.data.data);
       } else {

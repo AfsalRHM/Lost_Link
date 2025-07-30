@@ -1,17 +1,17 @@
 import { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+
+import { adminService } from "../../../services/adminService";
+
 import { Users, ShoppingCart, TrendingUp, IndianRupee } from "lucide-react";
 import { Sidebar } from "../shared/Sidebar";
 import { StatCard } from "./StatCard";
 import { UserCountChart } from "./UserCountChart";
 import NavBar from "../shared/Navbar";
 import { ProjectRequestChart } from "./RequestChart";
-import fetchAllRequests from "../../../api/admin-api/allRequestAPI";
-import fetchAllUsers from "../../../api/admin-api/allUsersAPI";
 import { userDataType } from "../../../interface/IuserModel";
 import AdminErrorHandling from "../../../middlewares/AdminErrorHandling";
-import { useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
-import fetchAllRedeemRequests from "../../../api/admin-api/allRedeemRequestsAPI";
 import { RedeemRequestChart } from "./RequestRedeemChart";
 import IrequestModel from "../../../interface/IrequestModel";
 
@@ -50,7 +50,8 @@ const DashboardPage = () => {
     // To get User Details
     const fetchUsers = async () => {
       try {
-        const response = await fetchAllUsers();
+        const response = await adminService.getUsers();
+
         if (response.status == 200) {
           setUsers(response.data.data);
 
@@ -92,7 +93,8 @@ const DashboardPage = () => {
     // To get Request Details
     const fetchRequests = async () => {
       try {
-        const response = await fetchAllRequests();
+        const response = await adminService.getRequests();
+
         if (response.status == 200) {
           setRequests(response.data.data);
           const profit = response.data.data.reduce(
@@ -112,10 +114,11 @@ const DashboardPage = () => {
       }
     };
 
-    // To get Request Details
+    // To get Redeem Request Details
     const fetchRedeemRequests = async () => {
       try {
-        const response = await fetchAllRedeemRequests();
+        const response = await adminService.getRedeemRequests();
+
         if (response.status == 200) {
           setRedeemRequests(response.data.data);
         } else {

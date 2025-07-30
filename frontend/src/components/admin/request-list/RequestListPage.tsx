@@ -1,10 +1,12 @@
-import { Sidebar } from "../shared/Sidebar";
 import { useEffect, useState } from "react";
-import fetchAllRequests from "../../../api/admin-api/allRequestAPI";
-import RequestListPart from "./RequestListPart";
-import NavBar from "../shared/Navbar";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
+
+import { adminService } from "../../../services/adminService";
+
+import { Sidebar } from "../shared/Sidebar";
+import RequestListPart from "./RequestListPart";
+import NavBar from "../shared/Navbar";
 import AdminErrorHandling from "../../../middlewares/AdminErrorHandling";
 
 const RequestListPage = () => {
@@ -16,7 +18,7 @@ const RequestListPage = () => {
 
   const getAllRequest = async () => {
     try {
-      const response = await fetchAllRequests();
+      const response = await adminService.getRequests();
 
       if (response.status == 200) {
         setRequestList(response.data.data);

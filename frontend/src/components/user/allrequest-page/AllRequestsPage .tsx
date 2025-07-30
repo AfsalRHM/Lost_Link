@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { userService } from "../../../services/userService";
+
 import FilterSideBar from "./FilterSideBar";
-import getAllRequests from "../../../api/user-api/getAllRequestsAPI";
 import RequestLoading from "./loading/AllRequestLoading";
 import RequestPart from "./RequestPart";
 import UserErrorHandling from "../../../middlewares/UserErrorHandling";
-import { useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
 
 const AllRequests = () => {
   const dispatch = useDispatch();
@@ -24,7 +25,7 @@ const AllRequests = () => {
   useEffect(() => {
     const fetchRequests = async () => {
       try {
-        const response = await getAllRequests();
+        const response = await userService.getAllRequests();
 
         if (response.status == 200) {
           setallRequests(response.data.data);

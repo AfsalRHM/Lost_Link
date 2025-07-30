@@ -1,6 +1,7 @@
+import { useState } from "react";
+
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
-import { useState } from "react";
 
 type inputProps = {
   name: string;
@@ -23,7 +24,13 @@ const LoginInput = (props: inputProps) => {
     <div className="py-4 relative">
       <span className="mb-2 text-md">{props.name}</span>
       <input
-        type={props.item == "password" ? showPassword == true ? "password" : "text" : "text"}
+        type={
+          props.item == "password"
+            ? showPassword == true
+              ? "password"
+              : "text"
+            : "text"
+        }
         className="w-full p-2 border border-gray-300 rounded-md placeholder:font-light placeholder:text-gray-500"
         name={props.item}
         id={props.item}

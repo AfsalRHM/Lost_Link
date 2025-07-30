@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+
+import { adminService } from "../../../services/adminService";
+
 import { Sidebar } from "../shared/Sidebar";
 import NavBar from "../shared/Navbar";
 import MeetListPart from "./MeetListPart";
-import fetchAllMeets from "../../../api/admin-api/allMeetsAPI";
 import AdminErrorHandling from "../../../middlewares/AdminErrorHandling";
-import { useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
 
 const MeetListPage = () => {
   const dispatch = useDispatch();
@@ -16,7 +18,7 @@ const MeetListPage = () => {
 
   const getAllMeets = async () => {
     try {
-      const response = await fetchAllMeets();
+      const response = await adminService.getAllMeets();
 
       if (response.status == 200) {
         setMeetList(response.data.data);

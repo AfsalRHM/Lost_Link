@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+
 import { userDataType } from "../../../interface/IuserModel";
 import {
   getNextTier,

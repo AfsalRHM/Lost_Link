@@ -1,14 +1,15 @@
-import SigninInput from "../signup-page/SigninInput";
-import ContinueButton from "../signup-page/ContinueButton";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { resetStep } from "../../../redux/slice/registerStepSlice";
-import { useState } from "react";
 
+import { userService } from "../../../services/userService";
+
+import { resetStep } from "../../../redux/slice/registerStepSlice";
+import SigninInput from "../signup-page/SigninInput";
+import ContinueButton from "../signup-page/ContinueButton";
 import { validateStep3Details } from "../../../validations/registerStep3";
 import ValidationError from "../shared/ValidationError";
 import { showSuccessToast } from "../../../utils/toastUtils";
-import changePassword from "../../../api/auth-api/changePasswordAPI";
 import UserErrorHandling from "../../../middlewares/UserErrorHandling";
 
 type inputPropsType = {
@@ -61,7 +62,7 @@ const ChangePasswordStep2 = (Props: {
       }
 
       if (!errors.reEnterPassword && !errors.password) {
-        const response = await changePassword({
+        const response = await userService.changePassword({
           userEmail: Props.userMailValue,
           newPassword: userPasswordInput,
         });

@@ -28,7 +28,7 @@ const Geoapify = (props: geoapifyProps) => {
 
   const type: "city" = "city";
   const language = "en";
-  const countryCodes = ["IN"] as any;
+  const filterByCountryCode = ["IN"] as any;
   const limit = 5;
 
   function onPlaceSelect(value: any) {
@@ -102,7 +102,7 @@ const Geoapify = (props: geoapifyProps) => {
               placeholder="Enter city name"
               type="city"
               lang={language}
-              countryCodes={countryCodes}
+              filterByCountryCode={filterByCountryCode}
               limit={limit}
               value={displayValue}
               placeSelect={onPlaceSelect}
@@ -124,7 +124,7 @@ const Geoapify = (props: geoapifyProps) => {
             placeholder="Enter city name in India"
             type={type}
             lang={language}
-            countryCodes={countryCodes}
+            filterByCountryCode={filterByCountryCode}
             limit={limit}
             value={displayValue}
             placeSelect={onPlaceSelect}
@@ -139,7 +139,7 @@ const Geoapify = (props: geoapifyProps) => {
             placeholder="Enter city name in India"
             type={type}
             lang={language}
-            countryCodes={countryCodes}
+            filterByCountryCode={filterByCountryCode}
             limit={limit}
             value={displayValue}
             placeSelect={onPlaceSelect}

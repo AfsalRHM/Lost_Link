@@ -1,3 +1,9 @@
+import { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+
+import { userService } from "../../../services/userService";
+
 import {
   ArrowLeft,
   MapPin,
@@ -10,13 +16,9 @@ import {
   Info,
   CheckCircle,
 } from "lucide-react";
-import { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
 import { showErrorToast2 } from "../../../utils/iziToastUtils";
-import getRequestRedeemDetails from "../../../api/user-api/getRedeemRequestDetails";
 import MeetScheduleModal from "./MeetScheduleModal";
 import UserErrorHandling from "../../../middlewares/UserErrorHandling";
-import { useDispatch } from "react-redux";
 
 const RedeemRequestDetails = () => {
   const dispatch = useDispatch();
@@ -38,7 +40,9 @@ const RedeemRequestDetails = () => {
           showErrorToast2("Invalid Access Detected");
           return;
         } else {
-          const response = await getRequestRedeemDetails(redeemRequestId);
+          const response = await userService.getRequestRedeemDetails({
+            requestRedeemId: redeemRequestId,
+          });
           if (response.status === 200) {
             setRequestRedeemData(response.data.data);
           } else {

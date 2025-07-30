@@ -1,14 +1,16 @@
-import { X } from "lucide-react";
 import { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+
+import { userService } from "../../../services/userService";
+
+import { X } from "lucide-react";
 import {
   showErrorToast2,
   showSuccessToast2,
 } from "../../../utils/iziToastUtils";
-import reportRequest from "../../../api/user-api/reportRequestAPI";
-import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../../redux/store";
 import UserErrorHandling from "../../../middlewares/UserErrorHandling";
-import { useNavigate } from "react-router-dom";
 
 interface reportModalType {
   setIsReportModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -30,7 +32,11 @@ const ReportModal = ({
 
   async function handleSubmitReport() {
     try {
-      const response = await reportRequest({ requestId, reportReason, userId });
+      const response = await userService.reportRequest({
+        requestId,
+        reportReason,
+        userId,
+      });
 
       if (response.status == 200) {
         setIsReportModalOpen(false);

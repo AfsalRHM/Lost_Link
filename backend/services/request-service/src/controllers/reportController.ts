@@ -41,16 +41,17 @@ export default class ReportController implements IreportController {
   // To get reports of a specfic user
   public getMyReports = async (req: Request, res: Response): Promise<void> => {
     try {
-      if (!req.body.userId) {
+      const userId = req.params.id;
+      if (!userId) {
         res.status(StatusCode.BAD_REQUEST).json({
           status: false,
-          message: "No Data found on the getMyReports Post Request",
+          message: "No User id found on the getMyReports get Request",
         });
         return;
       }
 
       const response = await this._reportService.getMyReports({
-        userId: req.body.userId,
+        userId,
       });
 
       if (response.status) {

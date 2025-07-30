@@ -4,13 +4,13 @@ let channel: Channel;
 let connection: Connection;
 
 export default async function configCommunication(retries = 5, delayMs = 5000) {
-  const AMQP_DEVELOPMENT_HOSTNAME = process.env.AMQP_DEVELOPMENT_HOSTNAME;
-  const AMQP_PRODUCTION_HOSTNAME = process.env.AMQP_PRODUCTION_HOSTNAME;
+  const AMQP_HOSTNAME_DEV = process.env.AMQP_HOSTNAME_DEV;
+  const AMQP_HOSTNAME = process.env.AMQP_HOSTNAME;
   const REQUEST_QUEUE = process.env.REQUEST_QUEUE;
 
   if (
-    !AMQP_PRODUCTION_HOSTNAME ||
-    !AMQP_DEVELOPMENT_HOSTNAME ||
+    !AMQP_HOSTNAME ||
+    !AMQP_HOSTNAME_DEV ||
     !REQUEST_QUEUE
   ) {
     throw new Error(
@@ -28,9 +28,9 @@ export default async function configCommunication(retries = 5, delayMs = 5000) {
       connection = await amqp.connect({
         protocol: "amqp",
         hostname:
-          process.env.PROJECT_STATUS == "Development"
-            ? process.env.AMQP_DEVELOPMENT_HOSTNAME
-            : process.env.AMQP_PRODUCTION_HOSTNAME,
+          process.env.NODE_ENV == "Development"
+            ? AMQP_HOSTNAME_DEV
+            : AMQP_HOSTNAME,
         port: 5672,
         username: "guest",
         password: "guest",

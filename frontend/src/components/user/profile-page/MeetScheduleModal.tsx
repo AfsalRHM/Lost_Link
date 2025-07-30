@@ -1,14 +1,16 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+
+import { userService } from "../../../services/userService";
+
 import { Info } from "lucide-react";
 import {
   showErrorToast2,
   showSuccessToast2,
 } from "../../../utils/iziToastUtils";
-import createMeeting from "../../../api/user-api/createMeetingAPI";
-import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../../redux/store";
 import UserErrorHandling from "../../../middlewares/UserErrorHandling";
-import { useNavigate } from "react-router-dom";
 
 interface MeetScheduleModalProps {
   onClose: () => void;
@@ -60,7 +62,7 @@ const MeetScheduleModal: React.FC<MeetScheduleModalProps> = ({
     }
 
     // API for creating meeting
-    const response = await createMeeting({
+    const response = await userService.createMeeting({
       date,
       time,
       userId: userId,

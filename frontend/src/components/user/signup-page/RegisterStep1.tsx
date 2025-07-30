@@ -1,5 +1,3 @@
-import SigninInput from "./SigninInput";
-import ContinueButton from "./ContinueButton";
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
@@ -7,7 +5,8 @@ import { useDispatch } from "react-redux";
 import ValidationError from "../shared/ValidationError";
 
 import { validateStep1Details } from "../../../validations/registerStep1";
-
+import SigninInput from "./SigninInput";
+import ContinueButton from "./ContinueButton";
 import { nextStep } from "../../../redux/slice/registerStepSlice";
 import {
   assignUserFullName,

@@ -1,18 +1,19 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+
+import { userService } from "../../../services/userService";
+
 import {
   showConfirmToast,
   showErrorToast2,
   showSuccessToast2,
 } from "../../../utils/iziToastUtils";
 import IrequestModel from "../../../interface/IrequestModel";
-import getRequestDetails from "../../../api/user-api/getRequestDetails";
 import MyRequestDetailsLoading from "./loading/MyRequestDetailsLoadin";
-import cancelRequest from "../../../api/user-api/cancelRequestAPI";
 import ChatPart from "./ChatPart";
 import CommentSection from "../../shared/CommentSection";
 import UserErrorHandling from "../../../middlewares/UserErrorHandling";
-import { useDispatch } from "react-redux";
 
 const MyRequestDetails = () => {
   const dispatch = useDispatch();
@@ -39,7 +40,7 @@ const MyRequestDetails = () => {
           showErrorToast2("Invalid Access Detected");
           return;
         } else {
-          const response = await getRequestDetails({
+          const response = await userService.getRequestDetails({
             requestId,
             from: "profile",
           });
@@ -70,7 +71,7 @@ const MyRequestDetails = () => {
       async () => {
         const requestId = requestData?._id;
         if (requestId) {
-          const response = await cancelRequest({ requestId });
+          const response = await userService.cancelRequest({ requestId });
           if (response.status == 200) {
             setRequestData((prev) => {
               if (prev) {

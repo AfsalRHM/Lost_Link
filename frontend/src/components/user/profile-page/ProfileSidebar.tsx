@@ -1,5 +1,8 @@
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
+
+import { userService } from "../../../services/userService";
+
 import { removeUserDetails } from "../../../redux/slice/userDetailsSlice";
 import { removeAccessToken } from "../../../redux/slice/accessTokenSlice";
 import {
@@ -7,7 +10,6 @@ import {
   showLogoutConfirmation,
   showSuccessToast,
 } from "../../../utils/toastUtils";
-import userLogout from "../../../api/auth-api/userLogoutAPI";
 
 const ProfileSidebar = ({
   selectFunction,
@@ -21,7 +23,7 @@ const ProfileSidebar = ({
 
   async function logoutFunction() {
     try {
-      await userLogout();
+      await userService.logout();
 
       dispatch(removeUserDetails());
       dispatch(removeAccessToken());

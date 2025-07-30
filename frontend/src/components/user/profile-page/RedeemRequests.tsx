@@ -1,16 +1,13 @@
 import { useEffect, useState } from "react";
-import { userDataType } from "../../../interface/IuserModel";
-import getRedeemRequests from "../../../api/user-api/getRedeemRequests";
 import { useNavigate } from "react-router-dom";
-import RedeemRequestLoading from "./loading/RedeemRequestsLoading";
-import UserErrorHandling from "../../../middlewares/UserErrorHandling";
 import { useDispatch } from "react-redux";
 
-const RedeemRequests = ({
-  userData,
-}: {
-  userData: userDataType | undefined;
-}) => {
+import { userService } from "../../../services/userService";
+
+import RedeemRequestLoading from "./loading/RedeemRequestsLoading";
+import UserErrorHandling from "../../../middlewares/UserErrorHandling";
+
+const RedeemRequests = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -21,20 +18,16 @@ const RedeemRequests = ({
   useEffect(() => {
     const getUserRedeemRequests = async () => {
       try {
-        if (userData?.requests.length === 0) {
-          return;
-        } else {
-          const response = await getRedeemRequests(userData?._id);
+        const response = await userService.getMyRedeemRequest();
 
-          if (response.status === 200) {
-            setRedeemRequests(response.data.data);
-          } else {
-            console.log(
-              response,
-              "this is the error response on getRedeemRequests"
-            );
-            UserErrorHandling(response, dispatch, navigate);
-          }
+        if (response.status === 200) {
+          setRedeemRequests(response.data.data);
+        } else {
+          console.log(
+            response,
+            "this is the error response on getRedeemRequests"
+          );
+          UserErrorHandling(response, dispatch, navigate);
         }
       } catch (error) {
         console.error("Failed to fetch redeem requests:", error);
@@ -55,19 +48,24 @@ const RedeemRequests = ({
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 4;
 
+  const filteredRequests = redeemRequests.filter(
+    (request: any) => request.status === currentStatus
+  );
+
   const indexOfLastRedeemRequest = currentPage * itemsPerPage;
   const indexOfFirstRedeemRequest = indexOfLastRedeemRequest - itemsPerPage;
-  const currentRedeemRequests = redeemRequests.slice(
+  const currentRedeemRequests = filteredRequests.slice(
     indexOfFirstRedeemRequest,
     indexOfLastRedeemRequest
   );
 
-  const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
-
   const totalPages = Math.ceil(redeemRequests.length / itemsPerPage);
+
+  const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
 
   function handleStatusField(status: string) {
     setCurrentStatus(status);
+    setCurrentPage(1);
   }
 
   if (loading) return <RedeemRequestLoading />;
@@ -137,17 +135,17 @@ const RedeemRequests = ({
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
-                  {currentRedeemRequests.map((request: any, index: number) =>
-                    request.status !== currentStatus ? (
-                      <tr key={index}>
-                        <td
-                          colSpan={4}
-                          className="py-6 text-center text-gray-500"
-                        >
-                          No {currentStatus} requests available.
-                        </td>
-                      </tr>
-                    ) : (
+                  {currentRedeemRequests.length === 0 ? (
+                    <tr>
+                      <td
+                        colSpan={4}
+                        className="py-6 text-center text-gray-500"
+                      >
+                        No {currentStatus} requests available.
+                      </td>
+                    </tr>
+                  ) : (
+                    currentRedeemRequests.map((request: any, index: number) => (
                       <tr
                         key={request._id}
                         className="hover:bg-gray-50 transition-colors"
@@ -181,7 +179,7 @@ const RedeemRequests = ({
                           </button>
                         </td>
                       </tr>
-                    )
+                    ))
                   )}
                 </tbody>
               </table>

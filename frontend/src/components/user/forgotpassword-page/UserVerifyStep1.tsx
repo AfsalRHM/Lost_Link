@@ -1,15 +1,15 @@
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+
+import { userService } from "../../../services/userService";
+
 import SigninInput from "../signup-page/SigninInput";
 import ContinueButton from "../signup-page/ContinueButton";
-import { Link } from "react-router-dom";
-import { useEffect, useState } from "react";
-
 import {
   validateStep2Email,
   validateStep2OTP,
 } from "../../../validations/registerStep2";
 import ValidationError from "../shared/ValidationError";
-import verifyOTP from "../../../api/auth-api/verifyOTPAPI";
-import sendResetPasswordMail from "../../../api/auth-api/resetPasswordAPI";
 
 type inputPropsType = {
   display: boolean;
@@ -75,7 +75,7 @@ const UserVerifyStep1 = (Props: {
     }
 
     if (!errors.userEmail) {
-      const response = await sendResetPasswordMail({
+      const response = await userService.resetOtpPassword({
         recieverName: "Reset Password",
         recieverEmail: userEmailInput,
       });
@@ -110,10 +110,11 @@ const UserVerifyStep1 = (Props: {
       setuserOTPValidationErrorData({ display: false, content: "" });
     }
     if (!errors.userOTP) {
-      const response = await verifyOTP({
+      const response = await userService.verifyOTP({
         userEmail: userEmailInput,
         userEnteredOTP: userOTPInput,
       });
+
       if (response.status === 200) {
         Props.funcUserMail(userEmailInput);
         Props.funcCurrentStep(2);
@@ -122,10 +123,7 @@ const UserVerifyStep1 = (Props: {
           display: true,
           content: "Enter the correct OTP",
         });
-        console.log(
-          response,
-          "this is the error response on verifyOTP"
-        );
+        console.log(response, "this is the error response on verifyOTP");
       }
     }
   }

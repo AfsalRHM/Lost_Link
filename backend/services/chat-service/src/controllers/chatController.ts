@@ -15,7 +15,7 @@ export default class chatController implements IchatController {
   // To Create or Fetch the Chat
   public getUserChat = async (req: Request, res: Response): Promise<void> => {
     try {
-      const requestId = req.body.requestId;
+      const requestId = req.params.id;
       if (!requestId) {
         throw new Error("Request Id not passed correctly");
       }
@@ -68,7 +68,7 @@ export default class chatController implements IchatController {
     res: Response
   ): Promise<void> => {
     try {
-      const userId = req.body.userId;
+      const userId = req.params.id;
 
       if (!userId) {
         throw new Error("User Id not passed correctly");

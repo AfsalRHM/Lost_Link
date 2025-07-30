@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import { useDispatch } from "react-redux";
+
+import { adminService } from "../../../services/adminService";
+
 import { Sidebar } from "../shared/Sidebar";
 import MeetDetailsPart from "./MeetDetailsPart";
 import NavBar from "../shared/Navbar";
-import { useParams } from "react-router-dom";
-import fetchMeetData from "../../../api/admin-api/getMeetDetailsAPI";
 import AdminErrorHandling from "../../../middlewares/AdminErrorHandling";
-import { useDispatch } from "react-redux";
 
 const MeetDetailsPage = () => {
   const dispatch = useDispatch();
@@ -21,7 +23,7 @@ const MeetDetailsPage = () => {
 
     try {
       setLoading(true);
-      const response = await fetchMeetData({ meetId });
+      const response = await adminService.getMeet({ meetId });
 
       if (response.status == 200) {
         setMeetData(response.data.data);

@@ -108,16 +108,16 @@ export default class RequestController implements IrequestController {
     res: Response
   ): Promise<void> => {
     try {
-      if (!req.body.userRequests) {
+      const userId = req.params.id;
+      if (!userId) {
         res.status(StatusCode.OK).json({
           status: false,
-          message: "No User Requests found on the getUserRequests Post Request",
+          message: "No User Id found on the getUserRequests Post Request",
         });
         return;
       }
-      const response = await this._requestService.getUserRequests(
-        req.body.userRequests
-      );
+      const response = await this._requestService.getUserRequests(userId);
+
       if (response.status) {
         res.status(StatusCode.OK).json(response);
       } else {
@@ -214,17 +214,21 @@ export default class RequestController implements IrequestController {
   // To cancel a Request
   public cancelRequest = async (req: Request, res: Response): Promise<void> => {
     try {
+      const requestId = req.params.id;
+      const from = req.body.from;
+
       const accessToken = req.headers["authorization"]?.split(" ")[1];
       if (!accessToken) {
         res
           .status(StatusCode.OK)
           .json({ message: "No authorization token provided" });
+      } else if (!requestId) {
+        res.status(StatusCode.OK).json({ message: "No request id available" });
       } else {
         const decoded = await jwtFunctions.verifyAccessToken(accessToken);
-
         const response = await this._requestService.cancelRequest({
-          requestId: req.body.requestId,
-          userId: decoded?.id,
+          requestId,
+          userId: from == "admin" ? "admin" : decoded?.id,
         });
         res.status(StatusCode.OK).json(response);
       }
@@ -241,7 +245,8 @@ export default class RequestController implements IrequestController {
     res: Response
   ): Promise<void> => {
     try {
-      if (!req.body.requestId) {
+      const requestId = req.params.id;
+      if (!requestId) {
         console.log("Request Id Not Reached here on the changeLikeStatus");
         return;
       }
@@ -254,7 +259,7 @@ export default class RequestController implements IrequestController {
         const decoded = await jwtFunctions.verifyAccessToken(accessToken);
 
         const response = await this._requestService.changeLikeStatus({
-          requestId: req.body.requestId,
+          requestId,
           userId: decoded?.id,
         });
         res.status(StatusCode.OK).json(response);
@@ -342,12 +347,7 @@ export default class RequestController implements IrequestController {
     res: Response
   ): Promise<void> => {
     try {
-      let requestRedeemId;
-      if (req.body.requestRedeemId) {
-        requestRedeemId = req.body.requestRedeemId;
-      } else if (req.params.id) {
-        requestRedeemId = req.params.id;
-      }
+      const requestRedeemId = req.params.id;
       if (!requestRedeemId) {
         res.status(StatusCode.UNAUTHORIZED).json({
           message:
@@ -380,15 +380,14 @@ export default class RequestController implements IrequestController {
     res: Response
   ): Promise<void> => {
     try {
+      const requestId = req.params.id;
       const accessToken = req.headers["authorization"]?.split(" ")[1];
-      if (!accessToken) {
-        res
-          .status(StatusCode.OK)
-          .json({ message: "No authorization token provided" });
+      if (!requestId) {
+        res.status(StatusCode.OK).json({ message: "No Request id found" });
       } else {
-        const response = await this._requestService.changeRequestStatus(
-          req.body.Props
-        );
+        const response = await this._requestService.changeRequestStatus({
+          requestId,
+        });
         res
           .setHeader("Authorization", `Bearer ${accessToken}`)
           .status(StatusCode.OK)
@@ -407,8 +406,7 @@ export default class RequestController implements IrequestController {
     res: Response
   ): Promise<void> => {
     try {
-      console.log(req.body.Props);
-      const { redeemRequestId, changeTo } = req.body.Props;
+      const { redeemRequestId, changeTo } = req.body;
       if (!redeemRequestId || !changeTo) {
         res.status(StatusCode.UNAUTHORIZED).json({
           message:

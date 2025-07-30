@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "../../../redux/store";
-import fetchUserMeetings from "../../../api/user-api/getUserMeetingsAPI";
 import { useNavigate } from "react-router-dom";
+
+import { userService } from "../../../services/userService";
+
+import { RootState } from "../../../redux/store";
 import UserErrorHandling from "../../../middlewares/UserErrorHandling";
 
 // Meeting data type definition
@@ -26,7 +28,7 @@ const MeetingSection = () => {
   useEffect(() => {
     const fetchMeetings = async () => {
       try {
-        const response = await fetchUserMeetings({ userId });
+        const response = await userService.getMeetings({ userId });
 
         if (response.status == 200) {
           const fetchedMeetings: MeetingType[] = response.data.data;

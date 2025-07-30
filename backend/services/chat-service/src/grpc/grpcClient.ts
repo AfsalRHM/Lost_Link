@@ -6,8 +6,19 @@ const protoPath = path.join(__dirname, "./proto/user.proto");
 const packageDef = protoLoader.loadSync(protoPath);
 const proto = grpc.loadPackageDefinition(packageDef) as any;
 
+const GRPC_URL =
+  process.env.NODE_ENV == "Development"
+    ? process.env.GRPC_USER_URL_DEV
+    : process.env.GRPC_USER_URL;
+
+if (!GRPC_URL) {
+  throw new Error(
+    "GRPC_URL is not defined. Please set it in your environment variables."
+  );
+}
+
 const client = new proto.user.UserService(
-  "user-service:50051",
+  GRPC_URL,
   grpc.credentials.createInsecure()
 );
 

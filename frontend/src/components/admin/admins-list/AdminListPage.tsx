@@ -1,29 +1,21 @@
 import { useEffect, useState } from "react";
+
+import { adminService } from "../../../services/adminService";
+
 import AdminListPart from "./AdminListPart";
 import { Sidebar } from "../shared/Sidebar";
-import fetchAllAdmins from "../../../api/admin-api/allAdminsAPI";
-import { useAdminJwtErrors } from "../../../utils/JwtErrors";
-import adminLogout from "../../../api/admin-api/adminLogoutAPI";
 import NavBar from "../shared/Navbar";
 
 const UserListPage = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const JwtErrors = useAdminJwtErrors();
   const [adminList, setAdminList] = useState([]);
 
   const getAllAdmins = async () => {
     try {
-      const response = await fetchAllAdmins();
+      const response = await adminService.getAdmins();
 
       if (response && response.data && response.data.status) {
         setAdminList(response.data.data);
-      } else if (response === false) {
-        JwtErrors({ reason: "session expiration" });
-        try {
-          await adminLogout();
-        } catch (logoutError) {
-          console.error("Error during admin logout:", logoutError);
-        }
       } else {
         console.log("Unexpected response:", response);
       }

@@ -40,7 +40,7 @@ const verifyAccessToken = async (
       throw new Error("invalid User Access Token");
     }
   } catch (error) {
-    res.status(401).json({ status: false, message: "Invalid Token" });
+    res.status(401).json({ status: false, message: "Invalid Token mo" });
   }
 };
 
@@ -69,6 +69,6 @@ export const verifyAdminAccessToken = async (
       throw new Error("invalid Admin Access Token");
     }
   } catch (error) {
-    res.status(401).json({ status: false, message: "Invalid Token" });
+    res.status(401).json({ status: false, message: "Invalid Token ha" });
   }
 };

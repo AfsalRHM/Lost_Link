@@ -14,10 +14,18 @@ let io: Server<
   CustomSocketData
 >;
 
+const CORS_ORIGINS = process.env.CORS_ORIGINS;
+
+if (!CORS_ORIGINS) {
+  console.log(
+    "Missing required environment variables. Please check your .env file - From socket.ts"
+  );
+}
+
 export const initializeSocket = (server: any) => {
   io = new Server(server, {
     cors: {
-      origin: "https://lostlink.live",
+      origin: CORS_ORIGINS?.split(","),
       credentials: true,
     },
     path: "/chat/socket.io/",

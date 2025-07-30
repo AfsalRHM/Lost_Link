@@ -1,4 +1,9 @@
 import React, { useEffect, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+
+import { adminService } from "../../../services/adminService";
+
 import {
   BarChart,
   Users,
@@ -9,10 +14,7 @@ import {
   Video,
 } from "lucide-react";
 import { SidebarProps } from "../../../interface/IadminDashboard";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
 import { removeAdminDetails } from "../../../redux/slice/adminDetailsSlice";
-import adminLogout from "../../../api/admin-api/adminLogoutAPI";
 import { showErrorToast, showSuccessToast } from "../../../utils/toastUtils";
 import { removeAdminAccessToken } from "../../../redux/slice/accessTokenSlice";
 import { RootState } from "../../../redux/store";
@@ -32,7 +34,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggle }) => {
 
   const handleLogout = async () => {
     try {
-      await adminLogout();
+      await adminService.logout();
 
       dispatch(removeAdminDetails());
       dispatch(removeAdminAccessToken());

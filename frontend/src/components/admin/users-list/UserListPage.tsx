@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+
+import { adminService } from "../../../services/adminService";
+
 import UserListPart from "./UserListPart";
 import { Sidebar } from "../shared/Sidebar";
-import fetchAllUsers from "../../../api/admin-api/allUsersAPI";
 import { showErrorToast } from "../../../utils/toastUtils";
 import NavBar from "../shared/Navbar";
 import AdminErrorHandling from "../../../middlewares/AdminErrorHandling";
-import { useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
 
 const UserListPage = () => {
   const dispatch = useDispatch();
@@ -17,7 +19,7 @@ const UserListPage = () => {
 
   const getAllUsers = async () => {
     try {
-      const response = await fetchAllUsers();
+      const response = await adminService.getUsers();
 
       if (response.status == 200) {
         setUserList(response.data.data);

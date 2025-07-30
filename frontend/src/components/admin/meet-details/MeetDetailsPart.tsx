@@ -1,3 +1,5 @@
+import { useNavigate } from "react-router-dom";
+
 import { format, isAfter, addMinutes, setHours, setMinutes } from "date-fns";
 import {
   Video,
@@ -8,7 +10,6 @@ import {
   ChevronLeft,
   ExternalLink,
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 
 const MeetDetailsPart = ({ meetData }: { meetData: any }) => {
   const navigate = useNavigate();

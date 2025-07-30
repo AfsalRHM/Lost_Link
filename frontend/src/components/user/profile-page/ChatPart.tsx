@@ -1,19 +1,19 @@
 import { useState, useRef, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+
+import { userService } from "../../../services/userService";
+
 import { IoSend, IoClose } from "react-icons/io5";
-import getMyChat from "../../../api/user-api/getChat";
 import { showErrorToast2 } from "../../../utils/iziToastUtils";
 import ChatPartLoading from "./loading/ChatPartLoading";
-import saveMessage from "../../../api/user-api/sendMessage";
 import IchatModel, { ImessageModel } from "../../../interface/Ichat";
-import getAllMessagesOfChat from "../../../api/user-api/getAllMessages";
-import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../../redux/store";
 import { getNotifSocket, getSocket } from "../../../socket/socket";
 import { Trash, X } from "lucide-react";
 import ImageUpload from "../../shared/ImageUpload";
 import ImageModal from "../../shared/ImageModal";
 import UserErrorHandling from "../../../middlewares/UserErrorHandling";
-import { useNavigate } from "react-router-dom";
 
 const ChatPart = ({
   onClose,
@@ -64,7 +64,8 @@ const ChatPart = ({
   useEffect(() => {
     const getChatData = async () => {
       try {
-        const response = await getMyChat({ requestId });
+        const response = await userService.getChat({ requestId: requestId! });
+
         if (response.status === 200) {
           setChat(response.data.data.chatData);
           getMessages(response.data.data.chatData._id);
@@ -81,7 +82,7 @@ const ChatPart = ({
   }, []);
 
   async function getMessages(chatIdProp: string) {
-    const messagesResponse = await getAllMessagesOfChat({
+    const messagesResponse = await userService.getMessages({
       chatId: chatIdProp,
     });
 
@@ -120,7 +121,7 @@ const ChatPart = ({
     }
 
     if (chat) {
-      const response = await saveMessage({
+      const response = await userService.sendMessage({
         chatId: chatIdProp!,
         content: newMessage,
         image: chatImage,

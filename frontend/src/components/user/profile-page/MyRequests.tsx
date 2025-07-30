@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
-import { userDataType } from "../../../interface/IuserModel";
-import getMyRequests from "../../../api/user-api/getMyRequests";
-import MyRequestsLoading from "./loading/MyRequestsLoading";
-import { useNavigate } from "react-router-dom";
-import UserErrorHandling from "../../../middlewares/UserErrorHandling";
 import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+
+import { userService } from "../../../services/userService";
+
+import { userDataType } from "../../../interface/IuserModel";
+import MyRequestsLoading from "./loading/MyRequestsLoading";
+import UserErrorHandling from "../../../middlewares/UserErrorHandling";
 
 const MyRequests = ({ userData }: { userData: userDataType | undefined }) => {
   const dispatch = useDispatch();
@@ -21,7 +23,10 @@ const MyRequests = ({ userData }: { userData: userDataType | undefined }) => {
         if (userData?.requests.length === 0) {
           return;
         } else {
-          const response = await getMyRequests(userData?.requests);
+          const response = await userService.getMyRequests({
+            userId: userData?._id!,
+          });
+
           if (response.status === 200) {
             setRequests(response.data.data);
           } else {
