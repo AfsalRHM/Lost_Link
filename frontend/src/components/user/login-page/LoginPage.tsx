@@ -104,9 +104,9 @@ const LoginPage = () => {
 
         if (response.status === 200) {
           const userData = {
-            userId: response.data._id,
-            userName: response.data.user_name,
-            userProfile: response.data.profile_pic,
+            userId: response.data.data._id,
+            userName: response.data.data.user_name,
+            userProfile: response.data.data.profile_pic,
           };
           console.log(userData, "This is the data that we generated 123456709")
           // Changed the access token to body

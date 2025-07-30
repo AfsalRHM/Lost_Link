@@ -269,12 +269,10 @@ export default class authController implements IauthController {
     res: Response
   ): Promise<void> => {
     try {
-      console.log(req.body, "this is the body")
+      console.log(req.body, "this is the body");
       const userMail = req.body.userMail;
       if (userMail) {
-        const response = await this._authService.googleLoginVerify(
-          userMail
-        );
+        const response = await this._authService.googleLoginVerify(userMail);
 
         if (response.status && response.data.data) {
           const accessToken = jwtFunctions.generateAccessToken({
@@ -300,6 +298,7 @@ export default class authController implements IauthController {
               status: true,
               data: response.data.data,
               message: "Login Successfull...!",
+              accessToken,
             });
         } else {
           res.status(StatusCode.BAD_REQUEST).json(response);
