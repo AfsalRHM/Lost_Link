@@ -269,7 +269,6 @@ export default class authController implements IauthController {
     res: Response
   ): Promise<void> => {
     try {
-      console.log(req.body, "this is the body");
       const userMail = req.body.userMail;
       if (userMail) {
         const response = await this._authService.googleLoginVerify(userMail);

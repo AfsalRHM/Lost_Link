@@ -100,15 +100,12 @@ const LoginPage = () => {
           userMail: userData.email,
         });
 
-        console.log(response, "This is the response 098765")
-
         if (response.status === 200) {
           const userData = {
             userId: response.data.data._id,
             userName: response.data.data.user_name,
             userProfile: response.data.data.profile_pic,
           };
-          console.log(userData, "This is the data that we generated 123456709")
           // Changed the access token to body
           const accessToken = response.data.accessToken;
           dispatch(assignUserDetails(userData));
