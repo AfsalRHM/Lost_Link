@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: user-service
-          image: afsalm/lostlink-user-service:v10.2
+          image: afsalm/lostlink-user-service:v10.3
           ports:
             - containerPort: 7002 
             - containerPort: 50051

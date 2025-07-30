@@ -7,7 +7,7 @@ services:
   api-gateway:
     build:
       context: ./gateway
-    image: afsalm/lostlink-api-gateway:latest
+    image: afsalm/lostlink-api-gateway:v10.3
     ports:
       - "7000:7000"
     depends_on:
@@ -27,7 +27,7 @@ services:
   user-service:
     build:
       context: ./services/user-service
-    image: afsalm/lostlink-user-service:latest
+    image: afsalm/lostlink-user-service:v10.3
     container_name: user-service
     ports:
       - "7002:7002"
@@ -45,7 +45,7 @@ services:
   auth-service:
     build:
       context: ./services/auth-service
-    image: afsalm/lostlink-auth-service:latest
+    image: afsalm/lostlink-auth-service:v10.3
     container_name: auth-service
     ports:
       - "7001:7001"
@@ -61,7 +61,7 @@ services:
   admin-service:
     build:
       context: ./services/admin-service
-    image: afsalm/lostlink-admin-service:latest
+    image: afsalm/lostlink-admin-service:v10.3
     container_name: admin-service
     ports:
       - "7007:7007"
@@ -77,7 +77,7 @@ services:
   chat-service:
     build:
       context: ./services/chat-service
-    image: afsalm/lostlink-chat-service:latest
+    image: afsalm/lostlink-chat-service:v10.3
     container_name: chat-service
     ports:
       - "7005:7005"
@@ -93,7 +93,7 @@ services:
   notification-service:
     build:
       context: ./services/notification-service
-    image: afsalm/lostlink-notification-service:latest
+    image: afsalm/lostlink-notification-service:v10.3
     container_name: notification-service
     ports:
       - "7006:7006"
@@ -109,7 +109,7 @@ services:
   request-service:
     build:
       context: ./services/request-service
-    image: afsalm/lostlink-request-service:latest
+    image: afsalm/lostlink-request-service:v10.3
     container_name: request-service
     ports:
       - "7003:7003"

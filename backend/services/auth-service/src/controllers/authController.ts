@@ -269,9 +269,11 @@ export default class authController implements IauthController {
     res: Response
   ): Promise<void> => {
     try {
-      if (req.body.email) {
+      console.log(req.body, "this is the body")
+      const userMail = req.body.userMail;
+      if (userMail) {
         const response = await this._authService.googleLoginVerify(
-          req.body.email
+          userMail
         );
 
         if (response.status && response.data.data) {
@@ -302,8 +304,11 @@ export default class authController implements IauthController {
         } else {
           res.status(StatusCode.BAD_REQUEST).json(response);
         }
+      } else {
+        throw new Error("Mail Cannot be fectched");
       }
     } catch (error) {
+      console.log(error, "From the GoogleLoginVerify/authController");
       res.status(StatusCode.UNAUTHORIZED).json({
         status: false,
         message: "Error on GoogleLoginVerify/authController 1",

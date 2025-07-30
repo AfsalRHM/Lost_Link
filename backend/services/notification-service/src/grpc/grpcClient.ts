@@ -9,7 +9,7 @@ const proto = grpc.loadPackageDefinition(packageDef) as any;
 const GRPC_URL =
   process.env.NODE_ENV == "Development"
     ? process.env.GRPC_URL_DEV
-    : process.env.GRPC_URL_DEV;
+    : process.env.GRPC_URL;
 
 if (!GRPC_URL) {
   throw new Error(
