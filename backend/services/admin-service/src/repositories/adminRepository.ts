@@ -1,14 +1,15 @@
+import { Model } from "mongoose";
+
 import BaseRepository from "./baseRepository";
 import IbaseRepository from "../interface/IbaseRepository";
-import adminModel from "../model/adminModel";
 import IadminModel from "../interface/IadminModel";
 
 export default class AdminRepository
   extends BaseRepository<IadminModel>
   implements IbaseRepository<IadminModel>
 {
-  constructor() {
-    super(adminModel);
+  constructor(model: Model<IadminModel>) {
+    super(model);
   }
 
   async findAdmin(adminMail: string): Promise<IadminModel | null> {

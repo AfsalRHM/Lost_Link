@@ -9,6 +9,7 @@ import { showErrorToast2 } from "../../utils/iziToastUtils";
 import { MessageCircle, Send } from "lucide-react";
 import { RootState } from "../../redux/store";
 import UserErrorHandling from "../../middlewares/UserErrorHandling";
+import { adminService } from "../../services/adminService";
 
 interface ICommentModel {
   _id?: string;
@@ -25,9 +26,11 @@ interface ICommentModel {
 const CommentSection = ({
   requestId,
   noField,
+  from,
 }: {
   requestId: string | null | undefined;
   noField: boolean;
+  from: string;
 }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -51,7 +54,13 @@ const CommentSection = ({
     setLoadingComments(true);
     try {
       if (requestId) {
-        const response = await userService.getComments({ requestId, count });
+        let response;
+        if (from == "user") {
+          response = await userService.getComments({ requestId, count });
+        } else {
+          response = await adminService.getComments({ requestId, count });
+        }
+
         if (response.status === 200) {
           setComments(response.data.data.newCommentDatas);
           setCommentCount(response.data.data.totalCommentLength);

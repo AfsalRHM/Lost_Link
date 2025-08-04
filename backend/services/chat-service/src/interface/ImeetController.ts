@@ -1,7 +1,12 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 
 export default interface ImeetController {
-  createMeet(req: Request, res: Response): Promise<void>;
-  getAllMeets(req: Request, res: Response): Promise<void>;
-  getMeetDataAdmin(req: Request, res: Response): Promise<void>;
+  createMeet(req: Request, res: Response, next: NextFunction): Promise<void>;
+  getAllMeets(req: Request, res: Response, next: NextFunction): Promise<void>;
+  getMeetDataAdmin(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void>;
+  getUserMeets(req: Request, res: Response, next: NextFunction): Promise<void>;
 }

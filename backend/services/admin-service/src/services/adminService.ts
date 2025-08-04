@@ -1,15 +1,14 @@
 import sendToService from "../rabbitmq/producer";
 
-import { createCorrelationId } from "../utils/correlationId";
-
 import adminRepository from "../repositories/adminRepository";
+import adminModel from "../model/adminModel";
+
 import IadminService from "../interface/IadminService";
+import { IserviceResponseType } from "../interface/IresponseTypes";
 
 import eventEmitter from "../utils/eventEmitter";
-import { Types } from "mongoose";
-import { decodedType } from "../interface/IjwtTypes";
 import jwtFunctions from "../utils/jwt";
-import { IserviceResponseType } from "../interface/IresponseTypes";
+import { createCorrelationId } from "../utils/correlationId";
 
 // DTO's
 import { AdminLoginDTO } from "../dtos/AdminLoginDTO";
@@ -17,22 +16,33 @@ import { InsertAdminDTO } from "../dtos/InsertAdminDTO";
 import { ChangeAdminStatusDTO } from "../dtos/ChangeAdminStatusDTO";
 import { ChangeUserStatusDTO } from "../dtos/ChangeUserStatusDTO";
 import { RefreshTokenDTO } from "../dtos/RefreshTokenDTO";
+import { AppError } from "../utils/appError";
+import { StatusCode } from "../constants/statusCodes";
+import { handleServiceError } from "../utils/errorHandler";
 
-export default class adminService implements IadminService {
+export default class AdminService implements IadminService {
   private _adminRepository: adminRepository;
 
   constructor() {
-    this._adminRepository = new adminRepository();
+    this._adminRepository = new adminRepository(adminModel);
   }
 
-  async adminLogin(loginDetails: AdminLoginDTO): Promise<IserviceResponseType> {
+  async adminLogin({ email, password }: AdminLoginDTO): Promise<any> {
     try {
-      const adminData = await this._adminRepository.findAdmin(
-        loginDetails.email
-      );
-      
-      if (!adminData || adminData.password !== loginDetails.password) {
-        return { status: false, message: "Invalid Credentials" };
+      if (!email || !password) {
+        throw new AppError(
+          "email and password is required",
+          StatusCode.BAD_REQUEST
+        );
+      }
+
+      const adminData = await this._adminRepository.findAdmin(email);
+      if (!adminData) {
+        throw new AppError("Admin not found", StatusCode.NOT_FOUND);
+      }
+
+      if (adminData.password !== password) {
+        throw new AppError("Invalid credentials", StatusCode.FORBIDDEN);
       }
 
       const newAccessToken = jwtFunctions.generateAdminAccessToken({
@@ -45,56 +55,48 @@ export default class adminService implements IadminService {
         email: adminData.email,
         role: adminData.role,
       });
+      if (!newAccessToken || !newRefreshToken) {
+        throw new AppError(
+          "Failed to generate authentication tokens",
+          StatusCode.INTERNAL_SERVER_ERROR
+        );
+      }
 
       let responseData: {
-        status: boolean;
-        data: null | { accessToken: string; refreshToken: string };
+        adminData: any;
+        accessToken: string;
+        refreshToken: string;
       };
 
-      if (!newAccessToken || !newRefreshToken) {
-        responseData = {
-          status: false,
-          data: null,
-        };
-      } else {
-        responseData = {
-          status: true,
-          data: {
-            accessToken: newAccessToken,
-            refreshToken: newRefreshToken,
-          },
-        };
+      responseData = {
+        adminData,
+        accessToken: newAccessToken,
+        refreshToken: newRefreshToken,
+      };
+
+      return responseData;
+    } catch (error: any) {
+      if (error.name === "MongoNetworkError") {
+        throw new AppError(
+          "Database connection failed",
+          StatusCode.SERVICE_UNAVAILABLE
+        );
       }
 
-      if (responseData.status) {
-        return {
-          status: true,
-          message: "Admin Verificaiton Successfull",
-          data: adminData,
-          tokenData: responseData.data,
-        };
-      } else {
-        return {
-          status: false,
-          message: "Admin Verificaiton Failed",
-          data: null,
-        };
-      }
-    } catch (error) {
-      return { status: false, message: "Error in adminLogin/adminService" };
+      handleServiceError(error, "Something went wrong while verifying admin");
     }
   }
 
   async getAllUsers(): Promise<IserviceResponseType> {
     try {
+      const sendingTo = process.env.USER_QUEUE;
+      if (!sendingTo) {
+        throw new Error("sendingTo env is not accessible, from admin service");
+      }
+
       const correlationIdString = "toGetAllUsers";
       const correlationId = createCorrelationId(correlationIdString);
-      const sendingTo = process.env.USER_QUEUE;
       const source = "get All Users";
-
-      if (!sendingTo) {
-        throw new Error("sendingTo is emplty...");
-      }
 
       sendToService({
         sendingTo,
@@ -113,61 +115,53 @@ export default class adminService implements IadminService {
           resolve(data);
         });
       });
-
-      if (responseData.status) {
-        return responseData;
-      } else {
-        return {
-          status: false,
-          message: "responseData not reached on here from the mangingQueue 1",
-        };
+      if (!responseData.status) {
+        throw new AppError(
+          "Failed to fetch users",
+          StatusCode.INTERNAL_SERVER_ERROR
+        );
       }
-    } catch (error) {
-      return {
-        status: false,
-        message: "Error in getAllUsers/adminService",
-        error: error,
-      };
+
+      return responseData.data;
+    } catch (error: any) {
+      if (error.name === "MongoNetworkError") {
+        throw new AppError(
+          "Database connection failed",
+          StatusCode.SERVICE_UNAVAILABLE
+        );
+      }
+
+      handleServiceError(error, "Something went wrong while fetching users");
     }
   }
 
-  async getAllAdmins(): Promise<IserviceResponseType> {
+  async getAllAdmins(): Promise<any> {
     try {
       const adminData = await this._adminRepository.findAll();
 
-      if (adminData) {
-        return {
-          status: true,
-          data: adminData,
-          message: "All admins Fetched Successfully",
-        };
-      } else {
-        return {
-          status: false,
-          message: "adminData not reached on here from the mangingQueue 1",
-        };
+      return adminData;
+    } catch (error: any) {
+      if (error.name === "MongoNetworkError") {
+        throw new AppError(
+          "Database connection failed",
+          StatusCode.SERVICE_UNAVAILABLE
+        );
       }
-    } catch (error) {
-      return {
-        status: false,
-        message: "Error in getAllAdmins/adminService",
-        error: error,
-      };
+
+      handleServiceError(error, "Something went wrong while fetching admins");
     }
   }
 
-  async changeUserStatus(
-    props: ChangeUserStatusDTO
-  ): Promise<IserviceResponseType> {
+  async changeUserStatus(props: ChangeUserStatusDTO): Promise<any> {
     try {
+      const sendingTo = process.env.USER_QUEUE;
+      if (!sendingTo) {
+        throw new Error("sendingTo env is not accessible, from admin service");
+      }
+
       const correlationIdString = "toChangeTheUserStatus";
       const correlationId = createCorrelationId(correlationIdString);
-      const sendingTo = process.env.USER_QUEUE;
       const source = "Change the User Status";
-
-      if (!sendingTo) {
-        throw new Error("sendingTo is emplty...");
-      }
 
       sendToService({
         sendingTo,
@@ -187,94 +181,110 @@ export default class adminService implements IadminService {
           resolve(data);
         });
       });
-
-      if (responseData.status) {
-        return responseData;
-      } else {
-        return {
-          status: false,
-          message: "responseData not reached on here from the mangingQueue 2",
-        };
+      if (!responseData.status) {
+        throw new AppError(
+          "Failed to update user",
+          StatusCode.INTERNAL_SERVER_ERROR
+        );
       }
-    } catch (error) {
-      return {
-        status: false,
-        message: "Error in getAllUsers/adminService",
-        error: error,
-      };
+
+      return;
+    } catch (error: any) {
+      if (error.name === "MongoNetworkError") {
+        throw new AppError(
+          "Database connection failed",
+          StatusCode.SERVICE_UNAVAILABLE
+        );
+      }
+
+      handleServiceError(error, "Something went wrong while updating user");
     }
   }
 
-  async changeAdminStatus(
-    props: ChangeAdminStatusDTO
-  ): Promise<IserviceResponseType> {
+  async changeAdminStatus({ adminId }: ChangeAdminStatusDTO): Promise<any> {
     try {
-      if (!props.adminId) {
-        throw new Error("Admin Id is empty...");
+      if (!adminId) {
+        throw new AppError("adminId is required", StatusCode.BAD_REQUEST);
       }
 
-      const responseData = await this._adminRepository.changeStatus(
-        props.adminId
-      );
-
-      if (responseData) {
-        return { data: responseData };
-      } else {
-        return {
-          status: false,
-          message: "responseData not reached on here from the mangingQueue 2",
-        };
+      const responseData = await this._adminRepository.changeStatus(adminId);
+      if (!responseData) {
+        throw new AppError(
+          "failed to update admin",
+          StatusCode.INTERNAL_SERVER_ERROR
+        );
       }
-    } catch (error) {
-      return {
-        status: false,
-        message: "Error in getAllUsers/adminService",
-        error: error,
-      };
+
+      return responseData;
+    } catch (error: any) {
+      if (error.name === "MongoNetworkError") {
+        throw new AppError(
+          "Database connection failed",
+          StatusCode.SERVICE_UNAVAILABLE
+        );
+      }
+
+      handleServiceError(error, "Something went wrong while updating admin");
     }
   }
 
-  async insertAdmin(props: InsertAdminDTO): Promise<IserviceResponseType> {
+  async insertAdmin({
+    email,
+    name,
+    password,
+    role,
+    status,
+  }: InsertAdminDTO): Promise<any> {
     try {
-      const response = await this._adminRepository.insert(props);
-      if (response) {
-        return { data: response };
-      } else {
-        return {
-          status: false,
-          message: "responseData not reached, in insertAdmin/adminService",
-        };
+      if (!email || !name || !password || !role || !status) {
+        throw new AppError(
+          "email, name, password, role and status is required"
+        );
       }
-    } catch (error) {
-      return {
-        status: false,
-        message: "Error in insertAdmin/adminService",
-        error: error,
-      };
+
+      const admin = await this._adminRepository.insert({
+        email,
+        name,
+        password,
+        role,
+        status,
+      });
+      if (!admin) {
+        throw new AppError(
+          "Failed to insert admin",
+          StatusCode.INTERNAL_SERVER_ERROR
+        );
+      }
+
+      return admin;
+    } catch (error: any) {
+      if (error.name === "MongoNetworkError") {
+        throw new AppError(
+          "Database connection failed",
+          StatusCode.SERVICE_UNAVAILABLE
+        );
+      }
+      handleServiceError(error, "Something went wrong while inserting admin");
     }
   }
 
   // To create a new access token with the existing refresh token
-  async refreshToken(props: RefreshTokenDTO): Promise<IserviceResponseType> {
+  async refreshToken({ token }: RefreshTokenDTO): Promise<any> {
     try {
-      if (!props.token) {
-        return { status: false, message: "No Token Provided" };
+      if (!token) {
+        throw new AppError("token is required", StatusCode.BAD_REQUEST);
       }
 
-      const decoded = jwtFunctions.verifyAdminRefreshToken(props.token);
-
+      const decoded = jwtFunctions.verifyAdminRefreshToken(token);
       if (!decoded) {
-        return { status: false, message: "Token expired" };
+        throw new AppError("token expired", StatusCode.UNAUTHORIZED);
       }
 
       const adminData = await this._adminRepository.findAdmin(decoded.email);
-
       if (!adminData) {
-        return { status: false, message: "Admin Not Found" };
-      }
-
-      if (adminData.status !== "active") {
-        return { status: false, message: "Admin is Blocked" };
+        throw new AppError("admin not found", StatusCode.NOT_FOUND);
+      } else if (adminData.status !== "active") {
+        throw new AppError("admin is blocked", StatusCode.FORBIDDEN);
       }
 
       const newAccessToken = jwtFunctions.generateAdminAccessToken({
@@ -283,17 +293,25 @@ export default class adminService implements IadminService {
         role: adminData.role,
       });
       if (!newAccessToken) {
-        return { status: false, message: "New Access Token not Generated" };
+        throw new AppError(
+          "Faile to create access token",
+          StatusCode.INTERNAL_SERVER_ERROR
+        );
       }
 
-      return { status: true, message: newAccessToken };
-    } catch (error) {
-      console.log(error);
-      return {
-        status: false,
-        message: "Error in refreshToken/adminService",
-        error: error,
-      };
+      return newAccessToken;
+    } catch (error: any) {
+      if (error.name === "MongoNetworkError") {
+        throw new AppError(
+          "Database connection failed",
+          StatusCode.SERVICE_UNAVAILABLE
+        );
+      }
+
+      handleServiceError(
+        error,
+        "Something went wrong while creating new access token"
+      );
     }
   }
 }

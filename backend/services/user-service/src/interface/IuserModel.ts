@@ -1,6 +1,7 @@
 import { Document } from "mongoose";
 
 export default interface IuserModel extends Document {
+  _id: string;
   profile_pic: string;
   full_name: string;
   user_name: string;

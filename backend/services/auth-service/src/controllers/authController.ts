@@ -1,320 +1,346 @@
-import { Request, Response } from "express";
-import { IauthController } from "../interface/IauthController";
-import authService from "../services/authService";
-import { validationResult } from "express-validator";
+import { NextFunction, Request, Response } from "express";
+
+import IauthController from "../interface/IauthController";
+import IauthService from "../interface/IauthService";
 
 import jwtFunctions from "../utils/jwt";
+import { validationResult } from "express-validator";
 import { StatusCode } from "../constants/statusCodes";
+import { AppError } from "../utils/appError";
 
-export default class authController implements IauthController {
-  private _authService: authService;
+export default class AuthController implements IauthController {
+  private _authService: IauthService;
 
-  constructor() {
-    this._authService = new authService();
+  constructor(authService: IauthService) {
+    this._authService = authService;
   }
 
-  // Controller to Send the Mail to User
-  public sendMail = async (req: Request, res: Response): Promise<any> => {
+  // To Send the Mail to User
+  public sendMail = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<any> => {
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        return res
-          .status(StatusCode.BAD_REQUEST)
-          .json({ errors: errors.array() });
-      }
-
-      const userExists = await this._authService.checkMail(
-        req.body.recieverEmail
-      );
-      if (userExists == true) {
         res.status(StatusCode.BAD_REQUEST).json({
           status: false,
-          message: "User already exists with this Email",
+          errors: errors.array(),
+          message: "validation failed",
         });
-      } else {
-        const response = await this._authService.sendMail(
-          req.body.recieverEmail,
-          req.body.recieverName
-        );
-
-        res
-          .status(StatusCode.OK)
-          .json({ status: true, message: "User is New" });
+        return;
       }
+
+      const { recieverEmail, recieverName } = req.body;
+
+      const userExists = await this._authService.checkMail(recieverEmail);
+      if (userExists) {
+        throw new AppError("User already exists", StatusCode.CONFLICT);
+      }
+
+      await this._authService.sendMail(recieverEmail, recieverName);
+
+      res
+        .status(StatusCode.OK)
+        .json({ status: true, data: null, message: "User is New" });
     } catch (error) {
-      console.log("error in authController/sendMail", error);
+      next(error);
     }
   };
 
+  // To Send the Mail to User
   public sendResetPasswordMail = async (
     req: Request,
-    res: Response
+    res: Response,
+    next: NextFunction
   ): Promise<void> => {
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        res.status(StatusCode.BAD_REQUEST).json({ errors: errors.array() });
-      } else {
-        const response = await this._authService.sendMail(
-          req.body.recieverEmail,
-          req.body.recieverName
-        );
-        if (response.message == "No user found") {
-          res
-            .status(StatusCode.BAD_REQUEST)
-            .json({ status: false, message: "User not Found" });
-        } else {
-          res
-            .status(StatusCode.OK)
-            .json({ status: true, message: "User is New" });
-        }
-      }
-    } catch (error) {
-      console.log("error in authController", error);
-    }
-  };
-
-  public resetPassword = async (req: Request, res: Response): Promise<any> => {
-    try {
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        res.status(StatusCode.BAD_REQUEST).json({ errors: errors.array() });
-      } else {
-        const response = await this._authService.resetPassword(
-          req.body.userEmail,
-          req.body.newPassword
-        );
-        if (response.message == "Password changed") {
-          res
-            .status(StatusCode.OK)
-            .json({ status: true, message: "Password Changed Successfully" });
-        } else {
-          res
-            .status(StatusCode.OK)
-            .json({ status: false, message: "Password didn't changed" });
-        }
-      }
-    } catch (error) {
-      console.log("error in authController", error);
-    }
-  };
-
-  // Controller to Verify the User Entered OTP
-  public verifyOTP = async (req: Request, res: Response): Promise<any> => {
-    try {
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        return res
-          .status(StatusCode.BAD_REQUEST)
-          .json({ errors: errors.array() });
+        res.status(StatusCode.BAD_REQUEST).json({
+          status: false,
+          errors: errors.array(),
+          message: "validation failed",
+        });
+        return;
       }
 
-      const result: boolean = await this._authService.verifyotp(
-        req.body.userEmail,
-        req.body.userEnteredOTP
-      );
+      const { recieverEmail, recieverName } = req.body;
+
+      await this._authService.sendMail(recieverEmail, recieverName);
+
       res
         .status(StatusCode.OK)
-        .json({ status: result, message: "OTP Verified" });
+        .json({ status: true, data: null, message: "Mail send" });
     } catch (error) {
-      console.log("error in authController/verfiyOTP", error);
-      res
-        .status(StatusCode.OK)
-        .json({ status: false, message: "Internal Server Error" });
+      next(error);
     }
   };
 
-  // Controller to Insert the User after Registeration.
-  public insertUser = async (req: Request, res: Response): Promise<any> => {
+  // To reset password
+  public resetPassword = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<any> => {
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        return res
-          .status(StatusCode.BAD_REQUEST)
-          .json({ errors: errors.array() });
+        res.status(StatusCode.BAD_REQUEST).json({
+          status: false,
+          errors: errors.array(),
+          message: "validation failed",
+        });
+        return;
+      }
+
+      const { userEmail, newPassword } = req.body;
+
+      await this._authService.resetPassword(userEmail, newPassword);
+
+      res.status(StatusCode.OK).json({
+        status: true,
+        message: "Password Changed Successfully",
+        data: null,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  // To Verify the User Entered OTP
+  public verifyOTP = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<any> => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        res.status(StatusCode.BAD_REQUEST).json({
+          status: false,
+          errors: errors.array(),
+          message: "validation failed",
+        });
+        return;
+      }
+
+      const { userEmail, userEnteredOTP } = req.body;
+
+      await this._authService.verifyotp(userEmail, userEnteredOTP);
+
+      res
+        .status(StatusCode.OK)
+        .json({ status: true, data: null, message: "OTP Verified" });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  // To Insert the User after Registeration.
+  public insertUser = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<any> => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        res.status(StatusCode.BAD_REQUEST).json({
+          status: false,
+          errors: errors.array(),
+          message: "validation failed",
+        });
+        return;
       }
 
       const userExists = await this._authService.checkMail(req.body.userEmail);
-      if (userExists) {
-        res
-          .status(StatusCode.BAD_REQUEST)
-          .json({ status: false, message: "User with Email already Exixts." });
-      } else {
-        const userData = await this._authService.insertuser(
-          req.body.userFullName,
-          req.body.userName,
-          req.body.userLocation,
-          req.body.userEmail,
-          req.body.userPassword
+      if (!userExists) {
+        throw new AppError(
+          "User with mail already exists",
+          StatusCode.CONFLICT
         );
-        res.status(StatusCode.OK).json({
-          status: true,
-          message: "Registered Successfully",
-          data: userData,
-        });
       }
+
+      const user = await this._authService.insertuser(
+        req.body.userFullName,
+        req.body.userName,
+        req.body.userLocation,
+        req.body.userEmail,
+        req.body.userPassword
+      );
+
+      res.status(StatusCode.OK).json({
+        status: true,
+        message: "Registered Successfully",
+        data: user,
+      });
     } catch (error) {
-      console.log("error in authController/insertUser", error);
-      res
-        .status(StatusCode.OK)
-        .json({ status: false, message: "Internal Server Error" });
+      next(error);
     }
   };
 
-  // Controller to Verify the User while Login & Setting the JWT Tokens to the Cookies.
-  public loginVerify = async (req: Request, res: Response): Promise<any> => {
+  // To Verify the User while Login & Setting the JWT Tokens to the Cookies.
+  public loginVerify = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<any> => {
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        return res
-          .status(StatusCode.BAD_REQUEST)
-          .json({ errors: errors.array() });
+        res.status(StatusCode.BAD_REQUEST).json({
+          status: false,
+          errors: errors.array(),
+          message: "validation failed",
+        });
+        return;
       }
 
-      const response: { status: boolean; data: any; message?: string } =
-        await this._authService.loginVerify(
-          req.body.userEmail,
-          req.body.userPassword
-        );
+      const { userEmail, userPassword } = req.body;
 
-      if (response.status == true) {
-        const accessToken = jwtFunctions.generateAccessToken({
-          id: response.data.data._id.toString(),
-          email: response.data.data.email,
-          role: response.data.data.role,
+      const user = await this._authService.loginVerify(userEmail, userPassword);
+
+      const accessToken = jwtFunctions.generateAccessToken({
+        id: user._id.toString(),
+        email: user.email,
+        role: "user",
+        name: user.user_name,
+      });
+      const refreshToken = jwtFunctions.generateRefreshToken({
+        id: user._id.toString(),
+      });
+
+      res
+        .status(StatusCode.OK)
+        .cookie("refreshToken", refreshToken, {
+          httpOnly: true,
+          sameSite: "strict",
+          path: "/",
+        })
+        // .setHeader("Authorization", `Bearer ${accessToken}`)
+        .header("Authorization", `Bearer ${accessToken}`)
+        // Changed access token to send through body
+        .json({
+          status: true,
+          message: "Login Successfull",
+          data: user,
+          accessToken,
         });
-
-        const refreshToken = jwtFunctions.generateRefreshToken({
-          id: response.data.data._id.toString(),
-          email: response.data.data.email,
-          role: response.data.data.role,
-        });
-
-        res
-          .status(StatusCode.OK)
-          .cookie("refreshToken", refreshToken, {
-            httpOnly: true,
-            sameSite: "strict",
-            path: "/",
-          })
-          // .setHeader("Authorization", `Bearer ${accessToken}`)
-          .header("Authorization", `Bearer ${accessToken}`)
-          // Changed access token to send through body
-          .json({
-            status: true,
-            message: "Login Successfull",
-            data: response.data.data,
-            accessToken,
-          });
-      } else {
-        res.status(StatusCode.BAD_REQUEST).json(response);
-      }
     } catch (error) {
-      console.log("Error on authController/loginVerify", error);
+      next(error);
     }
   };
 
   // To Verify the Refresh Token and Create new Access Token
-  public refreshToken = async (req: Request, res: Response): Promise<void> => {
-    try {
-      const refreshToken = req.cookies.refreshToken;
-      const result = await this._authService.refreshToken(refreshToken);
-      if (result?.status == true) {
-        res
-          .setHeader("Authorization", `Bearer ${result.data}`)
-          .status(StatusCode.OK)
-          // Changed access token to send through body
-          .json({ result, accessToken: result.data });
-      } else {
-        res.status(StatusCode.UNAUTHORIZED).json(result);
-      }
-    } catch (error) {
-      res
-        .status(StatusCode.UNAUTHORIZED)
-        .json({ status: false, message: "New Access Token not Generated" });
-    }
-  };
-
-  public adminRefreshToken = async (
+  public refreshToken = async (
     req: Request,
-    res: Response
+    res: Response,
+    next: NextFunction
   ): Promise<void> => {
     try {
       const refreshToken = req.cookies.refreshToken;
-      console.log(refreshToken, "console from the refreshToken/authController");
-      const result = await this._authService.adminRefreshToken(refreshToken);
-      if (result?.status == true) {
-        res
-          .setHeader("Authorization", `Bearer ${result.message}`)
-          .status(StatusCode.OK)
-          .json({ status: true, message: "New Access Token Created" });
-      } else if (result?.message === "Token expired") {
-        res
-          .status(StatusCode.UNAUTHORIZED)
-          .json({ status: false, message: "Refresh token expired" });
-      } else {
-        res
-          .status(StatusCode.UNAUTHORIZED)
-          .json({ status: false, message: "Failed to refresh token" });
+      if (!refreshToken) {
+        throw new AppError(
+          "Unauthorized: Refresh token missing",
+          StatusCode.UNAUTHORIZED
+        );
       }
-    } catch (error) {
+
+      const newAccessToken = await this._authService.refreshToken(refreshToken);
+
       res
-        .status(StatusCode.UNAUTHORIZED)
-        .json({ status: false, message: "New Access Token not Generated" });
+        .setHeader("Authorization", `Bearer ${newAccessToken}`)
+        .status(StatusCode.OK)
+        // Changed access token to send through body
+        .json({
+          status: true,
+          accessToken: newAccessToken,
+          message: "New token created",
+        });
+    } catch (error) {
+      next(error);
     }
   };
 
+  // To Verify the Admin Refresh Token and Create new Access Token
+  public adminRefreshToken = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
+    try {
+      const refreshToken = req.cookies.refreshToken;
+      if (!refreshToken) {
+        throw new AppError(
+          "Unauthorized: Refresh token missing",
+          StatusCode.UNAUTHORIZED
+        );
+      }
+
+      const newAccessToken = await this._authService.adminRefreshToken(
+        refreshToken
+      );
+
+      res
+        .setHeader("Authorization", `Bearer ${newAccessToken}`)
+        .status(StatusCode.OK)
+        .json({ status: true, message: "New Access Token Created" });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  // To Verify google login
   public googleLoginVerify = async (
     req: Request,
-    res: Response
+    res: Response,
+    next: NextFunction
   ): Promise<void> => {
     try {
       const userMail = req.body.userMail;
-      if (userMail) {
-        const response = await this._authService.googleLoginVerify(userMail);
-
-        if (response.status && response.data.data) {
-          const accessToken = jwtFunctions.generateAccessToken({
-            id: response.data.data._id.toString(),
-            email: response.data.data.email,
-            role: response.data.data.role,
-          });
-          const refreshToken = jwtFunctions.generateRefreshToken({
-            id: response.data.data._id.toString(),
-            email: response.data.data.email,
-            role: response.data.data.role,
-          });
-
-          res
-            .status(StatusCode.OK)
-            .cookie("refreshToken", refreshToken, {
-              httpOnly: true,
-              sameSite: "strict",
-              path: "/",
-            })
-            .setHeader("Authorization", `Bearer ${accessToken}`)
-            .json({
-              status: true,
-              data: response.data.data,
-              message: "Login Successfull...!",
-              accessToken,
-            });
-        } else {
-          res.status(StatusCode.BAD_REQUEST).json(response);
-        }
-      } else {
-        throw new Error("Mail Cannot be fectched");
+      if (!userMail) {
+        throw new AppError("userMail is required", StatusCode.BAD_REQUEST);
       }
-    } catch (error) {
-      console.log(error, "From the GoogleLoginVerify/authController");
-      res.status(StatusCode.UNAUTHORIZED).json({
-        status: false,
-        message: "Error on GoogleLoginVerify/authController 1",
+
+      const user = await this._authService.googleLoginVerify(userMail);
+
+      const accessToken = jwtFunctions.generateAccessToken({
+        id: user.data._id.toString(),
+        email: user.data.email,
+        role: "user",
+        name: user.data.user_name,
       });
+      const refreshToken = jwtFunctions.generateRefreshToken({
+        id: user.data._id.toString(),
+      });
+
+      res
+        .status(StatusCode.OK)
+        .cookie("refreshToken", refreshToken, {
+          httpOnly: true,
+          sameSite: "strict",
+          path: "/",
+        })
+        .setHeader("Authorization", `Bearer ${accessToken}`)
+        .json({
+          status: true,
+          data: user.data,
+          message: "Login Successfull...!",
+          accessToken,
+        });
+    } catch (error) {
+      next(error);
     }
   };
 
-  public userLogout = async (req: Request, res: Response): Promise<void> => {
+  // To Logout user
+  public userLogout = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       res
         .status(StatusCode.OK)
@@ -323,12 +349,13 @@ export default class authController implements IauthController {
           sameSite: "strict",
           path: "/",
         })
-        .json({ status: "true", message: "Logged out successfully" });
+        .json({
+          status: "true",
+          message: "Logged out successfully",
+          data: null,
+        });
     } catch (error) {
-      res.status(StatusCode.UNAUTHORIZED).json({
-        status: false,
-        message: "Error on userLogout/authController",
-      });
+      next(error);
     }
   };
 }

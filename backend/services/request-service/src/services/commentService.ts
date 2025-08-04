@@ -1,15 +1,22 @@
-import mongoose from "mongoose";
+import commentModel from "../models/commentModel";
+
 import IcommentService from "../interface/IcommentService";
-import sendToService from "../rabbitmq/producer";
+
 import commentRepository from "../repositories/commentRepository";
+
+import sendToService from "../rabbitmq/producer";
 import { createCorrelationId } from "../utils/correlationId";
 import eventEmitter from "../utils/eventEmitter";
+import { AppError } from "../utils/appError";
+import { StatusCode } from "../constants/statusCodes";
+import mergeUserAndComment from "../helpers/mergeUserAndComment";
+import { handleServiceError } from "../utils/errorHandler";
 
-export default class commentService implements IcommentService {
+export default class CommentService implements IcommentService {
   private _commentRepository: commentRepository;
 
   constructor() {
-    this._commentRepository = new commentRepository();
+    this._commentRepository = new commentRepository(commentModel);
   }
 
   async createComment({
@@ -23,11 +30,10 @@ export default class commentService implements IcommentService {
   }): Promise<any> {
     try {
       if (!requestId || !commentText || !userId) {
-        return {
-          status: false,
-          data: null,
-          message: "Data not reached on createComment/commentService",
-        };
+        throw new AppError(
+          "requestId, commentText and userId is required",
+          StatusCode.BAD_REQUEST
+        );
       }
 
       const comment = {
@@ -37,17 +43,23 @@ export default class commentService implements IcommentService {
       };
 
       const commentData = await this._commentRepository.insert(comment);
+      if (!commentData) {
+        throw new AppError(
+          "Failed to create comment",
+          StatusCode.INTERNAL_SERVER_ERROR
+        );
+      }
 
       const sendingTo = process.env.USER_QUEUE;
+      if (!sendingTo) {
+        throw new Error("sendigTo env is not accessible, from comment service");
+      }
+
       const correlationId = createCorrelationId(userId);
       const source = "get user data by userId";
       const props = {
         userId,
       };
-
-      if (!sendingTo) {
-        throw new Error("sendingTo is emplty...");
-      }
 
       sendToService({
         sendingTo,
@@ -76,25 +88,16 @@ export default class commentService implements IcommentService {
         },
       };
 
-      if (newCommentData) {
-        return {
-          status: true,
-          data: newCommentData,
-          message: "New comment Created",
-        };
-      } else {
-        return {
-          status: false,
-          data: null,
-          message: "Failed to create new Comment",
-        };
+      return newCommentData;
+    } catch (error: any) {
+      if (error.name === "MongoNetworkError") {
+        throw new AppError(
+          "Database connection failed",
+          StatusCode.SERVICE_UNAVAILABLE
+        );
       }
-    } catch (error) {
-      return {
-        status: false,
-        data: null,
-        message: "Error on createComment/commentService",
-      };
+
+      handleServiceError(error, "Something went wrong while creating comment");
     }
   }
 
@@ -108,19 +111,7 @@ export default class commentService implements IcommentService {
   }): Promise<any> {
     try {
       if (!requestId) {
-        return {
-          status: false,
-          data: null,
-          message: "Data not reached on getRequestComments/commentService",
-        };
-      }
-
-      if (!mongoose.Types.ObjectId.isValid(requestId)) {
-        return {
-          status: false,
-          data: null,
-          message: "Invalid Request ID format",
-        };
+        throw new AppError("requestId is required");
       }
 
       const allRequestComments = await this._commentRepository.findAll({
@@ -132,13 +123,8 @@ export default class commentService implements IcommentService {
         request_id1: requestId,
         commentCount,
       });
-
       if (!commentDatas) {
-        return {
-          status: true,
-          data: [],
-          message: "Comments is Empty",
-        };
+        throw new AppError("Comment is empty", StatusCode.NO_CONTENT);
       }
 
       const userIds = [
@@ -153,7 +139,7 @@ export default class commentService implements IcommentService {
       };
 
       if (!sendingTo) {
-        throw new Error("sendingTo is emplty...");
+        throw new Error("sendigTo env is not accessible, from comment service");
       }
 
       sendToService({
@@ -174,40 +160,21 @@ export default class commentService implements IcommentService {
         });
       });
 
-      const userMap =
-        userDatas?.reduce((acc: any, user: any) => {
-          acc[user._id] = {
-            _id: user._id,
-            name: user.user_name,
-            profilePicture: user.profile_pic,
-          };
-          return acc;
-        }, {}) || {};
+      const newCommentDatas = mergeUserAndComment({ userDatas, commentDatas });
 
-      const newCommentDatas = commentDatas.map((comment) => ({
-        ...comment.toObject(),
-        user_id: userMap[comment.user_id],
-      }));
-
-      if (newCommentDatas) {
-        return {
-          status: true,
-          data: { newCommentDatas, totalCommentLength },
-          message: "All Comment Successfully Fetched",
-        };
-      } else {
-        return {
-          status: false,
-          data: null,
-          message: "Failed to Fetch the Comments",
-        };
+      return { newCommentDatas, totalCommentLength };
+    } catch (error: any) {
+      if (error.name === "MongoNetworkError") {
+        throw new AppError(
+          "Database connection failed",
+          StatusCode.SERVICE_UNAVAILABLE
+        );
       }
-    } catch (error) {
-      return {
-        status: false,
-        data: null,
-        message: "Error on getRequestComments/commentService",
-      };
+
+      handleServiceError(
+        error,
+        "Something went wrong while fetching request comments"
+      );
     }
   }
 }

@@ -1,15 +1,16 @@
-import { DeleteResult, FilterQuery } from "mongoose";
-import IbaseRepository from "../interface/IbaseRepository";
-import IotpModel from "../interface/IotpModel";
-import otpModel from "../models/otpModel";
+import { DeleteResult, FilterQuery, Model } from "mongoose";
+
 import BaseRepository from "./baseRepository";
+
+import IotpModel from "../interface/IotpModel";
+import IbaseRepository from "../interface/IbaseRepository";
 
 export default class OtpRepository
   extends BaseRepository<IotpModel>
   implements IbaseRepository<IotpModel>
 {
-  constructor() {
-    super(otpModel);
+  constructor(model: Model<IotpModel>) {
+    super(model);
   }
 
   async insertOTP(otpData: Partial<IotpModel>): Promise<IotpModel | null> {

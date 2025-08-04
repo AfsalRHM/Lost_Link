@@ -2,19 +2,13 @@ import jwt from "jsonwebtoken";
 
 import { jwtPayload } from "../interface/IjwtTypes";
 
-let adminAccessTokenSecret = "";
-let adminRefreshTokenSecret = "";
+const JWT_ACCESS_SECRET = process.env.JWT_ACCESS_SECRET;
+const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET;
 
-if (process.env.ADMIN_JWT_ACCESS_SECRETKEY) {
-  adminAccessTokenSecret = process.env.ADMIN_JWT_ACCESS_SECRETKEY;
-} else {
-  console.log("No process.env.ADMIN_JWT_ACCESS_SECRETKEY Available");
-}
-
-if (process.env.ADMIN_JWT_REFRESH_SECRETKEY) {
-  adminRefreshTokenSecret = process.env.ADMIN_JWT_REFRESH_SECRETKEY;
-} else {
-  console.log("No process.env.ADMIN_JWT_REFRESH_SECRETKEY Available");
+if (!JWT_ACCESS_SECRET || !JWT_REFRESH_SECRET) {
+  throw new Error(
+    "❌ Access Secret and Refresh Secret is not defined in environment variables."
+  );
 }
 
 const accessExpiration = "1d";
@@ -23,13 +17,13 @@ const refreshExpiration = "1w";
 export default class jwtFunctions {
   /******* Functions For Admin JWT Verifications ********************************************************************************/
   static generateAdminAccessToken(admin: jwtPayload): string {
-    return jwt.sign(admin, adminAccessTokenSecret, {
+    return jwt.sign(admin, JWT_ACCESS_SECRET!, {
       expiresIn: accessExpiration,
     });
   }
 
   static generateAdminRefreshToken(admin: jwtPayload): string {
-    return jwt.sign(admin, adminRefreshTokenSecret, {
+    return jwt.sign(admin, JWT_REFRESH_SECRET!, {
       expiresIn: refreshExpiration,
     });
   }
@@ -39,7 +33,7 @@ export default class jwtFunctions {
       if (!token) {
         throw new Error("Token is undefined or null.");
       }
-      const decoded = jwt.verify(token, adminAccessTokenSecret);
+      const decoded = jwt.verify(token, JWT_ACCESS_SECRET!);
       return decoded as any;
     } catch (error) {
       return null;
@@ -48,7 +42,7 @@ export default class jwtFunctions {
 
   static verifyAdminRefreshToken(token: string): jwtPayload | null {
     try {
-      const decoded = jwt.verify(token, adminRefreshTokenSecret);
+      const decoded = jwt.verify(token, JWT_REFRESH_SECRET!);
       return decoded as any;
     } catch (error) {
       return null;

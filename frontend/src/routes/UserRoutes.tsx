@@ -9,7 +9,6 @@ import ReqeustDetailsPage from "../pages/user/RequestDetailsPage";
 import RequestRedeemPage from "../pages/user/RequestRedeemPage";
 import NotFoundPage from "../pages/user/NotFoundPage";
 
-import { IsUserLogin } from "../utils/IsUserLogin";
 import RequestRedeemDetailsPage from "../pages/user/RequestRedeemDetailsPage";
 import FAQPage from "../pages/user/FAQPage";
 import VideoCall from "../components/shared/VideoCall";
@@ -19,20 +18,18 @@ const UserRoutes = () => {
   return (
     <>
       <Route path="*" element={<NotFoundPage />} />
-      <Route element={<IsUserLogin />}>
-        <Route path="/home" element={<HomePage />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/my_request_details" element={<MyReqeustDetailsPage />} />
-        <Route path="/redeem_request_details" element={<RequestRedeemDetailsPage />} />
-        <Route path="/create_request" element={<CreateRequestPage />} />
-        <Route path="/requests" element={<AllRequestsPage />} />
-        <Route path="/requests/request-details" element={<ReqeustDetailsPage />} />
-        <Route path="/requests/redeem-request" element={<RequestRedeemPage />} />
-        <Route path="/payment-success" element={<PaymentSuccessPage />} />
+      <Route path="/home" element={<HomePage />} />
+      <Route path="/profile" element={<Profile />} />
+      <Route path="/my_request_details" element={<MyReqeustDetailsPage />} />
+      <Route path="/redeem_request_details" element={<RequestRedeemDetailsPage />} />
+      <Route path="/create_request" element={<CreateRequestPage />} />
+      <Route path="/requests" element={<AllRequestsPage />} />
+      <Route path="/requests/request-details" element={<ReqeustDetailsPage />} />
+      <Route path="/requests/redeem-request" element={<RequestRedeemPage />} />
+      <Route path="/payment-success" element={<PaymentSuccessPage />} />
 
-        <Route path="/video-call" element={<VideoCall />} />
+      <Route path="/video-call" element={<VideoCall />} />
 
-      </Route>
       <Route path="/faq" element={<FAQPage />} />
       <Route path="/about-us" element={<AboutPage />} />
       <Route path="/404" element={<NotFoundPage />} />

@@ -1,46 +1,47 @@
+import stripe from "stripe";
+
+import requestModel from "../models/requestModel";
+import redeemRequestModel from "../models/redeemRequestModel";
+import reportModel from "../models/reportModel";
+
 import IrequestModel from "../interface/IrequestModel";
 import IrequestService from "../interface/IrequestService";
-import sendToService from "../rabbitmq/producer";
+
 import requestRepository from "../repositories/requestRepository";
-import requestRedeemRepository from "../repositories/requestRedeemRepository";
 import reportRepository from "../repositories/reportRepository";
-import jwtFunctions from "../utils/jwt";
+import redeemRequestRepository from "../repositories/redeemRequestRepository";
 
-import stripe from "stripe";
-import mongoose from "mongoose";
+import calculateRequestExpiryDate from "../helpers/calculateRequestExpiryDate";
+import calculatePoints from "../helpers/calculatePoints";
+import calculateUserReward from "../helpers/calculateUserReward";
 
-export default class requestService implements IrequestService {
+import sendToService from "../rabbitmq/producer";
+
+import { AppError } from "../utils/appError";
+import { StatusCode } from "../constants/statusCodes";
+import { handleServiceError } from "../utils/errorHandler";
+
+export default class RequestService implements IrequestService {
   private _requestRepository: requestRepository;
-  private _requestRedeemRepository: requestRedeemRepository;
+  private _redeemRequestRepository: redeemRequestRepository;
   private _reportRepository: reportRepository;
 
   constructor() {
-    this._requestRepository = new requestRepository();
-    this._requestRedeemRepository = new requestRedeemRepository();
-    this._reportRepository = new reportRepository();
+    this._requestRepository = new requestRepository(requestModel);
+    this._redeemRequestRepository = new redeemRequestRepository(
+      redeemRequestModel
+    );
+    this._reportRepository = new reportRepository(reportModel);
   }
 
   async insertRequest({
-    accessToken,
+    userId,
     formData,
   }: {
-    accessToken: string;
+    userId: string;
     formData: any;
   }): Promise<any> {
-    const decoded = jwtFunctions.verifyAccessToken(accessToken);
-    if (decoded) {
-      const userId = decoded.id;
-
-      const expirationMonths = parseInt(
-        formData.expirationLimit.split(" ")[0],
-        10
-      );
-
-      const currentDate = new Date();
-      const expiryDate = new Date(
-        currentDate.setMonth(currentDate.getMonth() + expirationMonths)
-      );
-
+    try {
       const requestData = {
         user_id: userId,
         product_name: formData.productName,
@@ -53,44 +54,49 @@ export default class requestService implements IrequestService {
         missing_route: formData.travelRoutes,
         missing_date: formData.missingDate,
         expiration_validity: formData.expirationLimit,
-        expiration_date: expiryDate,
+        expiration_date: calculateRequestExpiryDate({
+          expirationLimit: formData.expirationLimit,
+        }),
         product_images: formData.images,
         additional_information: formData.additionalInfo,
       };
 
       const insertedData: IrequestModel | null =
         await this._requestRepository.insertRequest(requestData);
-
-      if (insertedData) {
-        const sendingTo = process.env.USER_QUEUE;
-        const source = "Add the request Id to the user";
-        const props = {
-          userId,
-          requestId: insertedData._id.toString(),
-        };
-
-        if (!sendingTo) {
-          throw new Error("sendingTo is emplty...");
-        }
-
-        sendToService({
-          sendingTo,
-          source,
-          props,
-        });
-
-        return {
-          status: true,
-          data: insertedData,
-          message: "Request Created successfully",
-        };
-      } else {
-        return {
-          status: false,
-          data: null,
-          message: "Request Creation Failed",
-        };
+      if (!insertedData) {
+        throw new AppError(
+          "Failed to create user",
+          StatusCode.INTERNAL_SERVER_ERROR
+        );
       }
+
+      const sendingTo = process.env.USER_QUEUE;
+      const source = "Add the request Id to the user";
+      const props = {
+        userId,
+        requestId: insertedData._id.toString(),
+      };
+
+      if (!sendingTo) {
+        throw new Error("sendigTo env is not accessible, from request service");
+      }
+
+      sendToService({
+        sendingTo,
+        source,
+        props,
+      });
+
+      return insertedData;
+    } catch (error: any) {
+      if (error.name === "MongoNetworkError") {
+        throw new AppError(
+          "Database connection failed",
+          StatusCode.SERVICE_UNAVAILABLE
+        );
+      }
+
+      handleServiceError(error, "Something went wrong while creating request");
     }
   }
 
@@ -99,26 +105,26 @@ export default class requestService implements IrequestService {
       const userRequests = await this._requestRepository.findUserRequests(
         userId
       );
-      if (userRequests) {
-        return {
-          status: true,
-          data: userRequests,
-          message: "All My Request Fetched",
-        };
-      } else {
-        return {
-          status: true,
-          data: null,
-          message: "No request on the database",
-        };
+      if (!userRequests) {
+        throw new AppError(
+          "Failed to fetch requests",
+          StatusCode.INTERNAL_SERVER_ERROR
+        );
       }
-    } catch (error) {
-      return {
-        status: false,
-        data: null,
-        message:
-          "Error occured while getting all requests - from getUserRequests/requestService",
-      };
+
+      return userRequests;
+    } catch (error: any) {
+      if (error.name === "MongoNetworkError") {
+        throw new AppError(
+          "Database connection failed",
+          StatusCode.SERVICE_UNAVAILABLE
+        );
+      }
+
+      handleServiceError(
+        error,
+        "Something went wrong while fetching user requests"
+      );
     }
   }
 
@@ -133,12 +139,8 @@ export default class requestService implements IrequestService {
     from: string;
   }): Promise<any> {
     try {
-      if (!mongoose.Types.ObjectId.isValid(requestId)) {
-        return {
-          status: false,
-          data: null,
-          message: "Invalid Request ID format",
-        };
+      if (!requestId) {
+        throw new AppError("requestId is required", StatusCode.BAD_REQUEST);
       }
 
       const requestData = await this._requestRepository.findOne({
@@ -147,63 +149,47 @@ export default class requestService implements IrequestService {
 
       if (from == "normalRequest") {
         if (requestData?.user_id == userId) {
-          return {
-            status: false,
-            data: null,
-            message: "Invalid Access on the Request",
-          };
+          throw new AppError("Invalid Access", StatusCode.FORBIDDEN);
         }
 
         if (
           requestData?.status == "cancelled" ||
           requestData?.status == "inactive"
         ) {
-          return {
-            status: false,
-            data: null,
-            message: "Request not Available",
-          };
+          throw new AppError("Request not found", StatusCode.NOT_FOUND);
         }
       }
 
-      if (requestData) {
-        const redeemRequestData = await this._requestRedeemRepository.findOne({
-          request_id: requestId,
-          user_id: userId,
-        });
+      const redeemRequestData = await this._redeemRequestRepository.findOne({
+        request_id: requestId,
+        user_id: userId,
+      });
 
-        const reportData = await this._reportRepository.findOne({
-          request_id: requestId,
-          user_id: userId,
-        });
+      const reportData = await this._reportRepository.findOne({
+        request_id: requestId,
+        user_id: userId,
+      });
 
-        if (redeemRequestData) {
-          return {
-            status: true,
-            data: { requestData, redeemRequestData, reportData },
-            message: "Request Data Found",
-          };
-        } else {
-          return {
-            status: true,
-            data: { requestData, reportData },
-            message: "Request Data Found",
-          };
-        }
+      let data;
+      if (redeemRequestData) {
+        data = { requestData, redeemRequestData, reportData };
       } else {
-        return {
-          status: false,
-          data: null,
-          message: "Request Data not Found",
-        };
+        data = { requestData, reportData };
       }
-    } catch (error) {
-      return {
-        status: false,
-        data: null,
-        message:
-          "Error occured while Fetching Request Data - from getRequestDetails/requestService",
-      };
+
+      return data;
+    } catch (error: any) {
+      if (error.name === "MongoNetworkError") {
+        throw new AppError(
+          "Database connection failed",
+          StatusCode.SERVICE_UNAVAILABLE
+        );
+      }
+
+      handleServiceError(
+        error,
+        "Something went wrong while fetching request details"
+      );
     }
   }
 
@@ -214,53 +200,44 @@ export default class requestService implements IrequestService {
     requestId: string;
   }): Promise<any> {
     try {
-      if (!mongoose.Types.ObjectId.isValid(requestId)) {
-        return {
-          status: false,
-          data: null,
-          message: "Invalid Request ID format",
-        };
+      if (!requestId) {
+        throw new AppError("requestId is required", StatusCode.BAD_REQUEST);
       }
 
       const requestData = await this._requestRepository.findOne({
         _id: requestId,
       });
+      if (!requestData) {
+        throw new AppError("request not found", StatusCode.NOT_FOUND);
+      }
 
-      if (requestData) {
-        const redeemRequestData =
-          await this._requestRedeemRepository.findAllRedeemRequest({
-            request_id: requestId,
-          });
-        const reportData = await this._reportRepository.findAll({
+      const redeemRequestData =
+        await this._redeemRequestRepository.findAllRedeemRequest({
           request_id: requestId,
         });
-        if (redeemRequestData) {
-          return {
-            status: true,
-            data: { requestData, redeemRequestData, reportData },
-            message: "Request Data Found",
-          };
-        } else {
-          return {
-            status: true,
-            data: { requestData, reportData },
-            message: "Request Data Found",
-          };
-        }
-      } else {
-        return {
-          status: false,
-          data: null,
-          message: "Request Data not Found",
-        };
-      }
-    } catch (error) {
-      return {
-        status: false,
-        data: null,
-        message:
-          "Error occured while Fetching Request Data - from getRequestDetails/requestService",
+      const reportData = await this._reportRepository.findAll({
+        request_id: requestId,
+      });
+
+      let data = {
+        requestData,
+        redeemRequestData: redeemRequestData.length ? redeemRequestData : null,
+        reportData: reportData.length ? reportData : null,
       };
+
+      return data;
+    } catch (error: any) {
+      if (error.name === "MongoNetworkError") {
+        throw new AppError(
+          "Database connection failed",
+          StatusCode.SERVICE_UNAVAILABLE
+        );
+      }
+
+      handleServiceError(
+        error,
+        "Something went wrong while fetching request details for admin"
+      );
     }
   }
 
@@ -269,50 +246,50 @@ export default class requestService implements IrequestService {
     userId,
   }: {
     requestId: string;
-    userId: string | undefined;
+    userId: string;
   }): Promise<any> {
     try {
-      const requestData: IrequestModel | null =
-        await this._requestRepository.findOne({ _id: requestId });
-      if (!requestData) {
-        return {
-          status: false,
-          data: null,
-          message: "Request not found",
-        };
-      }
-      if (requestData.user_id == userId || userId == "admin") {
-        const request = await this._requestRepository.findByIdAndUpdate(
-          requestId,
-          { status: "cancelled" }
+      if (!requestId || !userId) {
+        throw new AppError(
+          "requestId and userId is required",
+          StatusCode.BAD_REQUEST
         );
-        if (request) {
-          return {
-            status: true,
-            data: request,
-            message: "Request Cancelled",
-          };
-        } else {
-          return {
-            status: false,
-            data: null,
-            message: "Request Cancellation failed",
-          };
-        }
-      } else {
-        return {
-          status: false,
-          data: null,
-          message: "Invalid Action Detected",
-        };
       }
-    } catch (error) {
-      return {
-        status: false,
-        data: null,
-        message:
-          "Error occured while cancelling the request - from cancelRequest/requestService",
-      };
+
+      const requestExist: IrequestModel | null =
+        await this._requestRepository.findOne({ _id: requestId });
+      if (!requestExist) {
+        throw new AppError("Request not found", StatusCode.NOT_FOUND);
+      }
+
+      if (requestExist.user_id !== userId && userId !== "admin") {
+        throw new AppError("Action not allowed", StatusCode.FORBIDDEN);
+      }
+
+      const requestData = await this._requestRepository.findByIdAndUpdate(
+        requestId,
+        { status: "cancelled" }
+      );
+      if (!requestData) {
+        throw new AppError(
+          "Failed to update the request status",
+          StatusCode.INTERNAL_SERVER_ERROR
+        );
+      }
+
+      return requestData;
+    } catch (error: any) {
+      if (error.name === "MongoNetworkError") {
+        throw new AppError(
+          "Database connection failed",
+          StatusCode.SERVICE_UNAVAILABLE
+        );
+      }
+
+      handleServiceError(
+        error,
+        "Something went wrong while canceling a request"
+      );
     }
   }
 
@@ -325,24 +302,17 @@ export default class requestService implements IrequestService {
   }): Promise<any> {
     try {
       if (!requestId || !userId) {
-        return {
-          status: false,
-          data: null,
-          message:
-            "Data no reached here on the changeLikeStatus/requestService",
-        };
+        throw new AppError(
+          "requestId and userId is required",
+          StatusCode.BAD_REQUEST
+        );
       }
+
       const requestData: IrequestModel | null =
         await this._requestRepository.findOne({ _id: requestId });
       if (!requestData) {
-        return {
-          status: false,
-          data: null,
-          message: "Request not found",
-        };
+        throw new AppError("Request not found", StatusCode.NOT_FOUND);
       }
-
-      // change the add the user id to the users_liked array
 
       let newRequestData;
       if (requestData.users_liked.includes(userId)) {
@@ -357,27 +327,19 @@ export default class requestService implements IrequestService {
         });
       }
 
-      if (newRequestData) {
-        return {
-          status: true,
-          data: newRequestData,
-          message: "Changed the Like Status",
-        };
-      } else {
-        return {
-          status: false,
-          data: null,
-          message: "unable to Change the Like Status",
-        };
+      return newRequestData;
+    } catch (error: any) {
+      if (error.name === "MongoNetworkError") {
+        throw new AppError(
+          "Database connection failed",
+          StatusCode.SERVICE_UNAVAILABLE
+        );
       }
-    } catch (error) {
-      console.log(error);
-      return {
-        status: false,
-        data: null,
-        message:
-          "Error occured while cancelling the request - from changeLikeStatus/requestService",
-      };
+
+      handleServiceError(
+        error,
+        "Something went wrong while updating request for like"
+      );
     }
   }
 
@@ -386,21 +348,20 @@ export default class requestService implements IrequestService {
       const requestData = await this._requestRepository.findOne({
         _id: requestId,
       });
-      if (requestData) {
-        return {
-          status: true,
-          data: requestData,
-          message: "Request Data Available",
-        };
-      } else {
-        return {
-          status: false,
-          data: null,
-          message: "Request Un Available",
-        };
+      if (!requestData) {
+        throw new AppError("Request not found", StatusCode.NOT_FOUND);
       }
-    } catch (error) {
-      console.log(error, "error on the getRequestDataById/requestService");
+
+      return requestData;
+    } catch (error: any) {
+      if (error.name === "MongoNetworkError") {
+        throw new AppError(
+          "Database connection failed",
+          StatusCode.SERVICE_UNAVAILABLE
+        );
+      }
+
+      handleServiceError(error, "Something went wrong while fetching request");
     }
   }
 
@@ -414,6 +375,13 @@ export default class requestService implements IrequestService {
     userId: string;
   }): Promise<any> {
     try {
+      if (!requestId || !formData || !userId) {
+        throw new AppError(
+          "requestId, formData and userId is required",
+          StatusCode.BAD_REQUEST
+        );
+      }
+
       const updatedFormData = {
         user_id: userId,
         request_id: requestId,
@@ -427,102 +395,96 @@ export default class requestService implements IrequestService {
         account_holder_name: formData.accountHolderName,
         images: formData.images,
       };
-      const requestRedeemData =
-        await this._requestRedeemRepository.insertRequestRedeemForm(
+
+      const redeemRequestData =
+        await this._redeemRequestRepository.insertRequestRedeemForm(
           updatedFormData
         );
-      if (requestRedeemData) {
-        return {
-          status: true,
-          data: requestRedeemData,
-          message: "Request Redeem Form Submitted",
-        };
-      } else {
-        return {
-          status: false,
-          data: null,
-          message: "Failed to submit Request Redeem Form",
-        };
+      if (!redeemRequestData) {
+        throw new AppError(
+          "Failed to create redeem request data",
+          StatusCode.INTERNAL_SERVER_ERROR
+        );
       }
-    } catch (error) {
-      return {
-        status: false,
-        data: null,
-        message:
-          "Error occured while getting all requests - from createRedeemRequest/requestService",
-      };
+
+      return redeemRequestData;
+    } catch (error: any) {
+      if (error.name === "MongoNetworkError") {
+        throw new AppError(
+          "Database connection failed",
+          StatusCode.SERVICE_UNAVAILABLE
+        );
+      }
+
+      handleServiceError(
+        error,
+        "Something went wrong while inserting redeem request"
+      );
     }
   }
 
   // To find all the user redeem requests
   async getUserRedeemRequests({ userId }: { userId: string }): Promise<any> {
     try {
-      const redeemRequests = await this._requestRedeemRepository.findAll({
+      if (!userId) {
+        throw new AppError("userId is required", StatusCode.BAD_REQUEST);
+      }
+
+      const redeemRequests = await this._redeemRequestRepository.findAll({
         user_id: userId,
       });
-      if (redeemRequests) {
-        return {
-          status: true,
-          data: redeemRequests,
-          message: "All Redeem Request recieved",
-        };
-      } else {
-        return {
-          status: false,
-          data: null,
-          message: "All Redeem Request Failed to fetch",
-        };
+
+      return redeemRequests;
+    } catch (error: any) {
+      if (error.name === "MongoNetworkError") {
+        throw new AppError(
+          "Database connection failed",
+          StatusCode.SERVICE_UNAVAILABLE
+        );
       }
-    } catch (error) {
-      return {
-        status: false,
-        data: null,
-        message:
-          "Error occured while getting all redeem requests - from getUserRedeemRequests/requestService",
-      };
+
+      handleServiceError(
+        error,
+        "Something went wrong while fetching user's redeem requests"
+      );
     }
   }
 
   // To fetch the request redeem data
   async getRedeemRequestDetails({
-    requestRedeemId,
+    redeemRequestId,
   }: {
-    requestRedeemId: string;
+    redeemRequestId: string;
   }): Promise<any> {
     try {
-      if (!mongoose.Types.ObjectId.isValid(requestRedeemId)) {
-        return {
-          status: false,
-          data: null,
-          message: "Invalid Request ID format",
-        };
+      if (!redeemRequestId) {
+        throw new AppError(
+          "redeemRequestId is required",
+          StatusCode.BAD_REQUEST
+        );
       }
 
       const redeemRequestData =
-        await this._requestRedeemRepository.findOneRedeemRequest({
-          _id: requestRedeemId,
+        await this._redeemRequestRepository.findOneRedeemRequest({
+          _id: redeemRequestId,
         });
-
-      if (redeemRequestData) {
-        return {
-          status: true,
-          data: redeemRequestData,
-          message: "Fetched the Redeem Request Data",
-        };
-      } else {
-        return {
-          status: false,
-          data: null,
-          message: "Failed to fetch the Redeem Request Data",
-        };
+      if (!redeemRequestData) {
+        throw new AppError("Redeem request not found", StatusCode.NOT_FOUND);
       }
-    } catch (error) {
-      return {
-        status: false,
-        data: null,
-        message:
-          "Error occured while getting all redeem requests - from getUserRedeemRequests/requestService",
-      };
+
+      return redeemRequestData;
+    } catch (error: any) {
+      if (error.name === "MongoNetworkError") {
+        throw new AppError(
+          "Database connection failed",
+          StatusCode.SERVICE_UNAVAILABLE
+        );
+      }
+
+      handleServiceError(
+        error,
+        "Something went wrong while fetching redeem request"
+      );
     }
   }
 
@@ -530,26 +492,17 @@ export default class requestService implements IrequestService {
   async getRequests(): Promise<any> {
     try {
       const requests = await this._requestRepository.findAllRequests();
-      if (requests) {
-        return {
-          status: true,
-          data: requests,
-          message: "All Request recieved",
-        };
-      } else {
-        return {
-          status: false,
-          data: null,
-          message: "All Request Failed to fetch",
-        };
+
+      return requests;
+    } catch (error: any) {
+      if (error.name === "MongoNetworkError") {
+        throw new AppError(
+          "Database connection failed",
+          StatusCode.SERVICE_UNAVAILABLE
+        );
       }
-    } catch (error) {
-      return {
-        status: false,
-        data: null,
-        message:
-          "Error occured while getting all requests - from getRequests/requestService",
-      };
+
+      handleServiceError(error, "Something went wrong while fetching requests");
     }
   }
 
@@ -557,41 +510,37 @@ export default class requestService implements IrequestService {
   async getAllRedeemRequests(): Promise<any> {
     try {
       const redeemRrequests =
-        await this._requestRedeemRepository.findAllRedeemRequest();
-      if (redeemRrequests) {
-        return {
-          status: true,
-          data: redeemRrequests,
-          message: "All Redeem Request recieved",
-        };
-      } else {
-        return {
-          status: false,
-          data: null,
-          message: "All Redeem Request Failed to fetch",
-        };
+        await this._redeemRequestRepository.findAllRedeemRequest();
+
+      return redeemRrequests;
+    } catch (error: any) {
+      if (error.name === "MongoNetworkError") {
+        throw new AppError(
+          "Database connection failed",
+          StatusCode.SERVICE_UNAVAILABLE
+        );
       }
-    } catch (error) {
-      return {
-        status: false,
-        data: null,
-        message:
-          "Error occured while getting all requests - from getAllRedeemRequests/requestService",
-      };
+
+      handleServiceError(
+        error,
+        "Something went wrong while fetching redeem requests"
+      );
     }
   }
 
   async makePayment(formData: any): Promise<any> {
     try {
       const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
-
       if (!STRIPE_SECRET_KEY) {
         console.log("Stripe key not provided");
-        return {
-          status: false,
-          data: null,
-          message: "Stripe key not provided",
-        };
+        throw new AppError(
+          "Stripe configuration missing",
+          StatusCode.INTERNAL_SERVER_ERROR
+        );
+      }
+
+      if (!formData) {
+        throw new AppError("formData is required", StatusCode.BAD_REQUEST);
       }
 
       const stripeClient = new stripe(STRIPE_SECRET_KEY);
@@ -618,120 +567,136 @@ export default class requestService implements IrequestService {
         cancel_url: `${process.env.HOSTED_ROUTE}/payment-cancel`,
       });
 
-      return {
-        status: true,
-        data: { sessionId: session.id },
-        message: "Payment session created successfully.",
-      };
-    } catch (error) {
-      console.error("Stripe Payment Error: ", error);
+      return { sessionId: session.id };
+    } catch (error: any) {
+      if (error.name === "MongoNetworkError") {
+        throw new AppError(
+          "Database connection failed",
+          StatusCode.SERVICE_UNAVAILABLE
+        );
+      }
 
-      return {
-        status: false,
-        data: null,
-        message:
-          "Error occured while making payment - from makePayment/requestService",
-      };
+      handleServiceError(
+        error,
+        "Something went wrong while creating payment session"
+      );
     }
   }
 
   async changeRequestStatus(props: { requestId: string }): Promise<any> {
     try {
-      const response = await this._requestRepository.changeStatus(
+      const requestData = await this._requestRepository.changeStatus(
         props.requestId
       );
-      if (response) {
-        return {
-          status: true,
-          data: response,
-          message: "Request Status Changed Successfully.",
-        };
-      } else {
-        return {
-          status: false,
-          data: response,
-          message: "Request Status Changed Successfully.",
-        };
+      if (!requestData) {
+        throw new AppError(
+          "Failed to updated the request status",
+          StatusCode.INTERNAL_SERVER_ERROR
+        );
       }
-    } catch (error) {
-      return {
-        status: false,
-        message: "Error in changeRequestStatus/requestService",
-        error: error,
-      };
+
+      return requestData;
+    } catch (error: any) {
+      if (error.name === "MongoNetworkError") {
+        throw new AppError(
+          "Database connection failed",
+          StatusCode.SERVICE_UNAVAILABLE
+        );
+      }
+
+      handleServiceError(
+        error,
+        "Something went wrong while updating request status"
+      );
     }
   }
 
-  async changeRedeemRequestStatus(props: {
+  async changeRedeemRequestStatus({
+    redeemRequestId,
+    changeTo,
+  }: {
     redeemRequestId: string;
     changeTo: string;
   }): Promise<any> {
     try {
-      const response = await this._requestRedeemRepository.changeStatus(props);
-      if (response) {
-        if (props.changeTo == "accepted") {
-          const requestData = await this._requestRepository.findByIdAndUpdate(
-            response.request_id,
-            {
-              status: "completed",
-            }
-          );
-
-          if (requestData) {
-            // Calculate the Points
-            const calculatedPoints = Math.round(
-              2.508 * Math.pow(requestData.reward_amount, 1.0003)
-            );
-
-            const calulateCommission = Math.floor(
-              (requestData.reward_amount / 100) * 5
-            );
-
-            const calculatedUserReward =
-              requestData.reward_amount - calulateCommission;
-
-            const sendingTo = process.env.USER_QUEUE;
-            const source = "Add the completed request details to the user";
-            const props = {
-              userId: response?.user_id,
-              requestId: requestData?._id.toString(),
-              points: calculatedPoints,
-              rewardAmount: calculatedUserReward,
-            };
-
-            if (!sendingTo) {
-              throw new Error("sendingTo is emplty...");
-            }
-
-            sendToService({
-              sendingTo,
-              source,
-              props,
-            });
-          } else {
-            console.log(
-              "Unable to Change the Request Status and Adding the Points"
-            );
-          }
-        }
-        return {
-          status: true,
-          data: response,
-          message: "Redeem Request Status Changed Successfully.",
-        };
-      } else {
-        return {
-          status: false,
-          data: response,
-          message: "Redeeem Request Status Failed to Change.",
-        };
+      if (!redeemRequestId || !changeTo) {
+        throw new AppError(
+          "redeemRequestId and changeTo is required",
+          StatusCode.BAD_REQUEST
+        );
       }
-    } catch (error) {
-      return {
-        status: false,
-        message: "Error in changeRedeemRequestStatus/requestService",
-        error: error,
-      };
+
+      if (changeTo !== "accepted" && changeTo !== "rejected") {
+        throw new AppError("Action not supported", StatusCode.CONFLICT);
+      }
+
+      const redeemRequest = await this._redeemRequestRepository.changeStatus({
+        redeemRequestId,
+        changeTo,
+      });
+      if (!redeemRequest) {
+        throw new AppError(
+          "Failed to updated the redeem request status",
+          StatusCode.INTERNAL_SERVER_ERROR
+        );
+      }
+
+      if (changeTo == "accepted") {
+        const requestData = await this._requestRepository.findByIdAndUpdate(
+          redeemRequest.request_id,
+          {
+            status: changeTo,
+          }
+        );
+        if (!requestData) {
+          throw new AppError(
+            "Failed to update request",
+            StatusCode.INTERNAL_SERVER_ERROR
+          );
+        }
+
+        const calculatedPoints = calculatePoints({
+          rewardAmount: requestData.reward_amount,
+        });
+
+        const calculatedUserReward = calculateUserReward({
+          rewardAmount: requestData.reward_amount,
+        });
+
+        const sendingTo = process.env.USER_QUEUE;
+        const source = "Add the completed request details to the user";
+        const props = {
+          userId: redeemRequest?.user_id,
+          requestId: requestData?._id.toString(),
+          points: calculatedPoints,
+          rewardAmount: calculatedUserReward,
+        };
+
+        if (!sendingTo) {
+          throw new Error(
+            "sendigTo env is not accessible, from request service"
+          );
+        }
+
+        sendToService({
+          sendingTo,
+          source,
+          props,
+        });
+      }
+      return redeemRequest;
+    } catch (error: any) {
+      if (error.name === "MongoNetworkError") {
+        throw new AppError(
+          "Database connection failed",
+          StatusCode.SERVICE_UNAVAILABLE
+        );
+      }
+
+      handleServiceError(
+        error,
+        "Something went wrong while updating redeem request status"
+      );
     }
   }
 }

@@ -1,19 +1,32 @@
 import { Express } from "express";
 import proxy from "express-http-proxy";
 
+import { verifyToken } from "./src/middlewares/verifyToken";
+
 export default function serviceProxies(app: Express) {
-
-  const environment: Boolean = process.env.NODE_ENV == "Development" ? true : false;
-
+  const environment: Boolean =
+    process.env.NODE_ENV == "Development" ? true : false;
   const MAIN_ROUTE = process.env.MAIN_ROUTE;
 
   // Routes
-  const AUTH_ROUTE = environment ? process.env.AUTH_ROUTE_DEV : process.env.AUTH_ROUTE;
-  const USER_ROUTE = environment ? process.env.USER_ROUTE_DEV : process.env.USER_ROUTE;
-  const REQUEST_ROUTE = environment ? process.env.REQUEST_ROUTE_DEV : process.env.REQUEST_ROUTE;
-  const CHAT_ROUTE = environment ? process.env.CHAT_ROUTE_DEV : process.env.CHAT_ROUTE;
-  const NOTIF_ROUTE = environment ? process.env.NOTIF_ROUTE_DEV : process.env.NOTIF_ROUTE;
-  const ADMIN_ROUTE = environment ? process.env.ADMIN_ROUTE_DEV : process.env.ADMIN_ROUTE;
+  const AUTH_ROUTE = environment
+    ? process.env.AUTH_ROUTE_DEV
+    : process.env.AUTH_ROUTE;
+  const USER_ROUTE = environment
+    ? process.env.USER_ROUTE_DEV
+    : process.env.USER_ROUTE;
+  const REQUEST_ROUTE = environment
+    ? process.env.REQUEST_ROUTE_DEV
+    : process.env.REQUEST_ROUTE;
+  const CHAT_ROUTE = environment
+    ? process.env.CHAT_ROUTE_DEV
+    : process.env.CHAT_ROUTE;
+  const NOTIF_ROUTE = environment
+    ? process.env.NOTIF_ROUTE_DEV
+    : process.env.NOTIF_ROUTE;
+  const ADMIN_ROUTE = environment
+    ? process.env.ADMIN_ROUTE_DEV
+    : process.env.ADMIN_ROUTE;
 
   // Ports
   const AUTH_PORT = process.env.AUTH_PORT;
@@ -50,10 +63,19 @@ export default function serviceProxies(app: Express) {
   console.log("Proxying /request to:", `${REQUEST_ROUTE}${REQUEST_PORT}`);
   console.log("Proxying /notif to:", `${NOTIF_ROUTE}${NOTIF_PORT}`);
 
+  const adminPublicRoutes = ["/login-verify", "/refreshToken", "/logout"];
+
+  app.use("/admin", (req, res, next) => {
+    if (adminPublicRoutes.includes(req.path)) {
+      return proxy(`${ADMIN_ROUTE}${ADMIN_PORT}`)(req, res, next);
+    }
+    return verifyToken(req, res, () =>
+      proxy(`${ADMIN_ROUTE}${ADMIN_PORT}`)(req, res, next)
+    );
+  });
   app.use("/auth", proxy(`${AUTH_ROUTE}${AUTH_PORT}`));
-  app.use("/user", proxy(`${USER_ROUTE}${USER_PORT}`));
-  app.use("/admin", proxy(`${ADMIN_ROUTE}${ADMIN_PORT}`));
-  app.use("/chat", proxy(`${CHAT_ROUTE}${CHAT_PORT}`));
-  app.use("/request", proxy(`${REQUEST_ROUTE}${REQUEST_PORT}`));
-  app.use("/notif", proxy(`${NOTIF_ROUTE}${NOTIF_PORT}`));
+  app.use("/user", verifyToken, proxy(`${USER_ROUTE}${USER_PORT}`));
+  app.use("/chat", verifyToken, proxy(`${CHAT_ROUTE}${CHAT_PORT}`));
+  app.use("/request", verifyToken, proxy(`${REQUEST_ROUTE}${REQUEST_PORT}`));
+  app.use("/notif", verifyToken, proxy(`${NOTIF_ROUTE}${NOTIF_PORT}`));
 }

@@ -1,119 +1,119 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
+
 import IchatController from "../interface/IchatController";
-import chatService from "../services/chatService";
+import IchatService from "../interface/IchatService";
 
-import jwtFunctions from "../utils/jwt";
+import extractUserFromHeaders from "../utils/extractUserFromHeaders";
 import { StatusCode } from "../constants/statusCodes";
+import { AppError } from "../utils/appError";
 
-export default class chatController implements IchatController {
-  private _chatService: chatService;
+export default class ChatController implements IchatController {
+  private _chatService: IchatService;
 
-  constructor() {
-    this._chatService = new chatService();
+  constructor(chatService: IchatService) {
+    this._chatService = chatService;
   }
 
   // To Create or Fetch the Chat
-  public getUserChat = async (req: Request, res: Response): Promise<void> => {
+  public getUserChat = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const requestId = req.params.id;
       if (!requestId) {
-        throw new Error("Request Id not passed correctly");
-      }
-      const accessToken = req.headers["authorization"]?.split(" ")[1];
-      if (!accessToken) {
-        throw new Error("Access Token no exist");
-      }
-      const decoded = jwtFunctions.verifyAccessToken(accessToken);
-      if (!decoded) {
-        throw new Error("Access Token Expired");
+        throw new AppError("requestId is required", StatusCode.BAD_REQUEST);
       }
 
-      const userId = decoded.id;
+      const user = extractUserFromHeaders(req);
+      if (!user || !user.id) {
+        throw new AppError(
+          "Unauthorized: User info missing",
+          StatusCode.UNAUTHORIZED
+        );
+      }
 
-      const response = await this._chatService.getUserChat({
-        userId,
+      const chat = await this._chatService.getUserChat({
+        userId: user.id,
         requestId,
       });
 
-      if (response.status) {
-        res.status(StatusCode.OK).json(response);
-      } else {
-        res.status(StatusCode.BAD_REQUEST).json(response);
-      }
+      res
+        .status(StatusCode.OK)
+        .json({ status: true, data: chat, message: "User chat fetched" });
     } catch (error) {
       console.log("error in getUserChat/chatController", error);
-      return;
+      next(error);
     }
   };
 
   // To fetch all the chats
-  public getAllChats = async (req: Request, res: Response): Promise<void> => {
+  public getAllChats = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
-      const response = await this._chatService.getAllChats();
+      const chats = await this._chatService.getAllChats();
 
-      if (response.status) {
-        res.status(StatusCode.OK).json(response);
-      } else {
-        res.status(StatusCode.BAD_REQUEST).json(response);
-      }
+      res
+        .status(StatusCode.OK)
+        .json({ status: true, data: chats, message: "All chats fetched" });
     } catch (error) {
-      console.log("error in getUserChat/chatController", error);
-      return;
+      console.log("error in getAllChats/chatController", error);
+      next(error);
     }
   };
 
   // To fetch all the chats of a specific user
   public getAllUserChats = async (
     req: Request,
-    res: Response
+    res: Response,
+    next: NextFunction
   ): Promise<void> => {
     try {
       const userId = req.params.id;
-
       if (!userId) {
-        throw new Error("User Id not passed correctly");
+        throw new AppError("userId is required", StatusCode.BAD_REQUEST);
       }
 
-      const response = await this._chatService.getAllUserChats({ userId });
+      const chats = await this._chatService.getAllUserChats({ userId });
 
-      if (response.status) {
-        res.status(StatusCode.OK).json(response);
-      } else {
-        if (response.message == "Invalid Request ID format") {
-          res.status(StatusCode.NOT_FOUND).json(response);
-        } else {
-          res.status(StatusCode.BAD_REQUEST).json(response);
-        }
-      }
+      res
+        .status(StatusCode.OK)
+        .json({ status: true, data: chats, message: "All user chats fetched" });
     } catch (error) {
       console.log("error in getAllUserChats/chatController", error);
-      return;
+      next(error);
     }
   };
 
   // To fetch the user chat details to the admin
   public getChatDetails = async (
     req: Request,
-    res: Response
+    res: Response,
+    next: NextFunction
   ): Promise<void> => {
     try {
       const chatId = req.body.chatId;
       if (!chatId) {
-        throw new Error("Request Id not passed correctly");
+        throw new AppError("chatId is required", StatusCode.BAD_REQUEST);
       }
 
-      const response = await this._chatService.getChatDetails({
+      const chat = await this._chatService.getChatDetails({
         chatId: chatId,
       });
-
-      if (response.status) {
-        res.status(StatusCode.OK).json(response);
-      } else {
-        res.status(StatusCode.BAD_REQUEST).json(response);
+      if (!chat) {
+        throw new AppError("Chat not found", StatusCode.NOT_FOUND);
       }
+
+      res
+        .status(StatusCode.OK)
+        .json({ status: true, data: chat, message: "Chat details fetched" });
     } catch (error) {
       console.log("error in getChatDetails/chatController", error);
-      return;
+      next(error);
     }
   };
 }

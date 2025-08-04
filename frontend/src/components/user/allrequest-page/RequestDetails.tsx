@@ -367,7 +367,7 @@ const RequestDetails = ({}) => {
             )}
           </div>
 
-          <CommentSection requestId={requestId} noField={false} />
+          <CommentSection requestId={requestId} noField={false} from="user" />
         </div>
       </div>
     </div>

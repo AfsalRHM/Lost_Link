@@ -1,165 +1,124 @@
-import { Request, Response } from "express";
-import IuserController from "../interface/IuserController";
-import jwtFunctions from "../utils/jwt";
+import { NextFunction, Request, Response } from "express";
 
-import userService from "../services/userService";
-import jwtPayload from "../interface/IjwtPayload";
+import IuserController from "../interface/IuserController";
+import IuserService from "../interface/IuserService";
+
+import extractUserFromHeaders from "../utils/extractUserFromHeaders";
 import { validationResult } from "express-validator";
 import { StatusCode } from "../constants/statusCodes";
+import { AppError } from "../utils/appError";
 
 export default class UserController implements IuserController {
-  private _userService: userService;
+  private _userService: IuserService;
 
-  constructor() {
-    this._userService = new userService();
+  constructor(userService: IuserService) {
+    this._userService = userService;
   }
 
-  public getProfile = async (req: Request, res: Response): Promise<void> => {
-    const accessToken = req.headers["authorization"]?.split(" ")[1];
-    if (!accessToken) {
-      res
-        .status(StatusCode.BAD_REQUEST)
-        .json({ message: "No authorization token provided" });
-    } else {
-      const decoded: jwtPayload | null =
-        jwtFunctions.verifyAccessToken(accessToken);
-      if (!decoded) {
-        res
-          .status(StatusCode.BAD_REQUEST)
-          .json({ message: "No authorization token provided" });
-      } else {
-        const response = await this._userService.getProfile({
-          userId: decoded.id,
-        });
-        if (response.status) {
-          res
-            .setHeader("Authorization", `Bearer ${accessToken}`)
-            .status(StatusCode.OK)
-            .json({
-              status: true,
-              data: response.data,
-              message: response.message,
-            });
-        } else {
-          res
-            .setHeader("Authorization", `Bearer ${accessToken}`)
-            .status(StatusCode.OK)
-            .json({ status: false, data: null, message: response.message });
-        }
+  public getProfile = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
+    try {
+      const user = extractUserFromHeaders(req);
+      if (!user || !user.id) {
+        throw new AppError(
+          "Unauthorized: User info missing",
+          StatusCode.UNAUTHORIZED
+        );
       }
+
+      const userData = await this._userService.getProfile({
+        userId: user.id,
+      });
+
+      res
+        .status(StatusCode.OK)
+        .json({ status: true, message: "User data fectched", data: userData });
+    } catch (error) {
+      console.log("error in getUserData/userController", error);
+      next(error);
     }
   };
 
-  public getAllUsers = async (req: Request, res: Response): Promise<void> => {
-    const accessToken = req.headers["authorization"]?.split(" ")[1];
-    if (!accessToken) {
-      res
-        .status(StatusCode.BAD_REQUEST)
-        .json({ message: "No authorization token provided" });
-    } else {
-      const response = await this._userService.getAllUsers();
-      if (response.status) {
-        res
-          .setHeader("Authorization", `Bearer ${accessToken}`)
-          .status(StatusCode.OK)
-          .json({
-            status: true,
-            data: response.data,
-            message: response.message,
-          });
-      } else {
-        res
-          .setHeader("Authorization", `Bearer ${accessToken}`)
-          .status(StatusCode.OK)
-          .json({
-            status: false,
-            data: response.data,
-            message: response.message,
-          });
-      }
+  public getAllUsers = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
+    try {
+      const users = await this._userService.getAllUsers();
+
+      res.status(StatusCode.OK).json({
+        status: true,
+        data: users,
+        message: "Fetched all Users",
+      });
+    } catch (error) {
+      console.log("error in getAllUserData/userController", error);
+      next(error);
     }
   };
 
-  public getUserData = async (req: Request, res: Response): Promise<void> => {
+  public getUserData = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const userId = req.params.id;
       if (!userId) {
-        throw new Error("User Id not passed correctly through params");
+        throw new AppError("User ID is required", StatusCode.BAD_REQUEST);
       }
 
-      const response = await this._userService.getUserData({ userId });
+      const userData = await this._userService.getUserData({ userId });
 
-      if (response.status) {
-        res.status(StatusCode.OK).json(response);
-      } else {
-        if (response.message == "Invalid Request ID format") {
-          res.status(StatusCode.NOT_FOUND).json(response);
-        } else {
-          res.status(StatusCode.BAD_REQUEST).json(response);
-        }
-      }
+      res
+        .status(StatusCode.OK)
+        .json({ status: true, data: userData, message: "User data fetched" });
     } catch (error) {
       console.log("error in getUserData/userController", error);
-      res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
-        status: false,
-        data: null,
-        message: "Erorr on the getUserData/userController",
-      });
+      next(error);
     }
   };
 
-  public updateUser = async (req: Request, res: Response): Promise<void> => {
+  public updateUser = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const errors = validationResult(req);
-      
       if (!errors.isEmpty()) {
         res.status(StatusCode.BAD_REQUEST).json({ errors: errors.array()[0] });
-      } else {
-        const accessToken = req.headers["authorization"]?.split(" ")[1];
-        if (!accessToken) {
-          res
-            .status(StatusCode.BAD_REQUEST)
-            .json({ message: "No authorization token provided" });
-        } else if (!req.body.formData) {
-          res.status(StatusCode.NOT_FOUND).json({
-            status: false,
-            data: null,
-            message: "The form data not found on the updateUser/userController",
-          });
-        } else {
-          const decoded = jwtFunctions.verifyAccessToken(accessToken);
-          if (!decoded) {
-            throw new Error(
-              "Decoded value is not getting on the the updateUser/userController"
-            );
-          } else {
-            const response = await this._userService.updateUser({
-              updateFormData: req.body.formData,
-              userId: decoded.id,
-            });
-            if (response.status) {
-              res.status(StatusCode.OK).json({
-                status: response.status,
-                data: response.data,
-                message: response.message,
-              });
-            } else {
-              res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
-                status: false,
-                data: null,
-                message: response.message,
-              });
-            }
-          }
-        }
+        return;
       }
+
+      const formData = req.body.formData;
+      if (!formData) {
+        throw new AppError("Form Data is required", StatusCode.BAD_REQUEST);
+      }
+
+      const user = extractUserFromHeaders(req);
+      if (!user || !user.id) {
+        throw new AppError(
+          "Unauthorized: User info missing",
+          StatusCode.UNAUTHORIZED
+        );
+      }
+
+      const userData = await this._userService.updateUser({
+        updateFormData: formData,
+        userId: user.id,
+      });
+
+      res
+        .status(StatusCode.OK)
+        .json({ status: true, data: userData, message: "User info updated" });
     } catch (error) {
       console.log("Erorr on the updateUser/userController", error);
-      res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
-        status: false,
-        data: null,
-        message: "Erorr on the updateUser/userController",
-      });
+      next(error);
     }
   };
 }

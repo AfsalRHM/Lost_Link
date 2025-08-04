@@ -7,5 +7,6 @@ export default interface IchatService {
     requestId: string;
   }): Promise<any>;
   getAllChats(): Promise<any>;
-  getChatDetails({ chatId }: { chatId: string }): Promise<any>
+  getChatDetails({ chatId }: { chatId: string }): Promise<any>;
+  getAllUserChats({ userId }: { userId: string }): Promise<any>;
 }

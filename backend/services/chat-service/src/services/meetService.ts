@@ -1,11 +1,17 @@
-import ImeetService from "../interface/ImeetService";
+import meetModel from "../model/meetModel";
 import meetRepository from "../repositories/meetRepository";
 
-export default class meetService implements ImeetService {
+import ImeetService from "../interface/ImeetService";
+
+import { AppError } from "../utils/appError";
+import { StatusCode } from "../constants/statusCodes";
+import { handleServiceError } from "../utils/errorHandler";
+
+export default class MeetService implements ImeetService {
   private _meetRepository: meetRepository;
 
   constructor() {
-    this._meetRepository = new meetRepository();
+    this._meetRepository = new meetRepository(meetModel);
   }
 
   // To Create/Schedule Meet
@@ -23,6 +29,13 @@ export default class meetService implements ImeetService {
     userName: string;
   }): Promise<any> {
     try {
+      if (!date || !time || !userId || !requestId || !userName) {
+        throw new AppError(
+          "data, time, userId, requesId and userName is required",
+          StatusCode.BAD_REQUEST
+        );
+      }
+
       const meetDate = new Date(`${date}T${time}`);
 
       const meetData = await this._meetRepository.insertMeet({
@@ -32,23 +45,23 @@ export default class meetService implements ImeetService {
         request_id: requestId,
         user_name: userName,
       });
-
-      if (meetData) {
-        return {
-          status: true,
-          data: meetData,
-          message: "New Meet Created",
-        };
-      } else {
-        return {
-          status: false,
-          data: null,
-          message: "New Meet didn't Created",
-        };
+      if (!meetData) {
+        throw new AppError(
+          "Failed to create meet",
+          StatusCode.INTERNAL_SERVER_ERROR
+        );
       }
-    } catch (error) {
-      console.log(error, "error on the createMeet/meetService");
-      return false;
+
+      return meetData;
+    } catch (error: any) {
+      if (error.name === "MongoNetworkError") {
+        throw new AppError(
+          "Database connection failed",
+          StatusCode.SERVICE_UNAVAILABLE
+        );
+      }
+
+      handleServiceError(error, "Something went wrong while creating meet");
     }
   }
 
@@ -57,70 +70,69 @@ export default class meetService implements ImeetService {
     try {
       const meetData = await this._meetRepository.findAll();
 
-      if (meetData) {
-        return {
-          status: true,
-          data: meetData,
-          message: "New Meet Created",
-        };
-      } else {
-        return {
-          status: true,
-          data: null,
-          message: "No Meet has Scheduled",
-        };
+      return meetData;
+    } catch (error: any) {
+      if (error.name === "MongoNetworkError") {
+        throw new AppError(
+          "Database connection failed",
+          StatusCode.SERVICE_UNAVAILABLE
+        );
       }
-    } catch (error) {
-      console.log(error, "error on the getAllMeets/meetService");
-      return false;
+
+      handleServiceError(error, "Something went wrong while fetching meets");
     }
   }
 
   // To get a single meet data
   async getMeetDataAdmin({ meetId }: { meetId: string }): Promise<any> {
     try {
-      const meetData = await this._meetRepository.findOne({ _id: meetId });
-
-      if (meetData) {
-        return {
-          status: true,
-          data: meetData,
-          message: "Meet Data Fetched",
-        };
-      } else {
-        return {
-          status: false,
-          data: null,
-          message: "Unable to find meet data",
-        };
+      if (!meetId) {
+        throw new AppError("meetId is required", StatusCode.BAD_REQUEST);
       }
-    } catch (error) {
-      console.log(error, "error on the getAllMeets/meetService");
-      return false;
+
+      const meetData = await this._meetRepository.findOne({ _id: meetId });
+      if (!meetData) {
+        throw new AppError("meet not found", StatusCode.NOT_FOUND);
+      }
+
+      return meetData;
+    } catch (error: any) {
+      if (error.name === "MongoNetworkError") {
+        throw new AppError(
+          "Database connection failed",
+          StatusCode.SERVICE_UNAVAILABLE
+        );
+      }
+
+      handleServiceError(
+        error,
+        "Something went wrong while fetching meet for admin"
+      );
     }
   }
 
   // To get a single meet data
   async getUserMeets({ userId }: { userId: string }): Promise<any> {
     try {
+      if (!userId) {
+        throw new AppError("userId is required", StatusCode.BAD_REQUEST);
+      }
+
       const meetData = await this._meetRepository.findSome({ user_id: userId });
 
-      if (meetData) {
-        return {
-          status: true,
-          data: meetData,
-          message: "Meet Data Fetched",
-        };
-      } else {
-        return {
-          status: false,
-          data: null,
-          message: "Unable to find meet data",
-        };
+      return meetData;
+    } catch (error: any) {
+      if (error.name === "MongoNetworkError") {
+        throw new AppError(
+          "Database connection failed",
+          StatusCode.SERVICE_UNAVAILABLE
+        );
       }
-    } catch (error) {
-      console.log(error, "error on the getUserMeets/meetService");
-      return false;
+
+      handleServiceError(
+        error,
+        "Something went wrong while fetching user meets"
+      );
     }
   }
 }

@@ -72,6 +72,7 @@ const MyRequestDetails = () => {
         const requestId = requestData?._id;
         if (requestId) {
           const response = await userService.cancelRequest({ requestId });
+
           if (response.status == 200) {
             setRequestData((prev) => {
               if (prev) {
@@ -314,7 +315,7 @@ const MyRequestDetails = () => {
               />
             )}
           </div>
-          <CommentSection requestId={requestId} noField={true} />
+          <CommentSection requestId={requestId} noField={true} from="user" />
         </div>
       </div>
     </div>

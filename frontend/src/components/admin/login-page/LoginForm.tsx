@@ -33,7 +33,7 @@ const LoginForm: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const errors = await validateAdminLoginDetails(formData);
+    const errors = validateAdminLoginDetails(formData);
     if (errors.email) {
       setAdminMailLoginValidationError(errors.email);
     } else {
@@ -58,14 +58,14 @@ const LoginForm: React.FC = () => {
           display: true,
           content: "Invalid Credentials",
         });
-      } else if (result.data.data.status !== "active") {
+      } else if (result.data.data.adminData.status !== "active") {
         setAdminLoginValidationError({
           display: true,
           content: "You are Blocked from this Site",
         });
       } else {
         dispatch(assignAdminAccessToken(result.data.accessToken));
-        dispatch(assignAdminDetails(result.data.data));
+        dispatch(assignAdminDetails(result.data.data.adminData));
         showSuccessToast("Admin Login Success...!");
         navigate("/admin");
       }

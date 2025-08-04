@@ -1,31 +1,49 @@
-import mongoose from "mongoose";
-import IuserModel from "../interface/IuserModel";
-import IuserService, { updateFormDataType } from "../interface/IuserService";
 import userRepository from "../repositories/userRepository";
 
-export default class userService implements IuserService {
+import userModel from "../models/userModel";
+import IuserModel from "../interface/IuserModel";
+
+import IuserService, { updateFormDataType } from "../interface/IuserService";
+
+import { AppError } from "../utils/appError";
+import { StatusCode } from "../constants/statusCodes";
+import { CreateUserRequestDTO } from "../dtos/user/createUser.dto";
+import { UserMapper } from "../mappers/user.mapper";
+import { handleServiceError } from "../utils/errorHandler";
+
+export default class UserService implements IuserService {
   private _userRepository: userRepository;
 
   constructor() {
-    this._userRepository = new userRepository();
+    this._userRepository = new userRepository(userModel);
   }
 
-  async checkMail(recieverEmail: string): Promise<any> {
-    const userData = await this._userRepository.findUser(recieverEmail);
-    if (userData) {
+  async checkMail(
+    recieverEmail: string
+  ): Promise<{ status: boolean; data: any; message: string; email: string }> {
+    try {
+      const userData = await this._userRepository.findUser(recieverEmail);
+      if (!userData) {
+        throw new AppError("user not found", StatusCode.NOT_FOUND);
+      }
+
       return {
         status: true,
-        data: userData,
-        message: "Registration successfull",
+        data: !!userData,
+        message: userData
+          ? "Email already registered"
+          : "Registration Sucessfull",
         email: recieverEmail,
       };
-    } else {
-      return {
-        status: false,
-        data: null,
-        message: "Registeration Failed",
-        email: recieverEmail,
-      };
+    } catch (error: any) {
+      if (error.name === "MongoNetworkError") {
+        throw new AppError(
+          "Database connection failed",
+          StatusCode.SERVICE_UNAVAILABLE
+        );
+      }
+
+      handleServiceError(error, "Something went wrong while checking email");
     }
   }
 
@@ -36,96 +54,126 @@ export default class userService implements IuserService {
     userEmail: string,
     hashedPassword: string
   ): Promise<any> {
-    const data = {
-      full_name: userFullName,
-      user_name: userName,
-      location: userLocation,
-      email: userEmail,
-      password: hashedPassword,
-      status: "active",
-    };
-    const userData = await this._userRepository.insertUser(data);
-    if (userData) {
-      const plainUserData = userData?.toObject();
-      const { password, ...rest } = plainUserData;
-      return rest;
-    } else {
-      return {
-        status: false,
-        data: null,
-        message: "Registeration Failed",
+    try {
+      const data: CreateUserRequestDTO = {
+        full_name: userFullName,
+        user_name: userName,
+        location: userLocation,
         email: userEmail,
+        password: hashedPassword,
       };
+
+      const userData = await this._userRepository.insertUser(data);
+      if (!userData) {
+        throw new AppError(
+          "Failed to create user",
+          StatusCode.INTERNAL_SERVER_ERROR
+        );
+      }
+
+      const savedEntity = UserMapper.toEntity(userData);
+
+      return UserMapper.toResponseDTO(savedEntity);
+    } catch (error: any) {
+      if (error.name === "MongoNetworkError") {
+        throw new AppError(
+          "Database connection failed",
+          StatusCode.SERVICE_UNAVAILABLE
+        );
+      }
+
+      handleServiceError(error, "Something went wrong while inserting user");
     }
   }
 
-  async loginUser(userMail: string): Promise<any> {
-    const userData = await this._userRepository.findUser(userMail);
-    if (userData) {
+  async loginUser(
+    userMail: string
+  ): Promise<{ status: boolean; data: any; message: string }> {
+    try {
+      const userData = await this._userRepository.findUser(userMail);
+      if (!userData) {
+        throw new AppError("User not found", StatusCode.NOT_FOUND);
+      }
+
       return {
         status: true,
         data: userData,
         message: "Login Successfull",
       };
-    } else {
-      return {
-        status: false,
-        data: null,
-        message: "Login Failed",
-        email: userMail,
-      };
+    } catch (error: any) {
+      if (error.name === "MongoNetworkError") {
+        throw new AppError(
+          "Database connection failed",
+          StatusCode.SERVICE_UNAVAILABLE
+        );
+      }
+
+      handleServiceError(error, "Something went wrong while verifying user");
     }
   }
 
-  async updatePassword(userMail: string, newPassword: string): Promise<any> {
-    const userData = await this._userRepository.updateUserByEmail(
-      { email: userMail },
-      { password: newPassword }
-    );
-    if (userData) {
+  async updatePassword(
+    userMail: string,
+    newPassword: string
+  ): Promise<{ status: boolean; data: any; message: string; email: string }> {
+    try {
+      const userData = await this._userRepository.updateUserByEmail(
+        { email: userMail },
+        { password: newPassword }
+      );
+      if (!userData) {
+        throw new AppError(
+          "Failed to update password",
+          StatusCode.INTERNAL_SERVER_ERROR
+        );
+      }
+
       return {
         status: true,
         data: userData,
         message: "Password Changed Successfully",
         email: userMail,
       };
-    } else {
-      return {
-        status: false,
-        data: null,
-        message: "Error in the user Service while chaging Password",
-        email: userMail,
-      };
+    } catch (error: any) {
+      if (error.name === "MongoNetworkError") {
+        throw new AppError(
+          "Database connection failed",
+          StatusCode.SERVICE_UNAVAILABLE
+        );
+      }
+
+      handleServiceError(
+        error,
+        "Something went wrong while updating user password"
+      );
     }
   }
 
-  async getProfile({ userId }: { userId: string | undefined }): Promise<any> {
+  async getProfile({
+    userId,
+  }: {
+    userId: string | undefined;
+  }): Promise<IuserModel> {
     try {
       if (!userId) {
-        return {
-          status: false,
-          message: "User Id not reached on the getProfile/userService",
-          data: null,
-        };
+        throw new AppError("User ID is required", StatusCode.BAD_REQUEST);
       }
-      const userData: IuserModel | null = await this._userRepository.findOne({
-        _id: userId,
-      });
-      if (userData) {
-        return {
-          status: true,
-          message: "User Data Is Available",
-          data: userData,
-        };
-      } else {
-        return {
-          status: false,
-          message: "User not exist with the provided user id",
-          data: null,
-        };
+
+      const userData = await this._userRepository.findOne({ _id: userId });
+      if (!userData) {
+        throw new AppError("User not found", StatusCode.NOT_FOUND);
       }
-    } catch (error) {
-      console.log(error, "error on the getAllUsers/userService");
+
+      return userData;
+    } catch (error: any) {
+      if (error.name === "MongoNetworkError") {
+        throw new AppError(
+          "Database connection failed",
+          StatusCode.SERVICE_UNAVAILABLE
+        );
+      }
+
+      handleServiceError(error, "Something went wrong while checking email");
     }
   }
 
@@ -135,77 +183,108 @@ export default class userService implements IuserService {
   }: {
     updateFormData: updateFormDataType;
     userId: string;
-  }): Promise<any> {
+  }): Promise<IuserModel> {
     try {
-      if (!updateFormData) {
-        return {
-          status: false,
-          message: "User Id not reached on the getProfile/userService",
-          data: null,
-        };
+      if (!updateFormData || !userId) {
+        throw new AppError(
+          "Formdata and userId is required",
+          StatusCode.BAD_REQUEST
+        );
       }
+
       const userUpdateData = {
         profile_pic: updateFormData.profilePic,
         full_name: updateFormData.fullName,
         user_name: updateFormData.userName,
         phone: updateFormData.phone,
       };
-      const userData: IuserModel | null =
-        await this._userRepository.findByIdAndUpdate(userId, userUpdateData);
-      if (userData) {
-        return {
-          status: true,
-          message: "User Data Is Updated",
-          data: userData,
-        };
-      } else {
-        return {
-          status: false,
-          message: "User not exist with the provided user id",
-          data: null,
-        };
+
+      const userData = await this._userRepository.findByIdAndUpdate(
+        userId,
+        userUpdateData
+      );
+      if (!userData) {
+        throw new AppError(
+          "Failed to update password",
+          StatusCode.INTERNAL_SERVER_ERROR
+        );
       }
-    } catch (error) {
-      console.log(error, "error on the getAllUsers/userService");
+
+      return userData;
+    } catch (error: any) {
+      if (error.name === "MongoNetworkError") {
+        throw new AppError(
+          "Database connection failed",
+          StatusCode.SERVICE_UNAVAILABLE
+        );
+      }
+
+      handleServiceError(error, "Something went wrong while updating user");
     }
   }
 
   async getUserDataById({ userId }: { userId: string }): Promise<any> {
     try {
-      const userData = await this._userRepository.findOne({ _id: userId });
-      if (userData) {
-        const { password, ...newUserData } = userData;
-        return {
-          status: true,
-          data: newUserData,
-          message: "User Data Available",
-        };
-      } else {
-        return {
-          status: false,
-          data: null,
-          message: "User Un Available",
-        };
+      if (!userId) {
+        throw new AppError("userId is required", StatusCode.BAD_REQUEST);
       }
-    } catch (error) {
-      console.log(error, "error on the getUserDataById/userService");
+
+      const userData = await this._userRepository.findOne({ _id: userId });
+      if (!userData) {
+        throw new AppError("User not found", StatusCode.NOT_FOUND);
+      }
+
+      const { password, ...newUserData } = userData;
+      return {
+        status: true,
+        data: newUserData,
+        message: "User Data Available",
+      };
+    } catch (error: any) {
+      if (error.name === "MongoNetworkError") {
+        throw new AppError(
+          "Database connection failed",
+          StatusCode.SERVICE_UNAVAILABLE
+        );
+      }
+
+      handleServiceError(error, "Something went wrong while fetching user");
     }
   }
 
   // To get all the users data for the comments live load
-  async getUsersDataById({ userIds }: { userIds: string[] }): Promise<any> {
+  async getUsersDataById({
+    userIds,
+  }: {
+    userIds: string[];
+  }): Promise<Partial<IuserModel>[]> {
     try {
-      let userDatas: any = [];
-      for (let userId of userIds) {
-        const userData = await this._userRepository.findOne({ _id: userId });
-        const newUserData = userData
-          ? (({ password, ...rest }) => rest)(userData.toObject())
-          : null;
-        userDatas.push(newUserData);
+      if (!userIds) {
+        throw new AppError("userIds are required", StatusCode.BAD_REQUEST);
       }
-      return userDatas;
-    } catch (error) {
-      console.log(error, "error on the getUsersDataById/userService");
+
+      const users = await this._userRepository.findMany({
+        _id: { $in: userIds },
+      });
+      if (!users) {
+        throw new AppError("Users not found", StatusCode.NOT_FOUND);
+      }
+
+      const filteredUsers = users.map((user) => {
+        const { password, ...rest } = user.toObject();
+        return rest;
+      });
+
+      return filteredUsers;
+    } catch (error: any) {
+      if (error.name === "MongoNetworkError") {
+        throw new AppError(
+          "Database connection failed",
+          StatusCode.SERVICE_UNAVAILABLE
+        );
+      }
+
+      handleServiceError(error, "Something went wrong while fetching users");
     }
   }
 
@@ -217,10 +296,32 @@ export default class userService implements IuserService {
     userId: string;
   }): Promise<void> {
     try {
-      const userData: IuserModel | null =
-        await this._userRepository.findByIdAndAddRequestId(userId, requestId);
-    } catch (error) {
-      console.log(error, "error on the getAllUsers/userService");
+      if (!requestId || !userId) {
+        throw new AppError(
+          "userId and requestId are required",
+          StatusCode.BAD_REQUEST
+        );
+      }
+
+      const userData = await this._userRepository.findByIdAndAddRequestId(
+        userId,
+        requestId
+      );
+      if (!userData) {
+        throw new AppError("User not found", StatusCode.NOT_FOUND);
+      }
+    } catch (error: any) {
+      if (error.name === "MongoNetworkError") {
+        throw new AppError(
+          "Database connection failed",
+          StatusCode.SERVICE_UNAVAILABLE
+        );
+      }
+
+      handleServiceError(
+        error,
+        "Something went wrong while adding request id to the user"
+      );
     }
   }
 
@@ -237,12 +338,12 @@ export default class userService implements IuserService {
     rewardAmount: number;
   }): Promise<void> {
     try {
-      console.log(
-        requestId,
-        userId,
-        points,
-        "This is from the addCompletedRequestDetails/userService"
-      );
+      if (!requestId || !userId || !points || !rewardAmount) {
+        throw new AppError(
+          "requestId, userId, points and rewardAmount are required"
+        );
+      }
+
       const userData: IuserModel | null =
         await this._userRepository.findByIdAndAddCompletedRequestIdAndPoints(
           userId,
@@ -250,85 +351,104 @@ export default class userService implements IuserService {
           points,
           rewardAmount
         );
-    } catch (error) {
-      console.log(error, "error on the addCompletedRequestDetails/userService");
+      if (!userData) {
+        throw new AppError("User not found", StatusCode.NOT_FOUND);
+      }
+
+      return;
+    } catch (error: any) {
+      if (error.name === "MongoNetworkError") {
+        throw new AppError(
+          "Database connection failed",
+          StatusCode.SERVICE_UNAVAILABLE
+        );
+      }
+
+      handleServiceError(
+        error,
+        "Something went wrong while adding completed reqeust to the user"
+      );
     }
   }
 
   /****************************           Admin Side             **************************************/
-  async getAllUsers(): Promise<any> {
+  async getAllUsers(): Promise<IuserModel[]> {
     try {
       const userList = await this._userRepository.findAll();
-      if (userList) {
-        return {
-          status: true,
-          data: userList,
-          message: "All Users Fetched Successfully",
-        };
-      } else {
-        return {
-          status: true,
-          data: null,
-          message: "Failed to Fetch All Users ",
-        };
+
+      return userList;
+    } catch (error: any) {
+      if (error.name === "MongoNetworkError") {
+        throw new AppError(
+          "Database connection failed",
+          StatusCode.SERVICE_UNAVAILABLE
+        );
       }
-    } catch (error) {
-      console.log(error, "error on the getAllUsers/userService");
+
+      handleServiceError(
+        error,
+        "Something went wrong while fetching all users"
+      );
     }
   }
 
   // To get the user details to the admin side
-  async getUserData({ userId }: { userId: string }): Promise<any> {
+  async getUserData({ userId }: { userId: string }): Promise<IuserModel> {
     try {
-      if (!mongoose.Types.ObjectId.isValid(userId)) {
-        return {
-          status: false,
-          data: null,
-          message: "Invalid Request ID format",
-        };
+      if (!userId) {
+        throw new AppError("userId is required", StatusCode.BAD_REQUEST);
       }
+
       const userData = await this._userRepository.findOne({ _id: userId });
-      if (userData) {
-        return {
-          status: true,
-          data: userData,
-          message: "User Data Fetched Successfully",
-        };
-      } else {
-        return {
-          status: true,
-          data: null,
-          message: "Failed to Fetch User Data",
-        };
+      if (!userData) {
+        throw new AppError("user not found", StatusCode.NOT_FOUND);
       }
-    } catch (error) {
-      console.log(error, "error on the getUserData/userService");
-      return {
-        status: false,
-        data: null,
-        message: "Failed to get the User Data",
-      };
+
+      return userData;
+    } catch (error: any) {
+      if (error.name === "MongoNetworkError") {
+        throw new AppError(
+          "Database connection failed",
+          StatusCode.SERVICE_UNAVAILABLE
+        );
+      }
+
+      handleServiceError(error, "Something went wrong while fetching user");
     }
   }
 
-  async changeUserStatus(props: { userId: string }): Promise<any> {
+  async changeUserStatus({
+    userId,
+  }: {
+    userId: string;
+  }): Promise<{ status: boolean; data: any; message: string }> {
     try {
-      const userData = await this._userRepository.changeStatus(props.userId);
-      if (userData) {
-        return {
-          status: true,
-          data: userData,
-          message: "Status Changed",
-        };
-      } else {
-        return {
-          status: false,
-          data: null,
-          message: "Status didin't changed",
-        };
+      if (!userId) {
+        throw new AppError("userId is required", StatusCode.BAD_REQUEST);
       }
-    } catch (error) {
-      console.log(error, "error on the getAllUsers/userService");
+
+      const userData = await this._userRepository.changeStatus(userId);
+      if (!userData) {
+        throw new AppError("user not found", StatusCode.NOT_FOUND);
+      }
+
+      return {
+        status: true,
+        data: userData,
+        message: "User status changed",
+      };
+    } catch (error: any) {
+      if (error.name === "MongoNetworkError") {
+        throw new AppError(
+          "Database connection failed",
+          StatusCode.SERVICE_UNAVAILABLE
+        );
+      }
+
+      handleServiceError(
+        error,
+        "Something went wrong while updating user status"
+      );
     }
   }
 }

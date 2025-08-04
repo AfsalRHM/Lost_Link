@@ -1,20 +1,26 @@
-import IchatService from "../interface/IchatService";
 import chatRepository from "../repositories/chatRepository";
 import messageRepository from "../repositories/messageRepository";
 
-import { createCorrelationId } from "../utils/correlationId";
-import eventEmitter from "../utils/eventEmitter";
-import sendToService from "../rabbitmq/producer";
-import IchatModel from "../interface/IchatModel";
-import mongoose from "mongoose";
+import chatModel from "../model/chatModel";
+import messageModel from "../model/messageModel";
 
-export default class chatService implements IchatService {
+import IchatService from "../interface/IchatService";
+import IchatModel from "../interface/IchatModel";
+
+import sendToService from "../rabbitmq/producer";
+import eventEmitter from "../utils/eventEmitter";
+import { createCorrelationId } from "../utils/correlationId";
+import { AppError } from "../utils/appError";
+import { StatusCode } from "../constants/statusCodes";
+import { handleServiceError } from "../utils/errorHandler";
+
+export default class ChatService implements IchatService {
   private _chatRepository: chatRepository;
   private _messageRepository: messageRepository;
 
   constructor() {
-    this._chatRepository = new chatRepository();
-    this._messageRepository = new messageRepository();
+    this._chatRepository = new chatRepository(chatModel);
+    this._messageRepository = new messageRepository(messageModel);
   }
 
   // Function to Get the Chat if created OR Create the Chat
@@ -26,6 +32,13 @@ export default class chatService implements IchatService {
     requestId: string;
   }): Promise<any> {
     try {
+      if (!userId || !requestId) {
+        throw new AppError(
+          "userId and requestId is required",
+          StatusCode.BAD_REQUEST
+        );
+      }
+
       let chatData = await this._chatRepository.findOne({
         is_group_chat: false,
         user_id: userId,
@@ -41,15 +54,15 @@ export default class chatService implements IchatService {
       const correlationId2 = createCorrelationId(requestId);
 
       if (!replyQueue || !replyQueue2) {
-        throw new Error("replyQueue is empty...!");
+        throw new Error(
+          "replyQueue or replyQueue2 env is not accessible, from chat service"
+        );
       }
 
-      let props: { userId?: string; requestId?: string } = {};
-
-      if (userId && requestId) {
-        props.userId = userId;
-        props.requestId = requestId;
-      }
+      let props: { userId: string; requestId: string } = {
+        userId,
+        requestId,
+      };
 
       // Change to the GRPC
       // For the User Data
@@ -94,60 +107,61 @@ export default class chatService implements IchatService {
         });
       });
 
-      if (userDataResponse.status && requestDataResponse.status) {
-        if (chatData) {
-          return {
-            status: true,
-            data: {
-              chatData: chatData,
-              userData: userDataResponse.data._doc,
-            },
-            message: "Chat Data Available",
-          };
-        } else {
-          const chatDataToInsert = {
-            user_name: userDataResponse.data._doc.full_name,
-            user_id: userDataResponse.data._doc._id,
-            request_name: requestDataResponse.data.product_name,
-            request_id: requestDataResponse.data._id,
-            request_status: requestDataResponse.data.status,
-          };
-          const newChatData: IchatModel | null =
-            await this._chatRepository.insertChat(chatDataToInsert);
-          if (newChatData) {
-            // Add the first Auto Message
-            const newChatId: string = newChatData._id as string;
-            await this._messageRepository.insertMessage({
-              chat: newChatId,
-              sender: "admin",
-              content: "Hello! How can I assist you today?",
-            });
-            return {
-              status: true,
-              data: {
-                chatData: newChatData,
-                userData: userDataResponse.data._doc,
-              },
-              message: "Chat Data Available",
-            };
-          } else {
-            return {
-              status: false,
-              data: null,
-              message: "New Chat Data Didn't Created",
-            };
-          }
-        }
-      } else {
-        throw new Error("User Data or Request Data Didn't get");
+      if (!userDataResponse || !requestDataResponse) {
+        throw new AppError(
+          "Data is not available through rabbitmq",
+          StatusCode.INTERNAL_SERVER_ERROR
+        );
       }
-    } catch (error) {
-      console.log(error, "error on the getUserChat/chatService");
-      return {
-        status: false,
-        data: null,
-        message: "Failed to get the User Chat",
-      };
+
+      if (chatData) {
+        return {
+          chatData: chatData,
+          userData: userDataResponse.data._doc,
+        };
+      } else {
+        const chatDataToInsert = {
+          user_name: userDataResponse.data._doc.full_name,
+          user_id: userDataResponse.data._doc._id,
+          request_name: requestDataResponse._doc.product_name,
+          request_id: requestDataResponse._doc._id,
+          request_status: requestDataResponse._doc.status,
+        };
+
+        const newChatData: IchatModel | null =
+          await this._chatRepository.insertChat(chatDataToInsert);
+        if (!newChatData) {
+          throw new AppError(
+            "Failed to create chat",
+            StatusCode.INTERNAL_SERVER_ERROR
+          );
+        }
+
+        // Adding the first Auto Message
+        const newChatId: string = newChatData._id as string;
+        await this._messageRepository.insertMessage({
+          chat: newChatId,
+          sender: "admin",
+          content: "Hello! How can I assist you today?",
+        });
+
+        return {
+          chatData: newChatData,
+          userData: userDataResponse.data._doc,
+        };
+      }
+    } catch (error: any) {
+      if (error.name === "MongoNetworkError") {
+        throw new AppError(
+          "Database connection failed",
+          StatusCode.SERVICE_UNAVAILABLE
+        );
+      }
+
+      handleServiceError(
+        error,
+        "Something went wrong while fetching user chat"
+      );
     }
   }
 
@@ -158,93 +172,75 @@ export default class chatService implements IchatService {
         latest_message: { $exists: true, $ne: null },
       });
 
-      if (chatData) {
-        return {
-          status: true,
-          data: chatData,
-          message: "Fetched all the Chats",
-        };
-      } else {
-        return {
-          status: true,
-          data: null,
-          message: "Chat Data is Empty",
-        };
+      return chatData;
+    } catch (error: any) {
+      if (error.name === "MongoNetworkError") {
+        throw new AppError(
+          "Database connection failed",
+          StatusCode.SERVICE_UNAVAILABLE
+        );
       }
-    } catch (error) {
-      console.log(error, "error on the getAllChats/chatService");
-      return {
-        status: false,
-        data: null,
-        message: "Failed to get all the Chats",
-      };
+
+      handleServiceError(
+        error,
+        "Something went wrong while fetching all chats"
+      );
     }
   }
 
   // Fetch All the Chats
   async getAllUserChats({ userId }: { userId: string }): Promise<any> {
     try {
-      if (!mongoose.Types.ObjectId.isValid(userId)) {
-        return {
-          status: false,
-          data: null,
-          message: "Invalid Request ID format",
-        };
+      if (!userId) {
+        throw new AppError("userId is required", StatusCode.BAD_REQUEST);
       }
-      
+
       const chatData = await this._chatRepository.findSome({
         user_id: userId,
         latest_message: { $exists: true, $ne: null },
       });
 
-      if (chatData) {
-        return {
-          status: true,
-          data: chatData,
-          message: "Fetched all the Chats of a user",
-        };
-      } else {
-        return {
-          status: true,
-          data: null,
-          message: "Chat Data is Empty",
-        };
+      return chatData;
+    } catch (error: any) {
+      if (error.name === "MongoNetworkError") {
+        throw new AppError(
+          "Database connection failed",
+          StatusCode.SERVICE_UNAVAILABLE
+        );
       }
-    } catch (error) {
-      console.log(error, "error on the getAllUserChats/chatService");
-      return {
-        status: false,
-        data: null,
-        message: "Failed to get all the Chats of a specific user",
-      };
+
+      handleServiceError(
+        error,
+        "Something went wrong while fetching all user chats"
+      );
     }
   }
 
   // To fetch the chat details on the admin side
   async getChatDetails({ chatId }: { chatId: string }): Promise<any> {
     try {
-      const chatData = await this._chatRepository.findOne({ _id: chatId });
-
-      if (chatData) {
-        return {
-          status: true,
-          data: chatData,
-          message: "Fetched the User's Chat",
-        };
-      } else {
-        return {
-          status: true,
-          data: null,
-          message: "User's Chat Data is Empty",
-        };
+      if (!chatId) {
+        throw new AppError("chatId is required", StatusCode.BAD_REQUEST);
       }
-    } catch (error) {
-      console.log(error, "error on the getChatDetails/chatService");
-      return {
-        status: false,
-        data: null,
-        message: "Failed to get User's Chat Data",
-      };
+
+      const chatData = await this._chatRepository.findOne({ _id: chatId });
+      if (!chatData) {
+        throw new AppError("chat not found", StatusCode.NOT_FOUND);
+      }
+
+      return chatData;
+    } catch (error: any) {
+      if (error.name === "MongoNetworkError") {
+        throw new AppError(
+          "Database connection failed",
+          StatusCode.SERVICE_UNAVAILABLE
+        );
+      }
+
+      handleServiceError(
+        error,
+        "Something went wrong while fetching chat details"
+      );
     }
   }
 }

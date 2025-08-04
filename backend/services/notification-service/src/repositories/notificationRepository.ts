@@ -1,15 +1,16 @@
-import IbaseRepository from "../interface/IbaseRepository";
+import { Model, UpdateResult } from "mongoose";
+
 import BaseRepository from "./baseRepository";
+
+import IbaseRepository from "../interface/IbaseRepository";
 import InotificationModel from "../interface/InotificationModel";
-import notificationModel from "../model/notificationModel";
-import { UpdateResult } from "mongoose";
 
 export default class notificationRepository
   extends BaseRepository<InotificationModel>
   implements IbaseRepository<InotificationModel>
 {
-  constructor() {
-    super(notificationModel);
+  constructor(model: Model<InotificationModel>) {
+    super(model);
   }
 
   async insertChat(

@@ -1,28 +1,34 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
+
 import ImeetController from "../interface/ImeetController";
-import meetService from "../services/meetService";
+import ImeetService from "../interface/ImeetService";
+
 import { StatusCode } from "../constants/statusCodes";
+import { AppError } from "../utils/appError";
 
-export default class meetController implements ImeetController {
-  private _meetService: meetService;
+export default class MeetController implements ImeetController {
+  private _meetService: ImeetService;
 
-  constructor() {
-    this._meetService = new meetService();
+  constructor(meetService: ImeetService) {
+    this._meetService = meetService;
   }
 
   // To Create/Schedule a meet
-  public createMeet = async (req: Request, res: Response): Promise<void> => {
+  public createMeet = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const { date, time, userId, requestId, userName } = req.body;
       if (!date || !time || !userId || !requestId || !userName) {
-        console.log(
-          "invalid data passed to the request createMeet/meetController"
+        throw new AppError(
+          "data, time, userId, requesId and userName is required",
+          StatusCode.BAD_REQUEST
         );
-        res.status(StatusCode.NOT_FOUND);
-        return;
       }
 
-      const response = await this._meetService.createMeet({
+      const meet = await this._meetService.createMeet({
         date,
         time,
         userId,
@@ -30,82 +36,78 @@ export default class meetController implements ImeetController {
         userName,
       });
 
-      if (response.status) {
-        res.status(StatusCode.OK).json(response);
-      } else {
-        res.status(StatusCode.BAD_REQUEST).json(response);
-      }
+      res
+        .status(StatusCode.OK)
+        .json({ status: true, data: meet, message: "Meet created" });
     } catch (error) {
       console.log("error in createMeet/meetController", error);
-      return;
+      next(error);
     }
   };
 
   // To Create/Schedule a meet
-  public getAllMeets = async (req: Request, res: Response): Promise<void> => {
+  public getAllMeets = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
-      const response = await this._meetService.getAllMeets();
+      const meets = await this._meetService.getAllMeets();
 
-      if (response.status) {
-        res.status(StatusCode.OK).json(response);
-      } else {
-        res.status(StatusCode.BAD_REQUEST).json(response);
-      }
+      res
+        .status(StatusCode.OK)
+        .json({ status: true, data: meets, message: "All meets fetched" });
     } catch (error) {
       console.log("error in getAllMeets/meetController", error);
-      return;
+      next(error);
     }
   };
 
   // To get Meet data of a single meet
   public getMeetDataAdmin = async (
     req: Request,
-    res: Response
+    res: Response,
+    next: NextFunction
   ): Promise<void> => {
     try {
       const meetId = req.params.id;
       if (!meetId) {
-        console.log(
-          "invalid data passed to the request getMeetDataAdmin/meetController"
-        );
-        res.status(StatusCode.NOT_FOUND);
-        return;
+        throw new AppError("meetId is required", StatusCode.BAD_REQUEST);
       }
-      const response = await this._meetService.getMeetDataAdmin({ meetId });
 
-      if (response.status) {
-        res.status(StatusCode.OK).json(response);
-      } else {
-        res.status(StatusCode.BAD_REQUEST).json(response);
-      }
+      const meet = await this._meetService.getMeetDataAdmin({ meetId });
+
+      res.status(StatusCode.OK).json({
+        status: true,
+        data: meet,
+        message: "Meet details fetched for admin",
+      });
     } catch (error) {
       console.log("error in getMeetDataAdmin/meetController", error);
-      return;
+      next(error);
     }
   };
 
   // To get list of meetings of a particular user
-  public getUserMeets = async (req: Request, res: Response): Promise<void> => {
+  public getUserMeets = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const userId = req.params.id;
-
       if (!userId) {
-        console.log(
-          "invalid data passed to the request getUserMeets/meetController"
-        );
-        res.status(StatusCode.NOT_FOUND);
-        return;
+        throw new AppError("userId is required", StatusCode.BAD_REQUEST);
       }
-      const response = await this._meetService.getUserMeets({ userId });
 
-      if (response.status) {
-        res.status(StatusCode.OK).json(response);
-      } else {
-        res.status(StatusCode.BAD_REQUEST).json(response);
-      }
+      const meets = await this._meetService.getUserMeets({ userId });
+
+      res
+        .status(StatusCode.OK)
+        .json({ status: true, data: meets, message: "User meets fetched" });
     } catch (error) {
       console.log("error in getUserMeets/meetController", error);
-      return;
+      next(error);
     }
   };
 }

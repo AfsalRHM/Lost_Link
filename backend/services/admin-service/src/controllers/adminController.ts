@@ -1,121 +1,162 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
+
 import IadminController from "../interface/IadminController";
-import adminService from "../services/adminService";
+import IadminService from "../interface/IadminService";
+
 import { StatusCode } from "../constants/statusCodes";
+import { AppError } from "../utils/appError";
 
-export default class authController implements IadminController {
-  private _adminService: adminService;
+export default class AdminController implements IadminController {
+  private _adminService: IadminService;
 
-  constructor() {
-    this._adminService = new adminService();
+  constructor(adminService: IadminService) {
+    this._adminService = adminService;
   }
 
-  public adminLogin = async (req: Request, res: Response): Promise<void> => {
+  public adminLogin = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
-      const response = await this._adminService.adminLogin(req.body);
-
-      if (response.status) {
-        const accessToken = response.tokenData?.accessToken;
-        const refreshToken = response.tokenData?.refreshToken;
-
-        res
-          .status(StatusCode.OK)
-          .cookie("adminRefreshToken", refreshToken, {
-            httpOnly: true,
-            sameSite: "strict",
-            path: "/",
-          })
-          .setHeader("Authorization", `Bearer ${accessToken}`)
-          .json({
-            status: true,
-            message: "Login Successfull",
-            data: response.data,
-            accessToken,
-          });
-      } else {
-        res
-          .status(StatusCode.OK)
-          .json({ status: false, message: "Login Failed", data: null });
+      const { email, password } = req.body;
+      if (!email || !password) {
+        throw new AppError(
+          "email and password is required",
+          StatusCode.BAD_REQUEST
+        );
       }
-    } catch (error) {
+
+      const response = await this._adminService.adminLogin({ email, password });
+
+      const accessToken = response.accessToken;
+      const refreshToken = response.refreshToken;
+
       res
-        .status(StatusCode.BAD_REQUEST)
-        .json({ message: "error on the getAllUsers/adminController" });
+        .status(StatusCode.OK)
+        .cookie("adminRefreshToken", refreshToken, {
+          httpOnly: true,
+          sameSite: "strict",
+          path: "/",
+        })
+        .setHeader("Authorization", `Bearer ${accessToken}`)
+        .json({
+          status: true,
+          message: "Login Successfull",
+          data: response,
+          accessToken,
+        });
+    } catch (error) {
+      console.log("error on the adminLogin/adminController");
+      next(error);
     }
   };
 
-  public getAllUsers = async (req: Request, res: Response): Promise<void> => {
+  public getAllUsers = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
-      const response = await this._adminService.getAllUsers();
-      res.status(StatusCode.OK).json(response);
-    } catch (error) {
+      const users = await this._adminService.getAllUsers();
+
       res
-        .status(StatusCode.BAD_REQUEST)
-        .json({ message: "error on the getAllUsers/adminController" });
+        .status(StatusCode.OK)
+        .json({ status: true, data: users, message: "Fetched users" });
+    } catch (error) {
+      console.log("error on the getAllUsers/adminController");
+      next(error);
     }
   };
 
-  public getAllAdmins = async (req: Request, res: Response): Promise<void> => {
+  public getAllAdmins = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
-      const response = await this._adminService.getAllAdmins();
-      res.status(StatusCode.OK).json(response);
-    } catch (error) {
+      const admins = await this._adminService.getAllAdmins();
+
       res
-        .status(StatusCode.BAD_REQUEST)
-        .json({ message: "error on the getAllAdmins/adminController" });
+        .status(StatusCode.OK)
+        .json({ status: true, data: admins, message: "Fetched admins" });
+    } catch (error) {
+      console.log("error on the getAllAdmins/adminController");
+      next(error);
     }
   };
 
   public changeUserStatus = async (
     req: Request,
-    res: Response
+    res: Response,
+    next: NextFunction
   ): Promise<void> => {
     try {
       const userId = req.params.id;
+      if (!userId) {
+        throw new AppError("userId is required", StatusCode.BAD_REQUEST);
+      }
 
-      const response = await this._adminService.changeUserStatus({ userId });
-      res.status(StatusCode.OK).json(response);
-    } catch (error) {
+      await this._adminService.changeUserStatus({ userId });
+
       res
-        .status(StatusCode.BAD_REQUEST)
-        .json({ message: "error on the changeUserStatus/adminController" });
+        .status(StatusCode.OK)
+        .json({ status: true, data: null, message: "Updated user status" });
+    } catch (error) {
+      console.log("error on the changeUserStatus/adminController");
+      next(error);
     }
   };
 
   public changeAdminStatus = async (
     req: Request,
-    res: Response
+    res: Response,
+    next: NextFunction
   ): Promise<void> => {
     try {
       const adminId = req.params.id;
-
-      console.log(adminId, "THIS is the admin I d823943")
-
       if (!adminId) {
-        throw new Error("Admin id didn't get through the params");
+        throw new AppError("adminId is required", StatusCode.BAD_REQUEST);
       }
 
-      const response = await this._adminService.changeAdminStatus({ adminId });
-      res.status(StatusCode.OK).json(response.data);
-    } catch (error) {
+      await this._adminService.changeAdminStatus({ adminId });
+
       res
-        .status(StatusCode.BAD_REQUEST)
-        .json({ message: "error on the changeAdminStatus/adminController" });
+        .status(StatusCode.OK)
+        .json({ status: true, data: null, message: "Updated admin status" });
+    } catch (error) {
+      console.log("error on the changeAdminStatus/adminController");
+      next(error);
     }
   };
 
-  public insertAdmin = async (req: Request, res: Response): Promise<void> => {
+  public insertAdmin = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
-      const response = await this._adminService.insertAdmin(req.body.Props);
-      res.status(StatusCode.OK).json(response.data);
-    } catch (error) {
+      const formData = req.body.props;
+      if (!formData) {
+        throw new AppError("formData is required", StatusCode.BAD_REQUEST);
+      }
+
+      const admin = await this._adminService.insertAdmin(req.body.Props);
+
       res
-        .status(StatusCode.BAD_REQUEST)
-        .json({ message: "error on the insertAdmin/adminController" });
+        .status(StatusCode.OK)
+        .json({ status: true, data: admin, message: "Admin created" });
+    } catch (error) {
+      console.log("error on the insertAdmin/adminController");
+      next(error);
     }
   };
 
-  public adminLogout = async (req: Request, res: Response): Promise<void> => {
+  public adminLogout = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       res
         .status(StatusCode.OK)
@@ -126,38 +167,40 @@ export default class authController implements IadminController {
         })
         .json({ status: "true", message: "Logged out successfully" });
     } catch (error) {
-      res
-        .status(StatusCode.BAD_REQUEST)
-        .json({ message: "error on the adminLogout/adminController" });
+      console.log("error on the adminLogout/adminController");
+      next(error);
     }
   };
 
-  public refreshToken = async (req: Request, res: Response): Promise<void> => {
+  public refreshToken = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const refreshToken = req.cookies.adminRefreshToken;
-      const result = await this._adminService.refreshToken({token: refreshToken});
-      if (result?.status == true) {
-        res
-          .setHeader("Authorization", `Bearer ${result.message}`)
-          .status(StatusCode.OK)
-          .json({
-            status: true,
-            message: "New Access Token Created",
-            accessToken: result.message,
-          });
-      } else if (result?.message === "Token expired") {
-        res
-          .status(StatusCode.UNAUTHORIZED)
-          .json({ status: false, message: "Refresh token expired" });
-      } else {
-        res
-          .status(StatusCode.UNAUTHORIZED)
-          .json({ status: false, message: "Failed to refresh token" });
+      if (!refreshToken) {
+        throw new AppError(
+          "Unauthorized: Refresh token missing",
+          StatusCode.UNAUTHORIZED
+        );
       }
-    } catch (error) {
+
+      const newAccessToken = await this._adminService.refreshToken({
+        token: refreshToken,
+      });
+
       res
-        .status(StatusCode.UNAUTHORIZED)
-        .json({ status: false, message: "New Access Token not Generated" });
+        .setHeader("Authorization", `Bearer ${newAccessToken}`)
+        .status(StatusCode.OK)
+        .json({
+          status: true,
+          message: "New Access Token Created",
+          accessToken: newAccessToken,
+        });
+    } catch (error) {
+      console.log("error on the refreshToken/adminController");
+      next(error);
     }
   };
 }

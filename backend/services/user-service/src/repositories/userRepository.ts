@@ -1,16 +1,14 @@
-import { FilterQuery } from "mongoose";
+import { FilterQuery, Model } from "mongoose";
 import IbaseRepository from "../interface/IbaseRepository";
 import BaseRepository from "./baseRepository";
 import IuserModel from "../interface/IuserModel";
-import userModel from "../models/userModel";
-import { getTierByPoints } from "../utils/tier";
 
 export default class UserRepository
   extends BaseRepository<IuserModel>
   implements IbaseRepository<IuserModel>
 {
-  constructor() {
-    super(userModel);
+  constructor(model: Model<IuserModel>) {
+    super(model);
   }
 
   async insertUser(userData: Partial<IuserModel>): Promise<IuserModel | null> {
@@ -91,7 +89,7 @@ export default class UserRepository
           },
           $inc: {
             points: points,
-            wallet: rewardAmount
+            wallet: rewardAmount,
           },
         },
         { new: true }

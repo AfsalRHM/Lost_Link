@@ -1,28 +1,22 @@
 import express from "express";
 const meet_route = express.Router();
 
-import meetController from "../controllers/meetController";
-import verifyAccessToken, { verifyAdminAccessToken } from "../middlewares/jwtVerifyUser";
+import MeetController from "../controllers/meetController";
+import MeetService from "../services/meetService";
 
-const MeetController = new meetController();
+const meetService = new MeetService();
+const meetController = new MeetController(meetService);
 
 /*************************      User Side       *******************************/
 // Get Requests
-meet_route.get("/:id/meetings", verifyAccessToken, MeetController.getUserMeets); // To get list of meeting of a particular user
+meet_route.get("/:id/meetings", meetController.getUserMeets); // To get list of meeting of a particular user
 
 // Post Requests
-meet_route.post("/", verifyAccessToken, MeetController.createMeet); // To get schedule a meet
-
-// meet_route.post("/fetch-user-meetings", verifyAccessToken, MeetController.getUserMeets); // To get list of meeting of a particular user
-
-// Patch Requests
-
+meet_route.post("/", meetController.createMeet); // To get schedule a meet
 
 /*************************      Admin Side       *******************************/
 // Get Requests
-meet_route.get("/admin/meet/all", verifyAdminAccessToken, MeetController.getAllMeets); // To get all the meets
-meet_route.get("/admin/meet/:id", verifyAdminAccessToken, MeetController.getMeetDataAdmin); // To get details of one meet
-
-// Post Requests
+meet_route.get("/admin/meet/all", meetController.getAllMeets); // To get all the meets
+meet_route.get("/admin/meet/:id", meetController.getMeetDataAdmin); // To get details of one meet
 
 export default meet_route;

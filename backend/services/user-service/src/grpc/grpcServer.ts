@@ -2,8 +2,9 @@ import * as grpc from "@grpc/grpc-js";
 import * as protoLoader from "@grpc/proto-loader";
 import path from "path";
 import UserRepository from "../repositories/userRepository";
+import userModel from "../models/userModel";
 
-const userRepository = new UserRepository();
+const userRepository = new UserRepository(userModel);
 
 const protoPath = path.join(__dirname, "./proto/user.proto");
 const packageDef = protoLoader.loadSync(protoPath);

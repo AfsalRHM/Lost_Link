@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 import { adminService } from "../../../services/adminService";
 
-import { showSuccessToast, showErrorToast } from "../../../utils/toastUtils";
+import { showSuccessToast } from "../../../utils/toastUtils";
 
 const AddAdminForm = () => {
   const navigate = useNavigate();
@@ -44,17 +44,12 @@ const AddAdminForm = () => {
     if (!validateForm()) return;
 
     try {
-      const response = await adminService.insertAdmin(formData);
+      await adminService.insertAdmin(formData);
 
-      if (response.status) {
-        showSuccessToast("Admin created successfully.");
-        navigate("/admin/admins");
-      } else {
-        console.log("Unexpected response:", response);
-      }
+      showSuccessToast("Admin created successfully.");
+      navigate("/admin/admins");
     } catch (error) {
       console.error(error);
-      showErrorToast("An error occurred while creating the admin.");
     }
   };
 

@@ -1,5 +1,3 @@
-// src/constants/statusCodes.ts
-
 export enum StatusCode {
   OK = 200,
   CREATED = 201,
@@ -12,4 +10,5 @@ export enum StatusCode {
   CONFLICT = 409,
 
   INTERNAL_SERVER_ERROR = 500,
+  SERVICE_UNAVAILABLE = 503,
 }

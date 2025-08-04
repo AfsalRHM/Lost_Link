@@ -46,45 +46,52 @@ const LoginPage = () => {
   };
 
   async function handleSubmit(): Promise<void> {
-    const errors = await validateLoginDetails(loginPageDetails);
+    try {
+      const errors = validateLoginDetails(loginPageDetails);
 
-    if (errors.userMail) {
-      setUserMailValidationErrorData(errors.userMail);
-    } else {
-      setUserMailValidationErrorData({ display: false, content: "" });
-    }
-
-    if (errors.userPassword) {
-      setUserPasswordValidationErrorData(errors.userPassword);
-    } else {
-      setUserPasswordValidationErrorData({ display: false, content: "" });
-    }
-
-    if (!errors.userMail && !errors.userPassword) {
-      const response = await userService.login({
-        userEmail: userMailInput,
-        userPassword: userPasswordInput,
-      });
-
-      if (response.status === 200) {
-        const userData = {
-          userId: response.data.data._id,
-          userName: response.data.data.user_name,
-          userProfile: response.data.data.profile_pic,
-        };
-
-        // Changed the access token to body
-        const accessToken = response.data.accessToken;
-        dispatch(assignUserDetails(userData));
-        dispatch(assignAccessToken(accessToken));
-        showSuccessToast("Login successful!");
-        navigate("/home");
+      if (errors.userMail) {
+        setUserMailValidationErrorData(errors.userMail);
       } else {
-        setUserLoginValidationError({
-          display: !response.data.status,
-          content: response.data.message,
-        });
+        setUserMailValidationErrorData({ display: false, content: "" });
       }
+
+      if (errors.userPassword) {
+        setUserPasswordValidationErrorData(errors.userPassword);
+      } else {
+        setUserPasswordValidationErrorData({ display: false, content: "" });
+      }
+
+      if (!errors.userMail && !errors.userPassword) {
+        const response = await userService.login({
+          userEmail: userMailInput,
+          userPassword: userPasswordInput,
+        });
+
+        if (response.status === 200) {
+          const userData = {
+            userId: response.data.data._id,
+            userName: response.data.data.user_name,
+            userProfile: response.data.data.profile_pic,
+          };
+
+          // Changed the access token to body
+          const accessToken = response.data.accessToken;
+          dispatch(assignUserDetails(userData));
+          dispatch(assignAccessToken(accessToken));
+          showSuccessToast("Login successful!");
+          navigate("/home");
+        } else {
+          setUserLoginValidationError({
+            display: !response.data.status,
+            content: response.data.message,
+          });
+        }
+      }
+    } catch (error: any) {
+      setUserLoginValidationError({
+        display: !error.response.data.status,
+        content: error.response.data.message,
+      });
     }
   }
 
@@ -128,7 +135,6 @@ const LoginPage = () => {
         }
       }
     } catch (error) {
-      console.log(error);
       handleGoogleLoginFailure();
     }
   }

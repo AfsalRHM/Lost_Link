@@ -41,7 +41,6 @@ const ProfileSidebar = ({
 
   function goToPage(currentValue: string) {
     selectFunction(currentValue);
-    console.log(currentValue);
   }
 
   const menuItems = [

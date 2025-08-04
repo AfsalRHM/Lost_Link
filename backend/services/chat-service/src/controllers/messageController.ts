@@ -1,126 +1,119 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
+
 import ImessageController from "../interface/ImessageController";
-import messageService from "../services/messageService";
+import ImessageService from "../interface/ImessageService";
 
-import { getAdminIdFromToken, getUserIdFromToken } from "../utils/helpers";
 import { StatusCode } from "../constants/statusCodes";
+import { AppError } from "../utils/appError";
+import extractUserFromHeaders from "../utils/extractUserFromHeaders";
 
-export default class messageController implements ImessageController {
-  private _messageService: messageService;
+export default class MessageController implements ImessageController {
+  private _messageService: ImessageService;
 
-  constructor() {
-    this._messageService = new messageService();
+  constructor(messageService: ImessageService) {
+    this._messageService = messageService;
   }
 
   // To send the user messages
-  public sendMessage = async (req: Request, res: Response): Promise<void> => {
+  public sendMessage = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
-      const { content, chatId, image } = req.body; // Add Type
-      if (!chatId) {
-        console.log("invalid data passed to the request send-message 1");
-        res.status(StatusCode.NOT_FOUND);
-        return;
+      const { content, chatId, image } = req.body;
+      if (!chatId || !content || !image) {
+        throw new AppError(
+          "content, chatId and image is required",
+          StatusCode.BAD_REQUEST
+        );
       }
 
-      const token = req.header("Authorization")?.split(" ")[1];
-
-      if (!token) {
-        console.log("invalid data passed to the request send-message 2");
-        res.status(StatusCode.UNAUTHORIZED);
-        return;
-      }
-      const userId = await getUserIdFromToken({ token });
-
-      if (!userId) {
-        console.log("invalid Token On messageController");
-        res.status(StatusCode.UNAUTHORIZED);
-        return;
+      const user = extractUserFromHeaders(req);
+      if (!user || !user.id) {
+        throw new AppError(
+          "Unauthorized: User info missing",
+          StatusCode.UNAUTHORIZED
+        );
       }
 
-      const response = await this._messageService.sendMessage({
+      const message = await this._messageService.sendMessage({
         content,
         chatId,
-        userId,
+        userId: user.id,
         image,
       });
 
-      if (response.status) {
-        res.status(StatusCode.OK).json(response);
-      } else {
-        res.status(StatusCode.BAD_REQUEST).json(response);
-      }
+      res
+        .status(StatusCode.OK)
+        .json({ status: true, data: message, message: "Message created" });
     } catch (error) {
       console.log("error in sendMessage/messageController", error);
-      return;
+      next(error);
     }
   };
 
   // To save the admin messages
   public sendAdminMessage = async (
     req: Request,
-    res: Response
+    res: Response,
+    next: NextFunction
   ): Promise<void> => {
     try {
-      const { content, chatId, image } = req.body; // Add Type
-      if (!chatId) {
-        console.log("invalid data passed to the request send-admin-message");
-        res.status(StatusCode.NOT_FOUND);
-        return;
+      const { content, chatId, image } = req.body;
+      if (!chatId || !content || !image) {
+        throw new AppError(
+          "content, chatId and image is required",
+          StatusCode.BAD_REQUEST
+        );
       }
 
-      const token = req.header("Authorization")?.split(" ")[1];
-
-      if (!token) {
-        console.log("invalid data passed to the request send-admin-message");
-        res.status(StatusCode.UNAUTHORIZED);
-        return;
-      }
-      const adminId = await getAdminIdFromToken({ token });
-
-      if (!adminId) {
-        console.log("invalid Token On messageController");
-        res.status(StatusCode.UNAUTHORIZED);
-        return;
+      const user = extractUserFromHeaders(req);
+      if (!user || !user.id) {
+        throw new AppError(
+          "Unauthorized: User info missing",
+          StatusCode.UNAUTHORIZED
+        );
       }
 
-      const response = await this._messageService.sendAdminMessage({
+      const message = await this._messageService.sendAdminMessage({
         content,
         chatId,
-        adminId,
+        adminId: user.id,
         image,
       });
 
-      if (response.status) {
-        res.status(StatusCode.OK).json(response);
-      } else {
-        res.status(StatusCode.BAD_REQUEST).json(response);
-      }
+      res.status(StatusCode.OK).json({
+        status: true,
+        data: message,
+        message: "Admin message created",
+      });
     } catch (error) {
       console.log("error in sendMessage/messageController", error);
-      return;
+      next(error);
     }
   };
 
   // To get all the messages of a particular chat
-  public getMessages = async (req: Request, res: Response): Promise<void> => {
+  public getMessages = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const chatId = req.params.id;
       if (!chatId) {
-        console.log("invalid data passed to the request get-messages");
-        res.status(StatusCode.NOT_FOUND);
-        return;
+        throw new AppError("chatId is required", StatusCode.BAD_REQUEST);
       }
 
-      const response = await this._messageService.getMessages({ chatId });
+      const messages = await this._messageService.getMessages({ chatId });
 
-      if (response.status) {
-        res.status(StatusCode.OK).json(response);
-      } else {
-        res.status(StatusCode.BAD_REQUEST).json(response);
-      }
+      res
+        .status(StatusCode.OK)
+        .json({ status: true, data: messages, message: "Messages fetched" });
     } catch (error) {
       console.log("error in getMessages/messageController", error);
-      return;
+      next(error);
     }
   };
 }

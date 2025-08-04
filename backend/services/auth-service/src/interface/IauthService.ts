@@ -1,7 +1,7 @@
 export default interface IauthService {
   checkMail(recieverEmail: string): Promise<boolean>;
   resetPassword(userMail: string, newPassword: string): Promise<any>;
-  sendMail(recieverEmail: string, recieverName: string): Promise<void>;
+  sendMail(recieverEmail: string, recieverName: string): Promise<any>;
   verifyotp(userEmail: string, userEnteredOTP: string): Promise<boolean>;
   insertuser(
     userFullName: string,
@@ -11,12 +11,11 @@ export default interface IauthService {
     userPassword: string
   ): Promise<any>;
   loginVerify(userEmail: string, userPassword: string): Promise<any>;
-  refreshToken(
-    token: string
-  ): Promise<{ status: boolean; data: string | null; message: string } | undefined>;
+  refreshToken(token: string): Promise<any>;
   googleLoginVerify(
     email: string
-  ): Promise<{ status: boolean; data: UserDataType | null; message: string }>;
+  ): Promise<{ status: boolean; data: any | null; message: string }>;
+  adminRefreshToken(token: string): Promise<any>;
 }
 
 export interface UserDataType {

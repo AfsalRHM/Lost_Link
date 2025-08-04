@@ -1,11 +1,19 @@
-import InotificationService from "../interface/InotificationService";
 import notificationRepository from "../repositories/notificationRepository";
+import notificationModel from "../model/notificationModel";
 
-export default class notificationService implements InotificationService {
+import InotificationService from "../interface/InotificationService";
+
+import { AppError } from "../utils/appError";
+import { StatusCode } from "../constants/statusCodes";
+import { handleServiceError } from "../utils/errorHandler";
+
+export default class NotificationService implements InotificationService {
   private _notificationRepository: notificationRepository;
 
   constructor() {
-    this._notificationRepository = new notificationRepository();
+    this._notificationRepository = new notificationRepository(
+      notificationModel
+    );
   }
 
   // To create a notification
@@ -31,13 +39,18 @@ export default class notificationService implements InotificationService {
           message: "Unable to Insert Data",
         };
       }
-    } catch (error) {
-      console.log(error, "error on the createNotification/notificaitonService");
-      return {
-        status: false,
-        data: null,
-        message: "Failed to get all the Chats",
-      };
+    } catch (error: any) {
+      if (error.name === "MongoNetworkError") {
+        throw new AppError(
+          "Database connection failed",
+          StatusCode.SERVICE_UNAVAILABLE
+        );
+      }
+
+      handleServiceError(
+        error,
+        "Something went wrong while creating notification"
+      );
     }
   }
 
@@ -45,39 +58,28 @@ export default class notificationService implements InotificationService {
   async getNotifications({ userId }: { userId: string }): Promise<any> {
     try {
       if (!userId) {
-        return {
-          status: false,
-          data: null,
-          message:
-            "User id not get in the getNotifications/notificaitonService",
-        };
+        throw new AppError("userId is required", StatusCode.BAD_REQUEST);
       }
+
       const notificationData = await this._notificationRepository.findSome({
         sender: "admin",
         user_id: userId,
         seen: false,
       });
 
-      if (notificationData) {
-        return {
-          status: true,
-          data: notificationData,
-          message: "Fetched all the Notifications",
-        };
-      } else {
-        return {
-          status: true,
-          data: null,
-          message: "Notification is Empty",
-        };
+      return notificationData;
+    } catch (error: any) {
+      if (error.name === "MongoNetworkError") {
+        throw new AppError(
+          "Database connection failed",
+          StatusCode.SERVICE_UNAVAILABLE
+        );
       }
-    } catch (error) {
-      console.log(error, "error on the getNotifications/notificaitonService");
-      return {
-        status: false,
-        data: null,
-        message: "Failed to get the Notifications",
-      };
+
+      handleServiceError(
+        error,
+        "Something went wrong while user notifications"
+      );
     }
   }
 
@@ -89,37 +91,32 @@ export default class notificationService implements InotificationService {
   }): Promise<any> {
     try {
       if (!userId) {
-        return {
-          status: false,
-          data: null,
-          message:
-            "User id not get in the changeUserNotificationSeen/notificaitonService",
-        };
+        throw new AppError("userId is required", StatusCode.BAD_REQUEST);
       }
+
       const notificationData = await this._notificationRepository.updateAll(
         userId
       );
-
-      if (notificationData) {
-        return {
-          status: true,
-          data: notificationData,
-          message: "Marked all notifications as seen",
-        };
-      } else {
-        return {
-          status: true,
-          data: null,
-          message: "No notifications found to update",
-        };
+      if (!notificationData) {
+        throw new AppError(
+          "Failed to update the notifications status",
+          StatusCode.INTERNAL_SERVER_ERROR
+        );
       }
-    } catch (error) {
-      console.log(error, "error on the getNotifications/notificaitonService");
-      return {
-        status: false,
-        data: null,
-        message: "Failed to get the Notifications",
-      };
+
+      return;
+    } catch (error: any) {
+      if (error.name === "MongoNetworkError") {
+        throw new AppError(
+          "Database connection failed",
+          StatusCode.SERVICE_UNAVAILABLE
+        );
+      }
+
+      handleServiceError(
+        error,
+        "Something went wrong while updating notifications status"
+      );
     }
   }
 
@@ -127,30 +124,23 @@ export default class notificationService implements InotificationService {
   async changeAdminNotificationSeen(): Promise<any> {
     try {
       const notificationData = await this._notificationRepository.updateAll();
-
-      if (notificationData) {
-        return {
-          status: true,
-          data: notificationData,
-          message: "Marked all notifications as seen",
-        };
-      } else {
-        return {
-          status: true,
-          data: null,
-          message: "No notifications found to update",
-        };
+      if (!notificationData) {
+        throw new AppError("Failed to updated admin notifications status");
       }
-    } catch (error) {
-      console.log(
+
+      return;
+    } catch (error: any) {
+      if (error.name === "MongoNetworkError") {
+        throw new AppError(
+          "Database connection failed",
+          StatusCode.SERVICE_UNAVAILABLE
+        );
+      }
+
+      handleServiceError(
         error,
-        "error on the changeAdminNotificationSeen/notificaitonService"
+        "Something went wrong while updating admin notifications status"
       );
-      return {
-        status: false,
-        data: null,
-        message: "Failed to get the Notifications",
-      };
     }
   }
 
@@ -161,34 +151,34 @@ export default class notificationService implements InotificationService {
     notificationId: string;
   }): Promise<any> {
     try {
+      if (!notificationId) {
+        throw new AppError(
+          "notificationId is required",
+          StatusCode.BAD_REQUEST
+        );
+      }
+
       const notificationData =
         await this._notificationRepository.findByIdAndUpdate(notificationId, {
           seen: true,
         });
-
-      if (notificationData) {
-        return {
-          status: true,
-          data: notificationData,
-          message: "Marked notifications as seen",
-        };
-      } else {
-        return {
-          status: true,
-          data: null,
-          message: "No notification found to update",
-        };
+      if (!notificationData) {
+        throw new AppError("Failed to update admin notification status");
       }
-    } catch (error) {
-      console.log(
+
+      return;
+    } catch (error: any) {
+      if (error.name === "MongoNetworkError") {
+        throw new AppError(
+          "Database connection failed",
+          StatusCode.SERVICE_UNAVAILABLE
+        );
+      }
+
+      handleServiceError(
         error,
-        "error on the changeAdminNotificationSeen/notificaitonService"
+        "Something went wrong while updating admin notification status"
       );
-      return {
-        status: false,
-        data: null,
-        message: "Failed to get the Notifications",
-      };
     }
   }
 
@@ -200,29 +190,19 @@ export default class notificationService implements InotificationService {
         seen: false,
       });
 
-      if (notificationData) {
-        return {
-          status: true,
-          data: notificationData,
-          message: "Fetched all the Notifications",
-        };
-      } else {
-        return {
-          status: true,
-          data: null,
-          message: "Notification is Empty",
-        };
+      return notificationData;
+    } catch (error: any) {
+      if (error.name === "MongoNetworkError") {
+        throw new AppError(
+          "Database connection failed",
+          StatusCode.SERVICE_UNAVAILABLE
+        );
       }
-    } catch (error) {
-      console.log(
+
+      handleServiceError(
         error,
-        "error on the getAdminNotifications/notificaitonService"
+        "Something went wrong while fetching admin notificaitons"
       );
-      return {
-        status: false,
-        data: null,
-        message: "Failed to get the Notifications",
-      };
     }
   }
 }

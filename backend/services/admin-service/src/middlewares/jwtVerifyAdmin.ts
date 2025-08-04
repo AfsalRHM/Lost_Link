@@ -1,6 +1,5 @@
 import { Request, Response, NextFunction } from "express";
 
-// import jwtFunctions from "../utils/jwt";
 import { jwtPayload } from "../interface/IjwtTypes";
 import jwtFunctions from "../utils/jwt";
 

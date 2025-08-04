@@ -1,24 +1,18 @@
 import express from "express";
 const report_route = express.Router();
 
-import reportController from "../controllers/reportController";
-import verifyAccessToken from "../middlewares/jwtVerifyUser";
+import ReportController from "../controllers/reportController";
+import ReportService from "../services/reportService";
+import RequestService from "../services/requestService";
 
-const ReportController = new reportController();
+const requestService = new RequestService();
+const reportService = new ReportService(requestService);
+const reportController = new ReportController(reportService);
 
-/*************************      User Side       *******************************/
 // Get Requests
-report_route.get("/:id/reports", verifyAccessToken, ReportController.getMyReports); // To get a specific user's all reports
+report_route.get("/:id/reports", reportController.getMyReports); // To get a specific user's all reports
 
 // Post Requests
-report_route.post("/report-request", verifyAccessToken, ReportController.createReport); // To Create a Report
-
-// Patch Requests
-
-
-/*************************      Admin Side       *******************************/
-// Get Requests
-
-// Post Requests
+report_route.post("/report-request", reportController.createReport); // To Create a Report
 
 export default report_route;

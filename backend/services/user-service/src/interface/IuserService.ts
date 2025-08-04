@@ -1,26 +1,39 @@
+import IuserModel from "./IuserModel";
+
 export default interface IuserService {
-  checkMail(recieverEmail: string): Promise<any>;
+  checkMail(recieverEmail: string): Promise<{
+    status: boolean;
+    data: any;
+    message: string;
+    email: string;
+  }>;
   insertuser(
     userFullName: string,
     userName: string,
     userLocation: string,
     userEmail: string,
     hashedPassword: string
-  ): Promise<any>;
-  checkMail(recieverEmail: string): Promise<boolean>;
-  loginUser(userMail: string): Promise<any>;
+  ): Promise<IuserModel>;
+  loginUser(
+    userMail: string
+  ): Promise<{ status: boolean; data: any; message: string }>;
   updatePassword(userMail: string, newPassword: string): Promise<any>;
   getAllUsers(): Promise<any>;
   changeUserStatus(props: { userId: string }): Promise<any>;
   getUserDataById({ userId }: { userId: string }): Promise<any>;
-  getProfile({ userId }: { userId: string | undefined }): Promise<any>;
+  getUsersDataById({
+    userIds,
+  }: {
+    userIds: string[];
+  }): Promise<Partial<IuserModel>[]>;
+  getProfile({ userId }: { userId: string | undefined }): Promise<IuserModel>;
   updateUser({
     updateFormData,
     userId,
   }: {
     updateFormData: updateFormDataType;
     userId: string;
-  }): Promise<any>;
+  }): Promise<IuserModel>;
   addRequestId({
     requestId,
     userId,
@@ -39,6 +52,7 @@ export default interface IuserService {
     points: number;
     rewardAmount: number;
   }): Promise<void>;
+  getUserData({ userId }: { userId: string }): Promise<IuserModel>;
 }
 
 export interface updateFormDataType {

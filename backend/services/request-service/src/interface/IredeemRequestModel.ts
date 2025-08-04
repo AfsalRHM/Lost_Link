@@ -1,6 +1,6 @@
 import mongoose, { Document } from "mongoose";
 
-export default interface IrequestRedeemModel extends Document {
+export default interface IredeemRequestModel extends Document {
   _id: mongoose.Types.ObjectId;
   user_id: string;
   request_id: string;

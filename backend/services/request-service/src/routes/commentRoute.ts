@@ -1,24 +1,17 @@
 import express from "express";
 const comment_route = express.Router();
 
-import commentController from "../controllers/commentController";
-import verifyAccessToken from "../middlewares/jwtVerifyUser";
+import CommentService from "../services/commentService";
+import CommentController from "../controllers/commentController";
 
-const CommentController = new commentController();
+const commentService = new CommentService();
+const commentController = new CommentController(commentService);
 
-/*************************      User Side       *******************************/
 // Get Requests
-comment_route.get("/:id/comments", verifyAccessToken, CommentController.getRequestComments); // To get all the comments of a specific request
+comment_route.get("/:id/comments", commentController.getRequestComments); // To get all the comments of a specific request
+comment_route.get("/admin/:id/comments", commentController.getRequestComments); // To get all the comments of a specific request
 
 // Post Requests
-comment_route.post("/comments", verifyAccessToken, CommentController.createComment); // To Create a Comment
-
-// Patch Requests
-
-
-/*************************      Admin Side       *******************************/
-// Get Requests
-
-// Post Requests
+comment_route.post("/comments", commentController.createComment); // To Create a Comment
 
 export default comment_route;

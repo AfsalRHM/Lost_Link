@@ -1,432 +1,441 @@
-import { Request, Response } from "express";
-import IrequestController from "../interface/IrequestController";
+import { NextFunction, Request, Response } from "express";
 
-import requestService from "../services/requestService";
-import { validationResult } from "express-validator";
-import jwtFunctions from "../utils/jwt";
+import IrequestController from "../interface/IrequestController";
+import IrequestService from "../interface/IrequestService";
+
+import { AppError } from "../utils/appError";
+import extractUserFromHeaders from "../utils/extractUserFromHeaders";
+
 import { StatusCode } from "../constants/statusCodes";
+import { validationResult } from "express-validator";
 
 export default class RequestController implements IrequestController {
-  private _requestService: requestService;
+  private _requestService: IrequestService;
 
-  constructor() {
-    this._requestService = new requestService();
+  constructor(requestService: IrequestService) {
+    this._requestService = requestService;
   }
 
-  public createRequest = async (req: Request, res: Response): Promise<void> => {
+  public createRequest = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
-      console.log("here reaching after the validation");
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
         res.status(StatusCode.OK).json({ errors: errors.array() });
         return;
       }
-      const accessToken = req.headers["authorization"]?.split(" ")[1];
-      if (!accessToken) {
-        res
-          .status(StatusCode.OK)
-          .json({ message: "No authorization token provided" });
-      } else {
-        const formData = req.body;
-        const requestData = await this._requestService.insertRequest({
-          accessToken,
-          formData,
-        });
 
-        res
-          .setHeader("Authorization", `Bearer ${accessToken}`)
-          .status(StatusCode.OK)
-          .json({ status: requestData.status, data: requestData.data });
+      const user = extractUserFromHeaders(req);
+      if (!user || !user.id) {
+        throw new AppError(
+          "Unauthorized: User info missing",
+          StatusCode.UNAUTHORIZED
+        );
       }
+
+      const formData = req.body.formData;
+      if (!formData) {
+        throw new AppError("Form Data is required", StatusCode.BAD_REQUEST);
+      }
+
+      const requestData = await this._requestService.insertRequest({
+        userId: user.id,
+        formData,
+      });
+
+      res.status(StatusCode.OK).json({
+        status: true,
+        data: requestData,
+        message: "request created",
+      });
     } catch (error) {
-      console.log("error in requestController", error);
+      console.log("error in createRequest/requestController", error);
+      next(error);
     }
   };
 
   // To fetch all the requests to the Admin side
   public getAllRequests = async (
     req: Request,
-    res: Response
+    res: Response,
+    next: NextFunction
   ): Promise<void> => {
     try {
-      const accessToken = req.headers["authorization"]?.split(" ")[1];
-      if (!accessToken) {
-        res
-          .status(StatusCode.OK)
-          .json({ message: "No authorization token provided" });
-      } else {
-        const requestData = await this._requestService.getRequests();
+      const requests = await this._requestService.getRequests();
 
-        res
-          .status(StatusCode.OK)
-          .json({ status: requestData.status, data: requestData.data });
-      }
+      res.status(StatusCode.OK).json({
+        status: true,
+        data: requests,
+        message: "All requests fetched",
+      });
     } catch (error) {
-      console.log("error in requestController", error);
+      console.log("error in getAllRequest/requestController", error);
+      next(error);
     }
   };
 
   // To fetch all the redeem requests to the Admin side
   public getAllRedeemRequests = async (
     req: Request,
-    res: Response
+    res: Response,
+    next: NextFunction
   ): Promise<void> => {
     try {
-      const response = await this._requestService.getAllRedeemRequests();
-      if (response.status) {
-        res.status(StatusCode.OK).json(response);
-      } else {
-        res.status(StatusCode.OK).json(response);
-      }
+      const redeemRequests = await this._requestService.getAllRedeemRequests();
+
+      res.status(StatusCode.OK).json({
+        status: true,
+        data: redeemRequests,
+        message: "All redeem requests fetched",
+      });
     } catch (error) {
-      console.log("error in requestController", error);
+      console.log("error in getAllRedeemRequests/requestController", error);
+      next(error);
     }
   };
 
-  public managePayment = async (req: Request, res: Response): Promise<void> => {
+  public managePayment = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
-      const accessToken = req.headers["authorization"]?.split(" ")[1];
-      if (!accessToken) {
-        res
-          .status(StatusCode.OK)
-          .json({ message: "No authorization token provided" });
-      } else {
-        const { formData } = req.body;
-        const responseData = await this._requestService.makePayment(formData);
-        res
-          .setHeader("Authorization", `Bearer ${accessToken}`)
-          .status(StatusCode.OK)
-          .json({ status: responseData.status, data: responseData.data });
+      const formData = req.body.formData;
+      if (!formData) {
+        throw new AppError("form data is required", StatusCode.BAD_REQUEST);
       }
+
+      const sessionId = await this._requestService.makePayment(formData);
+
+      res.status(StatusCode.OK).json({
+        status: true,
+        data: sessionId,
+        message: "Session for payment created ",
+      });
     } catch (error) {
-      console.log("error in requestController", error);
+      console.log("error in managePayment/requestController", error);
+      next(error);
     }
   };
 
   public getUserRequests = async (
     req: Request,
-    res: Response
+    res: Response,
+    next: NextFunction
   ): Promise<void> => {
     try {
       const userId = req.params.id;
       if (!userId) {
-        res.status(StatusCode.OK).json({
-          status: false,
-          message: "No User Id found on the getUserRequests Post Request",
-        });
-        return;
+        throw new AppError("userId is required", StatusCode.BAD_REQUEST);
       }
-      const response = await this._requestService.getUserRequests(userId);
 
-      if (response.status) {
-        res.status(StatusCode.OK).json(response);
-      } else {
-        res.status(StatusCode.OK).json(response);
-      }
+      const requests = await this._requestService.getUserRequests(userId);
+
+      res.status(StatusCode.OK).json({
+        status: true,
+        data: requests,
+        message: "Fetched all user's requests",
+      });
     } catch (error) {
-      console.log("error in requestController", error);
+      console.log("error in getUserRequests/requestController", error);
+      next(error);
     }
   };
 
   // To get request details for the user side
   public getRequestDetails = async (
     req: Request,
-    res: Response
+    res: Response,
+    next: NextFunction
   ): Promise<void> => {
     try {
-      if (!req.body.requestId) {
-        res.status(StatusCode.OK).json({
-          status: false,
-          message: "Request Id not found on the getRequestDetails Post Request",
-        });
-        return;
-      }
-      const accessToken = req.headers["authorization"]?.split(" ")[1];
-      if (!accessToken) {
-        res.status(StatusCode.OK).json({
-          status: false,
-          message: "Access Token Not Found",
-        });
-      }
-      const decoded = jwtFunctions.verifyAccessToken(accessToken!);
-      if (!decoded) {
-        res.status(StatusCode.OK).json({
-          status: false,
-          message: "Access Token Data Can't Get",
-        });
+      const { requestId, from } = req.body;
+      if (!requestId || !from) {
+        throw new AppError(
+          "requestId and from(data) is required",
+          StatusCode.BAD_REQUEST
+        );
       }
 
-      const response = await this._requestService.getRequestDetails({
+      const user = extractUserFromHeaders(req);
+      if (!user || !user.id) {
+        throw new AppError(
+          "Unauthorized: User info missing",
+          StatusCode.UNAUTHORIZED
+        );
+      }
+
+      const data = await this._requestService.getRequestDetails({
         requestId: req.body.requestId,
-        userId: decoded?.id!,
+        userId: user.id,
         from: req.body.from,
       });
-      if (response.status) {
-        res.status(StatusCode.OK).json(response);
-      } else {
-        if (
-          response.message == "Request Data not Found" ||
-          response.message == "Invalid Request ID format"
-        ) {
-          res.status(StatusCode.NOT_FOUND).json(response);
-        } else {
-          res.status(StatusCode.OK).json(response);
-        }
-      }
+
+      res
+        .status(StatusCode.OK)
+        .json({ status: true, data, message: "request details fetched" });
     } catch (error) {
       console.log("error in getRequestDetails/requestController", error);
+      next(error);
     }
   };
 
   // To get request details for the admin side
   public adminGetRequestDetails = async (
     req: Request,
-    res: Response
+    res: Response,
+    next: NextFunction
   ): Promise<void> => {
     try {
       const requestId = req.params.id;
       if (!requestId) {
-        res.status(StatusCode.OK).json({
-          status: false,
-          message:
-            "Request Id not found on the adminGetRequestDetails Get Request",
-        });
-        return;
+        throw new AppError("requestId and is required", StatusCode.BAD_REQUEST);
       }
 
-      const response = await this._requestService.adminGetRequestDetails({
+      const data = await this._requestService.adminGetRequestDetails({
         requestId: requestId,
       });
-      if (response.status) {
-        res.status(StatusCode.OK).json(response);
-      } else {
-        if (response.message == "Invalid Request ID format") {
-          res.status(StatusCode.NOT_FOUND).json(response);
-        } else {
-          res.status(StatusCode.OK).json(response);
-        }
-      }
+
+      res
+        .status(StatusCode.OK)
+        .json({ status: true, data, message: "request details fetched" });
     } catch (error) {
       console.log("error in adminGetRequestDetails/requestController", error);
+      next(error);
     }
   };
 
   // To cancel a Request
-  public cancelRequest = async (req: Request, res: Response): Promise<void> => {
+  public cancelRequest = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
+      console.log(req.params);
+      console.log(req.body);
       const requestId = req.params.id;
-      const from = req.body.from;
-
-      const accessToken = req.headers["authorization"]?.split(" ")[1];
-      if (!accessToken) {
-        res
-          .status(StatusCode.OK)
-          .json({ message: "No authorization token provided" });
-      } else if (!requestId) {
-        res.status(StatusCode.OK).json({ message: "No request id available" });
-      } else {
-        const decoded = await jwtFunctions.verifyAccessToken(accessToken);
-        const response = await this._requestService.cancelRequest({
-          requestId,
-          userId: from == "admin" ? "admin" : decoded?.id,
-        });
-        res.status(StatusCode.OK).json(response);
+      const from = req.body.from ? req.body.from : "user";
+      if (!requestId || !from) {
+        throw new AppError(
+          "requestId and from is required",
+          StatusCode.BAD_REQUEST
+        );
       }
+
+      const user = extractUserFromHeaders(req);
+      if (!user || !user.id) {
+        throw new AppError(
+          "Unauthorized: User info missing",
+          StatusCode.UNAUTHORIZED
+        );
+      }
+
+      const requestData = await this._requestService.cancelRequest({
+        requestId,
+        userId: from == "admin" ? "admin" : user.id,
+      });
+
+      res.status(StatusCode.OK).json({
+        status: true,
+        data: requestData,
+        message: `Request cancelled successfully`,
+      });
     } catch (error) {
-      res
-        .status(StatusCode.BAD_REQUEST)
-        .json({ message: "error on the cancelRequest/requestController" });
+      console.log("error on the cancelRequest/requestController");
+      next(error);
     }
   };
 
   // To change the like status of request
   public changeLikeStatus = async (
     req: Request,
-    res: Response
+    res: Response,
+    next: NextFunction
   ): Promise<void> => {
     try {
       const requestId = req.params.id;
       if (!requestId) {
-        console.log("Request Id Not Reached here on the changeLikeStatus");
-        return;
+        throw new AppError("requestId is required", StatusCode.BAD_REQUEST);
       }
-      const accessToken = req.headers["authorization"]?.split(" ")[1];
-      if (!accessToken) {
-        res
-          .status(StatusCode.OK)
-          .json({ message: "No authorization token provided" });
-      } else {
-        const decoded = await jwtFunctions.verifyAccessToken(accessToken);
 
-        const response = await this._requestService.changeLikeStatus({
-          requestId,
-          userId: decoded?.id,
-        });
-        res.status(StatusCode.OK).json(response);
+      const user = extractUserFromHeaders(req);
+      if (!user || !user.id) {
+        throw new AppError(
+          "Unauthorized: User info missing",
+          StatusCode.UNAUTHORIZED
+        );
       }
+
+      const requestData = await this._requestService.changeLikeStatus({
+        requestId,
+        userId: user.id,
+      });
+
+      res.status(StatusCode.OK).json({
+        status: true,
+        data: requestData,
+        message: "request updated with like count",
+      });
     } catch (error) {
       console.log("error on the changeLikeStatus/requestController");
+      next(error);
     }
   };
 
   public createRedeemRequest = async (
     req: Request,
-    res: Response
+    res: Response,
+    next: NextFunction
   ): Promise<void> => {
     try {
-      const accessToken = req.headers["authorization"]?.split(" ")[1];
-      if (!accessToken) {
-        res
-          .status(StatusCode.OK)
-          .json({ message: "No authorization token provided" });
-      } else {
-        const decoded = await jwtFunctions.verifyAccessToken(accessToken);
-
-        if (!decoded) {
-          res
-            .status(StatusCode.OK)
-            .json({ message: "Unable to decode the Access Token" });
-        } else {
-          const response = await this._requestService.createRedeemRequest({
-            requestId: req.body.requestId,
-            formData: req.body.formData,
-            userId: decoded.id,
-          });
-          if (response.status) {
-            res.status(StatusCode.OK).json(response);
-          } else {
-            res.status(StatusCode.OK).json(response);
-          }
-        }
+      const { requestId, formData } = req.body;
+      if (!requestId || !formData) {
+        throw new AppError("requestId and formData is required");
       }
+
+      const user = extractUserFromHeaders(req);
+      if (!user || !user.id) {
+        throw new AppError(
+          "Unauthorized: User info missing",
+          StatusCode.UNAUTHORIZED
+        );
+      }
+
+      const redeemRequest = await this._requestService.createRedeemRequest({
+        requestId,
+        formData,
+        userId: user.id,
+      });
+
+      res.status(StatusCode.OK).json({
+        status: true,
+        data: redeemRequest,
+        message: "redeem request inserted",
+      });
     } catch (error) {
-      res
-        .status(StatusCode.BAD_REQUEST)
-        .json({ message: "error on the createRedeemRequest/adminController" });
+      console.log("error on the createRedeemRequest/adminController");
+      next(error);
     }
   };
 
   public getUserRedeemRequests = async (
     req: Request,
-    res: Response
+    res: Response,
+    next: NextFunction
   ): Promise<void> => {
     try {
-      const accessToken = req.headers["authorization"]?.split(" ")[1];
-      if (!accessToken) {
-        res
-          .status(StatusCode.OK)
-          .json({ message: "No authorization token provided" });
-      } else {
-        const decoded = await jwtFunctions.verifyAccessToken(accessToken);
-
-        if (!decoded) {
-          res
-            .status(StatusCode.OK)
-            .json({ message: "Unable to decode the Access Token" });
-        } else {
-          const response = await this._requestService.getUserRedeemRequests({
-            userId: decoded.id,
-          });
-          if (response.status) {
-            res.status(StatusCode.OK).json(response);
-          } else {
-            res.status(StatusCode.OK).json(response);
-          }
-        }
+      const user = extractUserFromHeaders(req);
+      if (!user || !user.id) {
+        throw new AppError(
+          "Unauthorized: User info missing",
+          StatusCode.UNAUTHORIZED
+        );
       }
+
+      const redeemRequests = await this._requestService.getUserRedeemRequests({
+        userId: user.id,
+      });
+
+      res.status(StatusCode.OK).json({
+        status: true,
+        data: redeemRequests,
+        message: "fetched user's redeem requests",
+      });
     } catch (error) {
-      res
-        .status(StatusCode.BAD_REQUEST)
-        .json({ message: "error on the createRedeemRequest/adminController" });
+      console.log("error on the getUserRedeemRequests/adminController");
+      next(error);
     }
   };
 
   // To get the redeem request details for the user and admin
   public getRedeemRequestDetails = async (
     req: Request,
-    res: Response
+    res: Response,
+    next: NextFunction
   ): Promise<void> => {
     try {
-      const requestRedeemId = req.params.id;
-      if (!requestRedeemId) {
-        res.status(StatusCode.UNAUTHORIZED).json({
-          message:
-            "requestRedeemId no getting on the the getRedeemRequestDetails/adminController",
-        });
-      } else {
-        const response = await this._requestService.getRedeemRequestDetails({
-          requestRedeemId,
-        });
-        if (response.status) {
-          res.status(StatusCode.OK).json(response);
-        } else {
-          if (response.message == "Invalid Request ID format") {
-            res.status(StatusCode.NOT_FOUND).json(response);
-          } else {
-            res.status(StatusCode.OK).json(response);
-          }
-        }
+      const redeemRequestId = req.params.id;
+      if (!redeemRequestId) {
+        throw new AppError(
+          "redeemRequestId is required",
+          StatusCode.BAD_REQUEST
+        );
       }
-    } catch (error) {
-      res.status(StatusCode.BAD_REQUEST).json({
-        message: "error on the getRedeemRequestDetails/adminController",
+
+      const redeemRequest = await this._requestService.getRedeemRequestDetails({
+        redeemRequestId,
       });
+
+      res.status(StatusCode.OK).json({
+        status: true,
+        data: redeemRequest,
+        message: "redeem request details fetched",
+      });
+    } catch (error) {
+      console.log("error on the getRedeemRequestDetails/adminController");
+      next(error);
     }
   };
 
   // TO change the request status
   public changeRequestStatus = async (
     req: Request,
-    res: Response
+    res: Response,
+    next: NextFunction
   ): Promise<void> => {
     try {
       const requestId = req.params.id;
-      const accessToken = req.headers["authorization"]?.split(" ")[1];
       if (!requestId) {
-        res.status(StatusCode.OK).json({ message: "No Request id found" });
-      } else {
-        const response = await this._requestService.changeRequestStatus({
-          requestId,
-        });
-        res
-          .setHeader("Authorization", `Bearer ${accessToken}`)
-          .status(StatusCode.OK)
-          .json(response);
+        throw new AppError("requestId is required", StatusCode.BAD_REQUEST);
       }
+
+      const requestData = await this._requestService.changeRequestStatus({
+        requestId,
+      });
+
+      res.status(StatusCode.OK).json({
+        status: true,
+        data: requestData,
+        message: "request status updated",
+      });
     } catch (error) {
-      res
-        .status(StatusCode.BAD_REQUEST)
-        .json({ message: "error on the changeUserStatus/adminController" });
+      console.log("error on the changeUserStatus/adminController");
+      next(error);
     }
   };
 
   // To change the redeem request status
   public changeRedeemRequestStatus = async (
     req: Request,
-    res: Response
+    res: Response,
+    next: NextFunction
   ): Promise<void> => {
     try {
       const { redeemRequestId, changeTo } = req.body;
       if (!redeemRequestId || !changeTo) {
-        res.status(StatusCode.UNAUTHORIZED).json({
-          message:
-            "Data are missing from the body getRedeemRequestDetails/adminController",
-        });
+        throw new AppError(
+          "requestId and changeTo(body) is required",
+          StatusCode.BAD_REQUEST
+        );
       }
-      const response = await this._requestService.changeRedeemRequestStatus({
+
+      const data = await this._requestService.changeRedeemRequestStatus({
         redeemRequestId,
         changeTo,
       });
 
-      if (response.status) {
-        res.status(StatusCode.OK).json(response);
-      } else {
-        res.status(StatusCode.OK).json(response);
-      }
+      res.status(StatusCode.OK).json({
+        status: true,
+        data,
+        message: "redeem request status updated",
+      });
     } catch (error) {
-      res
-        .status(StatusCode.BAD_REQUEST)
-        .json({ message: "error on the changeUserStatus/adminController" });
+      console.log("error on the changeUserStatus/adminController");
+      next(error);
     }
   };
 }

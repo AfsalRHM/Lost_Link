@@ -18,8 +18,6 @@ export async function manageQueue() {
       if (msg) {
         const messageContent = JSON.parse(msg.content.toString());
         let correlationId;
-        console.log(msg.properties);
-        console.log(messageContent);
 
         if (messageContent) {
           correlationId = getCorrelationId(

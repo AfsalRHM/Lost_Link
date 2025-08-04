@@ -1,19 +1,21 @@
-import IbaseRepository from "../interface/IbaseRepository";
-import BaseRepository from "./baseRepository";
-import IrequestRedeemModel from "../interface/IrequestRedeemModel";
-import requestRedeemModel from "../models/requestRedeemModel";
+import { Model } from "mongoose";
 
-export default class RequestRedeemRepository
-  extends BaseRepository<IrequestRedeemModel>
-  implements IbaseRepository<IrequestRedeemModel>
+import BaseRepository from "./baseRepository";
+
+import IbaseRepository from "../interface/IbaseRepository";
+import IredeemRequestModel from "../interface/IredeemRequestModel";
+
+export default class RedeemRequestRepository
+  extends BaseRepository<IredeemRequestModel>
+  implements IbaseRepository<IredeemRequestModel>
 {
-  constructor() {
-    super(requestRedeemModel);
+  constructor(model: Model<IredeemRequestModel>) {
+    super(model);
   }
 
   async insertRequestRedeemForm(
-    requestRedeemData: Partial<IrequestRedeemModel>
-  ): Promise<IrequestRedeemModel | null> {
+    requestRedeemData: Partial<IredeemRequestModel>
+  ): Promise<IredeemRequestModel | null> {
     return this.insert(requestRedeemData);
   }
 
@@ -23,7 +25,7 @@ export default class RequestRedeemRepository
   }: {
     redeemRequestId: string;
     changeTo: string;
-  }): Promise<IrequestRedeemModel | null> {
+  }): Promise<IredeemRequestModel | null> {
     try {
       const request = await this.model.findById(redeemRequestId);
       if (!request) {

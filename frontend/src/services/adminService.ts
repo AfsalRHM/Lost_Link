@@ -115,6 +115,12 @@ export const adminService = {
     return adminHttpClient.patch(API_ROUTES.ADMIN.UPDATE_USER(props.userId));
   },
 
+  getComments: (props: { requestId: string; count: number }) => {
+    return adminHttpClient.get(
+      API_ROUTES.ADMIN.GET_COMMENTS(props.requestId, props.count)
+    );
+  },
+
   logout: () => {
     return adminHttpClient.post(API_ROUTES.ADMIN.LOGOUT);
   },

@@ -1,135 +1,150 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
+
 import InotificationController from "../interface/InotificationController";
-import notificationService from "../services/notificationService";
+import InotificationService from "../interface/InotificationService";
+
 import { StatusCode } from "../constants/statusCodes";
+import { AppError } from "../utils/appError";
 
-export default class notificationController implements InotificationController {
-  private _notificationService: notificationService;
+export default class NotificationController implements InotificationController {
+  private _notificationService: InotificationService;
 
-  constructor() {
-    this._notificationService = new notificationService();
+  constructor(notificationService: InotificationService) {
+    this._notificationService = notificationService;
   }
 
   // To get the user notifications
   public getNotifications = async (
     req: Request,
-    res: Response
+    res: Response,
+    next: NextFunction
   ): Promise<void> => {
     try {
       const userId = req.params.id;
       if (!userId) {
-        throw new Error("User Id not passed correctly");
+        throw new AppError("userId is required", StatusCode.BAD_REQUEST);
       }
 
-      const response = await this._notificationService.getNotifications({
+      const notifications = await this._notificationService.getNotifications({
         userId,
       });
 
-      if (response.status) {
-        res.status(StatusCode.OK).json(response);
-      } else {
-        res.status(StatusCode.BAD_REQUEST).json(response);
-      }
+      res.status(StatusCode.OK).json({
+        status: true,
+        data: notifications,
+        message: "User notification fetched",
+      });
     } catch (error) {
       console.log("error in getNotifications/notificationController", error);
-      return;
+      next(error);
     }
   };
 
   // To change the notification seen or status
   public changeUserNotificationSeen = async (
     req: Request,
-    res: Response
+    res: Response,
+    next: NextFunction
   ): Promise<void> => {
     try {
-      const userId = req.body.userId;
+      const userId = req.params.id;
       if (!userId) {
-        throw new Error("User Id not passed correctly");
+        throw new AppError("userId is required", StatusCode.BAD_REQUEST);
       }
 
-      const response =
-        await this._notificationService.changeUserNotificationSeen({ userId });
+      await this._notificationService.changeUserNotificationSeen({ userId });
 
-      if (response.status) {
-        res.status(StatusCode.OK).json(response);
-      } else {
-        res.status(StatusCode.BAD_REQUEST).json(response);
-      }
+      res.status(StatusCode.OK).json({
+        status: true,
+        data: null,
+        message: "User notifications updated",
+      });
     } catch (error) {
       console.log(
         "error in changeUserNotificationSeen/notificationController",
         error
       );
-      return;
+      next(error);
     }
   };
 
   // To change the notification seen or status on admin
   public changeAdminNotificationSeen = async (
     req: Request,
-    res: Response
+    res: Response,
+    next: NextFunction
   ): Promise<void> => {
     try {
-      const response =
-        await this._notificationService.changeAdminNotificationSeen();
+      await this._notificationService.changeAdminNotificationSeen();
 
-      if (response.status) {
-        res.status(StatusCode.OK).json(response);
-      } else {
-        res.status(StatusCode.BAD_REQUEST).json(response);
-      }
+      res.status(StatusCode.OK).json({
+        status: true,
+        data: null,
+        message: "Admin notifications updated",
+      });
     } catch (error) {
       console.log(
         "error in changeAdminNotificationSeen/notificationController",
         error
       );
-      return;
+      next(error);
     }
   };
 
   // To change the notification seen or status on admin
   public changeAdminOneNotificationSeen = async (
     req: Request,
-    res: Response
+    res: Response,
+    next: NextFunction
   ): Promise<void> => {
     try {
-      const notificationId = req.body.notificationId;
-
-      const response =
-        await this._notificationService.changeAdminOneNotificationSeen({
-          notificationId,
-        });
-
-      if (response.status) {
-        res.status(StatusCode.OK).json(response);
-      } else {
-        res.status(StatusCode.BAD_REQUEST).json(response);
+      const notificationId = req.params.id;
+      if (!notificationId) {
+        throw new AppError(
+          "notificationId is required",
+          StatusCode.BAD_REQUEST
+        );
       }
+
+      await this._notificationService.changeAdminOneNotificationSeen({
+        notificationId,
+      });
+
+      res.status(StatusCode.OK).json({
+        status: true,
+        data: null,
+        message: "Admin's one notification updated",
+      });
     } catch (error) {
       console.log(
         "error in changeAdminOneNotificationSeen/notificationController",
         error
       );
-      return;
+      next(error);
     }
   };
 
   // To get the admin notifications
   public getAdminNotifications = async (
     req: Request,
-    res: Response
+    res: Response,
+    next: NextFunction
   ): Promise<void> => {
     try {
-      const response = await this._notificationService.getAdminNotifications();
+      const notifications =
+        await this._notificationService.getAdminNotifications();
 
-      if (response.status) {
-        res.status(StatusCode.OK).json(response);
-      } else {
-        res.status(StatusCode.BAD_REQUEST).json(response);
-      }
+      res.status(StatusCode.OK).json({
+        status: true,
+        data: notifications,
+        message: "Admin notificaitons fetched",
+      });
     } catch (error) {
-      console.log("error in getNotifications/notificationController", error);
-      return;
+      console.log(
+        "error in getAdminNotifications/notificationController",
+        error
+      );
+      next(error);
     }
   };
 }

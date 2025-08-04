@@ -20,15 +20,19 @@ export default class BaseRepository<T extends Document>
     return this.model.findOne(filter);
   }
 
-  async findAll(filter?: Partial<T> | undefined): Promise<T[]> {
-    return this.model.find({});
+  async findMany(filter: FilterQuery<T>): Promise<T[]> {
+    return this.model.find(filter);
+  }
+
+  async findAll(): Promise<T[]> {
+    return this.model.find();
   }
 
   async findByIdAndUpdate(Id: string, update: Partial<T>): Promise<T | null> {
     return this.model.findByIdAndUpdate(Id, update, { new: true });
   }
 
-  async deleteMany(userEmail: string): Promise<DeleteResult> {
-    return this.model.deleteMany({ email: userEmail }).exec();
+  async deleteMany(filter: FilterQuery<T>): Promise<DeleteResult> {
+    return this.model.deleteMany(filter).exec();
   }
 }

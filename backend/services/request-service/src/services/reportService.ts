@@ -1,18 +1,25 @@
-import IreportService from "../interface/IreportService";
-import sendToService from "../rabbitmq/producer";
 import reportRepository from "../repositories/reportRepository";
+import reportModel from "../models/reportModel";
+
+import IreportService from "../interface/IreportService";
+import IrequestService from "../interface/IrequestService";
+
+import sendToService from "../rabbitmq/producer";
 import { createCorrelationId } from "../utils/correlationId";
 import eventEmitter from "../utils/eventEmitter";
-import requestService from "./requestService";
+import { AppError } from "../utils/appError";
+import { StatusCode } from "../constants/statusCodes";
+import { handleServiceError } from "../utils/errorHandler";
 
-export default class reportService implements IreportService {
+export default class ReportService implements IreportService {
   private _reportRepository: reportRepository;
-  private _requestService: requestService;
+  private _requestService: IrequestService;
 
-  constructor() {
-    this._reportRepository = new reportRepository();
-    this._requestService = new requestService();
+  constructor(requestService: IrequestService) {
+    this._reportRepository = new reportRepository(reportModel);
+    this._requestService = requestService;
   }
+
   async createReport({
     requestId,
     reportReason,
@@ -24,11 +31,7 @@ export default class reportService implements IreportService {
   }): Promise<any> {
     try {
       if (!requestId || !reportReason || !userId) {
-        return {
-          status: false,
-          data: null,
-          message: "Data not reached on createReport/reportService",
-        };
+        throw new AppError("requestId, reportReason and userId is required");
       }
 
       const sendingTo = process.env.USER_QUEUE;
@@ -68,26 +71,23 @@ export default class reportService implements IreportService {
       };
 
       const reportData = await this._reportRepository.insert(report);
-
-      if (reportData) {
-        return {
-          status: true,
-          data: reportData,
-          message: "New Report Created",
-        };
-      } else {
-        return {
-          status: false,
-          data: null,
-          message: "Failed to create new Report",
-        };
+      if (!reportData) {
+        throw new AppError(
+          "Failed to create report",
+          StatusCode.INTERNAL_SERVER_ERROR
+        );
       }
-    } catch (error) {
-      return {
-        status: false,
-        data: null,
-        message: "Error on createReport/reportService",
-      };
+
+      return reportData;
+    } catch (error: any) {
+      if (error.name === "MongoNetworkError") {
+        throw new AppError(
+          "Database connection failed",
+          StatusCode.SERVICE_UNAVAILABLE
+        );
+      }
+
+      handleServiceError(error, "Something went wrong while inserting report");
     }
   }
 
@@ -95,48 +95,35 @@ export default class reportService implements IreportService {
   async getMyReports({ userId }: { userId: string }): Promise<any> {
     try {
       if (!userId) {
-        return {
-          status: false,
-          data: null,
-          message: "Data not reached on getMyReports/reportService",
-        };
+        throw new AppError("userId is required", StatusCode.BAD_REQUEST);
       }
 
       const reportData = await this._reportRepository.findAll({
         user_id: userId,
       });
 
-      if (reportData) {
-        const enrichedReports = await Promise.all(
-          reportData.map(async (report) => {
-            const requestData = await this._requestService.getRequestDataById({
-              requestId: report.request_id,
-            });
-            return {
-              ...report.toObject(),
-              title: requestData.data.product_name || "Unknown Product",
-            };
-          })
-        );
+      const enrichedReports = await Promise.all(
+        reportData.map(async (report) => {
+          const requestData = await this._requestService.getRequestDataById({
+            requestId: report.request_id,
+          });
+          return {
+            ...report.toObject(),
+            title: requestData.product_name || "Unknown Product",
+          };
+        })
+      );
 
-        return {
-          status: true,
-          data: enrichedReports,
-          message: "Got the reports of the user",
-        };
-      } else {
-        return {
-          status: false,
-          data: null,
-          message: "There has no reports registered by the user",
-        };
+      return enrichedReports;
+    } catch (error: any) {
+      if (error.name === "MongoNetworkError") {
+        throw new AppError(
+          "Database connection failed",
+          StatusCode.SERVICE_UNAVAILABLE
+        );
       }
-    } catch (error) {
-      return {
-        status: false,
-        data: null,
-        message: "Error on getMyReports/reportService",
-      };
+
+      handleServiceError(error, "Something went wrong while fetching reports");
     }
   }
 }

@@ -48,6 +48,8 @@ export const API_ROUTES = {
     SEND_MESSAGE: "chat/send-admin-message",
     GET_USERS: "/user/admin/all",
     GET_REQUESTS: "/request/admin/all",
+    GET_COMMENTS: (requestId: string, count: number) =>
+      `/request/admin/${requestId}/comments?count=${count}`,
     GET_REDEEM_REQUESTS: "/request/admin/redeem-request/all",
     GET_MEET: (meetId: string) => `/chat/admin/meet/${meetId}`,
     GET_MEETS: "/chat/admin/meet/all",

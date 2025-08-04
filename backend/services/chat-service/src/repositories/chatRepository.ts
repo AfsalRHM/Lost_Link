@@ -1,14 +1,16 @@
-import IbaseRepository from "../interface/IbaseRepository";
+import { Model } from "mongoose";
+
 import BaseRepository from "./baseRepository";
+
+import IbaseRepository from "../interface/IbaseRepository";
 import IchatModel from "../interface/IchatModel";
-import chatModel from "../model/chatModel";
 
 export default class chatRepository
   extends BaseRepository<IchatModel>
   implements IbaseRepository<IchatModel>
 {
-  constructor() {
-    super(chatModel);
+  constructor(model: Model<IchatModel>) {
+    super(model);
   }
 
   async insertChat(chatData: Partial<IchatModel>): Promise<IchatModel | null> {

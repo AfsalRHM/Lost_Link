@@ -1,8 +1,8 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 
 export default interface IuserController {
-  getProfile(req: Request, res: Response): Promise<void>;
-  getAllUsers(req: Request, res: Response): Promise<void>;
-  updateUser(req: Request, res: Response): Promise<void>;
-  getUserData(req: Request, res: Response): Promise<void>;
+  getProfile(req: Request, res: Response, next: NextFunction): Promise<void>;
+  getAllUsers(req: Request, res: Response, next: NextFunction): Promise<void>;
+  updateUser(req: Request, res: Response, next: NextFunction): Promise<void>;
+  getUserData(req: Request, res: Response, next: NextFunction): Promise<void>;
 }

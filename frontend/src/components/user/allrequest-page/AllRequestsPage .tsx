@@ -1,17 +1,12 @@
 import { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
+
 import { userService } from "../../../services/userService";
 
 import FilterSideBar from "./FilterSideBar";
 import RequestLoading from "./loading/AllRequestLoading";
 import RequestPart from "./RequestPart";
-import UserErrorHandling from "../../../middlewares/UserErrorHandling";
 
 const AllRequests = () => {
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
-
   const [allRequests, setallRequests] = useState([]);
   const [filteredRequests, setFilteredRequests] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -27,12 +22,7 @@ const AllRequests = () => {
       try {
         const response = await userService.getAllRequests();
 
-        if (response.status == 200) {
-          setallRequests(response.data.data);
-        } else {
-          console.log(response, "this is the error response on getAllRequests");
-          UserErrorHandling(response, dispatch, navigate);
-        }
+        setallRequests(response.data.data);
       } catch (error) {
         console.error("Failed to fetch requests:", error);
       } finally {

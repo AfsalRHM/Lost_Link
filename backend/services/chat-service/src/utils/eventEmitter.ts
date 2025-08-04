@@ -1,4 +1,3 @@
-// eventEmitter.ts
 import { EventEmitter } from "events";
 
 const eventEmitter = new EventEmitter();

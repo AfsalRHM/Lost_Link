@@ -108,7 +108,10 @@ const RequestDetailsPart = () => {
       "Are you sure you want to cancel this request?",
       async () => {
         if (id) {
-          const response = await adminService.cancelRequest({ requestId: id, from: "admin" });
+          const response = await adminService.cancelRequest({
+            requestId: id,
+            from: "admin",
+          });
 
           if (response.status == 200) {
             setRequestData((prev) => {
@@ -435,7 +438,7 @@ const RequestDetailsPart = () => {
             )}
           </div>
 
-          <CommentSection requestId={id} noField={true} />
+          <CommentSection requestId={id} noField={true} from="admin" />
         </div>
       </div>
     </div>

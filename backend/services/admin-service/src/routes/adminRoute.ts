@@ -1,25 +1,24 @@
 import express from "express";
 const admin_route = express.Router();
 
-import adminController from "../controllers/adminController";
-import verifyAccessToken from "../middlewares/jwtVerifyAdmin";
+import AdminController from "../controllers/adminController";
+import AdminService from "../services/adminService";
 
-const AdminController = new adminController();
+const adminService = new AdminService();
+const adminController = new AdminController(adminService);
 
 // Get Reqeusts
-admin_route.get("/allUsers", verifyAccessToken, AdminController.getAllUsers); // To Get All the Users
-admin_route.get("/", verifyAccessToken, AdminController.getAllAdmins);
+admin_route.get("/allUsers", adminController.getAllUsers); // To get all users
+admin_route.get("/", adminController.getAllAdmins); // To get all admins
 
 // Post Requests
-admin_route.post("/", verifyAccessToken, AdminController.insertAdmin);
-admin_route.post("/login-verify", AdminController.adminLogin);
-admin_route.post("/refreshToken", AdminController.refreshToken);
-admin_route.post("/logout", AdminController.adminLogout);
+admin_route.post("/login-verify", adminController.adminLogin); // To verify login
+admin_route.post("/refreshToken", adminController.refreshToken); // To refresh token
+admin_route.post("/logout", adminController.adminLogout); // To logout
+admin_route.post("/", adminController.insertAdmin); // To insert new admin
 
 // Patch Requests
-admin_route.patch("/user/:id", verifyAccessToken, AdminController.changeUserStatus);
-admin_route.patch("/:id", verifyAccessToken, AdminController.changeAdminStatus);
-
-
+admin_route.patch("/user/:id", adminController.changeUserStatus); // To change user status
+admin_route.patch("/:id", adminController.changeAdminStatus); // To change admin satus
 
 export default admin_route;

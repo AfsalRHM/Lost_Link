@@ -1,9 +1,11 @@
 import * as grpc from "@grpc/grpc-js";
 import * as protoLoader from "@grpc/proto-loader";
 import path from "path";
-import AdminRepository from "../repositories/adminRepository";
 
-const adminRepository = new AdminRepository();
+import AdminRepository from "../repositories/adminRepository";
+import adminModel from "../model/adminModel";
+
+const adminRepository = new AdminRepository(adminModel);
 
 const protoPath = path.join(__dirname, "./proto/admin.proto");
 const packageDef = protoLoader.loadSync(protoPath, {

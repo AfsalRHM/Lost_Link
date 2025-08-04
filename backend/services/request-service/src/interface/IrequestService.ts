@@ -1,16 +1,16 @@
 export default interface IrequestService {
   insertRequest({
-    accessToken,
+    userId,
     formData,
   }: {
-    accessToken: string;
-    formData: FormData;
+    userId: string;
+    formData: any;
   }): Promise<any>;
   getUserRequests(userId: string): Promise<any>;
   getRequestDetails({
     requestId,
     userId,
-    from
+    from,
   }: {
     requestId: string;
     userId: string;
@@ -21,14 +21,16 @@ export default interface IrequestService {
   createRedeemRequest({
     requestId,
     formData,
+    userId,
   }: {
     requestId: string;
     formData: any;
+    userId: string;
   }): Promise<any>;
   getRedeemRequestDetails({
-    requestRedeemId,
+    redeemRequestId,
   }: {
-    requestRedeemId: string;
+    redeemRequestId: string;
   }): Promise<any>;
 
   getRequests(): Promise<any>;
@@ -50,4 +52,11 @@ export default interface IrequestService {
   }): Promise<any>;
 
   adminGetRequestDetails({ requestId }: { requestId: string }): Promise<any>;
+  cancelRequest({
+    requestId,
+    userId,
+  }: {
+    requestId: string;
+    userId: string | undefined;
+  }): Promise<any>;
 }

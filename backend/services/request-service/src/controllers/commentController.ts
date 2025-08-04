@@ -1,78 +1,83 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 
-import commentService from "../services/commentService";
 import IcommentController from "../interface/IcommentController";
+import IcommentService from "../interface/IcommentService";
+
 import { StatusCode } from "../constants/statusCodes";
+import { AppError } from "../utils/appError";
 
 export default class CommentController implements IcommentController {
-  private _commentService: commentService;
+  private _commentService: IcommentService;
 
-  constructor() {
-    this._commentService = new commentService();
+  constructor(commentService: IcommentService) {
+    this._commentService = commentService;
   }
 
   // To insert comments
-  public createComment = async (req: Request, res: Response): Promise<void> => {
+  public createComment = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
-      if (!req.body.requestId || !req.body.commentText || !req.body.userId) {
-        res.status(StatusCode.BAD_REQUEST).json({
-          status: false,
-          message: "No Data found on the createComment Post Request",
-        });
-        return;
+      const { requestId, commentText, userId } = req.body;
+      if (!requestId || !commentText || !userId) {
+        throw new AppError(
+          "requestId, commentText and userId is required",
+          StatusCode.BAD_REQUEST
+        );
       }
 
-      const response = await this._commentService.createComment({
-        requestId: req.body.requestId,
-        commentText: req.body.commentText,
-        userId: req.body.userId,
+      const comment = await this._commentService.createComment({
+        requestId: requestId,
+        commentText: commentText,
+        userId: userId,
       });
-
-      if (response.status) {
-        res.status(StatusCode.OK).json(response);
-      } else {
-        res.status(StatusCode.BAD_REQUEST).json(response);
+      if (!comment) {
+        throw new AppError(
+          "Failed to create comment",
+          StatusCode.INTERNAL_SERVER_ERROR
+        );
       }
+
+      res
+        .status(StatusCode.OK)
+        .json({ status: true, data: comment, message: "Message created" });
     } catch (error) {
       console.log("error in createComment/commentController", error);
+      next(error);
     }
   };
 
   // To get comments of a request
   public getRequestComments = async (
     req: Request,
-    res: Response
+    res: Response,
+    next: NextFunction
   ): Promise<void> => {
     try {
       const requestId = req.params.id;
+      if (!requestId) {
+        throw new AppError("requestId is required", StatusCode.BAD_REQUEST);
+      }
+
       const commentCount = req.query.count
         ? parseInt(req.query.count as string, 10)
         : 3;
 
-      if (!requestId) {
-        res.status(StatusCode.BAD_REQUEST).json({
-          status: false,
-          message: "Request Id not found on the Params",
-        });
-        return;
-      }
-
-      const response = await this._commentService.getRequestComments({
+      const comments = await this._commentService.getRequestComments({
         requestId,
         commentCount,
       });
 
-      if (response.status) {
-        res.status(StatusCode.OK).json(response);
-      } else {
-        if (response.message == "Invalid Request ID format") {
-          res.status(StatusCode.NOT_FOUND).json(response);
-        } else {
-          res.status(StatusCode.BAD_REQUEST).json(response);
-        }
-      }
+      res.status(StatusCode.OK).json({
+        status: true,
+        data: comments,
+        message: "Fectched all request messages",
+      });
     } catch (error) {
       console.log("error in getRequestComments/commentController", error);
+      next(error);
     }
   };
 }

@@ -1,14 +1,16 @@
-import IbaseRepository from "../interface/IbaseRepository";
+import { Model } from "mongoose";
+
 import BaseRepository from "./baseRepository";
+
+import IbaseRepository from "../interface/IbaseRepository";
 import IreportModel from "../interface/IreportModel";
-import reportModel from "../models/reportModel";
 
 export default class reportRepository
   extends BaseRepository<IreportModel>
   implements IbaseRepository<IreportModel>
 {
-  constructor() {
-    super(reportModel);
+  constructor(model: Model<IreportModel>) {
+    super(model);
   }
 
   async findReports({

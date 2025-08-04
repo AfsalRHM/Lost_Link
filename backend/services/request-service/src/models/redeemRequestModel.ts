@@ -1,8 +1,8 @@
 import mongoose, { Schema } from "mongoose";
 
-import IrequestRedeemModel from "../interface/IrequestRedeemModel";
+import IredeemRequestModel from "../interface/IredeemRequestModel";
 
-const requestRedeemSchema = new Schema(
+const redeemRequestSchema = new Schema(
   {
     request_id: {
       type: mongoose.Types.ObjectId,
@@ -49,15 +49,15 @@ const requestRedeemSchema = new Schema(
     },
     status: {
       type: String,
-      default: "pending"
-    }
+      default: "pending",
+    },
   },
   {
     timestamps: true,
   }
 );
 
-export default mongoose.model<IrequestRedeemModel>(
+export default mongoose.model<IredeemRequestModel>(
   "Request_Redeem",
-  requestRedeemSchema
+  redeemRequestSchema
 );

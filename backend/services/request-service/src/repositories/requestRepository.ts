@@ -1,15 +1,16 @@
-import { FilterQuery } from "mongoose";
-import IbaseRepository from "../interface/IbaseRepository";
+import { FilterQuery, Model } from "mongoose";
+
 import BaseRepository from "./baseRepository";
+
 import IrequestModel from "../interface/IrequestModel";
-import requestModel from "../models/requestModel";
+import IbaseRepository from "../interface/IbaseRepository";
 
 export default class RequestRepository
   extends BaseRepository<IrequestModel>
   implements IbaseRepository<IrequestModel>
 {
-  constructor() {
-    super(requestModel);
+  constructor(model: Model<IrequestModel>) {
+    super(model);
   }
 
   async insertRequest(

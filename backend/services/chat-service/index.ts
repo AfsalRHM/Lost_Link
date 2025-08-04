@@ -2,9 +2,16 @@ import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-
 import bodyParser from "body-parser";
+
 import dbConnection from "./src/config/dbConfig";
+import chat_route from "./src/routes/chatRoute";
+import message_route from "./src/routes/messageRoute";
+import meet_route from "./src/routes/meetRoute";
+import { globalErrorHandler } from "./src/middlewares/errorHandler";
+import serverListening from "./src/config/serverConfig";
+import { initializeSocket } from "./src/socket/socket";
+import { manageQueue } from "./src/rabbitmq/consumer";
 
 const app = express();
 
@@ -32,21 +39,11 @@ app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-import chat_route from "./src/routes/chatRoute";
-import message_route from "./src/routes/messageRoute";
-import meet_route from "./src/routes/meetRoute";
 app.use("/", chat_route);
 app.use("/", message_route);
 app.use("/", meet_route);
+app.use(globalErrorHandler);
 
-// Setting up the Server
-import serverListening from "./src/config/serverConfig";
 const server = serverListening(app);
-
-// Initialize Socket.IO
-import { initializeSocket } from "./src/socket/socket";
 initializeSocket(server);
-
-// Setting Up the Rabbit MQ
-import { manageQueue } from "./src/rabbitmq/consumer";
 manageQueue();

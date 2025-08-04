@@ -4,7 +4,7 @@ export default interface ImeetService {
     time,
     userId,
     requestId,
-    userName
+    userName,
   }: {
     date: string;
     time: string;
@@ -12,6 +12,7 @@ export default interface ImeetService {
     requestId: string;
     userName: string;
   }): Promise<any>;
-  getAllMeets(): Promise<any>
-  getMeetDataAdmin({ meetId }: { meetId: string }): Promise<any>
+  getAllMeets(): Promise<any>;
+  getMeetDataAdmin({ meetId }: { meetId: string }): Promise<any>;
+  getUserMeets({ userId }: { userId: string }): Promise<any>;
 }

@@ -1,14 +1,15 @@
-import IbaseRepository from "../interface/IbaseRepository";
+import { Model } from "mongoose";
+
 import BaseRepository from "./baseRepository";
+import IbaseRepository from "../interface/IbaseRepository";
 import IcommentModel from "../interface/IcommentModel";
-import commentModel from "../models/commentModel";
 
 export default class commentRepository
   extends BaseRepository<IcommentModel>
   implements IbaseRepository<IcommentModel>
 {
-  constructor() {
-    super(commentModel);
+  constructor(model: Model<IcommentModel>) {
+    super(model);
   }
 
   async findComments({

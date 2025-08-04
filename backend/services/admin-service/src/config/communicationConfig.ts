@@ -23,7 +23,7 @@ export default async function configCommunication(retries = 5, delayMs = 5000) {
       connection = await amqp.connect({
         protocol: "amqp",
         hostname:
-          process.env.PROJECT_STATUS == "Development"
+          process.env.NODE_ENV == "Development"
             ? AMQP_HOSTNAME_DEV
             : AMQP_HOSTNAME,
         port: 5672,
