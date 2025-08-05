@@ -8,7 +8,6 @@ export interface userDataType {
   email: string;
   phone?: number | null;
   status: string;
-  password?: string;
   requests: string[];
   completed_requests: {
     request_id: string;

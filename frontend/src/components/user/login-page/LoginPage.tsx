@@ -66,12 +66,12 @@ const LoginPage = () => {
           userEmail: userMailInput,
           userPassword: userPasswordInput,
         });
-
+        
         if (response.status === 200) {
           const userData = {
-            userId: response.data.data._id,
-            userName: response.data.data.user_name,
-            userProfile: response.data.data.profile_pic,
+            userId: response.data.data.id,
+            userName: response.data.data.userName,
+            userProfile: response.data.data.profilePic,
           };
 
           // Changed the access token to body

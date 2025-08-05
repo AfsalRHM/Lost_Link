@@ -73,7 +73,11 @@ export function createHttpClient({
     async (error) => {
       const originalRequest = error.config;
 
-      if (error.response?.status === 401 && !originalRequest._retry) {
+      if (
+        error.response?.status === 401 &&
+        !originalRequest._retry &&
+        originalRequest.headers?.Authorization
+      ) {
         originalRequest._retry = true;
 
         if (!refreshState.isRefreshing) {
