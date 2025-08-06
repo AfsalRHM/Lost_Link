@@ -58,14 +58,14 @@ const LoginForm: React.FC = () => {
           display: true,
           content: "Invalid Credentials",
         });
-      } else if (result.data.data.adminData.status !== "active") {
+      } else if (result.data.data.status !== "active") {
         setAdminLoginValidationError({
           display: true,
           content: "You are Blocked from this Site",
         });
       } else {
         dispatch(assignAdminAccessToken(result.data.accessToken));
-        dispatch(assignAdminDetails(result.data.data.adminData));
+        dispatch(assignAdminDetails(result.data.data));
         showSuccessToast("Admin Login Success...!");
         navigate("/admin");
       }
