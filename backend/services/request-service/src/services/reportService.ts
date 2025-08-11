@@ -68,7 +68,7 @@ export default class ReportService implements IreportService {
       const report = {
         request_id: requestId,
         user_id: userId,
-        user_name: userData.data._doc.full_name,
+        user_name: userData.data.fullName,
         reason: reportReason,
       };
 
@@ -119,6 +119,7 @@ export default class ReportService implements IreportService {
           };
         })
       );
+      
 
       return enrichedReports;
     } catch (error: any) {
