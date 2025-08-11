@@ -4,13 +4,20 @@ export default interface IredeemRequestModel extends Document {
   _id: mongoose.Types.ObjectId;
   user_id: string;
   request_id: string;
-  found_location: String;
+  request_name: string;
+  reward_amount: number;
+  request_expiration_validity: string;
+  request_item_category: string;
+  found_location: string;
   found_date: Date;
-  damage_issues: String;
-  mobile_number: String;
-  bank_name: String;
-  account_number: String;
-  ifsc_code: String;
-  account_holder_name: String;
-  images: [String];
+  damage_issues: string;
+  mobile_number: string;
+  bank_name: string;
+  account_number: string;
+  ifsc_code: string;
+  account_holder_name: string;
+  images: string[];
+  status: string;
+  createdAt: Date;
+  updatedAt: Date;
 }

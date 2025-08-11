@@ -19,15 +19,21 @@ export default class RequestRepository
     return this.insert(requestData);
   }
 
-  async findAllRequests(): Promise<IrequestModel[] | null> {
+  async findAllRequests(): Promise<IrequestModel[] | []> {
+    return this.findAll({ status: "active" });
+  }
+
+  async adminFindAllRequests(): Promise<IrequestModel[] | []> {
     return this.findAll();
   }
 
-  async findUser(userMail: string): Promise<IrequestModel | null> {
-    return this.findOne({ email: userMail });
+  async findRequest(
+    filter: FilterQuery<IrequestModel>
+  ): Promise<IrequestModel | null> {
+    return this.findOne(filter);
   }
 
-  async updateUserByEmail(
+  async findRequestAndUpdate(
     filter: FilterQuery<IrequestModel>,
     update: Partial<IrequestModel>
   ): Promise<IrequestModel | null> {

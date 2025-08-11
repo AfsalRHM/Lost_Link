@@ -18,7 +18,7 @@ const adminSchema = new Schema(
     },
     status: {
       type: String,
-      required: true,
+      default: "active",
     },
     password: {
       type: String,

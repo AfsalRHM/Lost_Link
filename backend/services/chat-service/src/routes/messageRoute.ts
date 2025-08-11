@@ -3,8 +3,14 @@ const message_route = express.Router();
 
 import MessageService from "../services/messageService";
 import MessageController from "../controllers/messageController";
+import MessageRepository from "../repositories/messageRepository";
+import messageModel from "../model/messageModel";
+import ChatRepository from "../repositories/chatRepository";
+import chatModel from "../model/chatModel";
 
-const messageService = new MessageService();
+const chatRepository = new ChatRepository(chatModel);
+const messageRepository = new MessageRepository(messageModel);
+const messageService = new MessageService(messageRepository, chatRepository);
 const messageController = new MessageController(messageService);
 
 /*************************      User Side       *******************************/

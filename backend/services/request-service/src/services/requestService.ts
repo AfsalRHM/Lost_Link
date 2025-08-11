@@ -1,37 +1,40 @@
 import stripe from "stripe";
 
-import requestModel from "../models/requestModel";
-import redeemRequestModel from "../models/redeemRequestModel";
-import reportModel from "../models/reportModel";
-
 import IrequestModel from "../interface/IrequestModel";
 import IrequestService from "../interface/IrequestService";
-
-import requestRepository from "../repositories/requestRepository";
-import reportRepository from "../repositories/reportRepository";
-import redeemRequestRepository from "../repositories/redeemRequestRepository";
+import { IrequestRepository } from "../interface/IrequestRepository";
+import { IreportRepository } from "../interface/IreportRepository";
+import { IredeemRequestRepository } from "../interface/IredeemRequestRepository";
 
 import calculateRequestExpiryDate from "../helpers/calculateRequestExpiryDate";
 import calculatePoints from "../helpers/calculatePoints";
 import calculateUserReward from "../helpers/calculateUserReward";
 
 import sendToService from "../rabbitmq/producer";
+import { StatusCode } from "../constants/statusCodes";
 
 import { AppError } from "../utils/appError";
-import { StatusCode } from "../constants/statusCodes";
 import { handleServiceError } from "../utils/errorHandler";
 
-export default class RequestService implements IrequestService {
-  private _requestRepository: requestRepository;
-  private _redeemRequestRepository: redeemRequestRepository;
-  private _reportRepository: reportRepository;
+import { RequestMapper } from "../mappers/request.mapper";
+import { ReportMapper } from "../mappers/report.mapper";
+import { RedeemRequestMapper } from "../mappers/redeemRequest.mapper";
 
-  constructor() {
-    this._requestRepository = new requestRepository(requestModel);
-    this._redeemRequestRepository = new redeemRequestRepository(
-      redeemRequestModel
-    );
-    this._reportRepository = new reportRepository(reportModel);
+import { CreateRequestRequestDto } from "../dtos/request/createRequest.dto";
+
+export default class RequestService implements IrequestService {
+  private _requestRepository: IrequestRepository;
+  private _redeemRequestRepository: IredeemRequestRepository;
+  private _reportRepository: IreportRepository;
+
+  constructor(
+    requestRepository: IrequestRepository,
+    redeemRequestRepository: IredeemRequestRepository,
+    reportRepository: IreportRepository
+  ) {
+    this._requestRepository = requestRepository;
+    this._redeemRequestRepository = redeemRequestRepository;
+    this._reportRepository = reportRepository;
   }
 
   async insertRequest({
@@ -40,9 +43,9 @@ export default class RequestService implements IrequestService {
   }: {
     userId: string;
     formData: any;
-  }): Promise<any> {
+  }): Promise<void> {
     try {
-      const requestData = {
+      const requestData: CreateRequestRequestDto = {
         user_id: userId,
         product_name: formData.productName,
         reward_amount: formData.requestReward,
@@ -87,7 +90,7 @@ export default class RequestService implements IrequestService {
         props,
       });
 
-      return insertedData;
+      return;
     } catch (error: any) {
       if (error.name === "MongoNetworkError") {
         throw new AppError(
@@ -112,7 +115,12 @@ export default class RequestService implements IrequestService {
         );
       }
 
-      return userRequests;
+      const filteredRequests = userRequests.map((request) => {
+        const savedEntity = RequestMapper.toEntity(request);
+        return RequestMapper.toGetRequestSummaryDto(savedEntity);
+      });
+
+      return filteredRequests;
     } catch (error: any) {
       if (error.name === "MongoNetworkError") {
         throw new AppError(
@@ -143,38 +151,49 @@ export default class RequestService implements IrequestService {
         throw new AppError("requestId is required", StatusCode.BAD_REQUEST);
       }
 
-      const requestData = await this._requestRepository.findOne({
+      const requestData = await this._requestRepository.findRequest({
         _id: requestId,
       });
+      if (!requestData) {
+        throw new AppError("request not found", StatusCode.NOT_FOUND);
+      }
+
+      const requestEntity = RequestMapper.toEntity(requestData);
+      const mappedRequest = RequestMapper.toGetRequestDetailsDto(requestEntity);
 
       if (from == "normalRequest") {
         if (requestData?.user_id == userId) {
           throw new AppError("Invalid Access", StatusCode.FORBIDDEN);
         }
 
-        if (
-          requestData?.status == "cancelled" ||
-          requestData?.status == "inactive"
-        ) {
-          throw new AppError("Request not found", StatusCode.NOT_FOUND);
-        }
+        // if (
+        //   requestData?.status == "cancelled" ||
+        //   requestData?.status == "inactive"
+        // ) {
+        //   throw new AppError("Request not found", StatusCode.NOT_FOUND);
+        // }
       }
 
-      const redeemRequestData = await this._redeemRequestRepository.findOne({
-        request_id: requestId,
-        user_id: userId,
-      });
+      if (from == "profile") {
+        return { requestData: mappedRequest };
+      }
 
-      const reportData = await this._reportRepository.findOne({
+      const redeemRequestData =
+        await this._redeemRequestRepository.findRedeemRequest({
+          request_id: requestId,
+          user_id: userId,
+        });
+
+      const reportData = await this._reportRepository.findReport({
         request_id: requestId,
         user_id: userId,
       });
 
       let data;
       if (redeemRequestData) {
-        data = { requestData, redeemRequestData, reportData };
+        data = { requestData: mappedRequest, redeemRequestData, reportData };
       } else {
-        data = { requestData, reportData };
+        data = { requestData: mappedRequest, reportData };
       }
 
       return data;
@@ -193,6 +212,46 @@ export default class RequestService implements IrequestService {
     }
   }
 
+  async getMyRequestDetails({
+    requestId,
+    userId,
+  }: {
+    requestId: string;
+    userId: string;
+  }): Promise<any> {
+    try {
+      if (!requestId || !userId) {
+        throw new AppError(
+          "requestId and userId is required",
+          StatusCode.BAD_REQUEST
+        );
+      }
+
+      const requestData = await this._requestRepository.findRequest({
+        _id: requestId,
+      });
+      if (!requestData) {
+        throw new AppError("request not found", StatusCode.NOT_FOUND);
+      }
+
+      const requestEntity = RequestMapper.toEntity(requestData);
+
+      return RequestMapper.toGetRequestDetailsDto(requestEntity);
+    } catch (error: any) {
+      if (error.name === "MongoNetworkError") {
+        throw new AppError(
+          "Database connection failed",
+          StatusCode.SERVICE_UNAVAILABLE
+        );
+      }
+
+      handleServiceError(
+        error,
+        "Something went wrong while fetching my request details"
+      );
+    }
+  }
+
   // To get the request details for admin side with the redeem request data also.
   async adminGetRequestDetails({
     requestId,
@@ -204,7 +263,7 @@ export default class RequestService implements IrequestService {
         throw new AppError("requestId is required", StatusCode.BAD_REQUEST);
       }
 
-      const requestData = await this._requestRepository.findOne({
+      const requestData = await this._requestRepository.findRequest({
         _id: requestId,
       });
       if (!requestData) {
@@ -212,17 +271,35 @@ export default class RequestService implements IrequestService {
       }
 
       const redeemRequestData =
-        await this._redeemRequestRepository.findAllRedeemRequest({
+        await this._redeemRequestRepository.findManyRedeemRequest({
           request_id: requestId,
         });
-      const reportData = await this._reportRepository.findAll({
+      const reportData = await this._reportRepository.findManyReport({
         request_id: requestId,
       });
 
+      const requestEntity = RequestMapper.toEntity(requestData);
+      const mappedRequests =
+        RequestMapper.toGetRequestDetailsDto(requestEntity);
+
+      const mappedRedeemRequests = redeemRequestData.length
+        ? redeemRequestData.map((doc) =>
+            RedeemRequestMapper.toGetRedeemRequestSummaryDto(
+              RedeemRequestMapper.toEntity(doc)
+            )
+          )
+        : null;
+
+      const mappedReports = reportData.length
+        ? reportData.map((doc) =>
+            ReportMapper.toGetReportSummaryDto(ReportMapper.toEntity(doc))
+          )
+        : null;
+
       let data = {
-        requestData,
-        redeemRequestData: redeemRequestData.length ? redeemRequestData : null,
-        reportData: reportData.length ? reportData : null,
+        requestData: mappedRequests,
+        redeemRequestData: mappedRedeemRequests,
+        reportData: mappedReports,
       };
 
       return data;
@@ -247,7 +324,7 @@ export default class RequestService implements IrequestService {
   }: {
     requestId: string;
     userId: string;
-  }): Promise<any> {
+  }): Promise<void> {
     try {
       if (!requestId || !userId) {
         throw new AppError(
@@ -257,7 +334,7 @@ export default class RequestService implements IrequestService {
       }
 
       const requestExist: IrequestModel | null =
-        await this._requestRepository.findOne({ _id: requestId });
+        await this._requestRepository.findRequest({ _id: requestId });
       if (!requestExist) {
         throw new AppError("Request not found", StatusCode.NOT_FOUND);
       }
@@ -266,8 +343,8 @@ export default class RequestService implements IrequestService {
         throw new AppError("Action not allowed", StatusCode.FORBIDDEN);
       }
 
-      const requestData = await this._requestRepository.findByIdAndUpdate(
-        requestId,
+      const requestData = await this._requestRepository.findRequestAndUpdate(
+        { _id: requestId },
         { status: "cancelled" }
       );
       if (!requestData) {
@@ -276,8 +353,6 @@ export default class RequestService implements IrequestService {
           StatusCode.INTERNAL_SERVER_ERROR
         );
       }
-
-      return requestData;
     } catch (error: any) {
       if (error.name === "MongoNetworkError") {
         throw new AppError(
@@ -299,7 +374,7 @@ export default class RequestService implements IrequestService {
   }: {
     requestId: string;
     userId: string | undefined;
-  }): Promise<any> {
+  }): Promise<void> {
     try {
       if (!requestId || !userId) {
         throw new AppError(
@@ -309,7 +384,7 @@ export default class RequestService implements IrequestService {
       }
 
       const requestData: IrequestModel | null =
-        await this._requestRepository.findOne({ _id: requestId });
+        await this._requestRepository.findRequest({ _id: requestId });
       if (!requestData) {
         throw new AppError("Request not found", StatusCode.NOT_FOUND);
       }
@@ -326,8 +401,12 @@ export default class RequestService implements IrequestService {
           userId,
         });
       }
-
-      return newRequestData;
+      if (!newRequestData) {
+        throw new AppError(
+          "Failed to update the like count of request",
+          StatusCode.INTERNAL_SERVER_ERROR
+        );
+      }
     } catch (error: any) {
       if (error.name === "MongoNetworkError") {
         throw new AppError(
@@ -345,7 +424,7 @@ export default class RequestService implements IrequestService {
 
   async getRequestDataById({ requestId }: { requestId: string }): Promise<any> {
     try {
-      const requestData = await this._requestRepository.findOne({
+      const requestData = await this._requestRepository.findRequest({
         _id: requestId,
       });
       if (!requestData) {
@@ -382,9 +461,17 @@ export default class RequestService implements IrequestService {
         );
       }
 
+      const requestData = await this._requestRepository.findRequest({
+        _id: requestId,
+      });
+      if (!requestData) {
+        throw new AppError("request not found", StatusCode.NOT_FOUND);
+      }
+
       const updatedFormData = {
         user_id: userId,
         request_id: requestId,
+        request_name: requestData.product_name,
         found_location: formData.foundLocation,
         found_date: formData.foundDate,
         damage_issues: formData.damageIssues,
@@ -430,11 +517,18 @@ export default class RequestService implements IrequestService {
         throw new AppError("userId is required", StatusCode.BAD_REQUEST);
       }
 
-      const redeemRequests = await this._redeemRequestRepository.findAll({
-        user_id: userId,
-      });
+      const redeemRequests =
+        await this._redeemRequestRepository.findManyRedeemRequest({
+          user_id: userId,
+        });
 
-      return redeemRequests;
+      const mappedRedeemRequests = redeemRequests.map((redeemRequestEntity) =>
+        RedeemRequestMapper.toGetAllRedeemRequestsDto(
+          RedeemRequestMapper.toEntity(redeemRequestEntity)
+        )
+      );
+
+      return mappedRedeemRequests;
     } catch (error: any) {
       if (error.name === "MongoNetworkError") {
         throw new AppError(
@@ -465,14 +559,19 @@ export default class RequestService implements IrequestService {
       }
 
       const redeemRequestData =
-        await this._redeemRequestRepository.findOneRedeemRequest({
+        await this._redeemRequestRepository.findRedeemRequest({
           _id: redeemRequestId,
         });
       if (!redeemRequestData) {
         throw new AppError("Redeem request not found", StatusCode.NOT_FOUND);
       }
 
-      return redeemRequestData;
+      const redeemRequestEntity =
+        RedeemRequestMapper.toEntity(redeemRequestData);
+
+      return RedeemRequestMapper.toAdminGetRedeemRequestDetailsDto(
+        redeemRequestEntity
+      );
     } catch (error: any) {
       if (error.name === "MongoNetworkError") {
         throw new AppError(
@@ -493,7 +592,34 @@ export default class RequestService implements IrequestService {
     try {
       const requests = await this._requestRepository.findAllRequests();
 
-      return requests;
+      const mappedRequests = requests.map((doc) =>
+        RequestMapper.toGetRequestDetailsDto(RequestMapper.toEntity(doc))
+      );
+
+      return mappedRequests;
+    } catch (error: any) {
+      if (error.name === "MongoNetworkError") {
+        throw new AppError(
+          "Database connection failed",
+          StatusCode.SERVICE_UNAVAILABLE
+        );
+      }
+
+      handleServiceError(error, "Something went wrong while fetching requests");
+    }
+  }
+
+  async adminGetAllRequests(): Promise<any> {
+    try {
+      const requests = await this._requestRepository.adminFindAllRequests();
+
+      const mappedRequests = requests.map((requestEntity) =>
+        RequestMapper.toAdminGetAllRequests(
+          RequestMapper.toEntity(requestEntity)
+        )
+      );
+
+      return mappedRequests;
     } catch (error: any) {
       if (error.name === "MongoNetworkError") {
         throw new AppError(
@@ -512,7 +638,13 @@ export default class RequestService implements IrequestService {
       const redeemRrequests =
         await this._redeemRequestRepository.findAllRedeemRequest();
 
-      return redeemRrequests;
+      const mappedRedeemRequests = redeemRrequests.map((redeemRequestEntity) =>
+        RedeemRequestMapper.toAdminGetAllRedeemRequestsDto(
+          RedeemRequestMapper.toEntity(redeemRequestEntity)
+        )
+      );
+
+      return mappedRedeemRequests;
     } catch (error: any) {
       if (error.name === "MongoNetworkError") {
         throw new AppError(
@@ -642,8 +774,8 @@ export default class RequestService implements IrequestService {
       }
 
       if (changeTo == "accepted") {
-        const requestData = await this._requestRepository.findByIdAndUpdate(
-          redeemRequest.request_id,
+        const requestData = await this._requestRepository.findRequestAndUpdate(
+          { _id: redeemRequest.request_id },
           {
             status: changeTo,
           }

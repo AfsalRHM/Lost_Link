@@ -1,5 +1,7 @@
+import { UserLoginResponseDto } from "../dtos/user/userLogin.dto";
+
 export default interface IauthService {
-  checkMail(recieverEmail: string): Promise<boolean>;
+  checkMail(recieverEmail: string): Promise<{ status: boolean }>;
   resetPassword(userMail: string, newPassword: string): Promise<any>;
   sendMail(recieverEmail: string, recieverName: string): Promise<any>;
   verifyotp(userEmail: string, userEnteredOTP: string): Promise<boolean>;
@@ -10,7 +12,10 @@ export default interface IauthService {
     userEmail: string,
     userPassword: string
   ): Promise<any>;
-  loginVerify(userEmail: string, userPassword: string): Promise<any>;
+  loginVerify(
+    userEmail: string,
+    userPassword: string
+  ): Promise<UserLoginResponseDto>;
   refreshToken(token: string): Promise<any>;
   googleLoginVerify(
     email: string

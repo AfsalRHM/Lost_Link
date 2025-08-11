@@ -1,17 +1,16 @@
-import meetModel from "../model/meetModel";
-import meetRepository from "../repositories/meetRepository";
-
 import ImeetService from "../interface/ImeetService";
+import { ImeetRepository } from "../interface/ImeetRepository";
+
+import { StatusCode } from "../constants/statusCodes";
 
 import { AppError } from "../utils/appError";
-import { StatusCode } from "../constants/statusCodes";
 import { handleServiceError } from "../utils/errorHandler";
 
 export default class MeetService implements ImeetService {
-  private _meetRepository: meetRepository;
+  private _meetRepository: ImeetRepository;
 
-  constructor() {
-    this._meetRepository = new meetRepository(meetModel);
+  constructor(meetRepository: ImeetRepository) {
+    this._meetRepository = meetRepository;
   }
 
   // To Create/Schedule Meet
@@ -68,7 +67,7 @@ export default class MeetService implements ImeetService {
   // To get all the meets for the admin
   async getAllMeets(): Promise<any> {
     try {
-      const meetData = await this._meetRepository.findAll();
+      const meetData = await this._meetRepository.findAllMeets();
 
       return meetData;
     } catch (error: any) {
@@ -90,7 +89,7 @@ export default class MeetService implements ImeetService {
         throw new AppError("meetId is required", StatusCode.BAD_REQUEST);
       }
 
-      const meetData = await this._meetRepository.findOne({ _id: meetId });
+      const meetData = await this._meetRepository.findMeet({ _id: meetId });
       if (!meetData) {
         throw new AppError("meet not found", StatusCode.NOT_FOUND);
       }
@@ -118,7 +117,9 @@ export default class MeetService implements ImeetService {
         throw new AppError("userId is required", StatusCode.BAD_REQUEST);
       }
 
-      const meetData = await this._meetRepository.findSome({ user_id: userId });
+      const meetData = await this._meetRepository.findManyMeet({
+        user_id: userId,
+      });
 
       return meetData;
     } catch (error: any) {

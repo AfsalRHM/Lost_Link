@@ -40,6 +40,10 @@ const userSchema = new Schema(
       required: true,
       default: "active",
     },
+    current_tier: {
+      type: String,
+      default: "Rookie Explorer",
+    },
     password: {
       type: String,
       required: true,

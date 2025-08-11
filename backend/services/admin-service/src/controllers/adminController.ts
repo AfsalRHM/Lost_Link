@@ -97,11 +97,11 @@ export default class AdminController implements IadminController {
         throw new AppError("userId is required", StatusCode.BAD_REQUEST);
       }
 
-      await this._adminService.changeUserStatus({ userId });
+      const userData = await this._adminService.changeUserStatus({ userId });
 
       res
         .status(StatusCode.OK)
-        .json({ status: true, data: null, message: "Updated user status" });
+        .json({ status: true, data: userData, message: "Updated user status" });
     } catch (error) {
       console.log("error on the changeUserStatus/adminController");
       next(error);
@@ -136,12 +136,20 @@ export default class AdminController implements IadminController {
     next: NextFunction
   ): Promise<void> => {
     try {
-      const formData = req.body.props;
-      if (!formData) {
-        throw new AppError("formData is required", StatusCode.BAD_REQUEST);
+      const { email, name, role, password } = req.body;
+      if (!email || !name || !role || !password) {
+        throw new AppError(
+          "email, name, role and password is required",
+          StatusCode.BAD_REQUEST
+        );
       }
 
-      const admin = await this._adminService.insertAdmin(req.body.Props);
+      const admin = await this._adminService.insertAdmin({
+        email,
+        name,
+        role,
+        password,
+      });
 
       res
         .status(StatusCode.OK)

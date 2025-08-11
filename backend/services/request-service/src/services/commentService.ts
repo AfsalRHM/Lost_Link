@@ -1,22 +1,20 @@
-import commentModel from "../models/commentModel";
-
 import IcommentService from "../interface/IcommentService";
-
-import commentRepository from "../repositories/commentRepository";
+import { IcommentRepository } from "../interface/IcommentRepository";
 
 import sendToService from "../rabbitmq/producer";
+import { StatusCode } from "../constants/statusCodes";
+import mergeUserAndComment from "../helpers/mergeUserAndComment";
+
 import { createCorrelationId } from "../utils/correlationId";
 import eventEmitter from "../utils/eventEmitter";
 import { AppError } from "../utils/appError";
-import { StatusCode } from "../constants/statusCodes";
-import mergeUserAndComment from "../helpers/mergeUserAndComment";
 import { handleServiceError } from "../utils/errorHandler";
 
 export default class CommentService implements IcommentService {
-  private _commentRepository: commentRepository;
+  private _commentRepository: IcommentRepository;
 
-  constructor() {
-    this._commentRepository = new commentRepository(commentModel);
+  constructor(commentRepository: IcommentRepository) {
+    this._commentRepository = commentRepository;
   }
 
   async createComment({
@@ -33,20 +31,6 @@ export default class CommentService implements IcommentService {
         throw new AppError(
           "requestId, commentText and userId is required",
           StatusCode.BAD_REQUEST
-        );
-      }
-
-      const comment = {
-        request_id: requestId,
-        user_id: userId,
-        content: commentText,
-      };
-
-      const commentData = await this._commentRepository.insert(comment);
-      if (!commentData) {
-        throw new AppError(
-          "Failed to create comment",
-          StatusCode.INTERNAL_SERVER_ERROR
         );
       }
 
@@ -79,16 +63,25 @@ export default class CommentService implements IcommentService {
         });
       });
 
-      const newCommentData = {
-        ...commentData.toObject(),
-        user_id: {
-          _id: userDataResponse.data._doc._id,
-          name: userDataResponse.data._doc.user_name,
-          profilePicture: userDataResponse.data._doc.profile_pic,
+      const comment = {
+        request_id: requestId,
+        user_id: userId,
+        user_info: {
+          user_name: userDataResponse.data.userName,
+          profile_pic: userDataResponse.data.profilePic,
         },
+        content: commentText,
       };
 
-      return newCommentData;
+      const commentData = await this._commentRepository.insertComment(comment);
+      if (!commentData) {
+        throw new AppError(
+          "Failed to create comment",
+          StatusCode.INTERNAL_SERVER_ERROR
+        );
+      }
+
+      return commentData;
     } catch (error: any) {
       if (error.name === "MongoNetworkError") {
         throw new AppError(
@@ -114,7 +107,7 @@ export default class CommentService implements IcommentService {
         throw new AppError("requestId is required");
       }
 
-      const allRequestComments = await this._commentRepository.findAll({
+      const allRequestComments = await this._commentRepository.findMany({
         request_id: requestId,
       });
       const totalCommentLength = allRequestComments.length;

@@ -3,5 +3,4 @@ export class InsertAdminDTO {
   name!: string;
   role!: string;
   password!: string;
-  status!: string;
 }

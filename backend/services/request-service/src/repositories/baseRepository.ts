@@ -21,12 +21,12 @@ export default class BaseRepository<T extends Document>
   }
 
   async findOneRedeemRequest(filter: FilterQuery<T>): Promise<T | null> {
-    return this.model.findOne(filter).populate("request_id");
+    return this.model.findOne(filter);
   }
 
   async findAll(filter?: FilterQuery<T> | undefined): Promise<T[]> {
     if (filter) {
-      return this.model.find(filter).populate("request_id");
+      return this.model.find(filter);
     } else {
       return this.model.find();
     }

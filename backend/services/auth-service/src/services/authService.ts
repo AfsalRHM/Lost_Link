@@ -1,7 +1,6 @@
 import { Types } from "mongoose";
 
-import otpModel from "../models/otpModel";
-import otpRepository from "../repositories/otpRepository";
+import { IotpRepository } from "../interface/IotpRepository";
 import IauthService, { UserDataType } from "../interface/IauthService";
 
 import passwordUtils from "../utils/bcryptPassword";
@@ -12,24 +11,25 @@ import {
   createCorrelationId,
 } from "../utils/correlationId";
 import eventEmitter from "../utils/eventEmitter";
-
-import sendToService from "../rabbitmq/producer";
-
 import { IRefreshTokenJwtReturn } from "../interface/IjwtPayload";
-import { CreateUserRequestDto } from "../dtos/user/createUser.dto";
 import { AppError } from "../utils/appError";
-import { StatusCode } from "../constants/statusCodes";
 import { handleServiceError } from "../utils/errorHandler";
 
-export default class AuthService implements IauthService {
-  private _otpRepository: otpRepository;
+import sendToService from "../rabbitmq/producer";
+import { StatusCode } from "../constants/statusCodes";
 
-  constructor() {
-    this._otpRepository = new otpRepository(otpModel);
+import { CreateUserRequestDto } from "../dtos/user/createUser.dto";
+import { UserLoginResponseDto } from "../dtos/user/userLogin.dto";
+
+export default class AuthService implements IauthService {
+  private _otpRepository: IotpRepository;
+
+  constructor(otpRepository: IotpRepository) {
+    this._otpRepository = otpRepository;
   }
 
   // Function to check the user already exists or not
-  async checkMail(recieverEmail: string): Promise<boolean> {
+  async checkMail(recieverEmail: string): Promise<{ status: boolean }> {
     try {
       if (!recieverEmail) {
         throw new AppError("recieverMail is required", StatusCode.BAD_REQUEST);
@@ -53,7 +53,7 @@ export default class AuthService implements IauthService {
         props,
       });
 
-      const userData: any = await new Promise((resolve, reject) => {
+      const userExists: any = await new Promise((resolve, reject) => {
         const timeout = setTimeout(() => {
           reject(new Error("Response timeout"));
         }, 10000);
@@ -63,14 +63,14 @@ export default class AuthService implements IauthService {
           resolve(data);
         });
       });
-      if (!userData.data) {
+      if (userExists.status) {
         throw new AppError(
           "Failed to check mail",
           StatusCode.INTERNAL_SERVER_ERROR
         );
       }
 
-      return true;
+      return userExists.status;
     } catch (error: any) {
       if (error.name === "MongoNetworkError") {
         throw new AppError(
@@ -199,7 +199,7 @@ export default class AuthService implements IauthService {
 
         const expire = new Date(Date.now() + 10 * 1000 * 1);
 
-        await this._otpRepository.deleteMany(recieverEmail);
+        await this._otpRepository.deleteOTP(recieverEmail);
 
         const data = await this._otpRepository.insertOTP({
           email: recieverEmail,
@@ -223,7 +223,7 @@ export default class AuthService implements IauthService {
 
         const expire = new Date(Date.now() + 10 * 1000 * 1);
 
-        await this._otpRepository.deleteMany(recieverEmail);
+        await this._otpRepository.deleteOTP(recieverEmail);
 
         const data = await this._otpRepository.insertOTP({
           email: recieverEmail,
@@ -359,7 +359,10 @@ export default class AuthService implements IauthService {
   }
 
   // Function to  verify the User Entries for login
-  async loginVerify(userEmail: string, userPassword: string): Promise<any> {
+  async loginVerify(
+    userEmail: string,
+    userPassword: string
+  ): Promise<UserLoginResponseDto> {
     try {
       const replyQueue = process.env.USER_QUEUE;
       if (!replyQueue) {
@@ -393,6 +396,12 @@ export default class AuthService implements IauthService {
       if (!userData.data) {
         throw new AppError(
           "Failed to fetch user details",
+          StatusCode.INTERNAL_SERVER_ERROR
+        );
+      }
+      if (!userData.data.password) {
+        throw new AppError(
+          "Corrupted user data received",
           StatusCode.INTERNAL_SERVER_ERROR
         );
       }

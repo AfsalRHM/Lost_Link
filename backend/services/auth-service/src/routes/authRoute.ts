@@ -4,6 +4,9 @@ const auth_route = express.Router();
 import AuthController from "../controllers/authController";
 import AuthService from "../services/authService";
 
+import OtpRepository from "../repositories/otpRepository";
+import otpModel from "../models/otpModel";
+
 import isUserLogin from "../utils/isUserLogin";
 
 import loginValidator from "../validator/loginValidator";
@@ -11,7 +14,8 @@ import signinValidator from "../validator/signinValidator";
 import sendmailValidator from "../validator/sendmailValidator";
 import verifyotpValidator from "../validator/verifyotpValidator";
 
-const authService = new AuthService();
+const otpRepository = new OtpRepository(otpModel);
+const authService = new AuthService(otpRepository);
 const authController = new AuthController(authService);
 
 /*************************      User Side       *******************************/

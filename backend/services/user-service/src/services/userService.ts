@@ -1,40 +1,42 @@
-import userRepository from "../repositories/userRepository";
-
-import userModel from "../models/userModel";
 import IuserModel from "../interface/IuserModel";
-
 import IuserService, { updateFormDataType } from "../interface/IuserService";
 
-import { AppError } from "../utils/appError";
 import { StatusCode } from "../constants/statusCodes";
-import { CreateUserRequestDTO } from "../dtos/user/createUser.dto";
 import { UserMapper } from "../mappers/user.mapper";
+
+import { AppError } from "../utils/appError";
 import { handleServiceError } from "../utils/errorHandler";
 
-export default class UserService implements IuserService {
-  private _userRepository: userRepository;
+import {
+  CreateUserRequestDTO,
+  CreateUserResponseDto,
+} from "../dtos/user/createUser.dto";
+import {
+  UpdateUserRequestDto,
+  UpdateUserResponseDto,
+} from "../dtos/user/updateUser.dto";
+import { LoginUserResponseDto } from "../dtos/auth/loginUser.dto";
+import { UpdatePasswordResponseDto } from "../dtos/user/updatePassword.dto";
+import { GetProfileResponseDto } from "../dtos/user/getProfile.dto";
+import { GetUserResponseDTO } from "../dtos/user/getUser.dto";
+import { GetAllUsersResponseDto } from "../dtos/admin/getAllUsers.dto";
+import { AdminGetUserResponseDto } from "../dtos/admin/getUser.dto";
+import { IuserRepository } from "../interface/IuserRepository";
 
-  constructor() {
-    this._userRepository = new userRepository(userModel);
+export default class UserService implements IuserService {
+  private _userRepository: IuserRepository;
+
+  constructor(userRepository: IuserRepository) {
+    this._userRepository = userRepository;
   }
 
-  async checkMail(
-    recieverEmail: string
-  ): Promise<{ status: boolean; data: any; message: string; email: string }> {
+  async checkMail(recieverEmail: string): Promise<{ status: boolean }> {
     try {
-      const userData = await this._userRepository.findUser(recieverEmail);
-      if (!userData) {
-        throw new AppError("user not found", StatusCode.NOT_FOUND);
-      }
-
-      return {
-        status: true,
-        data: !!userData,
-        message: userData
-          ? "Email already registered"
-          : "Registration Sucessfull",
+      const userData = await this._userRepository.findUser({
         email: recieverEmail,
-      };
+      });
+
+      return { status: userData ? true : false };
     } catch (error: any) {
       if (error.name === "MongoNetworkError") {
         throw new AppError(
@@ -53,7 +55,7 @@ export default class UserService implements IuserService {
     userLocation: string,
     userEmail: string,
     hashedPassword: string
-  ): Promise<any> {
+  ): Promise<CreateUserResponseDto> {
     try {
       const data: CreateUserRequestDTO = {
         full_name: userFullName,
@@ -73,7 +75,7 @@ export default class UserService implements IuserService {
 
       const savedEntity = UserMapper.toEntity(userData);
 
-      return UserMapper.toResponseDTO(savedEntity);
+      return UserMapper.toCreateUserDTO(savedEntity);
     } catch (error: any) {
       if (error.name === "MongoNetworkError") {
         throw new AppError(
@@ -88,17 +90,24 @@ export default class UserService implements IuserService {
 
   async loginUser(
     userMail: string
-  ): Promise<{ status: boolean; data: any; message: string }> {
+  ): Promise<{ status: boolean; data: LoginUserResponseDto; message: string }> {
     try {
-      const userData = await this._userRepository.findUser(userMail);
+      if (!userMail) {
+        throw new AppError("userMail is required", StatusCode.BAD_REQUEST);
+      }
+
+      const userData = await this._userRepository.findUser({ email: userMail });
       if (!userData) {
         throw new AppError("User not found", StatusCode.NOT_FOUND);
       }
 
+      const userEntity = UserMapper.toEntity(userData);
+      const mappedData = UserMapper.toLoginUserDTO(userEntity);
+
       return {
         status: true,
-        data: userData,
-        message: "Login Successfull",
+        data: mappedData,
+        message: "User data for auth fetched successfully",
       };
     } catch (error: any) {
       if (error.name === "MongoNetworkError") {
@@ -115,7 +124,12 @@ export default class UserService implements IuserService {
   async updatePassword(
     userMail: string,
     newPassword: string
-  ): Promise<{ status: boolean; data: any; message: string; email: string }> {
+  ): Promise<{
+    status: boolean;
+    data: UpdatePasswordResponseDto;
+    message: string;
+    email: string;
+  }> {
     try {
       const userData = await this._userRepository.updateUserByEmail(
         { email: userMail },
@@ -128,9 +142,12 @@ export default class UserService implements IuserService {
         );
       }
 
+      const userEntity = UserMapper.toEntity(userData);
+      const mappedData = UserMapper.toUpdatePasswordDTO(userEntity);
+
       return {
         status: true,
-        data: userData,
+        data: mappedData,
         message: "Password Changed Successfully",
         email: userMail,
       };
@@ -153,18 +170,20 @@ export default class UserService implements IuserService {
     userId,
   }: {
     userId: string | undefined;
-  }): Promise<IuserModel> {
+  }): Promise<GetProfileResponseDto> {
     try {
       if (!userId) {
         throw new AppError("User ID is required", StatusCode.BAD_REQUEST);
       }
 
-      const userData = await this._userRepository.findOne({ _id: userId });
+      const userData = await this._userRepository.findUser({ _id: userId });
       if (!userData) {
         throw new AppError("User not found", StatusCode.NOT_FOUND);
       }
 
-      return userData;
+      const userEntity = UserMapper.toEntity(userData);
+
+      return UserMapper.toGetProfileDto(userEntity);
     } catch (error: any) {
       if (error.name === "MongoNetworkError") {
         throw new AppError(
@@ -183,23 +202,24 @@ export default class UserService implements IuserService {
   }: {
     updateFormData: updateFormDataType;
     userId: string;
-  }): Promise<IuserModel> {
+  }): Promise<UpdateUserResponseDto> {
     try {
-      if (!updateFormData || !userId) {
+      const { profilePic, fullName, userName, phone } = updateFormData;
+      if (!profilePic || !fullName || !userName || !userId) {
         throw new AppError(
-          "Formdata and userId is required",
+          "profilePic, fullName, userName, phone and userId is required",
           StatusCode.BAD_REQUEST
         );
       }
 
-      const userUpdateData = {
-        profile_pic: updateFormData.profilePic,
-        full_name: updateFormData.fullName,
-        user_name: updateFormData.userName,
-        phone: updateFormData.phone,
+      const userUpdateData: UpdateUserRequestDto = {
+        profile_pic: profilePic,
+        full_name: fullName,
+        user_name: userName,
+        phone: phone ? phone : null,
       };
 
-      const userData = await this._userRepository.findByIdAndUpdate(
+      const userData = await this._userRepository.findUserAndUpdate(
         userId,
         userUpdateData
       );
@@ -210,7 +230,9 @@ export default class UserService implements IuserService {
         );
       }
 
-      return userData;
+      const userEntity = UserMapper.toEntity(userData);
+
+      return UserMapper.toUpdateUserDto(userEntity);
     } catch (error: any) {
       if (error.name === "MongoNetworkError") {
         throw new AppError(
@@ -223,21 +245,27 @@ export default class UserService implements IuserService {
     }
   }
 
-  async getUserDataById({ userId }: { userId: string }): Promise<any> {
+  async getUserDataById({
+    userId,
+  }: {
+    userId: string;
+  }): Promise<{ status: boolean; data: GetUserResponseDTO; message: string }> {
     try {
       if (!userId) {
         throw new AppError("userId is required", StatusCode.BAD_REQUEST);
       }
 
-      const userData = await this._userRepository.findOne({ _id: userId });
+      const userData = await this._userRepository.findUser({ _id: userId });
       if (!userData) {
         throw new AppError("User not found", StatusCode.NOT_FOUND);
       }
 
-      const { password, ...newUserData } = userData;
+      const userEntity = UserMapper.toEntity(userData);
+      const mappedData = UserMapper.toGetUserDto(userEntity);
+
       return {
         status: true,
-        data: newUserData,
+        data: mappedData,
         message: "User Data Available",
       };
     } catch (error: any) {
@@ -257,13 +285,13 @@ export default class UserService implements IuserService {
     userIds,
   }: {
     userIds: string[];
-  }): Promise<Partial<IuserModel>[]> {
+  }): Promise<GetUserResponseDTO[]> {
     try {
       if (!userIds) {
         throw new AppError("userIds are required", StatusCode.BAD_REQUEST);
       }
 
-      const users = await this._userRepository.findMany({
+      const users = await this._userRepository.findUsers({
         _id: { $in: userIds },
       });
       if (!users) {
@@ -271,8 +299,9 @@ export default class UserService implements IuserService {
       }
 
       const filteredUsers = users.map((user) => {
-        const { password, ...rest } = user.toObject();
-        return rest;
+        const savedEntity = UserMapper.toEntity(user);
+        console.log("here mimgh have a problem 0989654356");
+        return UserMapper.toGetUserDto(savedEntity);
       });
 
       return filteredUsers;
@@ -310,6 +339,8 @@ export default class UserService implements IuserService {
       if (!userData) {
         throw new AppError("User not found", StatusCode.NOT_FOUND);
       }
+
+      return;
     } catch (error: any) {
       if (error.name === "MongoNetworkError") {
         throw new AppError(
@@ -372,11 +403,20 @@ export default class UserService implements IuserService {
   }
 
   /****************************           Admin Side             **************************************/
-  async getAllUsers(): Promise<IuserModel[]> {
+  async getAllUsers(): Promise<GetAllUsersResponseDto[] | null> {
     try {
-      const userList = await this._userRepository.findAll();
+      const userList = await this._userRepository.findAllUsers();
+      if (!userList) {
+        console.log("No users available");
+        return null;
+      }
 
-      return userList;
+      const mappedUsers = userList.map((user) => {
+        const savedEntity = UserMapper.toEntity(user);
+        return UserMapper.toGetAllUsersDto(savedEntity);
+      });
+
+      return mappedUsers;
     } catch (error: any) {
       if (error.name === "MongoNetworkError") {
         throw new AppError(
@@ -393,18 +433,24 @@ export default class UserService implements IuserService {
   }
 
   // To get the user details to the admin side
-  async getUserData({ userId }: { userId: string }): Promise<IuserModel> {
+  async getUserData({
+    userId,
+  }: {
+    userId: string;
+  }): Promise<AdminGetUserResponseDto> {
     try {
       if (!userId) {
         throw new AppError("userId is required", StatusCode.BAD_REQUEST);
       }
 
-      const userData = await this._userRepository.findOne({ _id: userId });
+      const userData = await this._userRepository.findUser({ _id: userId });
       if (!userData) {
         throw new AppError("user not found", StatusCode.NOT_FOUND);
       }
 
-      return userData;
+      const userEntity = UserMapper.toEntity(userData);
+
+      return UserMapper.toAdminGetUserDto(userEntity);
     } catch (error: any) {
       if (error.name === "MongoNetworkError") {
         throw new AppError(
@@ -432,9 +478,12 @@ export default class UserService implements IuserService {
         throw new AppError("user not found", StatusCode.NOT_FOUND);
       }
 
+      const userEntity = UserMapper.toEntity(userData);
+      const mappedData = UserMapper.toGetAllUsersDto(userEntity);
+
       return {
         status: true,
-        data: userData,
+        data: mappedData,
         message: "User status changed",
       };
     } catch (error: any) {

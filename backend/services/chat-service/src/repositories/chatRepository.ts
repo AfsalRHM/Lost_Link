@@ -1,11 +1,11 @@
-import { Model } from "mongoose";
+import { FilterQuery, Model } from "mongoose";
 
 import BaseRepository from "./baseRepository";
 
 import IbaseRepository from "../interface/IbaseRepository";
 import IchatModel from "../interface/IchatModel";
 
-export default class chatRepository
+export default class ChatRepository
   extends BaseRepository<IchatModel>
   implements IbaseRepository<IchatModel>
 {
@@ -21,7 +21,20 @@ export default class chatRepository
     return this.findAll();
   }
 
-  async findChat(userId: string): Promise<IchatModel | null> {
-    return this.findOne({ user_id: userId });
+  async findManyChats(
+    filter: FilterQuery<IchatModel>
+  ): Promise<IchatModel[] | []> {
+    return this.findAll(filter);
+  }
+
+  async findChat(filter: FilterQuery<IchatModel>): Promise<IchatModel | null> {
+    return this.findOne(filter);
+  }
+
+  async findMessageAndUpdate(
+    filter: FilterQuery<IchatModel>,
+    update: Partial<IchatModel>
+  ): Promise<IchatModel | null> {
+    return this.findByIdAndUpdate(filter, update);
   }
 }

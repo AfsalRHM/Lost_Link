@@ -23,7 +23,7 @@ const meetSchema = new Schema(
     request_id: {
       type: String,
       required: true,
-    }
+    },
   },
   {
     timestamps: true,

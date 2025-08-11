@@ -1,30 +1,29 @@
 import sendToService from "../rabbitmq/producer";
 
-import adminRepository from "../repositories/adminRepository";
-import adminModel from "../model/adminModel";
-
 import IadminService from "../interface/IadminService";
+import { IadminRepository } from "../interface/IadminRepository";
 import { IserviceResponseType } from "../interface/IresponseTypes";
 
 import eventEmitter from "../utils/eventEmitter";
 import jwtFunctions from "../utils/jwt";
 import { createCorrelationId } from "../utils/correlationId";
+import { AppError } from "../utils/appError";
+import { handleServiceError } from "../utils/errorHandler";
 
-// DTO's
+import { StatusCode } from "../constants/statusCodes";
+import { AdminMapper } from "../mappers/admin.mapper";
+
 import { AdminLoginDTO } from "../dtos/AdminLoginDTO";
 import { InsertAdminDTO } from "../dtos/InsertAdminDTO";
 import { ChangeAdminStatusDTO } from "../dtos/ChangeAdminStatusDTO";
 import { ChangeUserStatusDTO } from "../dtos/ChangeUserStatusDTO";
 import { RefreshTokenDTO } from "../dtos/RefreshTokenDTO";
-import { AppError } from "../utils/appError";
-import { StatusCode } from "../constants/statusCodes";
-import { handleServiceError } from "../utils/errorHandler";
 
 export default class AdminService implements IadminService {
-  private _adminRepository: adminRepository;
+  private _adminRepository: IadminRepository;
 
-  constructor() {
-    this._adminRepository = new adminRepository(adminModel);
+  constructor(adminRepository: IadminRepository) {
+    this._adminRepository = adminRepository;
   }
 
   async adminLogin({ email, password }: AdminLoginDTO): Promise<any> {
@@ -137,9 +136,14 @@ export default class AdminService implements IadminService {
 
   async getAllAdmins(): Promise<any> {
     try {
-      const adminData = await this._adminRepository.findAll();
+      const adminList = await this._adminRepository.findAll();
 
-      return adminData;
+      const mappedAdmins = adminList.map((admin) => {
+        const savedEntity = AdminMapper.toEntity(admin);
+        return AdminMapper.toGetAllAdminsDto(savedEntity);
+      });
+
+      return mappedAdmins;
     } catch (error: any) {
       if (error.name === "MongoNetworkError") {
         throw new AppError(
@@ -188,7 +192,7 @@ export default class AdminService implements IadminService {
         );
       }
 
-      return;
+      return responseData.data;
     } catch (error: any) {
       if (error.name === "MongoNetworkError") {
         throw new AppError(
@@ -233,21 +237,19 @@ export default class AdminService implements IadminService {
     name,
     password,
     role,
-    status,
   }: InsertAdminDTO): Promise<any> {
     try {
-      if (!email || !name || !password || !role || !status) {
+      if (!email || !name || !password || !role) {
         throw new AppError(
           "email, name, password, role and status is required"
         );
       }
 
-      const admin = await this._adminRepository.insert({
+      const admin = await this._adminRepository.insertAdmin({
         email,
         name,
         password,
         role,
-        status,
       });
       if (!admin) {
         throw new AppError(

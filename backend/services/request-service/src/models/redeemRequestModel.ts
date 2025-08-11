@@ -13,6 +13,22 @@ const redeemRequestSchema = new Schema(
       type: String,
       required: true,
     },
+    request_name: {
+      type: String,
+      required: true,
+    },
+    reward_amount: {
+      type: Number,
+      required: true,
+    },
+    request_expiration_validity: {
+      type: String,
+      required: true,
+    },
+    request_item_category: {
+      type: String,
+      required: true,
+    },
     found_location: {
       type: String,
       required: true,

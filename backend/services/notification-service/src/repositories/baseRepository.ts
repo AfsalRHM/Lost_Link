@@ -24,7 +24,7 @@ export default class BaseRepository<T extends Document>
     return this.model.find({});
   }
 
-  async findSome(filter: FilterQuery<T>): Promise<T[] | null> {
+  async findMany(filter: FilterQuery<T>): Promise<T[] | []> {
     return this.model.find(filter);
   }
 
@@ -35,7 +35,7 @@ export default class BaseRepository<T extends Document>
     return this.model.updateMany(filter, update);
   }
 
-  async findByIdAndUpdate(Id: string, update: Partial<T>): Promise<T | null> {
-    return this.model.findByIdAndUpdate(Id, update, { new: true });
+  async findAndUpdate(filter: FilterQuery<T>, update: Partial<T>): Promise<T | null> {
+    return this.model.findOneAndUpdate(filter, update, { new: true });
   }
 }

@@ -20,15 +20,22 @@ export default class BaseRepository<T extends Document>
     return this.model.findOne(filter);
   }
 
-  async findAll(): Promise<T[]> {
-    return this.model.find({});
+  async findAll(filter?: FilterQuery<T> | undefined): Promise<T[]> {
+    if (filter) {
+      return this.model.find(filter).populate("request_id");
+    } else {
+      return this.model.find();
+    }
   }
 
-  async findSome(filter: FilterQuery<T>): Promise<T[] | null> {
+  async findSome(filter: FilterQuery<T>): Promise<T[] | []> {
     return this.model.find(filter);
   }
 
-  async findByIdAndUpdate(Id: string, update: Partial<T>): Promise<T | null> {
-    return this.model.findByIdAndUpdate(Id, update, { new: true });
+  async findByIdAndUpdate(
+    filter: FilterQuery<T>,
+    update: Partial<T>
+  ): Promise<T | null> {
+    return this.model.findByIdAndUpdate(filter, update, { new: true });
   }
 }

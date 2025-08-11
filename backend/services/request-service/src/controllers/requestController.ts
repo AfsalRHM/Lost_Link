@@ -41,14 +41,14 @@ export default class RequestController implements IrequestController {
         throw new AppError("Form Data is required", StatusCode.BAD_REQUEST);
       }
 
-      const requestData = await this._requestService.insertRequest({
+      await this._requestService.insertRequest({
         userId: user.id,
         formData,
       });
 
       res.status(StatusCode.OK).json({
         status: true,
-        data: requestData,
+        data: null,
         message: "request created",
       });
     } catch (error) {
@@ -73,6 +73,26 @@ export default class RequestController implements IrequestController {
       });
     } catch (error) {
       console.log("error in getAllRequest/requestController", error);
+      next(error);
+    }
+  };
+
+  // To fetch all the requests to the Admin side
+  public adminGetAllRequests = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
+    try {
+      const requests = await this._requestService.adminGetAllRequests();
+
+      res.status(StatusCode.OK).json({
+        status: true,
+        data: requests,
+        message: "All requests fetched",
+      });
+    } catch (error) {
+      console.log("error in adminGetAllRequests/requestController", error);
       next(error);
     }
   };
@@ -183,6 +203,40 @@ export default class RequestController implements IrequestController {
     }
   };
 
+  // To get my request details for the user side
+  public getMyRequestDetails = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
+    try {
+      const requestId = req.params.id;
+      if (!requestId) {
+        throw new AppError("requestId is required", StatusCode.BAD_REQUEST);
+      }
+
+      const user = extractUserFromHeaders(req);
+      if (!user || !user.id) {
+        throw new AppError(
+          "Unauthorized: User info missing",
+          StatusCode.UNAUTHORIZED
+        );
+      }
+
+      const data = await this._requestService.getMyRequestDetails({
+        requestId,
+        userId: user.id,
+      });
+
+      res
+        .status(StatusCode.OK)
+        .json({ status: true, data, message: "request details fetched" });
+    } catch (error) {
+      console.log("error in getRequestDetails/requestController", error);
+      next(error);
+    }
+  };
+
   // To get request details for the admin side
   public adminGetRequestDetails = async (
     req: Request,
@@ -215,8 +269,6 @@ export default class RequestController implements IrequestController {
     next: NextFunction
   ): Promise<void> => {
     try {
-      console.log(req.params);
-      console.log(req.body);
       const requestId = req.params.id;
       const from = req.body.from ? req.body.from : "user";
       if (!requestId || !from) {
@@ -234,14 +286,14 @@ export default class RequestController implements IrequestController {
         );
       }
 
-      const requestData = await this._requestService.cancelRequest({
+      await this._requestService.cancelRequest({
         requestId,
         userId: from == "admin" ? "admin" : user.id,
       });
 
       res.status(StatusCode.OK).json({
         status: true,
-        data: requestData,
+        data: null,
         message: `Request cancelled successfully`,
       });
     } catch (error) {
@@ -270,14 +322,14 @@ export default class RequestController implements IrequestController {
         );
       }
 
-      const requestData = await this._requestService.changeLikeStatus({
+      await this._requestService.changeLikeStatus({
         requestId,
         userId: user.id,
       });
 
       res.status(StatusCode.OK).json({
         status: true,
-        data: requestData,
+        data: null,
         message: "request updated with like count",
       });
     } catch (error) {

@@ -3,8 +3,11 @@ const meet_route = express.Router();
 
 import MeetController from "../controllers/meetController";
 import MeetService from "../services/meetService";
+import MeetRepository from "../repositories/meetRepository";
+import meetModel from "../model/meetModel";
 
-const meetService = new MeetService();
+const meetRepository = new MeetRepository(meetModel);
+const meetService = new MeetService(meetRepository);
 const meetController = new MeetController(meetService);
 
 /*************************      User Side       *******************************/

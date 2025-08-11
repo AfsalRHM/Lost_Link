@@ -1,16 +1,35 @@
-import configCommunication, { getChannel } from "../config/communicationConfig";
-import requestService from "../services/requestService";
 import dotenv from "dotenv";
+
+import configCommunication, { getChannel } from "../config/communicationConfig";
 import sendToService from "./producer";
+
 import {
   getUserDataByUserId,
   getUsersDataByUserId,
 } from "../services/commentService";
 
+import requestService from "../services/requestService";
+import RequestRepository from "../repositories/requestRepository";
+import requestModel from "../models/requestModel";
+import RedeemRequestRepository from "../repositories/redeemRequestRepository";
+import redeemRequestModel from "../models/redeemRequestModel";
+import ReportRepository from "../repositories/reportRepository";
+import reportModel from "../models/reportModel";
+
 export async function manageQueue() {
   try {
     dotenv.config();
-    const _requestService = new requestService();
+    const redeemRequestRepository = new RedeemRequestRepository(
+      redeemRequestModel
+    );
+    const reportRepository = new ReportRepository(reportModel);
+    const requestRepository = new RequestRepository(requestModel);
+
+    const _requestService = new requestService(
+      requestRepository,
+      redeemRequestRepository,
+      reportRepository
+    );
     // Configuration of RabbitMQ
     await configCommunication();
     const channel = getChannel();

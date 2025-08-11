@@ -2,10 +2,14 @@ import express from "express";
 const user_route = express.Router();
 
 import updateUserDataValidator from "../validator/editUserDetailsValidator";
+
+import UserRepository from "../repositories/userRepository";
+import userModel from "../models/userModel";
 import UserService from "../services/userService";
 import UserController from "../controllers/userController";
 
-const userService = new UserService();
+const userRepository = new UserRepository(userModel);
+const userService = new UserService(userRepository);
 const userController = new UserController(userService);
 
 /*************************      User Side       *******************************/

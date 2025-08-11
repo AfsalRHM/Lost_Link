@@ -2,11 +2,20 @@ import configCommunication, { getChannel } from "../config/communicationConfig";
 import notificationService from "../services/notificationService";
 import dotenv from "dotenv";
 import { getCorrelationId } from "../utils/correlationId";
+import NotificationRepository from "../repositories/notificationRepository";
+import notificationModel from "../model/notificationModel";
 
 export async function manageQueue() {
   try {
     dotenv.config();
-    const _notificationService = new notificationService();
+
+    const notificationRepository = new NotificationRepository(
+      notificationModel
+    );
+    const _notificationService = new notificationService(
+      notificationRepository
+    );
+
     // Configuration of RabbitMQ
     await configCommunication();
     const channel = getChannel();

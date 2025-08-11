@@ -5,11 +5,18 @@ import chatService, {
 } from "../services/chatService";
 import dotenv from "dotenv";
 import { getCorrelationId } from "../utils/correlationId";
+import ChatRepository from "../repositories/chatRepository";
+import chatModel from "../model/chatModel";
+import MessageRepository from "../repositories/messageRepository";
+import messageModel from "../model/messageModel";
 
 export async function manageQueue() {
   try {
     dotenv.config();
-    const _chatService = new chatService();
+
+    const messageRepository = new MessageRepository(messageModel);
+    const chatRepository = new ChatRepository(chatModel);
+    const _chatService = new chatService(chatRepository, messageRepository);
     // Configuration of RabbitMQ
     await configCommunication();
     const channel = getChannel();

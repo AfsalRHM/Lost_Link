@@ -7,6 +7,7 @@ export default interface IrequestService {
     formData: any;
   }): Promise<any>;
   getUserRequests(userId: string): Promise<any>;
+  adminGetAllRequests(): Promise<any>;
   getRequestDetails({
     requestId,
     userId,
@@ -15,6 +16,13 @@ export default interface IrequestService {
     requestId: string;
     userId: string;
     from: string;
+  }): Promise<any>;
+  getMyRequestDetails({
+    requestId,
+    userId,
+  }: {
+    requestId: string;
+    userId: string;
   }): Promise<any>;
   makePayment(formData: any): Promise<any>;
   getRequestDataById({ requestId }: { requestId: string }): Promise<any>;

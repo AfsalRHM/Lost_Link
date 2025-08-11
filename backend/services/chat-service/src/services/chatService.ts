@@ -1,26 +1,27 @@
-import chatRepository from "../repositories/chatRepository";
-import messageRepository from "../repositories/messageRepository";
-
-import chatModel from "../model/chatModel";
-import messageModel from "../model/messageModel";
-
 import IchatService from "../interface/IchatService";
 import IchatModel from "../interface/IchatModel";
 
+import { IchatRepository } from "../interface/IchatRepository";
+import { ImessageRepository } from "../interface/ImessageRepository";
+
 import sendToService from "../rabbitmq/producer";
+import { StatusCode } from "../constants/statusCodes";
+
 import eventEmitter from "../utils/eventEmitter";
 import { createCorrelationId } from "../utils/correlationId";
 import { AppError } from "../utils/appError";
-import { StatusCode } from "../constants/statusCodes";
 import { handleServiceError } from "../utils/errorHandler";
 
 export default class ChatService implements IchatService {
-  private _chatRepository: chatRepository;
-  private _messageRepository: messageRepository;
+  private _chatRepository: IchatRepository;
+  private _messageRepository: ImessageRepository;
 
-  constructor() {
-    this._chatRepository = new chatRepository(chatModel);
-    this._messageRepository = new messageRepository(messageModel);
+  constructor(
+    chatRepository: IchatRepository,
+    messageRespository: ImessageRepository
+  ) {
+    this._chatRepository = chatRepository;
+    this._messageRepository = messageRespository;
   }
 
   // Function to Get the Chat if created OR Create the Chat
@@ -39,7 +40,7 @@ export default class ChatService implements IchatService {
         );
       }
 
-      let chatData = await this._chatRepository.findOne({
+      let chatData = await this._chatRepository.findChat({
         is_group_chat: false,
         user_id: userId,
         request_id: requestId,
@@ -117,12 +118,12 @@ export default class ChatService implements IchatService {
       if (chatData) {
         return {
           chatData: chatData,
-          userData: userDataResponse.data._doc,
+          userData: userDataResponse.data,
         };
       } else {
         const chatDataToInsert = {
-          user_name: userDataResponse.data._doc.full_name,
-          user_id: userDataResponse.data._doc._id,
+          user_name: userDataResponse.data.fullName,
+          user_id: userDataResponse.data.id,
           request_name: requestDataResponse._doc.product_name,
           request_id: requestDataResponse._doc._id,
           request_status: requestDataResponse._doc.status,
@@ -168,7 +169,7 @@ export default class ChatService implements IchatService {
   // Fetch All the Chats
   async getAllChats(): Promise<any> {
     try {
-      const chatData = await this._chatRepository.findSome({
+      const chatData = await this._chatRepository.findManyChats({
         latest_message: { $exists: true, $ne: null },
       });
 
@@ -195,7 +196,7 @@ export default class ChatService implements IchatService {
         throw new AppError("userId is required", StatusCode.BAD_REQUEST);
       }
 
-      const chatData = await this._chatRepository.findSome({
+      const chatData = await this._chatRepository.findManyChats({
         user_id: userId,
         latest_message: { $exists: true, $ne: null },
       });
@@ -223,7 +224,7 @@ export default class ChatService implements IchatService {
         throw new AppError("chatId is required", StatusCode.BAD_REQUEST);
       }
 
-      const chatData = await this._chatRepository.findOne({ _id: chatId });
+      const chatData = await this._chatRepository.findChat({ _id: chatId });
       if (!chatData) {
         throw new AppError("chat not found", StatusCode.NOT_FOUND);
       }

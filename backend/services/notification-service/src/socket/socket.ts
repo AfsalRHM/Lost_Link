@@ -7,6 +7,8 @@ import {
   TypedSocket,
 } from "./socketTypes";
 
+import NotificationRepository from "../repositories/notificationRepository";
+import notificationModel from "../model/notificationModel";
 import NotificationService from "../services/notificationService";
 
 let io: Server<
@@ -25,7 +27,8 @@ if (!CORS_ORIGINS) {
 }
 
 export const initializeSocket = (server: any) => {
-  const notificationService = new NotificationService();
+  const notficationRepository = new NotificationRepository(notificationModel);
+  const notificationService = new NotificationService(notficationRepository);
 
   io = new Server(server, {
     cors: {

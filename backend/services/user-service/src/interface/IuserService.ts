@@ -1,39 +1,56 @@
-import IuserModel from "./IuserModel";
+import { GetAllUsersResponseDto } from "../dtos/admin/getAllUsers.dto";
+import { AdminGetUserResponseDto } from "../dtos/admin/getUser.dto";
+import { CreateUserResponseDto } from "../dtos/user/createUser.dto";
+import { GetProfileResponseDto } from "../dtos/user/getProfile.dto";
+import { GetUserResponseDTO } from "../dtos/user/getUser.dto";
+import { UpdatePasswordResponseDto } from "../dtos/user/updatePassword.dto";
+import { UpdateUserResponseDto } from "../dtos/user/updateUser.dto";
 
 export default interface IuserService {
-  checkMail(recieverEmail: string): Promise<{
-    status: boolean;
-    data: any;
-    message: string;
-    email: string;
-  }>;
+  checkMail(recieverEmail: string): Promise<{ status: boolean }>;
   insertuser(
     userFullName: string,
     userName: string,
     userLocation: string,
     userEmail: string,
     hashedPassword: string
-  ): Promise<IuserModel>;
+  ): Promise<CreateUserResponseDto>;
   loginUser(
     userMail: string
   ): Promise<{ status: boolean; data: any; message: string }>;
-  updatePassword(userMail: string, newPassword: string): Promise<any>;
-  getAllUsers(): Promise<any>;
+  updatePassword(
+    userMail: string,
+    newPassword: string
+  ): Promise<{
+    status: boolean;
+    data: UpdatePasswordResponseDto;
+    message: string;
+    email: string;
+  }>;
+  getAllUsers(): Promise<GetAllUsersResponseDto[] | null>;
   changeUserStatus(props: { userId: string }): Promise<any>;
-  getUserDataById({ userId }: { userId: string }): Promise<any>;
+  getUserDataById({
+    userId,
+  }: {
+    userId: string;
+  }): Promise<{ status: boolean; data: GetUserResponseDTO; message: string }>;
   getUsersDataById({
     userIds,
   }: {
     userIds: string[];
-  }): Promise<Partial<IuserModel>[]>;
-  getProfile({ userId }: { userId: string | undefined }): Promise<IuserModel>;
+  }): Promise<GetUserResponseDTO[]>;
+  getProfile({
+    userId,
+  }: {
+    userId: string | undefined;
+  }): Promise<GetProfileResponseDto>;
   updateUser({
     updateFormData,
     userId,
   }: {
     updateFormData: updateFormDataType;
     userId: string;
-  }): Promise<IuserModel>;
+  }): Promise<UpdateUserResponseDto>;
   addRequestId({
     requestId,
     userId,
@@ -52,13 +69,12 @@ export default interface IuserService {
     points: number;
     rewardAmount: number;
   }): Promise<void>;
-  getUserData({ userId }: { userId: string }): Promise<IuserModel>;
+  getUserData({ userId }: { userId: string }): Promise<AdminGetUserResponseDto>;
 }
 
 export interface updateFormDataType {
   profilePic: string | undefined;
   fullName: string | undefined;
   userName: string | undefined;
-  email: string | undefined;
   phone: number | null | undefined;
 }

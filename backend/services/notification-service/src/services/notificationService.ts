@@ -1,25 +1,21 @@
-import notificationRepository from "../repositories/notificationRepository";
-import notificationModel from "../model/notificationModel";
-
 import InotificationService from "../interface/InotificationService";
+import { InotificationRepository } from "../interface/InotificationRepository";
 
 import { AppError } from "../utils/appError";
 import { StatusCode } from "../constants/statusCodes";
 import { handleServiceError } from "../utils/errorHandler";
 
 export default class NotificationService implements InotificationService {
-  private _notificationRepository: notificationRepository;
+  private _notificationRepository: InotificationRepository;
 
-  constructor() {
-    this._notificationRepository = new notificationRepository(
-      notificationModel
-    );
+  constructor(notificationRepository: InotificationRepository) {
+    this._notificationRepository = notificationRepository;
   }
 
   // To create a notification
   async createNotification(notfication: any): Promise<any> {
     try {
-      const notificationData = await this._notificationRepository.insert({
+      const notificationData = await this._notificationRepository.insertChat({
         sender: notfication.sender,
         request_id: notfication.request,
         chat_id: notfication.chat,
@@ -61,11 +57,12 @@ export default class NotificationService implements InotificationService {
         throw new AppError("userId is required", StatusCode.BAD_REQUEST);
       }
 
-      const notificationData = await this._notificationRepository.findSome({
-        sender: "admin",
-        user_id: userId,
-        seen: false,
-      });
+      const notificationData =
+        await this._notificationRepository.findManyNotification({
+          sender: "admin",
+          user_id: userId,
+          seen: false,
+        });
 
       return notificationData;
     } catch (error: any) {
@@ -159,9 +156,12 @@ export default class NotificationService implements InotificationService {
       }
 
       const notificationData =
-        await this._notificationRepository.findByIdAndUpdate(notificationId, {
-          seen: true,
-        });
+        await this._notificationRepository.findNotificationAndUpdate(
+          { _id: notificationId },
+          {
+            seen: true,
+          }
+        );
       if (!notificationData) {
         throw new AppError("Failed to update admin notification status");
       }
@@ -185,10 +185,11 @@ export default class NotificationService implements InotificationService {
   // To get all the notificaitons of a admin
   async getAdminNotifications(): Promise<any> {
     try {
-      const notificationData = await this._notificationRepository.findSome({
-        sender: "user",
-        seen: false,
-      });
+      const notificationData =
+        await this._notificationRepository.findManyNotification({
+          sender: "user",
+          seen: false,
+        });
 
       return notificationData;
     } catch (error: any) {

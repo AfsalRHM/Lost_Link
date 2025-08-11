@@ -1,11 +1,11 @@
-import { Model, UpdateResult } from "mongoose";
+import { FilterQuery, Model, UpdateQuery, UpdateResult } from "mongoose";
 
 import BaseRepository from "./baseRepository";
 
 import IbaseRepository from "../interface/IbaseRepository";
 import InotificationModel from "../interface/InotificationModel";
 
-export default class notificationRepository
+export default class NotificationRepository
   extends BaseRepository<InotificationModel>
   implements IbaseRepository<InotificationModel>
 {
@@ -19,12 +19,27 @@ export default class notificationRepository
     return this.insert(chatData);
   }
 
-  async findAllChats(): Promise<InotificationModel[] | null> {
+  async findManyNotification(
+    filter: FilterQuery<InotificationModel>
+  ): Promise<InotificationModel[] | []> {
+    return this.findMany(filter);
+  }
+
+  async findAllNotification(): Promise<InotificationModel[] | []> {
     return this.findAll();
   }
 
-  async findChat(userId: string): Promise<InotificationModel | null> {
+  async findUserNotification(
+    userId: string
+  ): Promise<InotificationModel | null> {
     return this.findOne({ user_id: userId });
+  }
+
+  async findNotificationAndUpdate(
+    filter: FilterQuery<InotificationModel>,
+    update: UpdateQuery<InotificationModel>
+  ): Promise<InotificationModel | null> {
+    return this.findAndUpdate(filter, update);
   }
 
   async updateAll(userId?: string): Promise<UpdateResult> {

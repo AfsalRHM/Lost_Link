@@ -19,10 +19,12 @@ export default interface IuserModel extends Document {
   }[];
   points: number;
   payment_history: {
+    _id: string;
     date: Date;
     type: string;
     amount: number;
   }[];
-  createdAt?: Date;
-  updatedAt?: Date;
+  current_tier: string;
+  createdAt: Date;
+  updatedAt: Date;
 }

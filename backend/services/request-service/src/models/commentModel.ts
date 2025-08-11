@@ -13,6 +13,10 @@ const commentSchema = new Schema(
       type: String,
       required: true,
     },
+    user_info: {
+      user_name: { type: String, required: true },
+      profile_pic: { type: String, required: true },
+    },
     content: {
       type: String,
       required: true,

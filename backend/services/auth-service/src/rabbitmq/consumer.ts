@@ -1,4 +1,8 @@
 import configCommunication, { getChannel } from "../config/communicationConfig";
+
+import otpModel from "../models/otpModel";
+import OtpRepository from "../repositories/otpRepository";
+
 import authService, {
   getUserDataByUserId,
   loginDetails,
@@ -9,7 +13,8 @@ import authService, {
 
 export async function manageQueue() {
   try {
-    const _authService = new authService();
+    const otpRepository = new OtpRepository(otpModel);
+    const _authService = new authService(otpRepository);
     // Configuration of RabbitMQ
     await configCommunication();
     const channel = getChannel();
@@ -41,7 +46,9 @@ export async function manageQueue() {
             } else {
               console.log("Error on messageContent on auth managing Queue 1");
             }
-          } else if (msg?.properties?.headers?.source == "user login request response") {
+          } else if (
+            msg?.properties?.headers?.source == "user login request response"
+          ) {
             if (messageContent) {
               loginDetails(correlationId, messageContent);
             } else {

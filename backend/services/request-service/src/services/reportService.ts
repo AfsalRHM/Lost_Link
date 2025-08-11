@@ -1,22 +1,24 @@
-import reportRepository from "../repositories/reportRepository";
-import reportModel from "../models/reportModel";
-
 import IreportService from "../interface/IreportService";
 import IrequestService from "../interface/IrequestService";
+import { IreportRepository } from "../interface/IreportRepository";
 
 import sendToService from "../rabbitmq/producer";
+import { StatusCode } from "../constants/statusCodes";
+
 import { createCorrelationId } from "../utils/correlationId";
 import eventEmitter from "../utils/eventEmitter";
 import { AppError } from "../utils/appError";
-import { StatusCode } from "../constants/statusCodes";
 import { handleServiceError } from "../utils/errorHandler";
 
 export default class ReportService implements IreportService {
-  private _reportRepository: reportRepository;
+  private _reportRepository: IreportRepository;
   private _requestService: IrequestService;
 
-  constructor(requestService: IrequestService) {
-    this._reportRepository = new reportRepository(reportModel);
+  constructor(
+    reportRepository: IreportRepository,
+    requestService: IrequestService
+  ) {
+    this._reportRepository = reportRepository;
     this._requestService = requestService;
   }
 
@@ -70,7 +72,7 @@ export default class ReportService implements IreportService {
         reason: reportReason,
       };
 
-      const reportData = await this._reportRepository.insert(report);
+      const reportData = await this._reportRepository.insertReport(report);
       if (!reportData) {
         throw new AppError(
           "Failed to create report",
@@ -98,9 +100,13 @@ export default class ReportService implements IreportService {
         throw new AppError("userId is required", StatusCode.BAD_REQUEST);
       }
 
-      const reportData = await this._reportRepository.findAll({
+      const reportData = await this._reportRepository.findManyReport({
         user_id: userId,
       });
+      if (!reportData) {
+        console.log("No report data available");
+        return null;
+      }
 
       const enrichedReports = await Promise.all(
         reportData.map(async (report) => {

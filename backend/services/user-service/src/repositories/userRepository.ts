@@ -1,11 +1,13 @@
 import { FilterQuery, Model } from "mongoose";
-import IbaseRepository from "../interface/IbaseRepository";
+
 import BaseRepository from "./baseRepository";
+
 import IuserModel from "../interface/IuserModel";
+import { IuserRepository } from "../interface/IuserRepository";
 
 export default class UserRepository
   extends BaseRepository<IuserModel>
-  implements IbaseRepository<IuserModel>
+  implements IuserRepository
 {
   constructor(model: Model<IuserModel>) {
     super(model);
@@ -15,8 +17,25 @@ export default class UserRepository
     return this.insert(userData);
   }
 
-  async findUser(userMail: string): Promise<IuserModel | null> {
-    return this.findOne({ email: userMail });
+  async findUser(filter: FilterQuery<IuserModel>): Promise<IuserModel | null> {
+    return this.findOne(filter);
+  }
+
+  async findUserAndUpdate(
+    Id: string,
+    update: Partial<IuserModel>
+  ): Promise<IuserModel | null> {
+    return this.findByIdAndUpdate(Id, update);
+  }
+
+  async findUsers(
+    filter: FilterQuery<IuserModel>
+  ): Promise<IuserModel[] | null> {
+    return this.findMany(filter);
+  }
+
+  async findAllUsers(): Promise<IuserModel[] | null> {
+    return this.findAll();
   }
 
   async updateUserByEmail(

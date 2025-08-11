@@ -17,10 +17,12 @@ export interface userEntity {
   }[];
   points: number;
   paymentHistory: {
+    id: string;
     date: Date;
     type: string;
     amount: number;
   }[];
-  createdAt?: Date;
-  updatedAt?: Date;
+  tier: string;
+  createdAt: Date;
+  updatedAt: Date;
 }

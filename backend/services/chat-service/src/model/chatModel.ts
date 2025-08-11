@@ -22,11 +22,11 @@ const chatSchema = new Schema(
     },
     request_id: {
       type: String,
-      required: true
+      required: true,
     },
     request_status: {
       type: String,
-      required: true
+      required: true,
     },
     latest_message: {
       type: {

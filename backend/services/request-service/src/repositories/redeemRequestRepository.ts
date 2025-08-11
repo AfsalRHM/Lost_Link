@@ -1,4 +1,4 @@
-import { Model } from "mongoose";
+import { FilterQuery, Model } from "mongoose";
 
 import BaseRepository from "./baseRepository";
 
@@ -11,6 +11,22 @@ export default class RedeemRequestRepository
 {
   constructor(model: Model<IredeemRequestModel>) {
     super(model);
+  }
+
+  findRedeemRequest(
+    filter: FilterQuery<IredeemRequestModel>
+  ): Promise<IredeemRequestModel | null> {
+    return this.findOne(filter);
+  }
+
+  findAllRedeemRequest(): Promise<IredeemRequestModel[] | []> {
+    return this.findAll();
+  }
+
+  findManyRedeemRequest(
+    filter: FilterQuery<IredeemRequestModel>
+  ): Promise<IredeemRequestModel[] | []> {
+    return this.findAll(filter);
   }
 
   async insertRequestRedeemForm(

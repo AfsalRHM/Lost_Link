@@ -1,10 +1,15 @@
 import configCommunication, { getChannel } from "../config/communicationConfig";
+
+import adminModel from "../model/adminModel";
+import AdminRepository from "../repositories/adminRepository";
 import adminService, { userDataStatusChange } from "../services/adminService";
+
 import { getCorrelationId } from "../utils/correlationId";
 
 export async function manageQueue() {
   try {
-    const _adminService = new adminService();
+    const adminRepository = new AdminRepository(adminModel);
+    const _adminService = new adminService(adminRepository);
     // Configuration of RabbitMQ
     await configCommunication();
     const channel = getChannel();

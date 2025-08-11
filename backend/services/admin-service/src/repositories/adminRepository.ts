@@ -1,6 +1,7 @@
 import { Model } from "mongoose";
 
 import BaseRepository from "./baseRepository";
+
 import IbaseRepository from "../interface/IbaseRepository";
 import IadminModel from "../interface/IadminModel";
 
@@ -12,11 +13,15 @@ export default class AdminRepository
     super(model);
   }
 
+  async insertAdmin(data: Partial<IadminModel>): Promise<IadminModel> {
+    return this.insert(data);
+  }
+
   async findAdmin(adminMail: string): Promise<IadminModel | null> {
     return this.findOne({ email: adminMail });
   }
 
-  async findAll(): Promise<IadminModel[] | null> {
+  async findAll(): Promise<IadminModel[] | []> {
     return this.findAllAdmins();
   }
 

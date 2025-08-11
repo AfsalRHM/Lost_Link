@@ -155,8 +155,10 @@ export default class AuthController implements IauthController {
         return;
       }
 
-      const userExists = await this._authService.checkMail(req.body.userEmail);
-      if (!userExists) {
+      const response: { status: boolean } = await this._authService.checkMail(
+        req.body.userEmail
+      );
+      if (response.status) {
         throw new AppError(
           "User with mail already exists",
           StatusCode.CONFLICT
@@ -203,13 +205,13 @@ export default class AuthController implements IauthController {
       const user = await this._authService.loginVerify(userEmail, userPassword);
 
       const accessToken = jwtFunctions.generateAccessToken({
-        id: user._id.toString(),
+        id: user.id.toString(),
         email: user.email,
         role: "user",
-        name: user.user_name,
+        name: user.userName,
       });
       const refreshToken = jwtFunctions.generateRefreshToken({
-        id: user._id.toString(),
+        id: user.id.toString(),
       });
 
       res

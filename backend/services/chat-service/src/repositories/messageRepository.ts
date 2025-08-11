@@ -1,11 +1,11 @@
-import { Model } from "mongoose";
+import { FilterQuery, Model } from "mongoose";
 
 import BaseRepository from "./baseRepository";
 
 import IbaseRepository from "../interface/IbaseRepository";
 import ImessageModel from "../interface/ImessageModel";
 
-export default class messageRepository
+export default class MessageRepository
   extends BaseRepository<ImessageModel>
   implements IbaseRepository<ImessageModel>
 {
@@ -17,6 +17,12 @@ export default class messageRepository
     messageData: Partial<ImessageModel>
   ): Promise<ImessageModel | null> {
     return this.insert(messageData);
+  }
+
+  async findMessages(
+    filter: FilterQuery<ImessageModel>
+  ): Promise<ImessageModel[] | []> {
+    return this.findSome(filter);
   }
 
   async findMessagesOfUser(userId: string): Promise<ImessageModel | null> {

@@ -2,9 +2,12 @@ import express from "express";
 const comment_route = express.Router();
 
 import CommentService from "../services/commentService";
+import commentModel from "../models/commentModel";
 import CommentController from "../controllers/commentController";
+import CommentRepository from "../repositories/commentRepository";
 
-const commentService = new CommentService();
+const commentRepository = new CommentRepository(commentModel);
+const commentService = new CommentService(commentRepository);
 const commentController = new CommentController(commentService);
 
 // Get Requests

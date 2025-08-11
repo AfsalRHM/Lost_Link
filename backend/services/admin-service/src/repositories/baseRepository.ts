@@ -20,8 +20,8 @@ export default class BaseRepository<T extends Document>
     return this.model.findOne(filter);
   }
 
-  async findAllAdmins(): Promise<T[] | null> {
-    return this.model.find({role: "Moderator"});
+  async findAllAdmins(): Promise<T[] | []> {
+    return this.model.find({ role: "Moderator" });
   }
 
   async findByIdAndUpdate(Id: string, update: Partial<T>): Promise<T | null> {

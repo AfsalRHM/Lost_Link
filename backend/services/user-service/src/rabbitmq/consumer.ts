@@ -1,9 +1,13 @@
 import configCommunication, { getChannel } from "../config/communicationConfig";
+
+import userModel from "../models/userModel";
+import UserRepository from "../repositories/userRepository";
 import userService from "../services/userService";
 
 export async function manageQueue() {
   try {
-    const _userService = new userService();
+    const userRepository = new UserRepository(userModel);
+    const _userService = new userService(userRepository);
     // Configuration of RabbitMQ
     await configCommunication();
     const channel = getChannel();

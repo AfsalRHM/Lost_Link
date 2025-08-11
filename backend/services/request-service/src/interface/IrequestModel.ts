@@ -6,6 +6,7 @@ export default interface IrequestModel extends Document {
   product_name: string;
   reward_amount: number;
   product_category: string;
+  missing_while: string;
   missing_place: string;
   last_seen: string;
   expiration_validity: string;
@@ -17,12 +18,6 @@ export default interface IrequestModel extends Document {
   additional_information: string;
   status: string;
   users_liked: string[];
-  comments: {
-    user_id: string;
-    user_name: string;
-    content: string;
-    created_at: Date;
-  }[];
-  createdAt?: Date;
-  updatedAt?: Date;
+  createdAt: Date;
+  updatedAt: Date;
 }

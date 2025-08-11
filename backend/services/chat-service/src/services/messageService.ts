@@ -1,21 +1,25 @@
-import messageModel from "../model/messageModel";
 import chatModel from "../model/chatModel";
-
-import messageRepository from "../repositories/messageRepository";
 import chatRepository from "../repositories/chatRepository";
+
+import { ImessageRepository } from "../interface/ImessageRepository";
+
+import { StatusCode } from "../constants/statusCodes";
 
 import ImessageService from "../interface/ImessageService";
 import { AppError } from "../utils/appError";
-import { StatusCode } from "../constants/statusCodes";
 import { handleServiceError } from "../utils/errorHandler";
+import { IchatRepository } from "../interface/IchatRepository";
 
 export default class MessageService implements ImessageService {
-  private _messageRepository: messageRepository;
-  private _chatRepository: chatRepository;
+  private _messageRepository: ImessageRepository;
+  private _chatRepository: IchatRepository;
 
-  constructor() {
-    this._messageRepository = new messageRepository(messageModel);
-    this._chatRepository = new chatRepository(chatModel);
+  constructor(
+    messageRepository: ImessageRepository,
+    chatRepository: IchatRepository
+  ) {
+    this._messageRepository = messageRepository;
+    this._chatRepository = chatRepository;
   }
 
   // Function to Send/Create a User Message
@@ -45,9 +49,9 @@ export default class MessageService implements ImessageService {
         image: image,
       };
 
-      const messageData = await (
-        await this._messageRepository.insert(newMessage)
-      ).populate("chat");
+      const messageData = await this._messageRepository.insertMessage(
+        newMessage
+      );
       if (!messageData) {
         throw new AppError(
           "Failed to create user message",
@@ -55,9 +59,12 @@ export default class MessageService implements ImessageService {
         );
       }
 
-      await this._chatRepository.findByIdAndUpdate(chatId, {
-        latest_message: messageData,
-      });
+      await this._chatRepository.findMessageAndUpdate(
+        { _id: chatId },
+        {
+          latest_message: messageData,
+        }
+      );
 
       return messageData;
     } catch (error: any) {
@@ -102,9 +109,9 @@ export default class MessageService implements ImessageService {
         image: image,
       };
 
-      const messageData = await (
-        await this._messageRepository.insert(newMessage)
-      ).populate("chat");
+      const messageData = await this._messageRepository.insertMessage(
+        newMessage
+      );
       if (!messageData) {
         throw new AppError(
           "Failed to create admin message",
@@ -112,9 +119,12 @@ export default class MessageService implements ImessageService {
         );
       }
 
-      await this._chatRepository.findByIdAndUpdate(chatId, {
-        latest_message: messageData,
-      });
+      await this._chatRepository.findMessageAndUpdate(
+        { _id: chatId },
+        {
+          latest_message: messageData,
+        }
+      );
 
       return messageData;
     } catch (error: any) {
@@ -138,7 +148,7 @@ export default class MessageService implements ImessageService {
         throw new AppError("chatId is required", StatusCode.BAD_REQUEST);
       }
 
-      const AllMessages = await this._messageRepository.findSome({
+      const AllMessages = await this._messageRepository.findMessages({
         chat: chatId,
       });
 

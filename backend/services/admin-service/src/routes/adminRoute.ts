@@ -3,8 +3,11 @@ const admin_route = express.Router();
 
 import AdminController from "../controllers/adminController";
 import AdminService from "../services/adminService";
+import AdminRepository from "../repositories/adminRepository";
+import adminModel from "../model/adminModel";
 
-const adminService = new AdminService();
+const adminRepository = new AdminRepository(adminModel);
+const adminService = new AdminService(adminRepository);
 const adminController = new AdminController(adminService);
 
 // Get Reqeusts
