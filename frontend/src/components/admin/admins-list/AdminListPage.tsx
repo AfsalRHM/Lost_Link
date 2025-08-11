@@ -6,9 +6,19 @@ import AdminListPart from "./AdminListPart";
 import { Sidebar } from "../shared/Sidebar";
 import NavBar from "../shared/Navbar";
 
+type Admin = {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  createdAt: Date;
+  updatedAt: Date;
+  status: string;
+};
+
 const UserListPage = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [adminList, setAdminList] = useState([]);
+  const [adminList, setAdminList] = useState<Admin[]>([]);
 
   const getAllAdmins = async () => {
     try {
@@ -42,7 +52,7 @@ const UserListPage = () => {
         <NavBar setSidebarOpen={setSidebarOpen} />
 
         <main className="p-6">
-          <AdminListPart allAdmins={adminList} allAdminsFunc={getAllAdmins} />
+          <AdminListPart allAdmins={adminList} setAdminList={setAdminList} />
         </main>
       </div>
     </div>

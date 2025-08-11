@@ -4,6 +4,15 @@ import { useNavigate } from "react-router-dom";
 
 import { adminService } from "../../../services/adminService";
 
+type Request = {
+  id: string;
+  productName: string;
+  productCategory: string;
+  status: string;
+  rewardAmount: number;
+  createdAt: Date;
+};
+
 import { Sidebar } from "../shared/Sidebar";
 import RequestListPart from "./RequestListPart";
 import NavBar from "../shared/Navbar";
@@ -14,7 +23,7 @@ const RequestListPage = () => {
   const navigate = useNavigate();
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [requestList, setRequestList] = useState([]);
+  const [requestList, setRequestList] = useState<Request[]>([]);
 
   const getAllRequest = async () => {
     try {
@@ -52,6 +61,7 @@ const RequestListPage = () => {
           <RequestListPart
             allRequests={requestList}
             allRequestsFunc={getAllRequest}
+            setRequestList={setRequestList}
           />
         </main>
       </div>

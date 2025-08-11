@@ -26,7 +26,7 @@ import CommentSection from "../../shared/CommentSection";
 import ReportModal from "./ReportModal";
 import UserErrorHandling from "../../../middlewares/UserErrorHandling";
 
-const RequestDetails = ({}) => {
+const RequestDetails = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -61,9 +61,9 @@ const RequestDetails = ({}) => {
           });
           if (response.status === 200) {
             setRequestData(response.data.data.requestData);
-            setLikeCount(response.data.data.requestData.users_liked.length);
+            setLikeCount(response.data.data.requestData.likedUsers.length);
             setHasLiked(
-              response.data.data.requestData.users_liked.includes(userId)
+              response.data.data.requestData.likedUsers.includes(userId)
             );
             if (response.data.data.redeemRequestData) {
               setRequestAlreadyRedeemed(true);
@@ -163,7 +163,7 @@ const RequestDetails = ({}) => {
           <div className="border-b border-gray-100 pb-6 mb-8">
             <div className="flex justify-between">
               <h1 className="text-3xl md:text-4xl font-bold text-violet-800 mb-4">
-                {requestData?.product_name}
+                {requestData?.productName}
               </h1>
               <div className="md:flex gap-2">
                 <div className="mb-2 md:mb-0">
@@ -204,7 +204,7 @@ const RequestDetails = ({}) => {
 
             <div className="flex flex-wrap items-center gap-4">
               <span className="text-2xl font-bold text-violet-600">
-                ₹{requestData?.reward_amount?.toLocaleString()}.00 Reward
+                ₹{requestData?.rewardAmount?.toLocaleString()}.00 Reward
               </span>
             </div>
             <div className="flex flex-wrap items-center gap-4">
@@ -228,16 +228,16 @@ const RequestDetails = ({}) => {
                   <div className="bg-violet-50 p-4 rounded-xl">
                     <p className="text-violet-600 text-sm mb-1">Category</p>
                     <p className="font-semibold text-violet-900">
-                      {requestData?.product_category}
+                      {requestData?.productCategory}
                     </p>
                   </div>
-                  {requestData?.missing_while == "specific" ? (
+                  {requestData?.missingWhile == "specific" ? (
                     <div className="bg-violet-50 p-4 rounded-xl">
                       <p className="text-violet-600 text-sm mb-1">
                         Missing Place
                       </p>
                       <p className="font-semibold text-violet-900">
-                        {requestData?.missing_place}
+                        {requestData?.missingPlace}
                       </p>
                     </div>
                   ) : (
@@ -246,27 +246,27 @@ const RequestDetails = ({}) => {
                         Travelling On
                       </p>
                       <p className="font-semibold text-violet-900">
-                        {requestData?.mode_of_travel}
+                        {requestData?.travelMode}
                       </p>
                     </div>
                   )}
                   <div className="bg-violet-50 p-4 rounded-xl">
                     <p className="text-violet-600 text-sm mb-1">Last Seen</p>
                     <p className="font-semibold text-violet-900">
-                      {requestData?.last_seen}
+                      {requestData?.lastSeen}
                     </p>
                   </div>
-                  {requestData?.missing_while === "route" ? (
+                  {requestData?.missingWhile === "route" ? (
                     <div className="bg-violet-50 p-4 rounded-xl">
                       <p className="text-violet-600 text-sm mb-1">
-                        Route of {requestData?.mode_of_travel}
+                        Route of {requestData?.travelMode}
                       </p>
                       <div className="font-semibold flex items-center flex-wrap gap-2">
-                        {requestData?.missing_route.map(
+                        {requestData?.missingRoute.map(
                           (place: string, index: number) => (
                             <React.Fragment key={index}>
                               <span>{place}</span>
-                              {index < requestData.missing_route.length - 1 && (
+                              {index < requestData.missingRoute.length - 1 && (
                                 <span className="text-violet-900">→</span>
                               )}
                             </React.Fragment>
@@ -287,26 +287,24 @@ const RequestDetails = ({}) => {
                     <div className="w-2 h-2 bg-violet-400 rounded-full"></div>
                     <p className="text-violet-600">
                       Missing since:{" "}
-                      {requestData?.missing_date
-                        ? new Date(
-                            requestData.missing_date
-                          ).toLocaleDateString()
+                      {requestData?.missingDate
+                        ? new Date(requestData.missingDate).toLocaleDateString()
                         : "N/A"}
                     </p>
                   </div>
                   <div className="flex items-center gap-3">
                     <div className="w-2 h-2 bg-violet-400 rounded-full"></div>
                     <p className="text-violet-600">
-                      Request Valid Upto: {requestData?.expiration_validity}
+                      Request Valid Upto: {requestData?.expirationValidity}
                     </p>
                   </div>
                   <div className="flex items-center gap-3">
                     <div className="w-2 h-2 bg-violet-400 rounded-full"></div>
                     <p className="text-violet-600">
                       Request Expires in:{" "}
-                      {requestData?.expiration_date
+                      {requestData?.expirationDate
                         ? new Date(
-                            requestData.expiration_date
+                            requestData.expirationDate
                           ).toLocaleDateString()
                         : "N/A"}
                     </p>
@@ -319,7 +317,7 @@ const RequestDetails = ({}) => {
                   <Info size={20} /> Additional Info
                 </h2>
                 <p className="text-violet-600 leading-relaxed">
-                  {requestData?.additional_information ||
+                  {requestData?.additionalInfo ||
                     "No additional information available"}
                 </p>
               </div>
@@ -331,7 +329,7 @@ const RequestDetails = ({}) => {
                   Images
                 </h2>
                 <div className="grid grid-cols-2 gap-4">
-                  {requestData?.product_images.map((image, index) => (
+                  {requestData?.productImages.map((image, index) => (
                     <div
                       key={index}
                       className="relative aspect-square rounded-xl overflow-hidden shadow-md"
@@ -356,11 +354,7 @@ const RequestDetails = ({}) => {
             ) : (
               <button
                 className="w-full md:w-1/3 px-6 py-3 bg-violet-600 text-white rounded-full font-semibold hover:bg-violet-700 transition-all duration-300 shadow-md hover:shadow-lg md:mb-0 mb-3"
-                onClick={() =>
-                  handleRedeemRequest(
-                    requestData && requestData._id ? requestData._id : ""
-                  )
-                }
+                onClick={() => handleRedeemRequest(requestData?.id ?? "")}
               >
                 Redeem Request
               </button>

@@ -156,7 +156,7 @@ const RequestRedeem = () => {
     const errors = validateRequestRedeemFormEntries({
       requestRedeemDetails: formData,
       requestCreationDate: requestData?.createdAt
-        ? requestData?.missing_date
+        ? requestData?.missingDate
         : new Date(),
     });
 
@@ -181,7 +181,7 @@ const RequestRedeem = () => {
       try {
         const response = await userService.createRedeemRequest({
           formData,
-          requestId: requestData ? requestData._id : "noRequestedIdGot",
+          requestId: requestData ? requestData.id : "noRequestedIdGot",
         });
 
         if (response.status === 200) {
@@ -216,16 +216,14 @@ const RequestRedeem = () => {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <p className="text-sm text-violet-600">Request ID</p>
-                  <p className="font-semibold">
-                    {requestData?._id.slice(0, 6)}
-                  </p>
+                  <p className="font-semibold">{requestData?.id.slice(0, 6)}</p>
                 </div>
                 <div>
                   <p className="text-sm text-violet-600 md:ml-[-100px]">
                     Item Name
                   </p>
                   <p className="font-semibold md:ml-[-100px]">
-                    {requestData?.product_name}
+                    {requestData?.productName}
                   </p>
                 </div>
                 <div>
@@ -233,7 +231,7 @@ const RequestRedeem = () => {
                     Reward Amount
                   </p>
                   <p className="font-semibold md:ml-[40px]">
-                    ₹{requestData?.reward_amount}
+                    ₹{requestData?.rewardAmount}
                   </p>
                 </div>
               </div>

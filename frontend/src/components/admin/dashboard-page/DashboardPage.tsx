@@ -7,12 +7,12 @@ import { adminService } from "../../../services/adminService";
 import { Users, ShoppingCart, TrendingUp, IndianRupee } from "lucide-react";
 import { Sidebar } from "../shared/Sidebar";
 import { StatCard } from "./StatCard";
-import { UserCountChart } from "./UserCountChart";
 import NavBar from "../shared/Navbar";
+import { UserCountChart } from "./UserCountChart";
 import { ProjectRequestChart } from "./RequestChart";
+import { RedeemRequestChart } from "./RequestRedeemChart";
 import { userDataType } from "../../../interface/IuserModel";
 import AdminErrorHandling from "../../../middlewares/AdminErrorHandling";
-import { RedeemRequestChart } from "./RequestRedeemChart";
 import IrequestModel from "../../../interface/IrequestModel";
 
 const DashboardPage = () => {
@@ -99,7 +99,7 @@ const DashboardPage = () => {
           setRequests(response.data.data);
           const profit = response.data.data.reduce(
             (acc: number, request: IrequestModel) => {
-              return (acc += Math.floor((request.reward_amount / 100) * 5));
+              return (acc += Math.floor((request.rewardAmount / 100) * 5));
             },
             0
           );

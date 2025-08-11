@@ -22,11 +22,11 @@ const UserDetails = ({ userData }: { userData: userDataType | undefined }) => {
   const CLOUDINARY_URL = import.meta.env.VITE_CLOUDINARY_URL;
 
   const [formData, setFormData] = useState<formDataType>({
-    profilePic: userData?.profile_pic,
-    fullName: userData?.full_name,
-    userName: userData?.user_name,
+    profilePic: userData?.profilePic,
+    fullName: userData?.fullName,
+    userName: userData?.userName,
     email: userData?.email,
-    phone: userData?.phone,
+    phone: userData?.phoneNumber,
   });
 
   const fileRef = useRef<any>(null);
@@ -75,25 +75,25 @@ const UserDetails = ({ userData }: { userData: userDataType | undefined }) => {
       const errors = validateUserEditDetails(formData);
       if (errors.phone) {
         showErrorToast2(errors.phone.content);
-        formData.profilePic = userData?.profile_pic;
-        formData.fullName = userData?.full_name;
-        formData.userName = userData?.user_name;
+        formData.profilePic = userData?.profilePic;
+        formData.fullName = userData?.fullName;
+        formData.userName = userData?.userName;
         formData.email = userData?.email;
-        formData.phone = userData?.phone;
+        formData.phone = userData?.phoneNumber;
       } else if (errors.fullName) {
         showErrorToast2(errors.fullName.content);
-        formData.profilePic = userData?.profile_pic;
-        formData.fullName = userData?.full_name;
-        formData.userName = userData?.user_name;
+        formData.profilePic = userData?.profilePic;
+        formData.fullName = userData?.fullName;
+        formData.userName = userData?.userName;
         formData.email = userData?.email;
-        formData.phone = userData?.phone;
+        formData.phone = userData?.phoneNumber;
       } else if (errors.userName) {
         showErrorToast2(errors.userName.content);
-        formData.profilePic = userData?.profile_pic;
-        formData.fullName = userData?.full_name;
-        formData.userName = userData?.user_name;
+        formData.profilePic = userData?.profilePic;
+        formData.fullName = userData?.fullName;
+        formData.userName = userData?.userName;
         formData.email = userData?.email;
-        formData.phone = userData?.phone;
+        formData.phone = userData?.phoneNumber;
       } else {
         const response = await userService.updateUser({ formData });
 

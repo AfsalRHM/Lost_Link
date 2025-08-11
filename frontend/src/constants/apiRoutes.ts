@@ -13,6 +13,8 @@ export const API_ROUTES = {
   USER: {
     GET_MY_REPORTS: "/request/get-my-reports",
     GET_ALL_REQUESTS: "/request/get-all-requests",
+    GET_MY_REQUEST_DETAILS: (requestId: string) =>
+      `/request/${requestId}/request/my`,
     GET_REQUEST_DETAILS: "/request/get-request-details",
     UPDATE_LIKE: (requestId: string) => `/request/${requestId}/like`,
     CREATE_REDEEM_REQUEST: "/request/create-redeem-request",

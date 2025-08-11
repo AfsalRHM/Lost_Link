@@ -3,20 +3,20 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 import { userService } from "../../services/userService";
+import { adminService } from "../../services/adminService";
 
 import { format } from "date-fns";
 import { showErrorToast2 } from "../../utils/iziToastUtils";
 import { MessageCircle, Send } from "lucide-react";
 import { RootState } from "../../redux/store";
 import UserErrorHandling from "../../middlewares/UserErrorHandling";
-import { adminService } from "../../services/adminService";
 
 interface ICommentModel {
   _id?: string;
-  user_id: {
-    _id: string;
-    name: string;
-    profilePicture: string;
+  user_id: string;
+  user_info: {
+    user_name: string;
+    profile_pic: string;
   };
   content: string;
   createdAt: string;
@@ -174,8 +174,8 @@ const CommentSection = ({
               <div className="flex items-start gap-3">
                 <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
                   <img
-                    src={comment.user_id.profilePicture}
-                    alt={comment.user_id.name}
+                    src={comment.user_info.profile_pic}
+                    alt={comment.user_info.user_name}
                     className="w-full h-full object-cover"
                     onError={(e) => {
                       const target = e.target as HTMLImageElement;
@@ -187,7 +187,7 @@ const CommentSection = ({
                   <div className="flex justify-between items-start">
                     <div>
                       <h4 className="font-semibold text-violet-800">
-                        {comment.user_id.name}
+                        {comment.user_info.user_name}
                       </h4>
                       <p className="text-xs text-gray-500">
                         {formatDate(comment.createdAt)}

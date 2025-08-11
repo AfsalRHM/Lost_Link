@@ -17,11 +17,11 @@ const ChatListPart = ({ allUsers = [] }: ChatListPartProps) => {
 
   const handleUserClick = (userId: string) => {
     if (userId) {
-      navigate(`/admin/chats/${userId}`); 
+      navigate(`/admin/chats/${userId}`);
     }
   };
   const filteredUsers = allUsers.filter((user) =>
-    user.full_name.toLowerCase().includes(searchTerm.toLowerCase())
+    user.fullName.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
@@ -84,10 +84,10 @@ const ChatListPart = ({ allUsers = [] }: ChatListPartProps) => {
                 </thead>
                 <tbody className="bg-blue-400 divide-y divide-gray-200">
                   {currentUsers.map((user) => (
-                    <tr key={user._id} className="hover:bg-blue-500">
+                    <tr key={user.id} className="hover:bg-blue-500">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-medium text-white">
-                          {user.full_name}
+                          {user.fullName}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
@@ -103,7 +103,7 @@ const ChatListPart = ({ allUsers = [] }: ChatListPartProps) => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-center">
                         <button
-                          onClick={() => handleUserClick(user._id)}
+                          onClick={() => handleUserClick(user.id)}
                           className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                         >
                           Chats...

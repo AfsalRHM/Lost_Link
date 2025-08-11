@@ -24,7 +24,7 @@ const MyRequests = ({ userData }: { userData: userDataType | undefined }) => {
           return;
         } else {
           const response = await userService.getMyRequests({
-            userId: userData?._id!,
+            userId: userData?.id!,
           });
 
           if (response.status === 200) {
@@ -144,16 +144,16 @@ const MyRequests = ({ userData }: { userData: userDataType | undefined }) => {
                     .map((request: any, index: number) =>
                       request.status !== currentStatus ? null : (
                         <tr
-                          key={request._id}
+                          key={request.id}
                           className="hover:bg-gray-50 transition-colors"
                         >
                           <td className="px-6 py-3 text-sm text-gray-700">
                             {indexOfFirstRequest + index + 1}
                           </td>
                           <td className="px-6 py-3 text-sm text-gray-700">
-                            {request.product_name.length <= 25
-                              ? request.product_name
-                              : request.product_name.slice(0, 25) + "..."}
+                            {request.productName.length <= 25
+                              ? request.productName
+                              : request.productName.slice(0, 25) + "..."}
                           </td>
                           <td
                             className={`px-6 py-3 text-sm hidden md:block ${
@@ -169,9 +169,7 @@ const MyRequests = ({ userData }: { userData: userDataType | undefined }) => {
                           <td className="px-6 py-3 text-sm">
                             <button
                               className="inline-flex items-center px-3 py-1.5 border border-gray-300 rounded-md hover:bg-gray-100 transition-colors"
-                              onClick={() =>
-                                handleDetailsPageClick(request._id)
-                              }
+                              onClick={() => handleDetailsPageClick(request.id)}
                             >
                               <span className="mr-2">👁️</span>Details
                             </button>

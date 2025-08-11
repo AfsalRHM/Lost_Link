@@ -1,25 +1,26 @@
 export interface userDataType {
-  _id: string;
-  profile_pic: string;
-  full_name: string;
-  user_name: string;
+  id: string;
+  profilePic: string;
+  fullName: string;
+  userName: string;
   location: string;
-  wallet: number;
+  walletBalance: number;
   email: string;
-  phone?: number | null;
+  phoneNumber?: number | null;
   status: string;
   requests: string[];
-  completed_requests: {
-    request_id: string;
-    completed_at: Date;
-    points_earned: number;
+  completedRequests: {
+    requestId: string;
+    completedAt: Date;
+    pointsEarned: number;
   }[];
   points: number;
-  payment_history: {
+  paymentHistory: {
     date: Date;
     type: string;
     amount: number;
   }[];
+  currentTier: string;
   createdAt?: Date;
   updatedAt?: Date;
 }

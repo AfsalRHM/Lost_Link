@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 import {
   XAxis,
@@ -49,7 +49,7 @@ interface UserCountChartProps {
   userData: any[];
 }
 
-export const UserCountChart: React.FC<UserCountChartProps> = ({ userData }) => {
+export const UserCountChart = ({ userData }: UserCountChartProps) => {
   const [activePeriod, setActivePeriod] = useState("Last 6 Months");
   const [showFilters, setShowFilters] = useState(false);
 

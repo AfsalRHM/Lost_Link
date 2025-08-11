@@ -19,6 +19,12 @@ export const userService = {
     return userHttpClient.get(API_ROUTES.USER.GET_ALL_REQUESTS);
   },
 
+  getMyRequestDetails: (props: { requestId: string }) => {
+    return userHttpClient.get(
+      API_ROUTES.USER.GET_MY_REQUEST_DETAILS(props.requestId)
+    );
+  },
+
   getRequestDetails: (payload: { requestId: string; from: string }) => {
     return userHttpClient.post(API_ROUTES.USER.GET_REQUEST_DETAILS, payload);
   },

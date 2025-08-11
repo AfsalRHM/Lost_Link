@@ -10,7 +10,7 @@ const WalletSection = ({
   const [currentPage, setCurrentPage] = useState(1);
   const transactionsPerPage = 5;
 
-  const transactions = userData?.payment_history || [];
+  const transactions = userData?.paymentHistory || [];
   const totalPages = Math.ceil(transactions.length / transactionsPerPage);
   const paginatedTransactions = transactions.slice(
     (currentPage - 1) * transactionsPerPage,
@@ -27,7 +27,7 @@ const WalletSection = ({
       <div className="flex space-x-4 mb-6 border-b-2 pb-2">
         <span className="text-gray-600 font-semibold">Wallet Balance:</span>
         <span className="text-gray-400 font-bold underline-offset-2">
-          ₹{userData?.wallet?.toLocaleString()}
+          ₹{userData?.walletBalance?.toLocaleString()}
         </span>
       </div>
 
@@ -61,7 +61,7 @@ const WalletSection = ({
                     {(currentPage - 1) * transactionsPerPage + index + 1}
                   </td>
                   <td className="px-6 py-3 text-sm text-gray-700">
-                    {transaction._id.slice(0, 6).toUpperCase()}
+                    {transaction.id.slice(0, 6).toUpperCase()}
                   </td>
                   <td className="hidden md:block px-6 py-3 text-sm text-gray-700">
                     {new Date(transaction.date).toLocaleDateString()}

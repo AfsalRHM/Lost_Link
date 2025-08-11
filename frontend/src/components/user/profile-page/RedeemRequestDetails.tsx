@@ -19,13 +19,16 @@ import {
 import { showErrorToast2 } from "../../../utils/iziToastUtils";
 import MeetScheduleModal from "./MeetScheduleModal";
 import UserErrorHandling from "../../../middlewares/UserErrorHandling";
+import IredeemRequestModel from "../../../interface/IrequestRedeem";
 
 const RedeemRequestDetails = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
 
-  const [requestRedeemData, setRequestRedeemData] = useState<any>();
+  const [requestRedeemData, setRequestRedeemData] = useState<
+    IredeemRequestModel | undefined
+  >(undefined);
   const [loading, setLoading] = useState<boolean>(true);
 
   const redeemRequestId = location.state?.redeemRequestId;
@@ -43,6 +46,7 @@ const RedeemRequestDetails = () => {
           const response = await userService.getRequestRedeemDetails({
             requestRedeemId: redeemRequestId,
           });
+
           if (response.status === 200) {
             setRequestRedeemData(response.data.data);
           } else {
@@ -68,7 +72,7 @@ const RedeemRequestDetails = () => {
   }
 
   if (loading) {
-    return <div>no available</div>;
+    return <div>not available</div>;
   }
 
   const calculateExpiryDate = (startDate: Date, months: number) => {
@@ -91,7 +95,7 @@ const RedeemRequestDetails = () => {
               <span className="font-medium">Back</span>
             </button>
           </div>
-          {requestRedeemData.status == "pending" ? (
+          {requestRedeemData?.status == "pending" ? (
             <div>
               <button
                 // onClick={() => setVideoCall(!videoCall)}
@@ -109,34 +113,32 @@ const RedeemRequestDetails = () => {
           <div className="bg-gradient-to-r flex justify-between from-blue-600 to-blue-400 p-8">
             <div>
               <h2 className="text-4xl font-extrabold text-white mb-2">
-                {requestRedeemData.request_id.product_name}
+                {requestRedeemData?.requestName}
               </h2>
               <div className="flex items-center text-blue-100 space-x-4">
                 <div className="flex items-center">
                   <MapPin className="w-5 h-5 mr-2" />
-                  <span>{requestRedeemData.found_location}</span>
+                  <span>{requestRedeemData?.foundLocation}</span>
                 </div>
                 <div className="flex items-center">
                   <Clock className="w-5 h-5 mr-2" />
                   <span>
                     Expires on:{" "}
                     {calculateExpiryDate(
-                      requestRedeemData.found_date,
+                      requestRedeemData?.foundDate!,
                       parseInt(
-                        requestRedeemData.request_id.expiration_validity.split(
-                          " "
-                        )[0]
+                        requestRedeemData?.expirationValidity!.split(" ")[0]!
                       )
                     )}
                   </span>
                 </div>
                 <div className="md:flex items-center hidden">
                   <Info className="w-5 h-5 mr-2" />
-                  <span>Status: {requestRedeemData.status}</span>
+                  <span>Status: {requestRedeemData?.status}</span>
                 </div>
                 <div className="md:flex items-center hidden">
                   <Phone className="w-5 h-5 mr-2" />
-                  <span>Contact: {requestRedeemData.mobile_number}</span>
+                  <span>Contact: {requestRedeemData?.mobileNumber}</span>
                 </div>
               </div>
             </div>
@@ -155,7 +157,7 @@ const RedeemRequestDetails = () => {
                   <div className="flex justify-between mb-4">
                     <span className="text-gray-600">Reward Amount</span>
                     <span className="text-3xl font-bold text-blue-600">
-                      ₹{requestRedeemData.request_id.reward_amount}.00
+                      ₹{requestRedeemData?.rewardAmount}.00
                     </span>
                   </div>
 
@@ -163,7 +165,7 @@ const RedeemRequestDetails = () => {
                     <div className="flex justify-between">
                       <span className="text-gray-600">Category</span>
                       <span className="font-medium">
-                        {requestRedeemData.request_id.product_category}
+                        {requestRedeemData?.itemCategory}
                       </span>
                     </div>
                   </div>
@@ -177,33 +179,33 @@ const RedeemRequestDetails = () => {
                     </h4>
                   </div>
                   <p className="text-gray-700">
-                    {requestRedeemData.damage_issues || "No damage reported"}
+                    {requestRedeemData?.damageIssues || "No damage reported"}
                   </p>
                 </div>
                 <div
                   className={`rounded-lg p-6 ${
-                    requestRedeemData.status.toLowerCase() === "pending"
+                    requestRedeemData?.status.toLowerCase() === "pending"
                       ? "bg-yellow-50"
-                      : requestRedeemData.status.toLowerCase() === "rejected"
+                      : requestRedeemData?.status.toLowerCase() === "rejected"
                       ? "bg-red-50"
                       : "bg-green-50"
                   }`}
                 >
                   <div className="flex items-center mb-4">
-                    {requestRedeemData.status.toLowerCase() === "pending" && (
+                    {requestRedeemData?.status.toLowerCase() === "pending" && (
                       <Clock className="w-6 h-6 text-yellow-500 mr-3" />
                     )}
-                    {requestRedeemData.status.toLowerCase() === "rejected" && (
+                    {requestRedeemData?.status.toLowerCase() === "rejected" && (
                       <AlertTriangle className="w-6 h-6 text-red-500 mr-3" />
                     )}
-                    {requestRedeemData.status.toLowerCase() === "approved" && (
+                    {requestRedeemData?.status.toLowerCase() === "approved" && (
                       <CheckCircle className="w-6 h-6 text-green-500 mr-3" />
                     )}
                     <h4 className="text-xl font-semibold text-gray-800">
                       Submission Status
                     </h4>
                   </div>
-                  <p className="text-gray-700">{requestRedeemData.status}</p>
+                  <p className="text-gray-700">{requestRedeemData?.status}</p>
                 </div>
               </div>
 
@@ -219,7 +221,7 @@ const RedeemRequestDetails = () => {
                     <div>
                       <p className="text-sm text-gray-600">Bank Name</p>
                       <p className="text-lg font-semibold text-gray-800">
-                        {requestRedeemData.bank_name}
+                        {requestRedeemData?.bankName}
                       </p>
                     </div>
                   </div>
@@ -229,7 +231,7 @@ const RedeemRequestDetails = () => {
                     <div>
                       <p className="text-sm text-gray-600">Account Number</p>
                       <p className="text-lg font-semibold text-gray-800">
-                        {requestRedeemData.account_number}
+                        {requestRedeemData?.accountNumber}
                       </p>
                     </div>
                   </div>
@@ -239,7 +241,7 @@ const RedeemRequestDetails = () => {
                     <div>
                       <p className="text-sm text-gray-600">Account Holder</p>
                       <p className="text-lg font-semibold text-gray-800">
-                        {requestRedeemData.account_holder_name}
+                        {requestRedeemData?.accountHolder}
                       </p>
                     </div>
                   </div>
@@ -247,18 +249,18 @@ const RedeemRequestDetails = () => {
                   <div>
                     <p className="text-sm text-gray-600">IFSC Code</p>
                     <p className="text-mono font-semibold text-gray-800">
-                      {requestRedeemData.ifsc_code}
+                      {requestRedeemData?.ifscCode}
                     </p>
                   </div>
                 </div>
               </div>
-              {requestRedeemData.images?.length > 0 && (
+              {requestRedeemData?.images?.length! > 0 && (
                 <div>
                   <h3 className="text-2xl font-semibold text-gray-800 mb-6 underline">
                     Item Images
                   </h3>
                   <div className="flex gap-6">
-                    {requestRedeemData.images.map(
+                    {requestRedeemData?.images.map(
                       (image: string, index: number) => (
                         <img
                           key={index}

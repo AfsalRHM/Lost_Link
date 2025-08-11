@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import requestRedeemType from "../../../interface/IrequestRedeem";
 import { Search } from "lucide-react";
+
+import IredeemRequestModel from "../../../interface/IrequestRedeem";
 
 interface UserListPartProps {
   allRedeemRequests: any;
@@ -22,10 +23,8 @@ const RedeemRequestListPart = ({ allRedeemRequests }: UserListPartProps) => {
   };
 
   const filteredRedeemRequests = allRedeemRequests.filter(
-    (redeemRequest: requestRedeemType) =>
-      redeemRequest.request_id.product_name
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase())
+    (redeemRequest: IredeemRequestModel) =>
+      redeemRequest.requestName.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const totalPages = Math.ceil(filteredRedeemRequests.length / usersPerPage);
@@ -79,13 +78,13 @@ const RedeemRequestListPart = ({ allRedeemRequests }: UserListPartProps) => {
             </thead>
             <tbody className="bg-blue-400 divide-y divide-gray-200">
               {paginatedRedeemRequests.map(
-                (redeemRequest: requestRedeemType) => (
-                  <tr key={redeemRequest._id} className="hover:bg-blue-700">
+                (redeemRequest: IredeemRequestModel) => (
+                  <tr key={redeemRequest.id} className="hover:bg-blue-700">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="h-10 flex items-center justify-center">
                           <span className="text-black font-medium">
-                            {redeemRequest.request_id.product_name}
+                            {redeemRequest.requestName}
                           </span>
                         </div>
                       </div>
@@ -105,14 +104,14 @@ const RedeemRequestListPart = ({ allRedeemRequests }: UserListPartProps) => {
                     <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
                       <div className="flex justify-center space-x-4">
                         <p className="inline-flex items-center px-4 py-2 text-white rounded-lg transition-colors">
-                          {redeemRequest.mobile_number}
+                          {redeemRequest.mobileNumber}
                         </p>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
                       <div className="flex justify-center space-x-4">
                         <button
-                          onClick={() => handleDetailsPage(redeemRequest._id)}
+                          onClick={() => handleDetailsPage(redeemRequest.id)}
                           className="inline-flex items-center px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
                         >
                           Details

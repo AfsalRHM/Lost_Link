@@ -10,12 +10,20 @@ import { showErrorToast } from "../../../utils/toastUtils";
 import NavBar from "../shared/Navbar";
 import AdminErrorHandling from "../../../middlewares/AdminErrorHandling";
 
+type User = {
+  id: string;
+  fullName: string;
+  userName: string;
+  email: string;
+  status: "active" | "inactive";
+};
+
 const UserListPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [userList, setUserList] = useState([]);
+  const [userList, setUserList] = useState<User[]>([]);
 
   const getAllUsers = async () => {
     try {
@@ -51,7 +59,7 @@ const UserListPage = () => {
         <NavBar setSidebarOpen={setSidebarOpen} />
 
         <main className="p-6">
-          <UserListPart allUsers={userList} allUsersFunc={getAllUsers} />
+          <UserListPart allUsers={userList} setUserList={setUserList} />
         </main>
       </div>
     </div>

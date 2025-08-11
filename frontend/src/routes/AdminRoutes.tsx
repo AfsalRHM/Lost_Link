@@ -17,6 +17,7 @@ import MeetDetails from "../pages/admin/MeetDetails";
 import NotFound from "../pages/admin/NotFound";
 
 import { AdminPrivateRoute } from "../utils/AdminPrivateRoutes";
+import { IsAdminLogin } from "../utils/IsAdminLogin";
 
 const AdminRoutes = () => {
   return (
@@ -27,19 +28,21 @@ const AdminRoutes = () => {
         <Route path="/admin/login" element={<Login />} />
       </Route>
 
-      <Route path="/admin" element={<Dashboard />} />
-      <Route path="/admin/users" element={<UsersList />} />
-      <Route path="/admin/users/user-details/:id" element={<UserDetails />} />
-      <Route path="/admin/admins" element={<AdminList />} />
-      <Route path="/admin/addadmin" element={<AddAdmin />} />
-      <Route path="/admin/requests" element={<RequestList />} />
-      <Route path="/admin/requests/request-details/:id" element={<RequestDetails />} />
-      <Route path="/admin/chats" element={<ChatList />} />
-      <Route path="/admin/redeem-requests" element={<RedeemRequestList />} />
-      <Route path="/admin/redeem-requests/details/:id" element={<RedeemRequestDetails />} />
-      <Route path="/admin/chats/:userId" element={<ChatDetails />} />
-      <Route path="/admin/meetings" element={<MeetList />} />
-      <Route path="/admin/meetings/:meetId" element={<MeetDetails />} />
+      <Route element={<IsAdminLogin />}>
+        <Route path="/admin" element={<Dashboard />} />
+        <Route path="/admin/users" element={<UsersList />} />
+        <Route path="/admin/users/user-details/:id" element={<UserDetails />} />
+        <Route path="/admin/admins" element={<AdminList />} />
+        <Route path="/admin/addadmin" element={<AddAdmin />} />
+        <Route path="/admin/requests" element={<RequestList />} />
+        <Route path="/admin/requests/request-details/:id" element={<RequestDetails />} />
+        <Route path="/admin/chats" element={<ChatList />} />
+        <Route path="/admin/redeem-requests" element={<RedeemRequestList />} />
+        <Route path="/admin/redeem-requests/details/:id" element={<RedeemRequestDetails />} />
+        <Route path="/admin/chats/:userId" element={<ChatDetails />} />
+        <Route path="/admin/meetings" element={<MeetList />} />
+        <Route path="/admin/meetings/:meetId" element={<MeetDetails />} />
+      </Route>
 
       <Route path="/admin/404" element={<NotFound />} />
     </>

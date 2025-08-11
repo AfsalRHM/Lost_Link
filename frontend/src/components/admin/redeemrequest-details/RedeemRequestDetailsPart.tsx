@@ -5,12 +5,12 @@ import { useDispatch } from "react-redux";
 import { adminService } from "../../../services/adminService";
 
 import { MapPin, Landmark, Package, CreditCard } from "lucide-react";
-import requestRedeemType from "../../../interface/IrequestRedeem";
 import {
   showErrorToast2,
   showSuccessToast2,
 } from "../../../utils/iziToastUtils";
 import AdminErrorHandling from "../../../middlewares/AdminErrorHandling";
+import IredeemRequestModel from "../../../interface/IrequestRedeem";
 
 const RedeemRequestDetailsPart = () => {
   const dispatch = useDispatch();
@@ -19,7 +19,7 @@ const RedeemRequestDetailsPart = () => {
   const { id } = useParams<{ id: string }>();
   const [loading, setLoading] = useState<boolean>(true);
   const [redeemRequestData, setRedeemRequestData] = useState<
-    requestRedeemType | undefined
+    IredeemRequestModel | undefined
   >();
 
   useEffect(() => {
@@ -117,14 +117,13 @@ const RedeemRequestDetailsPart = () => {
               <div className="flex items-center gap-3 justify-center mb-4">
                 <Package className="w-6 h-6 text-violet-600" />
                 <span className="text-xl text-violet-800 font-semibold">
-                  {redeemRequestData?.request_id.product_name}
+                  {redeemRequestData?.requestName}
                 </span>
               </div>
               <div className="flex items-center gap-3 justify-center">
                 <CreditCard className="w-6 h-6 text-violet-600" />
                 <span className="text-xl text-violet-800 font-semibold">
-                  ₹
-                  {redeemRequestData?.request_id.reward_amount.toLocaleString()}
+                  ₹{redeemRequestData?.rewardAmount.toLocaleString()}
                   .00
                 </span>
               </div>
@@ -142,7 +141,7 @@ const RedeemRequestDetailsPart = () => {
                   <div className="bg-white p-4 rounded-xl shadow-sm">
                     <p className="text-violet-600 text-sm">Found Location</p>
                     <p className="font-semibold text-violet-900 mt-1">
-                      {redeemRequestData?.found_location}
+                      {redeemRequestData?.foundLocation}
                     </p>
                   </div>
 
@@ -150,7 +149,7 @@ const RedeemRequestDetailsPart = () => {
                     <p className="text-violet-600 text-sm">Found Date</p>
                     <p className="font-semibold text-violet-900 mt-1">
                       {new Date(
-                        redeemRequestData?.found_date!
+                        redeemRequestData?.foundDate!
                       ).toLocaleDateString()}
                     </p>
                   </div>
@@ -158,14 +157,14 @@ const RedeemRequestDetailsPart = () => {
                   <div className="bg-white p-4 rounded-xl shadow-sm">
                     <p className="text-violet-600 text-sm">Damage Issues</p>
                     <p className="font-semibold text-violet-900 mt-1">
-                      {redeemRequestData?.damage_issues}
+                      {redeemRequestData?.damageIssues}
                     </p>
                   </div>
 
                   <div className="bg-white p-4 rounded-xl shadow-sm">
                     <p className="text-violet-600 text-sm">Contact Number</p>
                     <p className="font-semibold text-violet-900 mt-1">
-                      {redeemRequestData?.mobile_number}
+                      {redeemRequestData?.mobileNumber}
                     </p>
                   </div>
                 </div>
@@ -180,28 +179,28 @@ const RedeemRequestDetailsPart = () => {
                   <div className="bg-white p-4 rounded-xl shadow-sm">
                     <p className="text-violet-600 text-sm">Bank Name</p>
                     <p className="font-semibold text-violet-900 mt-1">
-                      {redeemRequestData?.bank_name}
+                      {redeemRequestData?.bankName}
                     </p>
                   </div>
 
                   <div className="bg-white p-4 rounded-xl shadow-sm">
                     <p className="text-violet-600 text-sm">Account Holder</p>
                     <p className="font-semibold text-violet-900 mt-1">
-                      {redeemRequestData?.account_holder_name}
+                      {redeemRequestData?.accountHolder}
                     </p>
                   </div>
 
                   <div className="bg-white p-4 rounded-xl shadow-sm">
                     <p className="text-violet-600 text-sm">Account Number</p>
                     <p className="font-semibold text-violet-900 mt-1">
-                      {redeemRequestData?.account_number}
+                      {redeemRequestData?.accountNumber}
                     </p>
                   </div>
 
                   <div className="bg-white p-4 rounded-xl shadow-sm">
                     <p className="text-violet-600 text-sm">IFSC Code</p>
                     <p className="font-semibold text-violet-900 mt-1">
-                      {redeemRequestData?.ifsc_code}
+                      {redeemRequestData?.ifscCode}
                     </p>
                   </div>
                 </div>

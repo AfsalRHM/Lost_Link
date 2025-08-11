@@ -1,18 +1,21 @@
-import IrequestModel from "./IrequestModel";
-
-export default interface requestRedeemType {
-  _id: string;
-  user_id: string;
-  request_id: IrequestModel;
-  found_location: String;
-  found_date: Date;
-  damage_issues: String;
-  mobile_number: String;
-  bank_name: String;
-  account_number: String;
-  ifsc_code: String;
-  account_holder_name: String;
-  images: [String];
+export default interface IredeemRequestModel {
+  id: string;
+  requestId: string;
+  userId: string;
+  requestName: string;
+  rewardAmount: number;
+  expirationValidity: string;
+  itemCategory: string;
+  foundLocation: string;
+  foundDate: Date;
+  damageIssues: string;
+  mobileNumber: string;
+  bankName: string;
+  accountNumber: string;
+  ifscCode: string;
+  accountHolder: string;
+  images: string[];
   status: string;
-  createdAt?: Date;
+  createdAt: Date;
+  updatedAt: Date;
 }

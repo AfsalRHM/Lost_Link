@@ -98,15 +98,15 @@ const UserDetailsPart = () => {
         <div className="bg-white rounded-2xl shadow-xl p-6 md:p-10">
           <div className="border-b border-gray-100 pb-6 mb-8">
             <div className="flex items-center gap-6 mb-4">
-              {userData?.profile_pic ? (
+              {userData?.profilePic ? (
                 <img
-                  src={userData.profile_pic}
-                  alt={userData.full_name}
+                  src={userData.profilePic}
+                  alt={userData.fullName}
                   className="w-24 h-24 rounded-full border-4 border-violet-200"
                 />
               ) : (
                 <div className="w-24 h-24 rounded-full bg-violet-600 flex items-center justify-center text-2xl font-bold text-white">
-                  {userData?.full_name
+                  {userData?.fullName
                     ?.split(" ")
                     .map((n: string) => n[0])
                     .join("")}
@@ -114,9 +114,9 @@ const UserDetailsPart = () => {
               )}
               <div>
                 <h1 className="text-3xl md:text-4xl font-bold text-violet-800">
-                  {userData?.full_name}
+                  {userData?.fullName}
                 </h1>
-                <p className="text-violet-600">@{userData?.user_name}</p>
+                <p className="text-violet-600">@{userData?.userName}</p>
               </div>
             </div>
           </div>
@@ -135,8 +135,8 @@ const UserDetailsPart = () => {
                   <div className="flex items-center gap-3">
                     <Phone className="w-5 h-5 text-violet-600" />
                     <span className="text-violet-900">
-                      {userData?.phone
-                        ? userData.phone
+                      {userData?.phoneNumber
+                        ? userData.phoneNumber
                         : "Mobile Number not Available"}
                     </span>
                   </div>
@@ -176,7 +176,7 @@ const UserDetailsPart = () => {
                       <p className="text-violet-600 text-sm">Completed</p>
                     </div>
                     <p className="font-semibold text-violet-900">
-                      {userData?.completed_requests?.length || 0}
+                      {userData?.completedRequests?.length || 0}
                     </p>
                   </div>
                   <div className="bg-violet-50 p-4 rounded-xl">
@@ -191,7 +191,7 @@ const UserDetailsPart = () => {
                   <div className="bg-violet-50 p-4 rounded-xl">
                     <p className="text-violet-600 text-sm mb-2">Current Tier</p>
                     <p className="font-semibold text-violet-900">
-                      {userData?.current_tier}
+                      {userData?.currentTier}
                     </p>
                   </div>
                 </div>

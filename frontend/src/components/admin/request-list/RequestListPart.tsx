@@ -1,43 +1,37 @@
-import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 
 import { adminService } from "../../../services/adminService";
 
-import { showSuccessToast } from "../../../utils/toastUtils";
-import { Search } from "lucide-react";
-import { assignAdminAccessToken } from "../../../redux/slice/accessTokenSlice";
-import AdminErrorHandling from "../../../middlewares/AdminErrorHandling";
+import IrequestModel from "../../../interface/IrequestModel";
 
-interface Request {
-  _id: string;
-  product_name: string;
-  reward_amount: number;
+import { showErrorToast, showSuccessToast } from "../../../utils/toastUtils";
+import { Search } from "lucide-react";
+
+type Request = {
+  id: string;
+  productName: string;
   productCategory: string;
-  travelMode: string;
-  travelRoutes: string[];
-  missingPlace: string;
-  missingDate: string;
-  expirationLimit: string;
-  images: File[];
-  additionalInfo: string;
-  status: "active" | "inactive" | "cancelled" | "completed";
-}
+  status: string;
+  rewardAmount: number;
+  createdAt: Date;
+};
 
 interface RequestListPartProps {
   allRequests: Request[];
   allRequestsFunc: () => Promise<void>;
+  setRequestList: Dispatch<SetStateAction<Request[]>>;
 }
 
 const RequestListPart = ({
   allRequests,
-  allRequestsFunc,
+  setRequestList,
 }: RequestListPartProps) => {
-  const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const [searchTerm, setSearchTerm] = useState("");
-  const [sortField, setSortField] = useState<keyof Request>("product_name");
+  const [sortField, setSortField] =
+    useState<keyof IrequestModel>("productName");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -45,7 +39,7 @@ const RequestListPart = ({
 
   const request: Request[] = allRequests;
 
-  const handleSort = (field: keyof Request) => {
+  const handleSort = (field: keyof IrequestModel) => {
     if (sortField === field) {
       setSortDirection(sortDirection === "asc" ? "desc" : "asc");
     } else {
@@ -61,27 +55,42 @@ const RequestListPart = ({
   };
 
   const handleStatusChange = async (id: string) => {
-    const response = await adminService.updateRequest({ requestId: id });
-    await allRequestsFunc();
-    if (response.status == 200) {
-      const token = response.headers["authorization"]?.split(" ")[1];
-      dispatch(assignAdminAccessToken(token));
-      showSuccessToast("Request Status Changed");
-    } else {
-      console.log(response, "this is the error response on handleStatusChange");
-      AdminErrorHandling(response, dispatch, navigate);
+    const previousData = [...allRequests];
+
+    setRequestList(
+      allRequests.map((request) =>
+        request.id === id
+          ? {
+              ...request,
+              status: request.status === "active" ? "inactive" : "active",
+            }
+          : request
+      )
+    );
+
+    try {
+      const response = await adminService.updateRequest({ requestId: id });
+
+      if (response.status == 200) {
+        showSuccessToast(response.data.message);
+      }
+    } catch (error) {
+      setRequestList(previousData);
+      showErrorToast("Failed to update request status");
     }
   };
 
   const filteredRequests = request
     .filter((request) =>
-      request.product_name.toLowerCase().includes(searchTerm.toLowerCase())
+      request.productName.toLowerCase().includes(searchTerm.toLowerCase())
     )
-    .sort((a, b) => {
+    .sort((a: Request, b: Request) => {
+      const field = sortField as keyof Request;
+
       if (sortDirection === "asc") {
-        return a[sortField] > b[sortField] ? 1 : -1;
+        return a[field] > b[field] ? 1 : -1;
       }
-      return a[sortField] < b[sortField] ? 1 : -1;
+      return a[field] < b[field] ? 1 : -1;
     });
 
   const indexOfLastRequest = currentPage * itemsPerPage;
@@ -127,7 +136,7 @@ const RequestListPart = ({
               <tr>
                 <th
                   className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider cursor-pointer"
-                  onClick={() => handleSort("product_name")}
+                  onClick={() => handleSort("productName")}
                 >
                   Name
                 </th>
@@ -139,7 +148,7 @@ const RequestListPart = ({
                 </th>
                 <th
                   className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider cursor-pointer"
-                  onClick={() => handleSort("reward_amount")}
+                  onClick={() => handleSort("rewardAmount")}
                 >
                   Reward
                 </th>
@@ -153,12 +162,12 @@ const RequestListPart = ({
             </thead>
             <tbody className="bg-blue-400 divide-y divide-gray-200">
               {currentRequests.map((request) => (
-                <tr key={request._id} className="hover:bg-blue-700">
+                <tr key={request.id} className="hover:bg-blue-700">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       <div className="ml-4">
                         <div className="text-sm font-medium text-white">
-                          {request.product_name}
+                          {request.productName}
                         </div>
                         <div className="text-sm text-black">
                           {request.productCategory}
@@ -182,7 +191,7 @@ const RequestListPart = ({
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className="inline-flex text-sm font-medium">
-                      ₹{request.reward_amount}
+                      ₹{request.rewardAmount}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-center">
@@ -196,7 +205,7 @@ const RequestListPart = ({
                       </p>
                     ) : (
                       <button
-                        onClick={() => handleStatusChange(request._id)}
+                        onClick={() => handleStatusChange(request.id)}
                         className={`inline-flex items-center px-4 py-2 text-white rounded-lg transition-colors ${
                           request.status === "active"
                             ? "bg-red-600 hover:bg-red-700"
@@ -210,7 +219,7 @@ const RequestListPart = ({
 
                   <td className="px-6 py-4 whitespace-nowrap text-center">
                     <button
-                      onClick={() => handleDetailsPage(request._id)}
+                      onClick={() => handleDetailsPage(request.id)}
                       className="inline-flex items-center px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
                     >
                       Details

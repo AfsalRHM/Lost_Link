@@ -2,8 +2,13 @@ import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 
 import { RootState } from "../../../redux/store";
+import IrequestModel from "../../../interface/IrequestModel";
 
-const RequestPart = ({ filteredRequests }: { filteredRequests: any }) => {
+const RequestPart = ({
+  filteredRequests,
+}: {
+  filteredRequests: IrequestModel[];
+}) => {
   const navigate = useNavigate();
 
   const { userId } = useSelector((state: RootState) => state.userDetails);
@@ -14,9 +19,9 @@ const RequestPart = ({ filteredRequests }: { filteredRequests: any }) => {
     }
   }
 
-  const activeRequests = filteredRequests.filter(
-    (request: any) => request.status === "active" && request.user_id !== userId
-  );
+  const activeRequests = filteredRequests.filter((request: IrequestModel) => {
+    return request.userId !== userId;
+  });
 
   return (
     <div className="flex-1 p-8">
@@ -34,46 +39,46 @@ const RequestPart = ({ filteredRequests }: { filteredRequests: any }) => {
             </p>
           </div>
         ) : (
-          activeRequests.map((request: any) =>
-            request.user_id === userId || request.status !== "active" ? null : (
+          activeRequests.map((request: IrequestModel) =>
+            request.userId === userId || request.status !== "active" ? null : (
               <div
-                key={request._id}
+                key={request.id}
                 className="bg-white shadow-md rounded-lg border border-gray-200 overflow-hidden flex flex-col"
               >
                 <img
-                  src={request.product_images[0]}
-                  alt={request.product_name}
+                  src={request.productImages[0]}
+                  alt={request.productName}
                   className="w-full h-48 object-cover"
                 />
                 <div className="p-4 flex-1 flex flex-col">
                   <h2 className="text-lg font-semibold mb-2 text-violet-700">
-                    {request.product_name}
+                    {request.productName}
                   </h2>
-                  {request.missing_place !== "" ? (
+                  {request.missingPlace !== "" ? (
                     <p className="text-sm text-gray-600 mb-1">
                       <span className="font-medium">location:</span>{" "}
-                      {request.missing_place}
+                      {request.missingPlace}
                     </p>
                   ) : (
                     <p className="text-sm text-gray-600 mb-1">
                       <span className="font-medium">location:</span>{" "}
-                      {request.missing_route[0]}
+                      {request.missingRoute[0]}
                     </p>
                   )}
                   <p className="text-sm text-gray-600 mb-3">
                     <span className="font-medium">Reward:</span>{" "}
-                    {` ₹${request.reward_amount}`}
+                    {` ₹${request.rewardAmount}`}
                   </p>
                   <p className="text-sm text-gray-700 mb-4 flex-1">
-                    {request.additional_information.length !== 0
-                      ? request.additional_information.length > 60
-                        ? `${request.additional_information.slice(0, 60)}...`
-                        : request.additional_information
+                    {request.additionalInfo.length !== 0
+                      ? request.additionalInfo.length > 60
+                        ? `${request.additionalInfo.slice(0, 60)}...`
+                        : request.additionalInfo
                       : "No Description Available..."}
                   </p>
                   <button
                     className="w-full bg-violet-600 text-white py-2 rounded-md hover:bg-violet-700 mt-auto"
-                    onClick={() => handleRequestDetails(request._id)}
+                    onClick={() => handleRequestDetails(request.id)}
                   >
                     View Details
                   </button>

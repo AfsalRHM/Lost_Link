@@ -40,13 +40,12 @@ const MyRequestDetails = () => {
           showErrorToast2("Invalid Access Detected");
           return;
         } else {
-          const response = await userService.getRequestDetails({
+          const response = await userService.getMyRequestDetails({
             requestId,
-            from: "profile",
           });
 
           if (response.status == 200) {
-            setRequestData(response.data.data.requestData);
+            setRequestData(response.data.data);
           } else {
             console.log(
               response,
@@ -69,7 +68,7 @@ const MyRequestDetails = () => {
     showConfirmToast(
       "Are you sure you want to cancel this request?",
       async () => {
-        const requestId = requestData?._id;
+        const requestId = requestData?.id;
         if (requestId) {
           const response = await userService.cancelRequest({ requestId });
 
@@ -125,11 +124,11 @@ const MyRequestDetails = () => {
         <div className="bg-white rounded-2xl shadow-xl p-6 md:p-10">
           <div className="border-b border-gray-100 pb-6 mb-8">
             <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
-              {requestData?.product_name}
+              {requestData?.productName}
             </h1>
             <div className="flex flex-wrap items-center gap-4">
               <span className="text-2xl font-bold text-blue-400">
-                ₹{requestData?.reward_amount.toLocaleString()}.00 Reward
+                ₹{requestData?.rewardAmount.toLocaleString()}.00 Reward
               </span>
             </div>
             <div className="flex flex-wrap items-center justify-between">
@@ -155,7 +154,7 @@ const MyRequestDetails = () => {
                     />
                   </svg>
                   <span className="font-medium">
-                    {requestData?.users_liked?.length || 0} Likes
+                    {requestData?.likedUsers?.length || 0} Likes
                   </span>
                 </div>
               </div>
@@ -173,16 +172,16 @@ const MyRequestDetails = () => {
                     <div className="bg-gray-50 p-4 rounded-xl">
                       <p className="text-gray-600 text-sm mb-1">Category</p>
                       <p className="font-semibold">
-                        {requestData?.product_category}
+                        {requestData?.productCategory}
                       </p>
                     </div>
-                    {requestData?.missing_while == "specific" ? (
+                    {requestData?.missingWhile == "specific" ? (
                       <div className="bg-gray-50 p-4 rounded-xl">
                         <p className="text-gray-600 text-sm mb-1">
                           Missing Place
                         </p>
                         <p className="font-semibold">
-                          {requestData?.missing_place}
+                          {requestData?.missingPlace}
                         </p>
                       </div>
                     ) : (
@@ -191,26 +190,26 @@ const MyRequestDetails = () => {
                           Travelling On
                         </p>
                         <p className="font-semibold">
-                          {requestData?.mode_of_travel}
+                          {requestData?.travelMode}
                         </p>
                       </div>
                     )}
                     <div className="bg-gray-50 p-4 rounded-xl">
                       <p className="text-gray-600 text-sm mb-1">Last Seen</p>
-                      <p className="font-semibold">{requestData?.last_seen}</p>
+                      <p className="font-semibold">{requestData?.lastSeen}</p>
                     </div>
-                    {requestData?.missing_while === "route" ? (
+                    {requestData?.missingWhile === "route" ? (
                       <div className="bg-gray-50 p-4 rounded-xl">
                         <p className="text-gray-600 text-sm mb-1">
-                          Route of {requestData?.mode_of_travel}
+                          Route of {requestData?.travelMode}
                         </p>
                         <div className="font-semibold flex items-center flex-wrap gap-2">
-                          {requestData?.missing_route.map(
+                          {requestData?.missingRoute.map(
                             (place: string, index: number) => (
                               <React.Fragment key={index}>
                                 <span>{place}</span>
                                 {index <
-                                  requestData.missing_route.length - 1 && (
+                                  requestData.missingRoute.length - 1 && (
                                   <span className="text-gray-400">→</span>
                                 )}
                               </React.Fragment>
@@ -232,26 +231,24 @@ const MyRequestDetails = () => {
                     <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
                     <p className="text-gray-600">
                       Missing since:{" "}
-                      {requestData?.missing_date
-                        ? new Date(
-                            requestData.missing_date
-                          ).toLocaleDateString()
+                      {requestData?.missingDate
+                        ? new Date(requestData.missingDate).toLocaleDateString()
                         : "N/A"}
                     </p>
                   </div>
                   <div className="flex items-center gap-3">
                     <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
                     <p className="text-gray-600">
-                      Request Valid Upto : {requestData?.expiration_validity}
+                      Request Valid Upto : {requestData?.expirationValidity}
                     </p>
                   </div>
                   <div className="flex items-center gap-3">
                     <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
                     <p className="text-gray-600">
                       Request Expires in :{" "}
-                      {requestData?.expiration_date
+                      {requestData?.expirationDate
                         ? new Date(
-                            requestData.expiration_date
+                            requestData.expirationDate
                           ).toLocaleDateString()
                         : "N/A"}
                     </p>
@@ -259,14 +256,14 @@ const MyRequestDetails = () => {
                 </div>
               </div>
 
-              {requestData?.additional_information && (
+              {requestData?.additionalInfo && (
                 <div>
                   <h2 className="text-xl font-bold text-gray-800 mb-4">
                     Additional Info.
                   </h2>
                   <p className="text-gray-600 leading-relaxed">
-                    {requestData?.additional_information
-                      ? requestData?.additional_information
+                    {requestData?.additionalInfo
+                      ? requestData?.additionalInfo
                       : "No Additional Informations Provided..."}
                   </p>
                 </div>
@@ -277,7 +274,7 @@ const MyRequestDetails = () => {
               <div>
                 <h2 className="text-xl font-bold text-gray-800 mb-4">Images</h2>
                 <div className="grid grid-cols-2 gap-4">
-                  {requestData?.product_images.map((image, index) => (
+                  {requestData?.productImages.map((image, index) => (
                     <div
                       key={index}
                       className="relative aspect-square rounded-xl overflow-hidden shadow-md"
@@ -310,7 +307,7 @@ const MyRequestDetails = () => {
             ) : null}
             {showChat && (
               <ChatPart
-                requestId={requestData?._id}
+                requestId={requestData?.id}
                 onClose={() => setShowChat(false)}
               />
             )}

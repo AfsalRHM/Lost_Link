@@ -1,13 +1,13 @@
-import { useState } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import { Link } from "react-router-dom";
 
 import { adminService } from "../../../services/adminService";
 
-import { showSuccessToast } from "../../../utils/toastUtils";
+import { showErrorToast, showSuccessToast } from "../../../utils/toastUtils";
 import { Search, UserPlus } from "lucide-react";
 
 interface Admin {
-  _id: string;
+  id: string;
   name: string;
   email: string;
   role: string;
@@ -18,18 +18,18 @@ interface Admin {
 
 interface AdminListPartProps {
   allAdmins: Admin[];
-  allAdminsFunc: () => Promise<void>;
+  setAdminList: Dispatch<SetStateAction<Admin[]>>;
 }
 
 const AdminListPart = ({
   allAdmins = [],
-  allAdminsFunc,
+  setAdminList,
 }: AdminListPartProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortField, setSortField] = useState<keyof Admin>("name");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10; // Items per page
+  const itemsPerPage = 10;
 
   const admins: Admin[] = allAdmins || [];
 
@@ -43,13 +43,27 @@ const AdminListPart = ({
   };
 
   const handleStatusChange = async (id: string) => {
-    const response = await adminService.updateAdmin({ adminId: id });
+    const previousData = [...allAdmins];
 
-    await allAdminsFunc();
-    if (response.status) {
-      showSuccessToast("Admin Status Changed");
-    } else {
-      console.log("Unexpected response:", response);
+    setAdminList(
+      allAdmins.map((admin) =>
+        admin.id === id
+          ? {
+              ...admin,
+              status: admin.status === "active" ? "inactive" : "active",
+            }
+          : admin
+      )
+    );
+
+    try {
+      const response = await adminService.updateAdmin({ adminId: id });
+      if (response.status) {
+        showSuccessToast("Admin Status Changed");
+      }
+    } catch (error) {
+      setAdminList(previousData);
+      showErrorToast("Failed to update admin status");
     }
   };
 
@@ -139,7 +153,7 @@ const AdminListPart = ({
             </thead>
             <tbody className="bg-blue-400 divide-y divide-gray-200">
               {currentAdmins.map((admin) => (
-                <tr key={admin._id} className="hover:bg-blue-700">
+                <tr key={admin.id} className="hover:bg-blue-700">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       <div className="ml-4">
@@ -169,7 +183,7 @@ const AdminListPart = ({
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-center">
                     <button
-                      onClick={() => handleStatusChange(admin._id)}
+                      onClick={() => handleStatusChange(admin.id)}
                       className={`inline-flex items-center px-4 py-2 text-white rounded-lg transition-colors ${
                         admin.status === "active"
                           ? "bg-red-600 hover:bg-red-700"

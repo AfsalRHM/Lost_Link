@@ -6,19 +6,24 @@ import { userService } from "../../../services/userService";
 
 import RedeemRequestLoading from "./loading/RedeemRequestsLoading";
 import UserErrorHandling from "../../../middlewares/UserErrorHandling";
+import IredeemRequestModel from "../../../interface/IrequestRedeem";
 
 const RedeemRequests = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState<boolean>(true);
-  const [redeemRequests, setRedeemRequests] = useState<any>([]);
+  const [redeemRequests, setRedeemRequests] = useState<IredeemRequestModel[]>(
+    []
+  );
   const [currentStatus, setCurrentStatus] = useState<string>("pending");
 
   useEffect(() => {
     const getUserRedeemRequests = async () => {
       try {
         const response = await userService.getMyRedeemRequest();
+
+        console.log(response, "this is hrr epospneroei");
 
         if (response.status === 200) {
           setRedeemRequests(response.data.data);
@@ -145,41 +150,44 @@ const RedeemRequests = () => {
                       </td>
                     </tr>
                   ) : (
-                    currentRedeemRequests.map((request: any, index: number) => (
-                      <tr
-                        key={request._id}
-                        className="hover:bg-gray-50 transition-colors"
-                      >
-                        <td className="px-6 py-3 text-sm text-gray-700">
-                          {indexOfFirstRedeemRequest + index + 1}
-                        </td>
-                        <td className="px-6 py-3 text-sm text-gray-700">
-                          {request.request_id.product_name.length <= 25
-                            ? request.request_id.product_name
-                            : request.request_id.product_name.slice(0, 25) +
-                              "..."}
-                        </td>
-                        <td
-                          className={`px-6 py-3 text-sm hidden md:block ${
-                            request?.status === "accepted"
-                              ? "text-green-700"
-                              : request?.status === "rejected"
-                              ? "text-red-700"
-                              : "text-orange-700"
-                          }`}
+                    currentRedeemRequests.map(
+                      (redeemRequest: IredeemRequestModel, index: number) => (
+                        <tr
+                          key={redeemRequest.id}
+                          className="hover:bg-gray-50 transition-colors"
                         >
-                          {request.status}
-                        </td>
-                        <td className="px-6 py-3 text-sm">
-                          <button
-                            className="inline-flex items-center px-3 py-1.5 border border-gray-300 rounded-md hover:bg-gray-100 transition-colors"
-                            onClick={() => handleDetailsPageClick(request._id)}
+                          <td className="px-6 py-3 text-sm text-gray-700">
+                            {indexOfFirstRedeemRequest + index + 1}
+                          </td>
+                          <td className="px-6 py-3 text-sm text-gray-700">
+                            {redeemRequest.requestName.length <= 25
+                              ? redeemRequest.requestName
+                              : redeemRequest.requestName.slice(0, 25) + "..."}
+                          </td>
+                          <td
+                            className={`px-6 py-3 text-sm hidden md:block ${
+                              redeemRequest?.status === "accepted"
+                                ? "text-green-700"
+                                : redeemRequest?.status === "rejected"
+                                ? "text-red-700"
+                                : "text-orange-700"
+                            }`}
                           >
-                            <span className="mr-2">👁️</span>Details
-                          </button>
-                        </td>
-                      </tr>
-                    ))
+                            {redeemRequest.status}
+                          </td>
+                          <td className="px-6 py-3 text-sm">
+                            <button
+                              className="inline-flex items-center px-3 py-1.5 border border-gray-300 rounded-md hover:bg-gray-100 transition-colors"
+                              onClick={() =>
+                                handleDetailsPageClick(redeemRequest.id)
+                              }
+                            >
+                              <span className="mr-2">👁️</span>Details
+                            </button>
+                          </td>
+                        </tr>
+                      )
+                    )
                   )}
                 </tbody>
               </table>

@@ -73,7 +73,11 @@ export function createHttpClient({
     async (error) => {
       const originalRequest = error.config;
 
-      if (error.response?.status === 401 && !originalRequest._retry) {
+      if (
+        error.response?.status === 401 &&
+        !originalRequest._retry &&
+        error.response?.message !== "Invalid Credentials"
+      ) {
         originalRequest._retry = true;
 
         if (!refreshState.isRefreshing) {
@@ -99,7 +103,7 @@ export function createHttpClient({
 
               setTimeout(() => {
                 if (tokenKey == "accessToken") {
-                  window.location.href = "/signin";
+                  // window.location.href = "/signin";
                 } else {
                   window.location.href = "/admin/login";
                 }

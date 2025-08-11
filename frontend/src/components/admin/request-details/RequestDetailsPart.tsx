@@ -11,10 +11,10 @@ import {
   showSuccessToast2,
 } from "../../../utils/iziToastUtils";
 import IrequestModel from "../../../interface/IrequestModel";
-import requestRedeemType from "../../../interface/IrequestRedeem";
+import IredeemRequestModel from "../../../interface/IrequestRedeem";
+import IreportModel from "../../../interface/IreportModel";
 import { showSuccessToast } from "../../../utils/toastUtils";
 import CommentSection from "../../shared/CommentSection";
-import IreportModel from "../../../interface/IreportModel";
 import ReportListModal from "./ReportListModal";
 import AdminErrorHandling from "../../../middlewares/AdminErrorHandling";
 
@@ -28,9 +28,9 @@ const RequestDetailsPart = () => {
   const [requestData, setRequestData] = useState<IrequestModel | undefined>(
     undefined
   );
-  const [redeemRequests, setRedeemRequests] = useState<requestRedeemType | []>(
-    []
-  );
+  const [redeemRequests, setRedeemRequests] = useState<
+    IredeemRequestModel | []
+  >([]);
 
   const [reportData, setReportData] = useState<IreportModel[] | []>();
 
@@ -137,7 +137,7 @@ const RequestDetailsPart = () => {
   }
 
   if (loading) {
-    return <div>Loading...</div>; // Replace with your loading component
+    return <div>Loading...</div>;
   }
 
   return (
@@ -166,11 +166,11 @@ const RequestDetailsPart = () => {
         <div className="bg-white rounded-2xl shadow-xl p-6 md:p-10">
           <div className="border-b border-gray-100 pb-6 mb-8">
             <h1 className="text-3xl md:text-4xl font-bold text-violet-800 mb-4">
-              {requestData?.product_name}
+              {requestData?.productName}
             </h1>
             <div className="flex items-center gap-4 text-violet-600">
               <span className="text-2xl font-bold">
-                ₹{requestData?.reward_amount.toLocaleString()}.00 Reward
+                ₹{requestData?.rewardAmount.toLocaleString()}.00 Reward
               </span>
             </div>
           </div>
@@ -188,7 +188,7 @@ const RequestDetailsPart = () => {
                       <p className="text-violet-600 text-sm">Category</p>
                     </div>
                     <p className="font-semibold text-violet-900">
-                      {requestData?.product_category}
+                      {requestData?.productCategory}
                     </p>
                   </div>
 
@@ -198,21 +198,21 @@ const RequestDetailsPart = () => {
                       <p className="text-violet-600 text-sm">Last Seen</p>
                     </div>
                     <p className="font-semibold text-violet-900">
-                      {requestData?.last_seen}
+                      {requestData?.lastSeen}
                     </p>
                   </div>
 
-                  {requestData?.missing_while === "route" ? (
+                  {requestData?.missingWhile === "route" ? (
                     <div className="bg-violet-50 p-4 rounded-xl col-span-2">
                       <div className="flex items-center gap-2 mb-2">
                         <MapPin className="w-5 h-5 text-violet-600" />
                         <p className="text-violet-600 text-sm">Travel Route</p>
                       </div>
                       <div className="font-semibold text-violet-900 flex items-center flex-wrap gap-2">
-                        {requestData?.missing_route.map((place, index) => (
+                        {requestData?.missingRoute.map((place, index) => (
                           <span key={index}>
                             {place}
-                            {index < requestData.missing_route.length - 1 && (
+                            {index < requestData.missingRoute.length - 1 && (
                               <span className="text-violet-400 mx-2">→</span>
                             )}
                           </span>
@@ -226,7 +226,7 @@ const RequestDetailsPart = () => {
                         <p className="text-violet-600 text-sm">Missing Place</p>
                       </div>
                       <p className="font-semibold text-violet-900">
-                        {requestData?.missing_place}
+                        {requestData?.missingPlace}
                       </p>
                     </div>
                   )}
@@ -243,14 +243,14 @@ const RequestDetailsPart = () => {
                     <span className="text-violet-900">
                       Missing since:{" "}
                       {new Date(
-                        requestData?.missing_date || ""
+                        requestData?.missingDate || ""
                       ).toLocaleDateString()}
                     </span>
                   </div>
                   <div className="flex items-center gap-3">
                     <Clock className="w-5 h-5 text-violet-600" />
                     <span className="text-violet-900">
-                      Valid for: {requestData?.expiration_validity}
+                      Valid for: {requestData?.expirationValidity}
                     </span>
                   </div>
                   <div className="flex items-center gap-3">
@@ -258,21 +258,21 @@ const RequestDetailsPart = () => {
                     <span className="text-violet-900">
                       Expires on:{" "}
                       {new Date(
-                        requestData?.expiration_date || ""
+                        requestData?.expirationDate || ""
                       ).toLocaleDateString()}
                     </span>
                   </div>
                 </div>
               </div>
 
-              {requestData?.additional_information && (
+              {requestData?.additionalInfo && (
                 <div>
                   <h2 className="text-xl font-bold text-violet-800 mb-4">
                     Additional Information
                   </h2>
                   <div className="bg-violet-50 p-4 rounded-xl">
                     <p className="text-violet-900">
-                      {requestData.additional_information ||
+                      {requestData.additionalInfo ||
                         "No additional information provided"}
                     </p>
                   </div>
@@ -302,21 +302,26 @@ const RequestDetailsPart = () => {
                       </thead>
                       <tbody>
                         {redeemRequests.map(
-                          (request: requestRedeemType, index: number) => (
+                          (
+                            redeemRequest: IredeemRequestModel,
+                            index: number
+                          ) => (
                             <tr
-                              key={request._id}
+                              key={redeemRequest.id}
                               className="hover:bg-violet-50 transition-colors"
                             >
                               <td className="px-4 py-3 text-violet-700">
                                 {index + 1}
                               </td>
                               <td className="px-4 py-3 text-violet-700">
-                                {request.request_id?.product_name || "Unknown"}
+                                {redeemRequest.requestName || "Unknown"}
                               </td>
                               <td className="px-4 py-3">
                                 <button
                                   onClick={() =>
-                                    handleRedeemRequestDetails(request?._id)
+                                    handleRedeemRequestDetails(
+                                      redeemRequest?.id
+                                    )
                                   }
                                   className="bg-violet-600 text-white px-3 py-1.5 rounded-md hover:bg-violet-700 transition-all"
                                 >
@@ -343,7 +348,7 @@ const RequestDetailsPart = () => {
                   Product Images
                 </h2>
                 <div className="grid grid-cols-2 gap-4">
-                  {requestData?.product_images.map((image, index) => (
+                  {requestData?.productImages.map((image, index) => (
                     <div
                       key={index}
                       className="relative aspect-square rounded-xl overflow-hidden shadow-md"
@@ -368,7 +373,7 @@ const RequestDetailsPart = () => {
                       Like Count:{" "}
                     </p>
                     <p className="text-red-500 font-bold mt-[-1px]">
-                      {requestData?.users_liked.length}
+                      {requestData?.likedUsers.length}
                     </p>
                   </div>
                   <div className="flex gap-1">
@@ -376,7 +381,7 @@ const RequestDetailsPart = () => {
                       Report Count:
                     </p>
                     <p className="text-red-500 font-bold mt-[-1px]">
-                      {reportData?.length}
+                      {reportData ? reportData.length : 0}
                     </p>
                     {reportData?.length! > 0 && (
                       <div className="text-black flex">
@@ -400,7 +405,9 @@ const RequestDetailsPart = () => {
                   <div>
                     <p className="text-violet-600 text-sm">Created:</p>
                     <p className="font-semibold text-violet-900">
-                      {new Date(requestData?.createdAt || "").toLocaleString()}
+                      {new Date(requestData?.createdAt || "").toLocaleString(
+                        "en-IN"
+                      )}
                     </p>
                   </div>
                 </div>

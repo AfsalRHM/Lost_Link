@@ -52,6 +52,11 @@ export const validateUserEditDetails = (userEditDetails: {
       display: true,
       content: "User Name must be at most 30 characters long.",
     };
+  } else if (!/^[a-zA-Z0-9_]+$/.test(userEditDetails.userName.trim())) {
+    errors.userName = {
+      display: true,
+      content: "User Name can only contain letters, numbers, and underscores.",
+    };
   }
 
   if (

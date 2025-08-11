@@ -1,11 +1,9 @@
 export default interface IreportModel {
-  _id: string;
-  request_id: string;
-  title: string;
-  user_id: string;
-  user_name: string;
+  id: string;
+  userId: string;
+  userName: string;
   reason: string;
   status: string;
-  createdAt?: Date;
-  updatedAt?: Date;
+  createdAt: Date;
+  updatedAt: Date;
 }

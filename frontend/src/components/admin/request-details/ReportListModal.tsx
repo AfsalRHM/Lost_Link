@@ -25,11 +25,16 @@ const ReportListModal = ({
             {reportData!.map((report: IreportModel, index: number) => (
               <li
                 key={index}
-                className="p-3 bg-gray-100 rounded-lg shadow-md text-sm"
+                className="p-3 pt-1 bg-gray-100 rounded-lg shadow-md text-sm"
               >
                 <p className="font-semibold">Reason:</p>
-                <p className="text-gray-700">{report.reason}</p>
-                <p className="text-xs text-gray-500 mt-1">Reported by: {report.user_name}</p>
+                <p className="text-gray-700 mb-2">{report.reason}</p>
+                <p className="text-xs text-gray-500 mt-1">
+                  Reported by: {report.userName}
+                </p>
+                <p className="text-xs text-gray-500 mt-1">
+                  Reported on: {new Date(report.createdAt).toLocaleDateString()}
+                </p>
               </li>
             ))}
           </ul>

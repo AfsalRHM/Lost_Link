@@ -1,31 +1,29 @@
-import { useState } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { adminService } from "../../../services/adminService";
 
 import { Search, ChevronDown, ChevronUp } from "lucide-react";
-import { showSuccessToast } from "../../../utils/toastUtils";
+import { showErrorToast, showSuccessToast } from "../../../utils/toastUtils";
 
-interface User {
-  _id: string;
-  full_name: string;
-  user_name: string;
+type User = {
+  id: string;
+  fullName: string;
+  userName: string;
   email: string;
-  createdAt: Date;
-  updatedAt: Date;
   status: "active" | "inactive";
-}
+};
 
 interface UserListPartProps {
   allUsers: User[];
-  allUsersFunc: () => Promise<void>;
+  setUserList: Dispatch<SetStateAction<User[]>>;
 }
 
-const UserListPart = ({ allUsers, allUsersFunc }: UserListPartProps) => {
+const UserListPart = ({ allUsers, setUserList }: UserListPartProps) => {
   const navigate = useNavigate();
 
   const [searchTerm, setSearchTerm] = useState("");
-  const [sortField, setSortField] = useState<keyof User>("user_name");
+  const [sortField, setSortField] = useState<keyof User>("userName");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [currentPage, setCurrentPage] = useState(1);
   const usersPerPage = 10;
@@ -46,18 +44,33 @@ const UserListPart = ({ allUsers, allUsersFunc }: UserListPartProps) => {
   };
 
   const handleStatusChange = async (id: string) => {
-    const response = await adminService.updateUser({ userId: id });
-    await allUsersFunc();
-    if (response.status) {
-      showSuccessToast("User Status Changed");
+    const prevUsers = [...allUsers];
+
+    setUserList(
+      allUsers.map((user) =>
+        user.id === id
+          ? {
+              ...user,
+              status: user.status === "active" ? "inactive" : "active",
+            }
+          : user
+      )
+    );
+    try {
+      const response = await adminService.updateUser({ userId: id });
+
+      showSuccessToast(response.data.message);
+    } catch (error) {
+      setUserList(prevUsers);
+      showErrorToast("Failed to change user status");
     }
   };
 
   const filteredUsers = allUsers
     .filter(
       (user) =>
-        user.user_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.userName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
         user.email.toLowerCase().includes(searchTerm.toLowerCase())
     )
     .sort((a, b) => {
@@ -118,9 +131,9 @@ const UserListPart = ({ allUsers, allUsersFunc }: UserListPartProps) => {
               <tr>
                 <th
                   className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider cursor-pointer"
-                  onClick={() => handleSort("user_name")}
+                  onClick={() => handleSort("userName")}
                 >
-                  Name <SortIcon field="user_name" />
+                  Name <SortIcon field="userName" />
                 </th>
                 <th
                   className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider cursor-pointer"
@@ -138,12 +151,12 @@ const UserListPart = ({ allUsers, allUsersFunc }: UserListPartProps) => {
             </thead>
             <tbody className="bg-blue-400 divide-y divide-gray-200">
               {paginatedUsers.map((user) => (
-                <tr key={user._id} className="hover:bg-blue-700">
+                <tr key={user.id} className="hover:bg-blue-700">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
                         <span className="text-black font-medium">
-                          {user.user_name
+                          {user.userName
                             .split(" ")
                             .map((n) => n[0])
                             .join("")}
@@ -151,7 +164,7 @@ const UserListPart = ({ allUsers, allUsersFunc }: UserListPartProps) => {
                       </div>
                       <div className="ml-4">
                         <div className="text-sm font-medium text-white">
-                          {user.user_name}
+                          {user.userName}
                         </div>
                         <div className="text-sm text-black">{user.email}</div>
                       </div>
@@ -172,7 +185,7 @@ const UserListPart = ({ allUsers, allUsersFunc }: UserListPartProps) => {
                   <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
                     <div className="flex justify-center space-x-4">
                       <button
-                        onClick={() => handleStatusChange(user._id)}
+                        onClick={() => handleStatusChange(user.id)}
                         className={`inline-flex items-center px-4 py-2 text-white rounded-lg transition-colors ${
                           user.status == "active"
                             ? "bg-red-600 hover:bg-red-700"
@@ -186,7 +199,7 @@ const UserListPart = ({ allUsers, allUsersFunc }: UserListPartProps) => {
                   <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
                     <div className="flex justify-center space-x-4">
                       <button
-                        onClick={() => handleDetailsPage(user._id)}
+                        onClick={() => handleDetailsPage(user.id)}
                         className="inline-flex items-center px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
                       >
                         Details

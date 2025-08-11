@@ -32,43 +32,50 @@ const LoginForm: React.FC = () => {
   ] = useState<inputPropsType>({ display: false, content: "" });
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const errors = validateAdminLoginDetails(formData);
-    if (errors.email) {
-      setAdminMailLoginValidationError(errors.email);
-    } else {
-      setAdminMailLoginValidationError({ display: false, content: "" });
-    }
-
-    if (errors.password) {
-      setAdminPasswordLoginValidationError(errors.password);
-    } else {
-      setAdminPasswordLoginValidationError({ display: false, content: "" });
-    }
-
-    if (!errors.password && !errors.email) {
-      const result = await adminService.loginVerify(formData);
-
-      console.log(result);
-
-      if (result == null) {
-        showErrorToast("Admin Login Failed...!");
-      } else if (result.data.status == false) {
-        setAdminLoginValidationError({
-          display: true,
-          content: "Invalid Credentials",
-        });
-      } else if (result.data.data.status !== "active") {
-        setAdminLoginValidationError({
-          display: true,
-          content: "You are Blocked from this Site",
-        });
+    try {
+      e.preventDefault();
+      const errors = validateAdminLoginDetails(formData);
+      if (errors.email) {
+        setAdminMailLoginValidationError(errors.email);
       } else {
-        dispatch(assignAdminAccessToken(result.data.accessToken));
-        dispatch(assignAdminDetails(result.data.data));
-        showSuccessToast("Admin Login Success...!");
-        navigate("/admin");
+        setAdminMailLoginValidationError({ display: false, content: "" });
       }
+
+      if (errors.password) {
+        setAdminPasswordLoginValidationError(errors.password);
+      } else {
+        setAdminPasswordLoginValidationError({ display: false, content: "" });
+      }
+
+      if (!errors.password && !errors.email) {
+        const result = await adminService.loginVerify(formData);
+
+        console.log(result);
+
+        if (result == null) {
+          showErrorToast("Admin Login Failed...!");
+        } else if (result.data.status == false) {
+          setAdminLoginValidationError({
+            display: true,
+            content: "Invalid Credentials",
+          });
+        } else if (result.data.data.adminData.status !== "active") {
+          setAdminLoginValidationError({
+            display: true,
+            content: "You are Blocked from this Site",
+          });
+        } else {
+          dispatch(assignAdminAccessToken(result.data.accessToken));
+          dispatch(assignAdminDetails(result.data.data.adminData));
+          showSuccessToast("Admin Login Success...!");
+          navigate("/admin");
+        }
+      }
+    } catch (error: any) {
+      setAdminLoginValidationError({
+        display: !error.response.data.status,
+        content: error.response.data.message,
+      });
     }
   };
 
