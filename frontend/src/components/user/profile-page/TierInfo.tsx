@@ -138,8 +138,8 @@ const TierInfo = ({ userData }: { userData: userDataType | undefined }) => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-                {userData?.completed_requests?.length ? (
-                  userData.completed_requests.map((entry, index) => (
+                {userData?.completedRequests?.length ? (
+                  userData.completedRequests.map((entry, index) => (
                     <tr
                       key={index}
                       className="hover:bg-gray-50 transition-colors"
@@ -148,13 +148,13 @@ const TierInfo = ({ userData }: { userData: userDataType | undefined }) => {
                         {index + 1}
                       </td>
                       <td className="px-6 py-3 text-sm text-gray-700">
-                        {entry.request_id.slice(0, 6).toUpperCase()}
+                        {entry.requestId.slice(0, 6).toUpperCase()}
                       </td>
                       <td className="px-6 py-3 text-sm text-gray-700">
-                        {new Date(entry.completed_at).toLocaleDateString()}
+                        {new Date(entry.completedAt).toLocaleDateString()}
                       </td>
                       <td className="px-6 py-3 text-sm text-gray-700">
-                        {entry.points_earned.toLocaleString()}
+                        {entry.pointsEarned.toLocaleString()}
                       </td>
                     </tr>
                   ))

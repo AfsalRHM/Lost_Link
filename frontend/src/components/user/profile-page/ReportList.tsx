@@ -7,8 +7,16 @@ import { userService } from "../../../services/userService";
 import ReportsLoading from "./loading/ReportListLoading";
 import { userDataType } from "../../../interface/IuserModel";
 import ReportDetailsModal from "./ReportDetailsModal";
-import IreportModel from "../../../interface/IreportModel";
 import UserErrorHandling from "../../../middlewares/UserErrorHandling";
+
+type Report = {
+  id: string;
+  title: string;
+  reason: string;
+  userId: string;
+  requestId: string;
+  createdAt: Date;
+};
 
 const ReportList = ({ userData }: { userData: userDataType }) => {
   const dispatch = useDispatch();
@@ -19,14 +27,14 @@ const ReportList = ({ userData }: { userData: userDataType }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 4;
 
-  const [reportData, setReportData] = useState<IreportModel | null>(null);
+  const [reportData, setReportData] = useState<Report | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchReports = async () => {
       try {
         const response = await userService.getUserReports({
-          userId: userData._id,
+          userId: userData.id,
         });
 
         if (response.status === 200) {
@@ -55,7 +63,7 @@ const ReportList = ({ userData }: { userData: userDataType }) => {
   const indexOfFirstReport = indexOfLastReport - itemsPerPage;
   const totalPages = Math.ceil(filteredReports.length / itemsPerPage);
 
-  const handleReportDetails = (report: IreportModel) => {
+  const handleReportDetails = (report: Report) => {
     setReportData(report);
     setIsModalOpen(true);
   };

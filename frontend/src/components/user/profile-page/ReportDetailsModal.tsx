@@ -1,12 +1,20 @@
 import React from "react";
 
 import { X } from "lucide-react";
-import IreportModel from "../../../interface/IreportModel";
+
+type Report = {
+  id: string;
+  title: string;
+  reason: string;
+  userId: string;
+  requestId: string;
+  createdAt: Date;
+};
 
 interface ReportDetailsModalProps {
   isOpen: boolean;
   onClose: () => void;
-  report: IreportModel | null;
+  report: Report | null;
 }
 
 const ReportDetailsModal: React.FC<ReportDetailsModalProps> = ({
