@@ -106,6 +106,7 @@ const LoginPage = () => {
         const response = await userService.googleLogin({
           userMail: userData.email,
         });
+        console.log(response, "this is the response");
 
         if (response.status === 200) {
           const userData = {
