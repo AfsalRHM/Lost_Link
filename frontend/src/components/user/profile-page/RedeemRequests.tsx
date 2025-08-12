@@ -23,8 +23,6 @@ const RedeemRequests = () => {
       try {
         const response = await userService.getMyRedeemRequest();
 
-        console.log(response, "this is hrr epospneroei");
-
         if (response.status === 200) {
           setRedeemRequests(response.data.data);
         } else {

@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: request-service
-          image: afsalm/lostlink-request-service:v10.3
+          image: afsalm/lostlink-request-service:v10.4
           ports:
             - containerPort: 7003
           envFrom:

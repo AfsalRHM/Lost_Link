@@ -309,13 +309,13 @@ export default class AuthController implements IauthController {
       const user = await this._authService.googleLoginVerify(userMail);
 
       const accessToken = jwtFunctions.generateAccessToken({
-        id: user.data._id.toString(),
+        id: user.data.id.toString(),
         email: user.data.email,
         role: "user",
-        name: user.data.user_name,
+        name: user.data.userName,
       });
       const refreshToken = jwtFunctions.generateRefreshToken({
-        id: user.data._id.toString(),
+        id: user.data.id.toString(),
       });
 
       res
