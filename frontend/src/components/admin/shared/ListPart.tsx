@@ -18,7 +18,6 @@ interface ListPartProps<T extends BaseEntity> {
   entity: string;
   updateData: (id: string) => Promise<{ status: string; message: string }>;
   tableHeaders: string[];
-  tableValues: string[];
 }
 
 function ListPart<T extends BaseEntity>({
@@ -27,7 +26,6 @@ function ListPart<T extends BaseEntity>({
   entity,
   updateData,
   tableHeaders,
-  tableValues,
 }: ListPartProps<T>) {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
