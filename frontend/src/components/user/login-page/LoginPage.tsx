@@ -134,13 +134,21 @@ const LoginPage = () => {
           }
         }
       }
-    } catch (error) {
-      handleGoogleLoginFailure();
+    } catch (error: any) {
+      if (error.response.data.message == "Your account has been blocked") {
+        setUserLoginValidationError({
+          display: true,
+          content:
+            "Your Account has been Blocked..! Please contact customer service for further details",
+        });
+      } else {
+        handleGoogleLoginFailure(error.response.data.message);
+      }
     }
   }
 
-  function handleGoogleLoginFailure() {
-    showErrorToast2("Google Login Failed...!");
+  function handleGoogleLoginFailure(message = "Google Login Failed...!") {
+    showErrorToast2(message);
   }
 
   return (
