@@ -156,8 +156,10 @@ export default class AdminService implements IadminService {
           }
         : {};
 
+      const updatedFilter = { role: { $ne: "Admin" }, ...filter };
+
       const response = await this._adminRepository.findPaginatedAdmins(
-        filter,
+        updatedFilter,
         skip,
         limit
       );

@@ -131,6 +131,23 @@ export function createHttpClient({
         });
       }
 
+      if (
+        error.response.status === 403 &&
+        error.response?.data.message == "Account Blocked"
+      ) {
+        cleanUp();
+
+        showErrorToast2("Account Blocked. Please contact support.");
+
+        setTimeout(() => {
+          if (tokenKey == "accessToken") {
+            window.location.href = "/signin";
+          } else {
+            window.location.href = "/admin/login";
+          }
+        }, 1000);
+      }
+
       return Promise.reject(error);
     }
   );

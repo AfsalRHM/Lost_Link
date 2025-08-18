@@ -6,13 +6,15 @@ import NotificationController from "../controllers/notificationController";
 import NotificationRepository from "../repositories/notificationRepository";
 import notificationModel from "../model/notificationModel";
 
+import { isAdminBlocked, isUserBlocked } from "../middlewares/isBlocked";
+
 const notificationRepository = new NotificationRepository(notificationModel)
 const nofiticationService = new NotificationService(notificationRepository);
 const notificationController = new NotificationController(nofiticationService);
 
 /*************************      User Side       *******************************/
 // Get Requests
-notification_route.get("/:id/my", notificationController.getNotifications);
+notification_route.get("/:id/my", isUserBlocked, notificationController.getNotifications);
 
 // Patch Requests
 notification_route.patch("/:id", notificationController.changeUserNotificationSeen);
@@ -20,7 +22,7 @@ notification_route.patch("/:id", notificationController.changeUserNotificationSe
 
 /*************************      Admin Side       *******************************/
 // Get Requests
-notification_route.get("/admin", notificationController.getAdminNotifications);
+notification_route.get("/admin", isAdminBlocked, notificationController.getAdminNotifications);
 
 // Patch Requests
 notification_route.patch("/admin/all", notificationController.changeAdminNotificationSeen);
