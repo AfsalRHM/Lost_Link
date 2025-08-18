@@ -141,6 +141,11 @@ const LoginPage = () => {
           content:
             "Your Account has been Blocked..! Please contact customer service for further details",
         });
+      } else if (error.response.data.message == "User Not Exists") {
+        setUserLoginValidationError({
+          display: true,
+          content: "User not Exists...! Please Register",
+        });
       } else {
         handleGoogleLoginFailure(error.response.data.message);
       }
