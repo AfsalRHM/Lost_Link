@@ -38,12 +38,13 @@ const MeetScheduleModal: React.FC<MeetScheduleModalProps> = ({
       return;
     }
 
-    const selectedDate = new Date(date);
+    const selectedDate = new Date(`${date}T${time}`);
     const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    today.setMinutes(today.getMinutes() + 1);
+    selectedDate.setSeconds(today.getSeconds() + 1);
 
     if (selectedDate < today) {
-      showErrorToast2("Please select a future date.");
+      showErrorToast2("Please select a future date and time.");
       return;
     }
 

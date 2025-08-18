@@ -14,6 +14,7 @@ export const validateUserEditDetails = (userEditDetails: {
     phone?: ValidationErrorData;
   } = {};
 
+  // Full Name validation
   if (
     !userEditDetails.fullName ||
     userEditDetails.fullName.trim().length === 0
@@ -32,8 +33,14 @@ export const validateUserEditDetails = (userEditDetails: {
       display: true,
       content: "Full Name must be at most 30 characters long.",
     };
+  } else if (!/^[a-zA-Z\s]+$/.test(userEditDetails.fullName.trim())) {
+    errors.fullName = {
+      display: true,
+      content: "Full Name can only contain letters and spaces.",
+    };
   }
 
+  // User Name validation
   if (
     !userEditDetails.userName ||
     userEditDetails.userName.trim().length === 0
@@ -59,13 +66,14 @@ export const validateUserEditDetails = (userEditDetails: {
     };
   }
 
+  // Phone validation
   if (
     (userEditDetails.phone && userEditDetails.phone.toString().length !== 10) ||
     (userEditDetails.phone && userEditDetails.phone < 0)
   ) {
     errors.phone = {
       display: true,
-      content: "Invalid Phone Number",
+      content: "Invalid Phone Number.",
     };
   }
 

@@ -4,12 +4,13 @@ import IuserModel from "./IuserModel";
 export interface IuserRepository {
   insertUser(userData: Partial<IuserModel>): Promise<IuserModel | null>;
   findUser(filter: FilterQuery<IuserModel>): Promise<IuserModel | null>;
-  findUsers(filter: FilterQuery<IuserModel>): Promise<IuserModel[] | null>;
+  findUsers(filter: object, skip: number, limit: number): Promise<any>;
   findUserAndUpdate(
     Id: string,
     update: Partial<IuserModel>
   ): Promise<IuserModel | null>;
-  findAllUsers(): Promise<IuserModel[] | null>;
+  findAllUsers(): Promise<IuserModel[] | []>;
+  findSomeUsers(filter: FilterQuery<IuserModel>): Promise<IuserModel[] | []>;
   updateUserByEmail(
     filter: FilterQuery<IuserModel>,
     update: Partial<IuserModel>

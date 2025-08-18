@@ -27,7 +27,15 @@ export default interface IuserService {
     message: string;
     email: string;
   }>;
-  getAllUsers(): Promise<GetAllUsersResponseDto[] | null>;
+  getUsers({
+    search,
+    limit,
+    page,
+  }: {
+    search: string;
+    limit: number;
+    page: number;
+  }): Promise<any>;
   changeUserStatus(props: { userId: string }): Promise<any>;
   getUserDataById({
     userId,
@@ -69,6 +77,7 @@ export default interface IuserService {
     points: number;
     rewardAmount: number;
   }): Promise<void>;
+  getAllUsers(): Promise<GetAllUsersResponseDto[] | []>;
   getUserData({ userId }: { userId: string }): Promise<AdminGetUserResponseDto>;
 }
 

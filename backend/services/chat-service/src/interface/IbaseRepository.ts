@@ -9,4 +9,14 @@ export default interface IbaseRepository<T extends Document> {
     filter: FilterQuery<T>,
     update: Partial<T>
   ): Promise<T | null>;
+  findEntities(
+    filter: FilterQuery<T>,
+    skip: number,
+    limit: number
+  ): Promise<{
+    data: T[];
+    totalItems: number;
+    totalPages: number;
+    currentPage: number;
+  }>;
 }

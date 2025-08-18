@@ -20,6 +20,7 @@ const UserDetails = ({ userData }: { userData: userDataType | undefined }) => {
 
   const CLOUDINARY_UPLOAD_PRESET = "profile_preset";
   const CLOUDINARY_URL = import.meta.env.VITE_CLOUDINARY_URL;
+  const CLOUDINARY_PREFIX = import.meta.env.VITE_CLOUDINARY_PREFIX;
 
   const [formData, setFormData] = useState<formDataType>({
     profilePic: userData?.profilePic,
@@ -49,11 +50,11 @@ const UserDetails = ({ userData }: { userData: userDataType | undefined }) => {
       const data = await response.json();
 
       if (data.secure_url) {
-        setImage(data.secure_url);
+        setImage(`${data.secure_url.split("upload/")[1]}`);
 
         setFormData((prevFormData) => ({
           ...prevFormData,
-          profilePic: data.secure_url,
+          profilePic: `${data.secure_url.split("upload/")[1]}`,
         }));
       }
     } catch (error) {
@@ -72,6 +73,16 @@ const UserDetails = ({ userData }: { userData: userDataType | undefined }) => {
 
   async function saveEditedData(formData: formDataType) {
     try {
+      if (
+        formData.profilePic == userData?.profilePic &&
+        formData.fullName == userData?.fullName &&
+        formData.userName == userData?.userName &&
+        formData.email == userData?.email &&
+        formData.phone == userData?.phoneNumber
+      ) {
+        showErrorToast2("No changes detected");
+        return;
+      }
       const errors = validateUserEditDetails(formData);
       if (errors.phone) {
         showErrorToast2(errors.phone.content);
@@ -132,7 +143,12 @@ const UserDetails = ({ userData }: { userData: userDataType | undefined }) => {
         />
         <img
           className="self-center cursor-pointer rounded-full object-cover"
-          src={image}
+          src={
+            image ==
+            "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png"
+              ? "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png"
+              : `${CLOUDINARY_PREFIX}${image}`
+          }
           alt="profile_pic"
           onClick={editDetails ? () => fileRef?.current?.click() : undefined}
         />

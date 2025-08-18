@@ -32,6 +32,29 @@ export default class BaseRepository<T extends Document>
     }
   }
 
+  async findEntities(
+    filter: FilterQuery<T>,
+    skip: number,
+    limit: number
+  ): Promise<{
+    data: T[];
+    totalItems: number;
+    totalPages: number;
+    currentPage: number;
+  }> {
+    const [data, totalItems] = await Promise.all([
+      this.model.find(filter).skip(skip).limit(limit).exec(),
+      this.model.countDocuments(filter),
+    ]);
+
+    return {
+      data,
+      totalItems,
+      totalPages: Math.ceil(totalItems / limit),
+      currentPage: Math.floor(skip / limit) + 1,
+    };
+  }
+
   async findCommentsLimit({
     request_id,
     commentCount,

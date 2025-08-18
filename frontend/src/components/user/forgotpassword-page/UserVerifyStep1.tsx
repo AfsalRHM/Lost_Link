@@ -10,6 +10,7 @@ import {
   validateStep2OTP,
 } from "../../../validations/registerStep2";
 import ValidationError from "../shared/ValidationError";
+import { showErrorToast2 } from "../../../utils/iziToastUtils";
 
 type inputPropsType = {
   display: boolean;
@@ -66,65 +67,76 @@ const UserVerifyStep1 = (Props: {
   // Validate the Email and Sending the OTP to Mail
 
   async function handleOtpTracker() {
-    const errors = validateStep2Email({ email: userEmailInput });
+    try {
+      const errors = validateStep2Email({ email: userEmailInput });
 
-    if (errors.userEmail) {
-      setuserEmailValidationErrorData(errors.userEmail);
-    } else {
-      setuserEmailValidationErrorData({ display: false, content: "" });
-    }
-
-    if (!errors.userEmail) {
-      const response = await userService.resetOtpPassword({
-        recieverName: "Reset Password",
-        recieverEmail: userEmailInput,
-      });
-      if (response.status === 200) {
-        const expirationTime = new Date(new Date().getTime() + 47 * 1000);
-        localStorage.setItem(
-          "resendOtpExpirationTime",
-          expirationTime.toISOString()
-        );
-        setResendOtpTimer(47);
-        setOtpTracker(true);
+      if (errors.userEmail) {
+        setuserEmailValidationErrorData(errors.userEmail);
       } else {
-        setuserEmailValidationErrorData({
-          display: !response.data.status,
-          content: response.data.message,
-        });
-        console.log(
-          response,
-          "this is the error response on sendResetPasswordMail"
-        );
+        setuserEmailValidationErrorData({ display: false, content: "" });
       }
+
+      if (!errors.userEmail) {
+        const response = await userService.resetOtpPassword({
+          recieverName: "Reset Password",
+          recieverEmail: userEmailInput,
+        });
+
+        if (response.status === 200) {
+          const expirationTime = new Date(new Date().getTime() + 47 * 1000);
+          localStorage.setItem(
+            "resendOtpExpirationTime",
+            expirationTime.toISOString()
+          );
+          setResendOtpTimer(47);
+          setOtpTracker(true);
+        } else {
+          setuserEmailValidationErrorData({
+            display: !response.data.status,
+            content: response.data.message,
+          });
+          console.log(
+            response,
+            "this is the error response on sendResetPasswordMail"
+          );
+        }
+      }
+    } catch (error: any) {
+      console.log(error, "this is the error");
+      showErrorToast2(error.response.data.message);
     }
   }
 
   // Verifying the OTP and Proceed to the Register Step 3
 
   async function handleVerify(): Promise<void> {
-    const errors = validateStep2OTP({ otp: userOTPInput });
-    if (errors.userOTP) {
-      setuserOTPValidationErrorData(errors.userOTP);
-    } else {
-      setuserOTPValidationErrorData({ display: false, content: "" });
-    }
-    if (!errors.userOTP) {
-      const response = await userService.verifyOTP({
-        userEmail: userEmailInput,
-        userEnteredOTP: userOTPInput,
-      });
-
-      if (response.status === 200) {
-        Props.funcUserMail(userEmailInput);
-        Props.funcCurrentStep(2);
+    try {
+      const errors = validateStep2OTP({ otp: userOTPInput });
+      if (errors.userOTP) {
+        setuserOTPValidationErrorData(errors.userOTP);
       } else {
-        setuserOTPValidationErrorData({
-          display: true,
-          content: "Enter the correct OTP",
-        });
-        console.log(response, "this is the error response on verifyOTP");
+        setuserOTPValidationErrorData({ display: false, content: "" });
       }
+      if (!errors.userOTP) {
+        const response = await userService.verifyOTP({
+          userEmail: userEmailInput,
+          userEnteredOTP: userOTPInput,
+        });
+
+        if (response.status === 200) {
+          Props.funcUserMail(userEmailInput);
+          Props.funcCurrentStep(2);
+        } else {
+          setuserOTPValidationErrorData({
+            display: true,
+            content: "Enter the correct OTP",
+          });
+          console.log(response, "this is the error response on verifyOTP");
+        }
+      }
+    } catch (error: any) {
+      console.log(error, "this is the error");
+      showErrorToast2(error.response.data.message);
     }
   }
 

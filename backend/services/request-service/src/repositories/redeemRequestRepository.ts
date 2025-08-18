@@ -2,28 +2,36 @@ import { FilterQuery, Model } from "mongoose";
 
 import BaseRepository from "./baseRepository";
 
-import IbaseRepository from "../interface/IbaseRepository";
 import IredeemRequestModel from "../interface/IredeemRequestModel";
+import { IredeemRequestRepository } from "../interface/IredeemRequestRepository";
 
 export default class RedeemRequestRepository
   extends BaseRepository<IredeemRequestModel>
-  implements IbaseRepository<IredeemRequestModel>
+  implements IredeemRequestRepository
 {
   constructor(model: Model<IredeemRequestModel>) {
     super(model);
   }
 
-  findRedeemRequest(
+  async findRedeemRequest(
     filter: FilterQuery<IredeemRequestModel>
   ): Promise<IredeemRequestModel | null> {
     return this.findOne(filter);
   }
 
-  findAllRedeemRequest(): Promise<IredeemRequestModel[] | []> {
+  async adminFindAllRedeemRequests(): Promise<IredeemRequestModel[] | []> {
     return this.findAll();
   }
 
-  findManyRedeemRequest(
+  async adminFindRedeemRequests(
+    filter: object,
+    skip: number,
+    limit: number
+  ): Promise<any> {
+    return this.findEntities(filter, skip, limit);
+  }
+
+  async findManyRedeemRequest(
     filter: FilterQuery<IredeemRequestModel>
   ): Promise<IredeemRequestModel[] | []> {
     return this.findAll(filter);

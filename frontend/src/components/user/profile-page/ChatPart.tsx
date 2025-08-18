@@ -15,6 +15,8 @@ import ImageUpload from "../../shared/ImageUpload";
 import ImageModal from "../../shared/ImageModal";
 import UserErrorHandling from "../../../middlewares/UserErrorHandling";
 
+const CLOUDINARY_PREFIX = import.meta.env.VITE_CLOUDINARY_PREFIX;
+
 const ChatPart = ({
   onClose,
   requestId,
@@ -121,11 +123,13 @@ const ChatPart = ({
     }
 
     if (chat) {
+      console.log(chatImage, "this is hte chat image");
       const response = await userService.sendMessage({
         chatId: chatIdProp!,
         content: newMessage,
         image: chatImage,
       });
+
       if (response.status === 200) {
         socket.emit("newUserMessage", {
           sender: userId,
@@ -249,7 +253,7 @@ const ChatPart = ({
                       {msg.image == "no image" ? null : !msg.image ? null : (
                         <div className="rounded-lg overflow-hidden">
                           <img
-                            src={msg.image}
+                            src={`${CLOUDINARY_PREFIX}${msg.image}`}
                             alt="Message attachment"
                             className="w-full max-w-[160px] min-w-[120px] object-cover rounded-lg hover:scale-105 transition-transform duration-200"
                             loading="lazy"

@@ -4,11 +4,9 @@ import { useSelector } from "react-redux";
 import { RootState } from "../../../redux/store";
 import IrequestModel from "../../../interface/IrequestModel";
 
-const RequestPart = ({
-  filteredRequests,
-}: {
-  filteredRequests: IrequestModel[];
-}) => {
+const CLOUDINARY_PREFIX = import.meta.env.VITE_CLOUDINARY_PREFIX;
+
+const RequestPart = ({ allRequests }: { allRequests: IrequestModel[] }) => {
   const navigate = useNavigate();
 
   const { userId } = useSelector((state: RootState) => state.userDetails);
@@ -19,7 +17,7 @@ const RequestPart = ({
     }
   }
 
-  const activeRequests = filteredRequests.filter((request: IrequestModel) => {
+  const activeRequests = allRequests.filter((request: IrequestModel) => {
     return request.userId !== userId;
   });
 
@@ -46,7 +44,7 @@ const RequestPart = ({
                 className="bg-white shadow-md rounded-lg border border-gray-200 overflow-hidden flex flex-col"
               >
                 <img
-                  src={request.productImages[0]}
+                  src={`${CLOUDINARY_PREFIX}${request.productImages[0]}`}
                   alt={request.productName}
                   className="w-full h-48 object-cover"
                 />

@@ -8,6 +8,7 @@ const ImagesElement = ({ onChange, errorData }: ImagesElementProps) => {
 
   const CLOUDINARY_UPLOAD_PRESET = "product_preset";
   const CLOUDINARY_URL = import.meta.env.VITE_CLOUDINARY_URL;
+  const CLOUDINARY_PREFIX = import.meta.env.VITE_CLOUDINARY_PREFIX;
 
   const handleImageUpload = async (
     event: React.ChangeEvent<HTMLInputElement>
@@ -31,8 +32,14 @@ const ImagesElement = ({ onChange, errorData }: ImagesElementProps) => {
 
           const data = await response.json();
 
+          // const images = formData.images.map((image: string) => {
+          //   return image.split("upload/")[1];
+          // });
+
+          // console.log(images, "this are teh new images");
+
           if (data.secure_url) {
-            uploadedImageUrls.push(data.secure_url);
+            uploadedImageUrls.push(data.secure_url.split("upload/")[1]);
           }
         } catch (error) {
           console.error("Error uploading image to Cloudinary:", error);
@@ -76,7 +83,9 @@ const ImagesElement = ({ onChange, errorData }: ImagesElementProps) => {
             <div key={index} className="relative">
               <img
                 src={
-                  typeof image === "string" ? image : URL.createObjectURL(image)
+                  typeof image === "string"
+                    ? `${CLOUDINARY_PREFIX}${image}`
+                    : URL.createObjectURL(image)
                 }
                 alt={`Uploaded preview ${index + 1}`}
                 className="w-full h-full object-cover rounded-md"

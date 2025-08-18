@@ -1,6 +1,4 @@
 import { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
 
 import { adminService } from "../../../services/adminService";
 
@@ -12,13 +10,9 @@ import { UserCountChart } from "./UserCountChart";
 import { ProjectRequestChart } from "./RequestChart";
 import { RedeemRequestChart } from "./RequestRedeemChart";
 import { userDataType } from "../../../interface/IuserModel";
-import AdminErrorHandling from "../../../middlewares/AdminErrorHandling";
 import IrequestModel from "../../../interface/IrequestModel";
 
 const DashboardPage = () => {
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
-
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const [users, setUsers] = useState([]);
@@ -47,20 +41,17 @@ const DashboardPage = () => {
   };
 
   useEffect(() => {
-    // To get User Details
     const fetchUsers = async () => {
       try {
-        const response = await adminService.getUsers();
+        const response = await adminService.getAllUsers();
 
         if (response.status == 200) {
           setUsers(response.data.data);
 
-          // Get current and previous month
           const currentMonth = new Date().getMonth();
           const previousMonth = currentMonth === 0 ? 11 : currentMonth - 1;
           const currentYear = new Date().getFullYear();
 
-          // Filter data for current and previous month
           const usersThisMonth = response.data.data.filter(
             (user: userDataType) => {
               const createdAt = new Date(user.createdAt!);
@@ -83,7 +74,6 @@ const DashboardPage = () => {
           setPreviousMonthUsers(usersLastMonth.length);
         } else {
           console.log(response, "this is the error response on fetchUsers");
-          AdminErrorHandling(response, dispatch, navigate);
         }
       } catch (error) {
         console.error("Failed to fetch users", error);
@@ -93,7 +83,7 @@ const DashboardPage = () => {
     // To get Request Details
     const fetchRequests = async () => {
       try {
-        const response = await adminService.getRequests();
+        const response = await adminService.getAllRequests();
 
         if (response.status == 200) {
           setRequests(response.data.data);
@@ -107,7 +97,6 @@ const DashboardPage = () => {
           setTotalProfit(formattedProfit);
         } else {
           console.log(response, "this is the error response on fetchRequests");
-          AdminErrorHandling(response, dispatch, navigate);
         }
       } catch (error) {
         console.error("Failed to fetch requests", error);
@@ -117,7 +106,7 @@ const DashboardPage = () => {
     // To get Redeem Request Details
     const fetchRedeemRequests = async () => {
       try {
-        const response = await adminService.getRedeemRequests();
+        const response = await adminService.getAllRedeemRequests();
 
         if (response.status == 200) {
           setRedeemRequests(response.data.data);
@@ -126,7 +115,6 @@ const DashboardPage = () => {
             response,
             "this is the error response on fetchRedeemRequests"
           );
-          AdminErrorHandling(response, dispatch, navigate);
         }
       } catch (error) {
         console.error("Failed to fetch redeem requests", error);

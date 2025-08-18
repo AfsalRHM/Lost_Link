@@ -182,17 +182,17 @@ export default class AuthService implements IauthService {
           });
         });
 
-        if (!userData.data) {
+        if (!userData.status) {
           throw new AppError(
-            "Failed to fetch user name",
+            "Failed to fetch user",
             StatusCode.INTERNAL_SERVER_ERROR
           );
         }
 
-        const otp = await sendMail(recieverEmail, userData.user_name);
+        const otp = await sendMail(recieverEmail, "LostLink User");
         if (!otp) {
           throw new AppError(
-            "Failed to send mail 1",
+            "Failed to send mail",
             StatusCode.INTERNAL_SERVER_ERROR
           );
         }

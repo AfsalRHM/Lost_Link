@@ -21,7 +21,8 @@ user_route.patch("/", updateUserDataValidator, userController.updateUser); // To
 
 /*************************      Admin Side       *******************************/
 // Get Requests
-user_route.get("/admin/all", userController.getAllUsers); // To get all users
+user_route.get("/admin", userController.getUsers); // To get all users
+user_route.get("/admin/analytics/all", userController.getAllUsers); // To get all users
 user_route.get("/admin/:id", userController.getUserData); // To get the user details
 
 export default user_route;

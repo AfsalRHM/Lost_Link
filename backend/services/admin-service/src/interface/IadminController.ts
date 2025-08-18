@@ -3,7 +3,7 @@ import { NextFunction, Request, Response } from "express";
 export default interface IadminController {
   adminLogin(req: Request, res: Response, next: NextFunction): Promise<void>;
   getAllUsers(req: Request, res: Response, next: NextFunction): Promise<void>;
-  getAllAdmins(req: Request, res: Response, next: NextFunction): Promise<void>;
+  getAdmins(req: Request, res: Response, next: NextFunction): Promise<void>;
   changeUserStatus(
     req: Request,
     res: Response,

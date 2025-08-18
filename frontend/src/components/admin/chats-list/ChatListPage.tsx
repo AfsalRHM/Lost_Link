@@ -1,39 +1,74 @@
-import { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useCallback, useEffect, useState } from "react";
 
 import { adminService } from "../../../services/adminService";
 
 import { Sidebar } from "../shared/Sidebar";
 import ChatListPart from "./ChatListPart";
 import NavBar from "../shared/Navbar";
-import AdminErrorHandling from "../../../middlewares/AdminErrorHandling";
+import ChatListPartLoading from "./loading/ChatListPartLoading";
+import { Search } from "lucide-react";
+
+type User = {
+  id: string;
+  fullName: string;
+  userName: string;
+  email: string;
+  status: "active" | "inactive";
+};
 
 const ChatListPage = () => {
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
-
+  const [loading, setLoading] = useState<boolean>(false);
+  const [currentPage, setCurrentPage] = useState<number>(1);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [userList, setUserList] = useState([]);
+  const [userList, setUserList] = useState<User[]>([]);
+  const [filterData, setFilterData] = useState({
+    totalItems: 0,
+    totalPages: 1,
+  });
+  const [searchTerm, setSearchTerm] = useState<string>("");
 
-  const getAllChats = async () => {
-    try {
-      const response = await adminService.getUsers();
+  const itemsPerPage = 2;
 
-      if (response.status == 200) {
-        setUserList(response.data.data);
-      } else {
-        console.log(response, "this is the error response on getAllChats");
-        AdminErrorHandling(response, dispatch, navigate);
+  const fetchUsers = useCallback(
+    async (page = 1, search = "") => {
+      setLoading(true);
+      try {
+        const { data } = await adminService.getUsers({
+          page,
+          limit: itemsPerPage,
+          search,
+        });
+
+        if (data.status) {
+          setUserList(data.data.data);
+          setFilterData({
+            totalItems: data.data.totalItems,
+            totalPages: data.data.totalPages,
+          });
+          setCurrentPage(data.data.currentPage);
+        }
+      } catch (error) {
+        console.error("Error in getAllChats:", error);
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      console.error("Error in getAllChats:", error);
+    },
+    [itemsPerPage]
+  );
+
+  const handlePageChange = (page: number) => {
+    if (page >= 1 && page <= filterData.totalPages) {
+      fetchUsers(page, searchTerm);
     }
   };
 
   useEffect(() => {
-    getAllChats();
-  }, []);
+    const delayDebounceFn = setTimeout(() => {
+      fetchUsers(1, searchTerm);
+    }, 500);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchTerm, fetchUsers]);
 
   return (
     <div className="flex min-h-screen bg-blue-900 text-white">
@@ -49,7 +84,54 @@ const ChatListPage = () => {
         <NavBar setSidebarOpen={setSidebarOpen} />
 
         <main className="p-6">
-          <ChatListPart allUsers={userList} />
+          <div className="p-6 bg-blue-900 min-h-screen text-white">
+            <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between">
+              <h1 className="text-2xl font-semibold text-white mb-4 sm:mb-0">
+                Chats
+              </h1>
+              <div className="flex gap-4 items-center">
+                <div className="relative">
+                  <Search
+                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                    size={20}
+                  />
+                  <input
+                    type="text"
+                    placeholder="Search Requests/Users..."
+                    className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 w-full bg-blue-300 text-black"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {loading ? (
+              <ChatListPartLoading />
+            ) : (
+              <ChatListPart allUsers={userList} />
+            )}
+
+            <div className="mt-4 flex justify-center gap-5 items-center">
+              <button
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg disabled:opacity-50"
+              >
+                Previous
+              </button>
+              <span className="text-white">
+                Page {currentPage} of {filterData.totalPages}
+              </span>
+              <button
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === filterData.totalPages}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg disabled:opacity-50"
+              >
+                Next
+              </button>
+            </div>
+          </div>
         </main>
       </div>
     </div>

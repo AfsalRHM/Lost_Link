@@ -13,12 +13,14 @@ export default interface IrequestController {
   cancelRequest(req: Request, res: Response, next: NextFunction): Promise<void>;
   changeLikeStatus(req: Request, res: Response, next: NextFunction): Promise<void>;
 
-  getAllRequests(req: Request, res: Response, next: NextFunction): Promise<void>;
+  getRequests(req: Request, res: Response, next: NextFunction): Promise<void>;
   changeRequestStatus(req: Request, res: Response, next: NextFunction): Promise<void>;
-  getAllRedeemRequests(req: Request, res: Response, next: NextFunction): Promise<void>;
-
-  adminGetAllRequests(req: Request, res: Response, next: NextFunction): Promise<void>
+  
+  adminGetRequests(req: Request, res: Response, next: NextFunction): Promise<void>
   adminGetRequestDetails(req: Request, res: Response, next: NextFunction): Promise<void>;
+  adminGetRedeemRequests(req: Request, res: Response, next: NextFunction): Promise<void>;
+  adminGetAllRequests(req: Request, res: Response, next: NextFunction): Promise<void>;
+  adminGetAllRedeemRequests(req: Request, res: Response, next: NextFunction): Promise<void>;
 
   changeRedeemRequestStatus(req: Request, res: Response, next: NextFunction): Promise<void>;
 }

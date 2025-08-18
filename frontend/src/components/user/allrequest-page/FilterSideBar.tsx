@@ -2,43 +2,14 @@ import Geoapify from "../shared/Geoapify";
 
 const FilterSideBar = ({
   setFilters,
-  allRequests,
   filters,
-  setFilteredRequests,
 }: {
   setFilters: any;
-  allRequests: any;
   filters: any;
-  setFilteredRequests: any;
 }) => {
   const handleFilterChange = (key: string, value: string | number) => {
     setFilters((prev: any) => {
-      const updatedFilters = { ...prev, [key]: value };
-      const filtered = allRequests.filter((request: any) => {
-        const rawLocations = request.missing_place || request.missing_route;
-        const locationsArray = Array.isArray(rawLocations)
-          ? rawLocations
-          : rawLocations
-          ? [rawLocations]
-          : [];
-
-        const locationFilter = updatedFilters.location.trim().toLowerCase();
-
-        const matchesLocation =
-          locationFilter === "" ||
-          locationsArray.some((loc: string) =>
-            loc.toLowerCase().includes(locationFilter)
-          );
-
-        const matchesReward =
-          request.reward_amount >= updatedFilters.minReward &&
-          request.reward_amount <= updatedFilters.maxReward;
-
-        return matchesLocation && matchesReward;
-      });
-
-      setFilteredRequests(filtered);
-      return updatedFilters;
+      return { ...prev, [key]: value };
     });
   };
 
@@ -59,6 +30,7 @@ const FilterSideBar = ({
         </label>
         <input
           type="number"
+          placeholder="Enter a minimum reward amount"
           className="w-full border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-violet-500"
           value={filters.minReward}
           onChange={(e) =>
@@ -72,6 +44,7 @@ const FilterSideBar = ({
         </label>
         <input
           type="number"
+          placeholder="Enter a maximum reward amount"
           className="w-full border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-violet-500"
           value={filters.maxReward}
           onChange={(e) =>

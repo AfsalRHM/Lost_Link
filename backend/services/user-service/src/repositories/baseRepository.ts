@@ -24,6 +24,29 @@ export default class BaseRepository<T extends Document>
     return this.model.find(filter);
   }
 
+  async findEntities(
+    filter: FilterQuery<T>,
+    skip: number,
+    limit: number
+  ): Promise<{
+    data: T[];
+    totalItems: number;
+    totalPages: number;
+    currentPage: number;
+  }> {
+    const [data, totalItems] = await Promise.all([
+      this.model.find(filter).skip(skip).limit(limit).exec(),
+      this.model.countDocuments(filter),
+    ]);
+
+    return {
+      data,
+      totalItems,
+      totalPages: Math.ceil(totalItems / limit),
+      currentPage: Math.floor(skip / limit) + 1,
+    };
+  }
+
   async findAll(): Promise<T[]> {
     return this.model.find();
   }

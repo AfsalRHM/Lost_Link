@@ -13,6 +13,8 @@ import ImageModal from "../../shared/ImageModal";
 import ImageUpload from "../../shared/ImageUpload";
 import AdminErrorHandling from "../../../middlewares/AdminErrorHandling";
 
+const CLOUDINARY_PREFIX = import.meta.env.VITE_CLOUDINARY_PREFIX;
+
 const ChatPart = ({ chatDetails }: { chatDetails: IchatModel | undefined }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -230,7 +232,7 @@ const ChatPart = ({ chatDetails }: { chatDetails: IchatModel | undefined }) => {
                       : message.image !== "no image" && (
                           <div className="rounded-lg overflow-hidden mt-1">
                             <img
-                              src={message.image}
+                              src={`${CLOUDINARY_PREFIX}${message.image}`}
                               alt="Message attachment"
                               className="w-full max-w-[160px] min-w-[120px] object-cover rounded-lg hover:scale-105 transition-transform duration-200"
                               loading="lazy"

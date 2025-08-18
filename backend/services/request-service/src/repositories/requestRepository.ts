@@ -3,11 +3,11 @@ import { FilterQuery, Model } from "mongoose";
 import BaseRepository from "./baseRepository";
 
 import IrequestModel from "../interface/IrequestModel";
-import IbaseRepository from "../interface/IbaseRepository";
+import { IrequestRepository } from "../interface/IrequestRepository";
 
 export default class RequestRepository
   extends BaseRepository<IrequestModel>
-  implements IbaseRepository<IrequestModel>
+  implements IrequestRepository
 {
   constructor(model: Model<IrequestModel>) {
     super(model);
@@ -19,8 +19,18 @@ export default class RequestRepository
     return this.insert(requestData);
   }
 
-  async findAllRequests(): Promise<IrequestModel[] | []> {
-    return this.findAll({ status: "active" });
+  async findAllRequests(
+    filter: FilterQuery<IrequestModel>
+  ): Promise<IrequestModel[] | []> {
+    return this.findAll({ ...filter, status: "active" });
+  }
+
+  async adminFindRequests(
+    filter: object,
+    skip: number,
+    limit: number
+  ): Promise<any> {
+    return this.findEntities(filter, skip, limit);
   }
 
   async adminFindAllRequests(): Promise<IrequestModel[] | []> {

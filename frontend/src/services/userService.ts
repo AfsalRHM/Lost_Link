@@ -15,8 +15,18 @@ export const userService = {
     return userHttpClient.post(API_ROUTES.AUTH.GOOGLE_LOGIN, payload);
   },
 
-  getAllRequests: () => {
-    return userHttpClient.get(API_ROUTES.USER.GET_ALL_REQUESTS);
+  getAllRequests: (props: {
+    location: string;
+    minReward: number;
+    maxReward: number;
+  }) => {
+    return userHttpClient.get(
+      API_ROUTES.USER.GET_ALL_REQUESTS(
+        props.location,
+        props.minReward,
+        props.maxReward
+      )
+    );
   },
 
   getMyRequestDetails: (props: { requestId: string }) => {

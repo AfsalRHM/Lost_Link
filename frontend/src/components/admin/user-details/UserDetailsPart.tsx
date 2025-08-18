@@ -20,6 +20,8 @@ import {
 import UserDetailsPartLoading from "./loading/UserDetailsPartLoading";
 import AdminErrorHandling from "../../../middlewares/AdminErrorHandling";
 
+const CLOUDINARY_PREFIX = import.meta.env.VITE_CLOUDINARY_PREFIX;
+
 const UserDetailsPart = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -100,7 +102,7 @@ const UserDetailsPart = () => {
             <div className="flex items-center gap-6 mb-4">
               {userData?.profilePic ? (
                 <img
-                  src={userData.profilePic}
+                  src={`${CLOUDINARY_PREFIX}${userData.profilePic}`}
                   alt={userData.fullName}
                   className="w-24 h-24 rounded-full border-4 border-violet-200"
                 />

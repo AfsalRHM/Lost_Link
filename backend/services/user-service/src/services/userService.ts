@@ -291,7 +291,7 @@ export default class UserService implements IuserService {
         throw new AppError("userIds are required", StatusCode.BAD_REQUEST);
       }
 
-      const users = await this._userRepository.findUsers({
+      const users = await this._userRepository.findSomeUsers({
         _id: { $in: userIds },
       });
       if (!users) {
@@ -403,15 +403,57 @@ export default class UserService implements IuserService {
   }
 
   /****************************           Admin Side             **************************************/
-  async getAllUsers(): Promise<GetAllUsersResponseDto[] | null> {
+  async getUsers({
+    search,
+    limit,
+    page,
+  }: {
+    search: string;
+    limit: number;
+    page: number;
+  }): Promise<any> {
     try {
-      const userList = await this._userRepository.findAllUsers();
-      if (!userList) {
-        console.log("No users available");
-        return null;
+      const skip = (page - 1) * limit;
+      const filter = search
+        ? {
+            $or: [
+              { user_name: { $regex: search, $options: "i" } },
+              { full_name: { $regex: search, $options: "i" } },
+              { email: { $regex: search, $options: "i" } },
+            ],
+          }
+        : {};
+
+      const response = await this._userRepository.findUsers(
+        filter,
+        skip,
+        limit
+      );
+
+      const mappedUsers = response.data.map((user: IuserModel) => {
+        const savedEntity = UserMapper.toEntity(user);
+        return UserMapper.toGetAllUsersDto(savedEntity);
+      });
+      response.data = mappedUsers;
+
+      return response;
+    } catch (error: any) {
+      if (error.name === "MongoNetworkError") {
+        throw new AppError(
+          "Database connection failed",
+          StatusCode.SERVICE_UNAVAILABLE
+        );
       }
 
-      const mappedUsers = userList.map((user) => {
+      handleServiceError(error, "Something went wrong while fetching users");
+    }
+  }
+
+  async getAllUsers(): Promise<GetAllUsersResponseDto[] | []> {
+    try {
+      const response = await this._userRepository.findAllUsers();
+
+      const mappedUsers = response.map((user: IuserModel) => {
         const savedEntity = UserMapper.toEntity(user);
         return UserMapper.toGetAllUsersDto(savedEntity);
       });

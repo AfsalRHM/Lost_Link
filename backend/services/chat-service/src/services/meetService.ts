@@ -65,11 +65,59 @@ export default class MeetService implements ImeetService {
   }
 
   // To get all the meets for the admin
-  async getAllMeets(): Promise<any> {
+  async getMeets({
+    search,
+    limit,
+    page,
+    activeTab,
+  }: {
+    search: string;
+    limit: number;
+    page: number;
+    activeTab: string;
+  }): Promise<any> {
     try {
-      const meetData = await this._meetRepository.findAllMeets();
+      const skip = (page - 1) * limit;
+      const searchFilter = search
+        ? {
+            $or: [{ user_name: { $regex: search, $options: "i" } }],
+          }
+        : {};
 
-      return meetData;
+      let dateFilter: any = {};
+      if (activeTab === "upcoming") {
+        dateFilter = {
+          $expr: {
+            $and: [
+              {
+                $gte: ["$$NOW", { $subtract: ["$meet_date", 15 * 60 * 1000] }],
+              },
+              { $lte: ["$$NOW", "$meet_date"] },
+            ],
+          },
+        };
+      } else if (activeTab === "finished") {
+        dateFilter = {
+          $expr: {
+            $gt: ["$$NOW", "$meet_date"],
+          },
+        };
+      } else {
+        console.log("No tab available - Please set a new condition");
+      }
+
+      const filter = {
+        ...searchFilter,
+        ...dateFilter,
+      };
+
+      const response = await this._meetRepository.findMeets(
+        filter,
+        skip,
+        limit
+      );
+
+      return response;
     } catch (error: any) {
       if (error.name === "MongoNetworkError") {
         throw new AppError(

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   GeoapifyGeocoderAutocomplete,
   GeoapifyContext,
@@ -35,10 +35,6 @@ const Geoapify = (props: geoapifyProps) => {
     setDisplayValue(value?.properties?.city || "");
   }
 
-  function onSuggestionChange(value: any) {
-    console.log(value);
-  }
-
   function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
     if (props.stateFunc) {
       props.stateFunc(e.target.value);
@@ -63,6 +59,21 @@ const Geoapify = (props: geoapifyProps) => {
       console.error("Error fetching location details:", error);
     }
   }
+
+  const inputRef = useRef<any>(null);
+
+  useEffect(() => {
+    if (inputRef.current) {
+      const inputEl = inputRef.current.querySelector("input");
+      if (inputEl) {
+        inputEl.addEventListener("input", (e: any) => {
+          if (props.stateFunc) {
+            props.stateFunc(e.target.value);
+          }
+        });
+      }
+    }
+  }, []);
 
   async function handleGetLocationClick() {
     if (navigator.geolocation) {
@@ -106,7 +117,6 @@ const Geoapify = (props: geoapifyProps) => {
               limit={limit}
               value={displayValue}
               placeSelect={onPlaceSelect}
-              suggestionsChange={onSuggestionChange}
             />
           </div>
           <span
@@ -119,7 +129,7 @@ const Geoapify = (props: geoapifyProps) => {
       );
     } else if (props.forThe === "filters") {
       return (
-        <div className="w-full rounded-md">
+        <div className="w-full rounded-md" ref={inputRef}>
           <GeoapifyGeocoderAutocomplete
             placeholder="Enter city name in India"
             type={type}
@@ -128,7 +138,6 @@ const Geoapify = (props: geoapifyProps) => {
             limit={limit}
             value={displayValue}
             placeSelect={onPlaceSelect}
-            suggestionsChange={onSuggestionChange}
           />
         </div>
       );
@@ -143,7 +152,6 @@ const Geoapify = (props: geoapifyProps) => {
             limit={limit}
             value={displayValue}
             placeSelect={onPlaceSelect}
-            suggestionsChange={onSuggestionChange}
           />
         </div>
       );

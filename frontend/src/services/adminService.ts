@@ -10,8 +10,64 @@ export const adminService = {
     return adminHttpClient.post(API_ROUTES.ADMIN.CREATE_ADMIN, payload);
   },
 
-  getAdmins: () => {
-    return adminHttpClient.get(API_ROUTES.ADMIN.GET_ADMINS);
+  getAdmins: (props: { page: number; limit: number; search: string }) => {
+    return adminHttpClient.get(
+      API_ROUTES.ADMIN.GET_ADMINS(props.page, props.limit, props.search)
+    );
+  },
+
+  getUsers: (props: { page: number; limit: number; search: string }) => {
+    return adminHttpClient.get(
+      API_ROUTES.ADMIN.GET_USERS(props.page, props.limit, props.search)
+    );
+  },
+
+  getRequests: (props: { page: number; limit: number; search: string }) => {
+    return adminHttpClient.get(
+      API_ROUTES.ADMIN.GET_REQUESTS(props.page, props.limit, props.search)
+    );
+  },
+
+  getRedeemRequests: (props: {
+    page: number;
+    limit: number;
+    search: string;
+  }) => {
+    return adminHttpClient.get(
+      API_ROUTES.ADMIN.GET_REDEEM_REQUESTS(
+        props.page,
+        props.limit,
+        props.search
+      )
+    );
+  },
+
+  getMeets: (props: {
+    page: number;
+    limit: number;
+    search: string;
+    activeTab: string;
+  }) => {
+    return adminHttpClient.get(
+      API_ROUTES.ADMIN.GET_MEETS(
+        props.page,
+        props.limit,
+        props.activeTab,
+        props.search
+      )
+    );
+  },
+
+  getAllUsers: () => {
+    return adminHttpClient.get(API_ROUTES.ADMIN.GET_ALL_USERS);
+  },
+
+  getAllRequests: () => {
+    return adminHttpClient.get(API_ROUTES.ADMIN.GET_ALL_REQUESTS);
+  },
+
+  getAllRedeemRequests: () => {
+    return adminHttpClient.get(API_ROUTES.ADMIN.GET_ALL_REDEEM_REQUESTS);
   },
 
   updateAdmin: (props: { adminId: string }) => {
@@ -34,28 +90,12 @@ export const adminService = {
     return adminHttpClient.post(API_ROUTES.ADMIN.SEND_MESSAGE, payload);
   },
 
-  getUsers: () => {
-    return adminHttpClient.get(API_ROUTES.ADMIN.GET_USERS);
-  },
-
-  getRequests: () => {
-    return adminHttpClient.get(API_ROUTES.ADMIN.GET_REQUESTS);
-  },
-
-  getRedeemRequests: () => {
-    return adminHttpClient.get(API_ROUTES.ADMIN.GET_REDEEM_REQUESTS);
-  },
-
   loginVerify: (payload: { email: string; password: string }) => {
     return adminHttpClient.post(API_ROUTES.ADMIN.LOGIN, payload);
   },
 
   getMeet: (props: { meetId: string }) => {
     return adminHttpClient.get(API_ROUTES.ADMIN.GET_MEET(props.meetId));
-  },
-
-  getAllMeets: () => {
-    return adminHttpClient.get(API_ROUTES.ADMIN.GET_MEETS);
   },
 
   getRedeemRequestDetails: (props: { redeemRequestId: string }) => {

@@ -12,7 +12,7 @@ const adminController = new AdminController(adminService);
 
 // Get Reqeusts
 admin_route.get("/allUsers", adminController.getAllUsers); // To get all users
-admin_route.get("/", adminController.getAllAdmins); // To get all admins
+admin_route.get("/", adminController.getAdmins); // To get all admins
 
 // Post Requests
 admin_route.post("/login-verify", adminController.adminLogin); // To verify login

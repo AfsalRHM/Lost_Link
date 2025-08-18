@@ -69,19 +69,29 @@ export default class AdminController implements IadminController {
     }
   };
 
-  public getAllAdmins = async (
+  public getAdmins = async (
     req: Request,
     res: Response,
     next: NextFunction
   ): Promise<void> => {
     try {
-      const admins = await this._adminService.getAllAdmins();
+      const page = parseInt(req.query.p as string) || 1;
+      const limit = parseInt(req.query.l as string) || 2;
+      const search = (req.query.s as string) || "";
 
-      res
-        .status(StatusCode.OK)
-        .json({ status: true, data: admins, message: "Fetched admins" });
+      const admins = await this._adminService.getAdmins({
+        search,
+        page,
+        limit,
+      });
+
+      res.status(StatusCode.OK).json({
+        status: true,
+        data: admins,
+        message: "Fetched admins",
+      });
     } catch (error) {
-      console.log("error on the getAllAdmins/adminController");
+      console.log("error on the getAdmins/adminController");
       next(error);
     }
   };

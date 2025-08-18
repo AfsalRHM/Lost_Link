@@ -28,13 +28,17 @@ export default class UserRepository
     return this.findByIdAndUpdate(Id, update);
   }
 
-  async findUsers(
+  async findUsers(filter: object, skip: number, limit: number): Promise<any> {
+    return this.findEntities(filter, skip, limit);
+  }
+
+  async findSomeUsers(
     filter: FilterQuery<IuserModel>
-  ): Promise<IuserModel[] | null> {
+  ): Promise<IuserModel[] | []> {
     return this.findMany(filter);
   }
 
-  async findAllUsers(): Promise<IuserModel[] | null> {
+  async findAllUsers(): Promise<IuserModel[] | []> {
     return this.findAll();
   }
 

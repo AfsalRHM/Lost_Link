@@ -15,6 +15,8 @@ import ChatPart from "./ChatPart";
 import CommentSection from "../../shared/CommentSection";
 import UserErrorHandling from "../../../middlewares/UserErrorHandling";
 
+const CLOUDINARY_PREFIX = import.meta.env.VITE_CLOUDINARY_PREFIX;
+
 const MyRequestDetails = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -280,7 +282,7 @@ const MyRequestDetails = () => {
                       className="relative aspect-square rounded-xl overflow-hidden shadow-md"
                     >
                       <img
-                        src={image}
+                        src={`${CLOUDINARY_PREFIX}${image}`}
                         alt={`Product ${index + 1}`}
                         className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                       />

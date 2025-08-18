@@ -1,19 +1,5 @@
-import { useNavigate } from "react-router-dom";
-
-import IredeemRequestModel from "../../../interface/IrequestRedeem";
-
-interface UserListPartProps {
-  allRedeemRequests: IredeemRequestModel[];
-}
-
-const RedeemRequestListPart = ({ allRedeemRequests }: UserListPartProps) => {
-  const navigate = useNavigate();
-
-  const handleDetailsPage = (id: string) => {
-    if (id) {
-      navigate(`/admin/redeem-requests/details/${id}`);
-    }
-  };
+const RedeemRequestListPartLoading = () => {
+  const skeletonRows = Array.from({ length: 5 }, (_, index) => index);
 
   return (
     <div className="bg-blue-800 rounded-lg shadow overflow-hidden">
@@ -36,44 +22,30 @@ const RedeemRequestListPart = ({ allRedeemRequests }: UserListPartProps) => {
             </tr>
           </thead>
           <tbody className="bg-blue-400 divide-y divide-gray-200">
-            {allRedeemRequests.map((redeemRequest: IredeemRequestModel) => (
-              <tr key={redeemRequest.id} className="hover:bg-blue-700">
+            {skeletonRows.map((index) => (
+              <tr key={index} className="animate-pulse">
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center">
                     <div className="h-10 flex items-center justify-center">
-                      <span className="text-black font-medium">
-                        {redeemRequest.requestName}
-                      </span>
+                      {/* Request name skeleton */}
+                      <div className="h-4 bg-blue-300 rounded w-36"></div>
                     </div>
                   </div>
                 </td>
                 <td className="px-6 pl-20 py-4 whitespace-nowrap">
-                  <span
-                    className={`inline-flex text-sm font-medium px-2 py-1 rounded ${
-                      redeemRequest.status === "active"
-                        ? "bg-green-100 text-green-800"
-                        : "bg-gray-100 text-gray-800"
-                    }`}
-                  >
-                    {redeemRequest.status.charAt(0).toUpperCase() +
-                      redeemRequest.status.slice(1)}
-                  </span>
+                  {/* Status badge skeleton */}
+                  <div className="h-6 bg-blue-300 rounded-full w-16"></div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
                   <div className="flex justify-center space-x-4">
-                    <p className="inline-flex items-center px-4 py-2 text-white rounded-lg transition-colors">
-                      {redeemRequest.mobileNumber}
-                    </p>
+                    {/* Mobile number skeleton */}
+                    <div className="h-4 bg-blue-300 rounded w-24"></div>
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
                   <div className="flex justify-center space-x-4">
-                    <button
-                      onClick={() => handleDetailsPage(redeemRequest.id)}
-                      className="inline-flex items-center px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-                    >
-                      Details
-                    </button>
+                    {/* Details button skeleton */}
+                    <div className="h-10 bg-blue-300 rounded-lg w-16"></div>
                   </div>
                 </td>
               </tr>
@@ -85,4 +57,4 @@ const RedeemRequestListPart = ({ allRedeemRequests }: UserListPartProps) => {
   );
 };
 
-export default RedeemRequestListPart;
+export default RedeemRequestListPartLoading;

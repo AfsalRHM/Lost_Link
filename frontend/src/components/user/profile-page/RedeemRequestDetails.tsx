@@ -21,6 +21,8 @@ import MeetScheduleModal from "./MeetScheduleModal";
 import UserErrorHandling from "../../../middlewares/UserErrorHandling";
 import IredeemRequestModel from "../../../interface/IrequestRedeem";
 
+const CLOUDINARY_PREFIX = import.meta.env.VITE_CLOUDINARY_PREFIX;
+
 const RedeemRequestDetails = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -264,7 +266,7 @@ const RedeemRequestDetails = () => {
                       (image: string, index: number) => (
                         <img
                           key={index}
-                          src={image}
+                          src={`${CLOUDINARY_PREFIX}${image}`}
                           alt={`Upload ${index + 1}`}
                           className="w-60 h-full object-cover rounded-lg shadow-md"
                         />

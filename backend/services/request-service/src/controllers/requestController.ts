@@ -58,21 +58,57 @@ export default class RequestController implements IrequestController {
   };
 
   // To fetch all the requests to the Admin side
-  public getAllRequests = async (
+  public getRequests = async (
     req: Request,
     res: Response,
     next: NextFunction
   ): Promise<void> => {
     try {
-      const requests = await this._requestService.getRequests();
+      const min = parseInt(req.query.min as string) || 0;
+      const max = parseInt(req.query.max as string) || 1000;
+      const location = (req.query.l as string) || "";
+
+      const requests = await this._requestService.getRequests({
+        min,
+        max,
+        location,
+      });
 
       res.status(StatusCode.OK).json({
         status: true,
         data: requests,
-        message: "All requests fetched",
+        message: "Requests fetched",
       });
     } catch (error) {
-      console.log("error in getAllRequest/requestController", error);
+      console.log("error in getRequests/requestController", error);
+      next(error);
+    }
+  };
+
+  // To fetch all the requests to the Admin side
+  public adminGetRequests = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
+    try {
+      const page = parseInt(req.query.p as string) || 1;
+      const limit = parseInt(req.query.l as string) || 2;
+      const search = (req.query.s as string) || "";
+
+      const requests = await this._requestService.adminGetRequests({
+        search,
+        page,
+        limit,
+      });
+
+      res.status(StatusCode.OK).json({
+        status: true,
+        data: requests,
+        message: "Requests fetched",
+      });
+    } catch (error) {
+      console.log("error in adminGetRequests/requestController", error);
       next(error);
     }
   };
@@ -89,7 +125,7 @@ export default class RequestController implements IrequestController {
       res.status(StatusCode.OK).json({
         status: true,
         data: requests,
-        message: "All requests fetched",
+        message: "Requests fetched",
       });
     } catch (error) {
       console.log("error in adminGetAllRequests/requestController", error);
@@ -98,21 +134,53 @@ export default class RequestController implements IrequestController {
   };
 
   // To fetch all the redeem requests to the Admin side
-  public getAllRedeemRequests = async (
+  public adminGetRedeemRequests = async (
     req: Request,
     res: Response,
     next: NextFunction
   ): Promise<void> => {
     try {
-      const redeemRequests = await this._requestService.getAllRedeemRequests();
+      const page = parseInt(req.query.p as string) || 1;
+      const limit = parseInt(req.query.l as string) || 2;
+      const search = (req.query.s as string) || "";
+
+      const redeemRequests = await this._requestService.adminGetRedeemRequests({
+        search,
+        page,
+        limit,
+      });
 
       res.status(StatusCode.OK).json({
         status: true,
         data: redeemRequests,
-        message: "All redeem requests fetched",
+        message: "Redeem Requests fetched",
       });
     } catch (error) {
-      console.log("error in getAllRedeemRequests/requestController", error);
+      console.log("error in adminGetRedeemRequests/requestController", error);
+      next(error);
+    }
+  };
+
+  // To fetch all the redeem requests to the Admin side
+  public adminGetAllRedeemRequests = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
+    try {
+      const redeemRequests =
+        await this._requestService.adminGetAllRedeemRequests();
+
+      res.status(StatusCode.OK).json({
+        status: true,
+        data: redeemRequests,
+        message: "Redeem Requests fetched",
+      });
+    } catch (error) {
+      console.log(
+        "error in adminGetAllRedeemRequests/requestController",
+        error
+      );
       next(error);
     }
   };
@@ -369,7 +437,7 @@ export default class RequestController implements IrequestController {
         message: "redeem request inserted",
       });
     } catch (error) {
-      console.log("error on the createRedeemRequest/adminController");
+      console.log("error on the createRedeemRequest/requestController");
       next(error);
     }
   };
@@ -398,7 +466,7 @@ export default class RequestController implements IrequestController {
         message: "fetched user's redeem requests",
       });
     } catch (error) {
-      console.log("error on the getUserRedeemRequests/adminController");
+      console.log("error on the getUserRedeemRequests/requestController");
       next(error);
     }
   };
@@ -428,7 +496,7 @@ export default class RequestController implements IrequestController {
         message: "redeem request details fetched",
       });
     } catch (error) {
-      console.log("error on the getRedeemRequestDetails/adminController");
+      console.log("error on the getRedeemRequestDetails/requestController");
       next(error);
     }
   };

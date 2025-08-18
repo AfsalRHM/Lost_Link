@@ -18,6 +18,8 @@ import CommentSection from "../../shared/CommentSection";
 import ReportListModal from "./ReportListModal";
 import AdminErrorHandling from "../../../middlewares/AdminErrorHandling";
 
+const CLOUDINARY_PREFIX = import.meta.env.VITE_CLOUDINARY_PREFIX;
+
 const RequestDetailsPart = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -354,7 +356,7 @@ const RequestDetailsPart = () => {
                       className="relative aspect-square rounded-xl overflow-hidden shadow-md"
                     >
                       <img
-                        src={image}
+                        src={`${CLOUDINARY_PREFIX}${image}`}
                         alt={`Product ${index + 1}`}
                         className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                       />

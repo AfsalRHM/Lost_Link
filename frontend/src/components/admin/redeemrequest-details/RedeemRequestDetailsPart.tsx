@@ -12,6 +12,8 @@ import {
 import AdminErrorHandling from "../../../middlewares/AdminErrorHandling";
 import IredeemRequestModel from "../../../interface/IrequestRedeem";
 
+const CLOUDINARY_PREFIX = import.meta.env.VITE_CLOUDINARY_PREFIX;
+
 const RedeemRequestDetailsPart = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -219,7 +221,7 @@ const RedeemRequestDetailsPart = () => {
                       className="group relative aspect-square rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300"
                     >
                       <img
-                        src={String(image)}
+                        src={`${CLOUDINARY_PREFIX}${String(image)}`}
                         alt={`Found item ${index + 1}`}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                       />

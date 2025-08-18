@@ -19,7 +19,7 @@ meet_route.post("/", meetController.createMeet); // To get schedule a meet
 
 /*************************      Admin Side       *******************************/
 // Get Requests
-meet_route.get("/admin/meet/all", meetController.getAllMeets); // To get all the meets
+meet_route.get("/admin/meet/all", meetController.getMeets); // To get all the meets
 meet_route.get("/admin/meet/:id", meetController.getMeetDataAdmin); // To get details of one meet
 
 export default meet_route;

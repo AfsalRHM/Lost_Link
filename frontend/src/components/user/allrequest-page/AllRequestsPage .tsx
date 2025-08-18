@@ -5,24 +5,28 @@ import { userService } from "../../../services/userService";
 import FilterSideBar from "./FilterSideBar";
 import RequestLoading from "./loading/AllRequestLoading";
 import RequestPart from "./RequestPart";
+import FilterSideBarLoading from "./loading/FilterSideBarLoading";
 
 const AllRequests = () => {
   const [allRequests, setallRequests] = useState([]);
-  const [filteredRequests, setFilteredRequests] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const [filters, setFilters] = useState({
-    category: "",
     minReward: 0,
     maxReward: 1000,
+    location: "",
   });
 
   useEffect(() => {
     const fetchRequests = async () => {
       try {
-        const response = await userService.getAllRequests();
+        const { data } = await userService.getAllRequests({
+          location: filters.location,
+          minReward: filters.minReward,
+          maxReward: filters.maxReward,
+        });
 
-        setallRequests(response.data.data);
+        setallRequests(data.data);
       } catch (error) {
         console.error("Failed to fetch requests:", error);
       } finally {
@@ -31,21 +35,12 @@ const AllRequests = () => {
     };
 
     fetchRequests();
-  }, []);
-
-  useEffect(() => {
-    setFilteredRequests(allRequests);
-  }, [allRequests]);
+  }, [filters]);
 
   if (loading) {
     return (
       <div className="bg-activity min-h-screen flex flex-col lg:flex-row">
-        <FilterSideBar
-          allRequests={allRequests}
-          setFilters={setFilters}
-          filters={filters}
-          setFilteredRequests={setFilteredRequests}
-        />
+        <FilterSideBarLoading />
         <RequestLoading />
       </div>
     );
@@ -53,13 +48,8 @@ const AllRequests = () => {
 
   return (
     <div className="bg-activity min-h-screen flex flex-col lg:flex-row">
-      <FilterSideBar
-        allRequests={allRequests}
-        setFilters={setFilters}
-        filters={filters}
-        setFilteredRequests={setFilteredRequests}
-      />
-      <RequestPart filteredRequests={filteredRequests} />
+      <FilterSideBar setFilters={setFilters} filters={filters} />
+      <RequestPart allRequests={allRequests} />
     </div>
   );
 };

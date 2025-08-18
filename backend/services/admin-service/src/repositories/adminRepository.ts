@@ -2,12 +2,12 @@ import { Model } from "mongoose";
 
 import BaseRepository from "./baseRepository";
 
-import IbaseRepository from "../interface/IbaseRepository";
 import IadminModel from "../interface/IadminModel";
+import { IadminRepository } from "../interface/IadminRepository";
 
 export default class AdminRepository
   extends BaseRepository<IadminModel>
-  implements IbaseRepository<IadminModel>
+  implements IadminRepository
 {
   constructor(model: Model<IadminModel>) {
     super(model);
@@ -21,11 +21,23 @@ export default class AdminRepository
     return this.findOne({ email: adminMail });
   }
 
-  async findAll(): Promise<IadminModel[] | []> {
-    return this.findAllAdmins();
+  async findSomeAdmins(): Promise<IadminModel[]> {
+    return this.findSome({}, 0, 10);
   }
 
-  async changeStatus(adminId: string): Promise<IadminModel | null> {
+  async findAllAdmins(): Promise<IadminModel[]> {
+    return this.findAll();
+  }
+
+  async findPaginatedAdmins(
+    filter: object,
+    skip: number,
+    limit: number
+  ): Promise<any> {
+    return this.findPaginated(filter, skip, limit);
+  }
+
+  async changeAdminStatus(adminId: string): Promise<IadminModel | null> {
     try {
       const admin = await this.model.findById(adminId);
       if (!admin) {
@@ -34,15 +46,13 @@ export default class AdminRepository
 
       const newStatus = admin.status === "active" ? "inactive" : "active";
 
-      const updatedUser = await this.model.findByIdAndUpdate(
+      return await this.model.findByIdAndUpdate(
         adminId,
         { status: newStatus },
         { new: true }
       );
-
-      return updatedUser;
     } catch (error) {
-      console.error("Error updating status 1:", error);
+      console.error("Error updating status:", error);
       return null;
     }
   }

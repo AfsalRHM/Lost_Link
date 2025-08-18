@@ -11,6 +11,8 @@ import { MessageCircle, Send } from "lucide-react";
 import { RootState } from "../../redux/store";
 import UserErrorHandling from "../../middlewares/UserErrorHandling";
 
+const CLOUDINARY_PREFIX = import.meta.env.VITE_CLOUDINARY_PREFIX;
+
 interface ICommentModel {
   _id?: string;
   user_id: string;
@@ -174,7 +176,7 @@ const CommentSection = ({
               <div className="flex items-start gap-3">
                 <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
                   <img
-                    src={comment.user_info.profile_pic}
+                    src={`${CLOUDINARY_PREFIX}${comment.user_info.profile_pic}`}
                     alt={comment.user_info.user_name}
                     className="w-full h-full object-cover"
                     onError={(e) => {

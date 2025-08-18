@@ -9,7 +9,7 @@ const meetSchema = new Schema(
       required: true,
     },
     meet_date: {
-      type: String,
+      type: Date,
       required: true,
     },
     user_id: {

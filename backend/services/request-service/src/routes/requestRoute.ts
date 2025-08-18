@@ -20,10 +20,10 @@ const requestController = new RequestController(requestService);
 
 /*************************      User Side       *******************************/
 // Get Requests
-request_route.get("/get-all-requests", requestController.getAllRequests); // To get all the requests to show in the request part
+request_route.get("/", requestController.getRequests); // To get all the requests to show in the request part
 request_route.get("/:id/requests", requestController.getUserRequests); // To get the user requests
-request_route.get("/:id/redeem-request", requestController.getRedeemRequestDetails); // To get the details of a specific redeem request
 request_route.get("/redeem-request/my", requestController.getUserRedeemRequests); // To get all the redeem requests to show in the profile
+request_route.get("/redeem-request/:id", requestController.getRedeemRequestDetails); // To get the details of a specific redeem request
 request_route.get("/:id/request/my", requestController.getMyRequestDetails); // To get the details of the request
 
 // Post Requests
@@ -38,10 +38,12 @@ request_route.patch("/:id/like", requestController.changeLikeStatus); // To chan
 
 /*************************      Admin Side       *******************************/
 // Get Requests
-request_route.get("/admin/all", requestController.adminGetAllRequests); // To get all the requests in the admin side
+request_route.get("/admin", requestController.adminGetRequests); // To get all the requests in the admin side
+request_route.get("/admin/redeem-request", requestController.adminGetRedeemRequests); // To get all the redeem requests in the admin side
 request_route.get("/admin/:id", requestController.adminGetRequestDetails); // To get all the redeem requests in the admin side
-request_route.get("/admin/redeem-request/all", requestController.getAllRedeemRequests); // To get all the redeem requests in the admin side
 request_route.get("/admin/redeem-request/:id", requestController.getRedeemRequestDetails); // To get the redeem requests details in the admin side
+request_route.get("/admin/analytics/all", requestController.adminGetAllRequests); // To get all the requests in the admin side
+request_route.get("/admin/redeem-request/analytics/all", requestController.adminGetAllRedeemRequests); // To get all the redeem requests in the admin side
 
 // Post Requests
 request_route.post("/admin/update-redeem-request", requestController.changeRedeemRequestStatus); // To change the redeem request status

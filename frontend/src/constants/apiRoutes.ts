@@ -12,7 +12,16 @@ export const API_ROUTES = {
   },
   USER: {
     GET_MY_REPORTS: "/request/get-my-reports",
-    GET_ALL_REQUESTS: "/request/get-all-requests",
+    GET_ALL_REQUESTS: (
+      location: string,
+      minReward: number,
+      maxReward: number
+    ) => {
+      let url = `/request?min=${minReward}&max=${maxReward}`;
+      if (location && location.trim())
+        url += `&l=${encodeURIComponent(location)}`;
+      return url;
+    },
     GET_MY_REQUEST_DETAILS: (requestId: string) =>
       `/request/${requestId}/request/my`,
     GET_REQUEST_DETAILS: "/request/get-request-details",
@@ -30,7 +39,7 @@ export const API_ROUTES = {
     CANCEL_REQUEST: (requestId: string) => `/request/${requestId}`,
     GET_MY_REQUESTS: (userId: string) => `/request/${userId}/requests`,
     GET_REQUEST_REDEEM_DETAILS: (requestRedeemId: string) =>
-      `/request/${requestRedeemId}/redeem-request`,
+      `/request/redeem-request/${requestRedeemId}`,
     GET_MY_REQUEST_REDEEMS: `/request/redeem-request/my`,
     GET_USER_REPORTS: (userId: string) => `/request/${userId}/reports`,
     UPDATE_USER: "/user",
@@ -43,18 +52,46 @@ export const API_ROUTES = {
   ADMIN: {
     CREATE_ADMIN: "/admin",
     LOGIN: "/admin/login-verify",
-    GET_ADMINS: "/admin",
+    GET_ADMINS: (page: number, limit: number, search?: string) => {
+      let url = `/admin?p=${page}&l=${limit}`;
+      if (search && search.trim()) url += `&s=${encodeURIComponent(search)}`;
+      return url;
+    },
+    GET_USERS: (page: number, limit: number, search?: string) => {
+      let url = `/user/admin?p=${page}&l=${limit}`;
+      if (search && search.trim()) url += `&s=${encodeURIComponent(search)}`;
+      return url;
+    },
+    GET_REQUESTS: (page: number, limit: number, search?: string) => {
+      let url = `/request/admin?p=${page}&l=${limit}`;
+      if (search && search.trim()) url += `&s=${encodeURIComponent(search)}`;
+      return url;
+    },
+    GET_REDEEM_REQUESTS: (page: number, limit: number, search?: string) => {
+      let url = `/request/admin/redeem-request?p=${page}&l=${limit}`;
+      if (search && search.trim()) url += `&s=${encodeURIComponent(search)}`;
+      return url;
+    },
+    GET_MEETS: (
+      page: number,
+      limit: number,
+      activeTab: string,
+      search?: string
+    ) => {
+      let url = `/chat/admin/meet/all?p=${page}&l=${limit}&f=${activeTab}`;
+      if (search && search.trim()) url += `&s=${encodeURIComponent(search)}`;
+      return url;
+    },
+    GET_ALL_USERS: "/user/admin/analytics/all",
+    GET_ALL_REQUESTS: "/request/admin/analytics/all",
+    GET_ALL_REDEEM_REQUESTS: "/request/admin/redeem-request/analytics/all",
     UPDATE_ADMIN: (adminId: string) => `/admin/${adminId}`,
     GET_USER_CHATS: (userId: string) => `/chat/admin/${userId}`,
     GET_MESSAGES: (chatId: string) => `/chat/admin/${chatId}/messages`,
     SEND_MESSAGE: "chat/send-admin-message",
-    GET_USERS: "/user/admin/all",
-    GET_REQUESTS: "/request/admin/all",
     GET_COMMENTS: (requestId: string, count: number) =>
       `/request/admin/${requestId}/comments?count=${count}`,
-    GET_REDEEM_REQUESTS: "/request/admin/redeem-request/all",
     GET_MEET: (meetId: string) => `/chat/admin/meet/${meetId}`,
-    GET_MEETS: "/chat/admin/meet/all",
     GET_REDEEM_REQUEST_DETAILS: (redeemRequestId: string) =>
       `/request/admin/redeem-request/${redeemRequestId}`,
     UPDATE_REDEEM_REQUEST: "/request/admin/update-redeem-request",

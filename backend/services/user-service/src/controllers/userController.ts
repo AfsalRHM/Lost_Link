@@ -42,6 +42,33 @@ export default class UserController implements IuserController {
     }
   };
 
+  public getUsers = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
+    try {
+      const page = parseInt(req.query.p as string) || 1;
+      const limit = parseInt(req.query.l as string) || 2;
+      const search = (req.query.s as string) || "";
+
+      const users = await this._userService.getUsers({
+        search,
+        page,
+        limit,
+      });
+
+      res.status(StatusCode.OK).json({
+        status: true,
+        data: users,
+        message: "Fetched Users",
+      });
+    } catch (error) {
+      console.log("error in getUsers/userController", error);
+      next(error);
+    }
+  };
+
   public getAllUsers = async (
     req: Request,
     res: Response,
@@ -53,10 +80,10 @@ export default class UserController implements IuserController {
       res.status(StatusCode.OK).json({
         status: true,
         data: users,
-        message: "Fetched all Users",
+        message: "Fetched Users",
       });
     } catch (error) {
-      console.log("error in getAllUserData/userController", error);
+      console.log("error in getAllUsers/userController", error);
       next(error);
     }
   };

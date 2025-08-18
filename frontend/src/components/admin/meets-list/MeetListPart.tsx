@@ -1,21 +1,19 @@
-import { useState } from "react";
 import { Link } from "react-router-dom";
 
-import { format, addMinutes, isAfter, setMinutes, setHours } from "date-fns";
+import { format } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
 
 interface MeetListPartType {
   allMeets: any;
+  activeTab: string;
 }
 
-const MeetListPart = ({ allMeets }: MeetListPartType) => {
-  const [activeTab, setActiveTab] = useState("upcoming");
-
+const MeetListPart = ({ allMeets, activeTab }: MeetListPartType) => {
   // Format date for display
   const formatDate = (dateString: string) => {
     try {
       const date = new Date(dateString);
-      const utcDate = toZonedTime(date, "UTC");
+      const utcDate = toZonedTime(date, "IST");
       return format(utcDate, "MMM dd, yyyy • h:mm a");
     } catch (error) {
       console.error("Date formatting error:", error);
@@ -23,61 +21,34 @@ const MeetListPart = ({ allMeets }: MeetListPartType) => {
     }
   };
 
-  // Filter meetings based on active tab
-  const filteredMeets = allMeets.filter((meet: any) => {
-    const meetDate = new Date(meet.meet_date); // Extract date part
-    const [meetHours, meetMinutes] = meet.meet_time.split(":").map(Number); // Extract hours & minutes
+  // // Filter meetings based on active tab
+  // const filteredMeets = allMeets.filter((meet: any) => {
+  //   const meetDate = new Date(meet.meet_date); // Extract date part
+  //   const [meetHours, meetMinutes] = meet.meet_time.split(":").map(Number); // Extract hours & minutes
 
-    // Create full meeting start datetime
-    const meetStartTime = setMinutes(
-      setHours(meetDate, meetHours),
-      meetMinutes
-    );
+  //   // Create full meeting start datetime
+  //   const meetStartTime = setMinutes(
+  //     setHours(meetDate, meetHours),
+  //     meetMinutes
+  //   );
 
-    const meetExpiryTime = addMinutes(meetStartTime, 15);
+  //   const meetExpiryTime = addMinutes(meetStartTime, 15);
 
-    // Add 15 minutes to get expiry time
-    return activeTab === "upcoming"
-      ? isAfter(meetExpiryTime, new Date()) // If meeting is still valid
-      : !isAfter(meetExpiryTime, new Date());
-  });
+  //   // Add 15 minutes to get expiry time
+  //   return activeTab === "upcoming"
+  //     ? isAfter(meetExpiryTime, new Date()) // If meeting is still valid
+  //     : !isAfter(meetExpiryTime, new Date());
+  // });
 
   return (
-    <div className="bg-blue-800 rounded-lg shadow-lg p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-white">Scheduled Meetings</h2>
-
-        <div className="flex bg-blue-900 rounded-lg p-1">
-          <button
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
-              activeTab === "upcoming"
-                ? "bg-blue-600 text-white"
-                : "text-blue-300 hover:text-white"
-            }`}
-            onClick={() => setActiveTab("upcoming")}
-          >
-            Upcoming
-          </button>
-          <button
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
-              activeTab === "finished"
-                ? "bg-blue-600 text-white"
-                : "text-blue-300 hover:text-white"
-            }`}
-            onClick={() => setActiveTab("finished")}
-          >
-            Finished
-          </button>
-        </div>
-      </div>
-
-      {filteredMeets.length === 0 ? (
+    <>
+      {allMeets.length === 0 ? (
         <div className="text-center py-16 text-blue-300">
           <p className="text-lg">No {activeTab} meetings found</p>
         </div>
       ) : (
         <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-          {filteredMeets.map((meet: any) => (
+          {allMeets.map((meet: any) => (
             <div
               key={meet._id}
               className="bg-blue-700 rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300"
@@ -126,7 +97,7 @@ const MeetListPart = ({ allMeets }: MeetListPartType) => {
           ))}
         </div>
       )}
-    </div>
+    </>
   );
 };
 

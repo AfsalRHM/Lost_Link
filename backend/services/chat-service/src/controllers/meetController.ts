@@ -45,20 +45,30 @@ export default class MeetController implements ImeetController {
     }
   };
 
-  // To Create/Schedule a meet
-  public getAllMeets = async (
+  // To get meets for admin
+  public getMeets = async (
     req: Request,
     res: Response,
     next: NextFunction
   ): Promise<void> => {
     try {
-      const meets = await this._meetService.getAllMeets();
+      const page = parseInt(req.query.p as string) || 1;
+      const limit = parseInt(req.query.l as string) || 2;
+      const search = (req.query.s as string) || "";
+      const activeTab = (req.query.f as string) || "upcoming";
+
+      const meets = await this._meetService.getMeets({
+        page,
+        limit,
+        search,
+        activeTab,
+      });
 
       res
         .status(StatusCode.OK)
-        .json({ status: true, data: meets, message: "All meets fetched" });
+        .json({ status: true, data: meets, message: "Meets fetched" });
     } catch (error) {
-      console.log("error in getAllMeets/meetController", error);
+      console.log("error in getMeets/meetController", error);
       next(error);
     }
   };

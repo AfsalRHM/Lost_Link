@@ -6,7 +6,10 @@ export interface IrequestRepository {
   insertRequest(
     requestData: Partial<IrequestModel>
   ): Promise<IrequestModel | null>;
-  findAllRequests(): Promise<IrequestModel[] | []>;
+  findAllRequests(
+    filter: FilterQuery<IrequestModel>
+  ): Promise<IrequestModel[] | []>;
+  adminFindRequests(filter: object, skip: number, limit: number): Promise<any>;
   adminFindAllRequests(): Promise<IrequestModel[] | []>;
   findRequest(
     filter: FilterQuery<IrequestModel>

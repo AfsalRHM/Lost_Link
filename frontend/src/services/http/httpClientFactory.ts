@@ -76,7 +76,8 @@ export function createHttpClient({
       if (
         error.response?.status === 401 &&
         !originalRequest._retry &&
-        error.response?.data.message !== "Invalid Credentials"
+        error.response?.data.message !== "Invalid Credentials" &&
+        error.response.data.message !== "Invalid or expired OTP"
       ) {
         originalRequest._retry = true;
 

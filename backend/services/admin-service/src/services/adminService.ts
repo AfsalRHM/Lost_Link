@@ -18,6 +18,8 @@ import { InsertAdminDTO } from "../dtos/InsertAdminDTO";
 import { ChangeAdminStatusDTO } from "../dtos/ChangeAdminStatusDTO";
 import { ChangeUserStatusDTO } from "../dtos/ChangeUserStatusDTO";
 import { RefreshTokenDTO } from "../dtos/RefreshTokenDTO";
+import { GetAllAdminResponseDto } from "../dtos/getAllAdmins.dto";
+import IadminModel from "../interface/IadminModel";
 
 export default class AdminService implements IadminService {
   private _adminRepository: IadminRepository;
@@ -134,16 +136,39 @@ export default class AdminService implements IadminService {
     }
   }
 
-  async getAllAdmins(): Promise<any> {
+  async getAdmins({
+    search,
+    limit,
+    page,
+  }: {
+    search: string;
+    limit: number;
+    page: number;
+  }): Promise<GetAllAdminResponseDto[]> {
     try {
-      const adminList = await this._adminRepository.findAll();
+      const skip = (page - 1) * limit;
+      const filter = search
+        ? {
+            $or: [
+              { name: { $regex: search, $options: "i" } },
+              { email: { $regex: search, $options: "i" } },
+            ],
+          }
+        : {};
 
-      const mappedAdmins = adminList.map((admin) => {
+      const response = await this._adminRepository.findPaginatedAdmins(
+        filter,
+        skip,
+        limit
+      );
+
+      const mappedAdmins = response.admins.map((admin: IadminModel) => {
         const savedEntity = AdminMapper.toEntity(admin);
         return AdminMapper.toGetAllAdminsDto(savedEntity);
       });
+      response.admins = mappedAdmins;
 
-      return mappedAdmins;
+      return response;
     } catch (error: any) {
       if (error.name === "MongoNetworkError") {
         throw new AppError(
@@ -211,7 +236,9 @@ export default class AdminService implements IadminService {
         throw new AppError("adminId is required", StatusCode.BAD_REQUEST);
       }
 
-      const responseData = await this._adminRepository.changeStatus(adminId);
+      const responseData = await this._adminRepository.changeAdminStatus(
+        adminId
+      );
       if (!responseData) {
         throw new AppError(
           "failed to update admin",

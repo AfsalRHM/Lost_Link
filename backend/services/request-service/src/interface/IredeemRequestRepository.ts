@@ -5,7 +5,12 @@ export interface IredeemRequestRepository {
   findRedeemRequest(
     filter: FilterQuery<IredeemRequestModel>
   ): Promise<IredeemRequestModel | null>;
-  findAllRedeemRequest(): Promise<IredeemRequestModel[] | []>;
+  adminFindRedeemRequests(
+    filter: object,
+    skip: number,
+    limit: number
+  ): Promise<any>;
+  adminFindAllRedeemRequests(): Promise<IredeemRequestModel[] | []>;
   findManyRedeemRequest(
     filter: FilterQuery<IredeemRequestModel>
   ): Promise<IredeemRequestModel[] | []>;

@@ -2,6 +2,7 @@ import stripe from "stripe";
 
 import IrequestModel from "../interface/IrequestModel";
 import IrequestService from "../interface/IrequestService";
+import IredeemRequestModel from "../interface/IredeemRequestModel";
 import { IrequestRepository } from "../interface/IrequestRepository";
 import { IreportRepository } from "../interface/IreportRepository";
 import { IredeemRequestRepository } from "../interface/IredeemRequestRepository";
@@ -21,6 +22,8 @@ import { ReportMapper } from "../mappers/report.mapper";
 import { RedeemRequestMapper } from "../mappers/redeemRequest.mapper";
 
 import { CreateRequestRequestDto } from "../dtos/request/createRequest.dto";
+import { AdminGetAllRequestsResponseDto } from "../dtos/request/getAllRequests.dto";
+import { adminGetAllRedeemRequestsResponseDto } from "../dtos/redeemRequest/getAllRedeemRequests.dto";
 
 export default class RequestService implements IrequestService {
   private _requestRepository: IrequestRepository;
@@ -588,9 +591,29 @@ export default class RequestService implements IrequestService {
   }
 
   // To find all the requests
-  async getRequests(): Promise<any> {
+  async getRequests({
+    min,
+    max,
+    location,
+  }: {
+    min: number;
+    max: number;
+    location: string;
+  }): Promise<any> {
     try {
-      const requests = await this._requestRepository.findAllRequests();
+      const filter = {
+        $and: [
+          { reward_amount: { $gte: min, $lte: max } },
+          {
+            $or: [
+              { missing_place: { $regex: location, $options: "i" } },
+              { missing_route: { $regex: location, $options: "i" } },
+            ],
+          },
+        ],
+      };
+
+      const requests = await this._requestRepository.findAllRequests(filter);
 
       const mappedRequests = requests.map((doc) =>
         RequestMapper.toGetRequestDetailsDto(RequestMapper.toEntity(doc))
@@ -609,17 +632,39 @@ export default class RequestService implements IrequestService {
     }
   }
 
-  async adminGetAllRequests(): Promise<any> {
+  async adminGetRequests({
+    search,
+    limit,
+    page,
+  }: {
+    search: string;
+    limit: number;
+    page: number;
+  }): Promise<any> {
     try {
-      const requests = await this._requestRepository.adminFindAllRequests();
+      const skip = (page - 1) * limit;
+      const filter = search
+        ? {
+            $or: [
+              { user_name: { $regex: search, $options: "i" } },
+              { full_name: { $regex: search, $options: "i" } },
+              { email: { $regex: search, $options: "i" } },
+            ],
+          }
+        : {};
 
-      const mappedRequests = requests.map((requestEntity) =>
-        RequestMapper.toAdminGetAllRequests(
-          RequestMapper.toEntity(requestEntity)
-        )
+      const response = await this._requestRepository.adminFindRequests(
+        filter,
+        skip,
+        limit
       );
 
-      return mappedRequests;
+      const mappedRequests = response.data.map((request: IrequestModel) =>
+        RequestMapper.toAdminGetAllRequests(RequestMapper.toEntity(request))
+      );
+      response.data = mappedRequests;
+
+      return response;
     } catch (error: any) {
       if (error.name === "MongoNetworkError") {
         throw new AppError(
@@ -632,16 +677,92 @@ export default class RequestService implements IrequestService {
     }
   }
 
-  // To Fetch all the Redeem Requests
-  async getAllRedeemRequests(): Promise<any> {
+  async adminGetAllRequests(): Promise<AdminGetAllRequestsResponseDto[] | []> {
     try {
-      const redeemRrequests =
-        await this._redeemRequestRepository.findAllRedeemRequest();
+      const response = await this._requestRepository.adminFindAllRequests();
 
-      const mappedRedeemRequests = redeemRrequests.map((redeemRequestEntity) =>
-        RedeemRequestMapper.toAdminGetAllRedeemRequestsDto(
-          RedeemRequestMapper.toEntity(redeemRequestEntity)
-        )
+      const mappedRequests = response.map((request: IrequestModel) =>
+        RequestMapper.toAdminGetAllRequests(RequestMapper.toEntity(request))
+      );
+
+      return mappedRequests;
+    } catch (error: any) {
+      if (error.name === "MongoNetworkError") {
+        throw new AppError(
+          "Database connection failed",
+          StatusCode.SERVICE_UNAVAILABLE
+        );
+      }
+
+      handleServiceError(
+        error,
+        "Something went wrong while fetching all requests"
+      );
+    }
+  }
+
+  // To Fetch all the Redeem Requests
+  async adminGetRedeemRequests({
+    search,
+    limit,
+    page,
+  }: {
+    search: string;
+    limit: number;
+    page: number;
+  }): Promise<any> {
+    try {
+      const skip = (page - 1) * limit;
+      const filter = search
+        ? {
+            $or: [{ request_name: { $regex: search, $options: "i" } }],
+          }
+        : {};
+
+      const response =
+        await this._redeemRequestRepository.adminFindRedeemRequests(
+          filter,
+          skip,
+          limit
+        );
+
+      const mappedRedeemRequests = response.data.map(
+        (redeemRequest: IredeemRequestModel) =>
+          RedeemRequestMapper.toAdminGetAllRedeemRequestsDto(
+            RedeemRequestMapper.toEntity(redeemRequest)
+          )
+      );
+      response.data = mappedRedeemRequests;
+
+      return response;
+    } catch (error: any) {
+      if (error.name === "MongoNetworkError") {
+        throw new AppError(
+          "Database connection failed",
+          StatusCode.SERVICE_UNAVAILABLE
+        );
+      }
+
+      handleServiceError(
+        error,
+        "Something went wrong while fetching redeem requests"
+      );
+    }
+  }
+
+  // To Fetch all the Redeem Requests
+  async adminGetAllRedeemRequests(): Promise<
+    adminGetAllRedeemRequestsResponseDto[] | []
+  > {
+    try {
+      const response =
+        await this._redeemRequestRepository.adminFindAllRedeemRequests();
+
+      const mappedRedeemRequests = response.map(
+        (redeemRequest: IredeemRequestModel) =>
+          RedeemRequestMapper.toAdminGetAllRedeemRequestsDto(
+            RedeemRequestMapper.toEntity(redeemRequest)
+          )
       );
 
       return mappedRedeemRequests;
@@ -655,7 +776,7 @@ export default class RequestService implements IrequestService {
 
       handleServiceError(
         error,
-        "Something went wrong while fetching redeem requests"
+        "Something went wrong while fetching all redeem requests"
       );
     }
   }
