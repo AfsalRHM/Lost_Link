@@ -47,7 +47,7 @@ interface ProjectRequestChartProps {
   requestData: any[];
 }
 
-export const ProjectRequestChart: React.FC<ProjectRequestChartProps> = ({
+export const RequestChart: React.FC<ProjectRequestChartProps> = ({
   requestData,
 }) => {
   const [activePeriod, setActivePeriod] = useState("Last 6 Months");
@@ -62,7 +62,9 @@ export const ProjectRequestChart: React.FC<ProjectRequestChartProps> = ({
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3">
         <div className="flex items-center gap-2">
           <Briefcase size={18} className="text-green-300" />
-          <h3 className="text-blue-100 font-semibold text-lg">Request Statistics</h3>
+          <h3 className="text-blue-100 font-semibold text-lg">
+            Request Statistics
+          </h3>
           <div className="flex items-center px-2 py-1 bg-blue-800/30 rounded-md text-blue-300 text-xs">
             <CalendarRange size={14} className="mr-1" />
             {activePeriod}

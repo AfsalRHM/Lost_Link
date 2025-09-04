@@ -1,13 +1,19 @@
 import React from "react";
 
 import { StatCardProps } from "../../../interface/IadminDashboard";
+import StatCardLoading from "./loading/StatCardLoading";
 
 export const StatCard: React.FC<StatCardProps> = ({
   title,
   value,
   icon,
   className = "",
+  loading,
 }) => {
+  if (loading) {
+    return <StatCardLoading />;
+  }
+
   return (
     <div
       className={`p-6 rounded-xl shadow-md transition-all duration-300 ${className}`}

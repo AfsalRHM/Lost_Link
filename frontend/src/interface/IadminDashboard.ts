@@ -3,6 +3,7 @@ export interface StatCardProps {
   value: string;
   icon: React.ReactNode;
   className?: string;
+  loading: boolean;
 }
 export type AnalyticsData = {
   name: string;

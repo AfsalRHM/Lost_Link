@@ -22,7 +22,7 @@ type Admin = {
 };
 
 const AdminListPage = () => {
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [adminList, setAdminList] = useState<Admin[]>([]);
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -36,7 +36,6 @@ const AdminListPage = () => {
 
   const fetchAdmins = useCallback(
     async (page = 1, search = "") => {
-      setLoading(true);
       try {
         const { data } = await adminService.getAdmins({
           page,

@@ -10,7 +10,7 @@ import MeetListPartLoading from "./loading/MeetListPartLoading";
 import { Search } from "lucide-react";
 
 const MeetListPage = () => {
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [activeTab, setActiveTab] = useState<string>("upcoming");
@@ -25,7 +25,6 @@ const MeetListPage = () => {
 
   const fetchMeets = useCallback(
     async (page = 1, search = "", activeTab = "upcoming") => {
-      setLoading(true);
       try {
         const { data } = await adminService.getMeets({
           page,

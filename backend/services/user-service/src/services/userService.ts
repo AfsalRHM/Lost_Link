@@ -90,7 +90,11 @@ export default class UserService implements IuserService {
 
   async loginUser(
     userMail: string
-  ): Promise<{ status: boolean; data: LoginUserResponseDto; message: string }> {
+  ): Promise<{
+    status: boolean;
+    data: LoginUserResponseDto | null;
+    message: string;
+  }> {
     try {
       if (!userMail) {
         throw new AppError("userMail is required", StatusCode.BAD_REQUEST);
@@ -98,7 +102,11 @@ export default class UserService implements IuserService {
 
       const userData = await this._userRepository.findUser({ email: userMail });
       if (!userData) {
-        throw new AppError("User not found", StatusCode.NOT_FOUND);
+        return {
+          status: true,
+          data: null,
+          message: "User not found",
+        };
       }
 
       const userEntity = UserMapper.toEntity(userData);

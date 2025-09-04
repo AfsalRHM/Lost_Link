@@ -732,6 +732,13 @@ export default class AuthService implements IauthService {
         });
       });
       if (!userData.data) {
+        if (userData.message == "User not found") {
+          throw new AppError(
+            "Register first for Logging In",
+            StatusCode.INTERNAL_SERVER_ERROR
+          );
+        }
+
         throw new AppError(
           "Failed to fetch user details",
           StatusCode.INTERNAL_SERVER_ERROR

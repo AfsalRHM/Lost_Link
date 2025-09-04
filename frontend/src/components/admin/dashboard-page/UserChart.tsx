@@ -49,7 +49,7 @@ interface UserCountChartProps {
   userData: any[];
 }
 
-export const UserCountChart = ({ userData }: UserCountChartProps) => {
+export const UserChart = ({ userData }: UserCountChartProps) => {
   const [activePeriod, setActivePeriod] = useState("Last 6 Months");
   const [showFilters, setShowFilters] = useState(false);
 

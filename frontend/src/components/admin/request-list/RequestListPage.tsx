@@ -19,7 +19,7 @@ import { Search } from "lucide-react";
 import RequestListPartLoading from "./loading/RequestListPartLoading";
 
 const RequestListPage = () => {
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [requestList, setRequestList] = useState<Request[]>([]);
@@ -33,7 +33,6 @@ const RequestListPage = () => {
 
   const fetchRequests = useCallback(
     async (page = 1, search = "") => {
-      setLoading(true);
       try {
         const { data } = await adminService.getRequests({
           page,

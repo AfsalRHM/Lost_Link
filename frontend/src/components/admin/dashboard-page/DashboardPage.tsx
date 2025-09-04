@@ -3,16 +3,28 @@ import { useEffect, useState } from "react";
 import { adminService } from "../../../services/adminService";
 
 import { Users, ShoppingCart, TrendingUp, IndianRupee } from "lucide-react";
+
 import { Sidebar } from "../shared/Sidebar";
-import { StatCard } from "./StatCard";
 import NavBar from "../shared/Navbar";
-import { UserCountChart } from "./UserCountChart";
-import { ProjectRequestChart } from "./RequestChart";
+
+import { StatCard } from "./StatCard";
+
+import { UserChart } from "./UserChart";
+import { RequestChart } from "./RequestChart";
 import { RedeemRequestChart } from "./RequestRedeemChart";
+
 import { userDataType } from "../../../interface/IuserModel";
 import IrequestModel from "../../../interface/IrequestModel";
+import UserChartLoading from "./loading/UserChartLoading";
+import RequestChartLoading from "./loading/RequestChartLoading";
+import RedeemRequestChartLoading from "./loading/RedeemRequestChartLoading";
 
 const DashboardPage = () => {
+  const [userLoading, setUserLoading] = useState<boolean>(true);
+  const [requestLoading, setRequestLoading] = useState<boolean>(true);
+  const [redeemRequestLoading, setRedeemRequestLoading] =
+    useState<boolean>(true);
+
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const [users, setUsers] = useState([]);
@@ -77,6 +89,8 @@ const DashboardPage = () => {
         }
       } catch (error) {
         console.error("Failed to fetch users", error);
+      } finally {
+        setUserLoading(false);
       }
     };
 
@@ -100,6 +114,8 @@ const DashboardPage = () => {
         }
       } catch (error) {
         console.error("Failed to fetch requests", error);
+      } finally {
+        setRequestLoading(false);
       }
     };
 
@@ -118,6 +134,8 @@ const DashboardPage = () => {
         }
       } catch (error) {
         console.error("Failed to fetch redeem requests", error);
+      } finally {
+        setRedeemRequestLoading(false);
       }
     };
 
@@ -160,18 +178,21 @@ const DashboardPage = () => {
               value={`₹${totalProfit}`}
               icon={<IndianRupee size={24} className="text-blue-400" />}
               className="bg-blue-300/50 backdrop-blur-sm hover:shadow-lg transition-all hover:scale-105"
+              loading={requestLoading}
             />
             <StatCard
               title="Total Requests (All Time)"
               value={requests.length.toString()}
               icon={<ShoppingCart size={24} className="text-green-400" />}
               className="bg-blue-300/50 backdrop-blur-sm hover:shadow-lg transition-all hover:scale-105"
+              loading={requestLoading}
             />
             <StatCard
               title="Total Users (All Time)"
               value={users.length.toString()}
               icon={<Users size={24} className="text-purple-400" />}
               className="bg-blue-300/50 backdrop-blur-sm hover:shadow-lg transition-all hover:scale-105"
+              loading={userLoading}
             />
             <StatCard
               title="Growth Rate (This Month)"
@@ -181,6 +202,7 @@ const DashboardPage = () => {
               })}
               icon={<TrendingUp size={24} className="text-orange-400" />}
               className="bg-blue-300/50 backdrop-blur-sm hover:shadow-lg transition-all hover:scale-105"
+              loading={requestLoading}
             />
           </div>
 
@@ -189,7 +211,11 @@ const DashboardPage = () => {
               <h2 className="text-xl font-semibold mb-4 text-blue-100">
                 User Trend
               </h2>
-              <UserCountChart userData={users} />
+              {userLoading ? (
+                <UserChartLoading />
+              ) : (
+                <UserChart userData={users} />
+              )}
             </div>
           </div>
 
@@ -198,7 +224,11 @@ const DashboardPage = () => {
               <h2 className="text-xl font-semibold mb-4 text-blue-100">
                 Request Trend
               </h2>
-              <ProjectRequestChart requestData={requests} />
+              {requestLoading ? (
+                <RequestChartLoading />
+              ) : (
+                <RequestChart requestData={requests} />
+              )}
             </div>
           </div>
 
@@ -207,7 +237,11 @@ const DashboardPage = () => {
               <h2 className="text-xl font-semibold mb-4 text-blue-100">
                 Redeem Request Trend
               </h2>
-              <RedeemRequestChart redeemRequestData={redeemRequests} />
+              {redeemRequestLoading ? (
+                <RedeemRequestChartLoading />
+              ) : (
+                <RedeemRequestChart redeemRequestData={redeemRequests} />
+              )}
             </div>
           </div>
         </main>
