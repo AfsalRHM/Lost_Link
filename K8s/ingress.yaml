@@ -8,7 +8,7 @@ metadata:
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
     nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
     nginx.ingress.kubernetes.io/proxy-request-buffering: "off"
-    nginx.ingress.kubernetes.io/cors-allow-origin: "https://lostlink.live"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "https://lostlink.afsalrahman.live"
     nginx.ingress.kubernetes.io/cors-allow-methods: "GET, PUT, POST, DELETE, PATCH, OPTIONS"
     nginx.ingress.kubernetes.io/cors-allow-headers: "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,authorization"
     nginx.ingress.kubernetes.io/cors-expose-headers: "Content-Length,Content-Range"
@@ -21,10 +21,10 @@ spec:
   ingressClassName: nginx
   tls:
     - hosts:
-        - api.lostlink.live
+        - api.lostlink.afsalrahman.live
       secretName: my-tls-secret
   rules:
-    - host: api.lostlink.live
+    - host: api.lostlink.afsalrahman.live
       http:
         paths:
           - path: /chat/socket.io/?(.*)
